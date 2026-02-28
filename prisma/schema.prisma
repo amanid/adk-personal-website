@@ -1,0 +1,279 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+enum ServiceType {
+  CONSULTING
+  TRAINING
+  SPEAKING
+  AI_DEVELOPMENT
+  OTHER
+}
+
+enum RequestStatus {
+  PENDING
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+}
+
+model User {
+  id                    String                @id @default(cuid())
+  name                  String?
+  email                 String                @unique
+  hashedPassword        String?
+  image                 String?
+  role                  Role                  @default(USER)
+  createdAt             DateTime              @default(now())
+  updatedAt             DateTime              @updatedAt
+  accounts              Account[]
+  sessions              Session[]
+  blogPosts             BlogPost[]
+  comments              Comment[]
+  questions             Question[]
+  answers               Answer[]
+  serviceRequests       ServiceRequest[]
+  publicationComments   PublicationComment[]
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model BlogPost {
+  id         String    @id @default(cuid())
+  title      String
+  titleFr    String?
+  slug       String    @unique
+  content    String    @db.Text
+  contentFr  String?   @db.Text
+  excerpt    String?
+  excerptFr  String?
+  coverImage String?
+  published  Boolean   @default(false)
+  category   String?
+  tags       String[]
+  authorId   String
+  views      Int       @default(0)
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+  author     User      @relation(fields: [authorId], references: [id])
+  comments   Comment[]
+}
+
+model Comment {
+  id        String   @id @default(cuid())
+  content   String   @db.Text
+  postId    String
+  authorId  String
+  createdAt DateTime @default(now())
+  post      BlogPost @relation(fields: [postId], references: [id], onDelete: Cascade)
+  author    User     @relation(fields: [authorId], references: [id])
+}
+
+model ServiceRequest {
+  id          String        @id @default(cuid())
+  name        String
+  email       String
+  company     String?
+  serviceType ServiceType
+  description String        @db.Text
+  budget      String?
+  status      RequestStatus @default(PENDING)
+  userId      String?
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  user        User?         @relation(fields: [userId], references: [id])
+}
+
+model Question {
+  id         String   @id @default(cuid())
+  title      String
+  content    String   @db.Text
+  authorId   String
+  isAnswered Boolean  @default(false)
+  createdAt  DateTime @default(now())
+  author     User     @relation(fields: [authorId], references: [id])
+  answers    Answer[]
+}
+
+model Answer {
+  id         String   @id @default(cuid())
+  content    String   @db.Text
+  questionId String
+  authorId   String
+  createdAt  DateTime @default(now())
+  question   Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  author     User     @relation(fields: [authorId], references: [id])
+}
+
+model ContactMessage {
+  id        String   @id @default(cuid())
+  name      String
+  email     String
+  subject   String
+  message   String   @db.Text
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+}
+
+model Project {
+  id            String   @id @default(cuid())
+  title         String
+  titleFr       String?
+  slug          String   @unique
+  description   String   @db.Text
+  descriptionFr String?  @db.Text
+  coverImage    String?
+  technologies  String[]
+  category      String?
+  liveUrl       String?
+  githubUrl     String?
+  featured      Boolean  @default(false)
+  sortOrder     Int      @default(0)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+model Experience {
+  id            String   @id @default(cuid())
+  role          String
+  roleFr        String?
+  organization  String
+  location      String
+  startDate     String
+  endDate       String?
+  description   String[]
+  descriptionFr String[]
+  logo          String?
+  sortOrder     Int      @default(0)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+model Education {
+  id          String   @id @default(cuid())
+  degree      String
+  degreeFr    String?
+  institution String
+  year        String
+  location    String
+  sortOrder   Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Certification {
+  id        String   @id @default(cuid())
+  name      String
+  issuer    String
+  year      String
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model SkillCategory {
+  id        String   @id @default(cuid())
+  name      String
+  nameFr    String?
+  sortOrder Int      @default(0)
+  skills    Skill[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Skill {
+  id         String        @id @default(cuid())
+  name       String
+  level      Int
+  categoryId String
+  category   SkillCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+}
+
+model SiteSetting {
+  id    String @id @default(cuid())
+  key   String @unique
+  value String @db.Text
+}
+
+model Publication {
+  id          String               @id @default(cuid())
+  title       String
+  titleFr     String?
+  slug        String               @unique
+  abstract    String               @db.Text
+  abstractFr  String?              @db.Text
+  authors     String[]
+  journal     String?
+  year        Int
+  category    String?
+  pdfUrl      String?
+  tags        String[]
+  featured    Boolean              @default(false)
+  views       Int                  @default(0)
+  createdAt   DateTime             @default(now())
+  updatedAt   DateTime             @updatedAt
+  comments    PublicationComment[]
+}
+
+model PublicationComment {
+  id            String      @id @default(cuid())
+  content       String      @db.Text
+  publicationId String
+  authorId      String
+  createdAt     DateTime    @default(now())
+  publication   Publication @relation(fields: [publicationId], references: [id], onDelete: Cascade)
+  author        User        @relation(fields: [authorId], references: [id])
+}
+
+model PageView {
+  id        String   @id @default(cuid())
+  path      String
+  referrer  String?
+  userAgent String?  @db.Text
+  country   String?
+  city      String?
+  device    String?
+  browser   String?
+  os        String?
+  sessionId String?
+  createdAt DateTime @default(now())
+
+  @@index([path])
+  @@index([createdAt])
+  @@index([country])
+}

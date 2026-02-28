@@ -1,0 +1,23 @@
+services:
+  - type: web
+    name: konan-amani-website
+    runtime: node
+    plan: free
+    buildCommand: npx prisma generate && npm run build
+    startCommand: npm start
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: konan-website-db
+          property: connectionString
+      - key: AUTH_SECRET
+        generateValue: true
+      - key: AUTH_URL
+        value: https://www.konanamanidieudonne.org
+      - key: NEXT_PUBLIC_APP_URL
+        value: https://www.konanamanidieudonne.org
+
+databases:
+  - name: konan-website-db
+    plan: free
+    databaseName: konan_website
