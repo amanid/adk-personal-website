@@ -1,9 +1,35 @@
 import { PrismaClient } from "@prisma/client";
+import bcrypt from "bcryptjs";
 
 const prisma = new PrismaClient();
 
 async function main() {
   console.log("Seeding database...");
+
+  // Seed Admin User
+  const adminEmail = "amani_dieudonne@yahoo.fr";
+  const existingAdmin = await prisma.user.findUnique({ where: { email: adminEmail } });
+  if (!existingAdmin) {
+    console.log("Seeding admin user...");
+    const hashedPassword = await bcrypt.hash("Admin@2026", 12);
+    await prisma.user.create({
+      data: {
+        name: "KONAN Amani Dieudonné",
+        email: adminEmail,
+        hashedPassword,
+        role: "ADMIN",
+      },
+    });
+    console.log("  Admin user created");
+  } else if (existingAdmin.role !== "ADMIN") {
+    await prisma.user.update({
+      where: { email: adminEmail },
+      data: { role: "ADMIN" },
+    });
+    console.log("  Existing user promoted to ADMIN");
+  } else {
+    console.log("  Admin user already exists");
+  }
 
   // Seed Experiences
   const expCount = await prisma.experience.count();
