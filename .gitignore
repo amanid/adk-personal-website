@@ -59,3 +59,7 @@ Thumbs.db
 # Duplicate files (originals in public/)
 /projects/
 /photo.jpg
+
+# Generated docs
+*.docx
+~$*
