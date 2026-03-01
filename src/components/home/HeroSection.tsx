@@ -23,11 +23,13 @@ export default function HeroSection() {
   }, []);
 
   const roles = [
-    "Senior Data Scientist",
-    "AI Engineer & Architect",
-    "Statistician & Econometrician",
-    "Strategic Consultant",
-    "Data Engineer",
+    "Full-Stack Senior Statistician",
+    "Data Science & Analytics Leader",
+    "Machine Learning & AI Architect",
+    "Data Engineering & Architecture Expert",
+    "Full-Stack Developer & MLOps Engineer",
+    "Econometrician & Causal Inference Specialist",
+    "Strategic AI & Data Consultant",
   ];
 
   return (

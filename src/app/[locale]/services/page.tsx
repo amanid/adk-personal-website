@@ -2,13 +2,24 @@
 
 import { useTranslations } from "next-intl";
 import { motion } from "framer-motion";
-import { Brain, Database, Server, GraduationCap, BarChart3, CheckCircle, Send } from "lucide-react";
+import { Brain, Database, Server, GraduationCap, BarChart3, Code2, CheckCircle, Send } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { serviceRequestSchema, ServiceRequestInput } from "@/lib/validations";
 import { useState } from "react";
 
 const serviceCards = [
+  {
+    icon: BarChart3,
+    titleKey: "statistics",
+    descKey: "statistics_desc",
+    features: [
+      "Statistical Inference & Modeling",
+      "Econometric Analysis (ARIMA, VAR, VECM)",
+      "Survey Design & Sampling",
+      "Causal Inference & Impact Evaluation",
+    ],
+  },
   {
     icon: Brain,
     titleKey: "consulting",
@@ -37,9 +48,20 @@ const serviceCards = [
     descKey: "mlops_desc",
     features: [
       "ML Pipeline Development",
-      "Model Deployment",
-      "Monitoring & Optimization",
-      "A/B Testing Frameworks",
+      "Model Deployment & MLOps",
+      "LLM & RAG Systems",
+      "AI Agents & Multi-Model Platforms",
+    ],
+  },
+  {
+    icon: Code2,
+    titleKey: "fullstack",
+    descKey: "fullstack_desc",
+    features: [
+      "Next.js & React Applications",
+      "REST APIs & Backend Services",
+      "Database Design & ORM",
+      "Cloud Deployment & CI/CD",
     ],
   },
   {
@@ -51,17 +73,6 @@ const serviceCards = [
       "Hands-on Workshops",
       "Team Upskilling",
       "Executive Briefings",
-    ],
-  },
-  {
-    icon: BarChart3,
-    titleKey: "statistics",
-    descKey: "statistics_desc",
-    features: [
-      "Statistical Inference & Modeling",
-      "Econometric Analysis",
-      "Survey Design & Sampling",
-      "Impact Evaluation",
     ],
   },
 ];
@@ -220,7 +231,10 @@ export default function ServicesPage() {
                   className="w-full px-4 py-2.5 bg-navy/50 border border-glass-border rounded-lg text-text-primary focus:border-gold/50 focus:outline-none transition-colors"
                 >
                   <option value="CONSULTING">AI & Data Consulting</option>
-                  <option value="AI_DEVELOPMENT">AI Development</option>
+                  <option value="STATISTICS">Statistical & Econometric Analysis</option>
+                  <option value="AI_DEVELOPMENT">AI & ML Development</option>
+                  <option value="DATA_ENGINEERING">Data Engineering & Architecture</option>
+                  <option value="FULLSTACK">Full-Stack Web Development</option>
                   <option value="TRAINING">Training & Workshops</option>
                   <option value="SPEAKING">Speaking Engagements</option>
                   <option value="OTHER">Other</option>

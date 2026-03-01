@@ -9,32 +9,59 @@ import "../globals.css";
 
 export const metadata = {
   title: {
-    default: "KONAN Amani Dieudonné | Data Scientist, AI Engineer & Statistician-Econometrician",
+    default: "KONAN Amani Dieudonné | Full-Stack Senior Statistician, Data, ML & AI Professional",
     template: "%s | KONAN Amani Dieudonné",
   },
   description:
-    "Senior Data Scientist, Principal AI Engineer & Statistician-Econometrician with 13+ years of international experience. Specializing in AI/ML, Statistics, Econometrics, Data Architecture, and Strategic Consulting.",
+    "Full-Stack Senior Statistician, Data Scientist, Machine Learning & AI Professional with 13+ years of international experience. Expert in Statistics, Econometrics, Data Science, AI/ML Engineering, Data Architecture, Full-Stack Development, and Strategic Consulting across the UN system, development finance, and international organizations.",
   keywords: [
-    "Data Scientist",
+    "Full-Stack Statistician",
+    "Senior Data Scientist",
     "AI Engineer",
+    "Machine Learning Professional",
     "Statistician",
     "Econometrician",
-    "Machine Learning",
-    "Data Architecture",
-    "Econometrics",
-    "Statistical Analysis",
-    "Consulting",
-    "KONAN Amani",
+    "Data Architect",
+    "Full-Stack Developer",
+    "MLOps Engineer",
+    "Data Engineering",
+    "Predictive Analytics",
+    "Deep Learning",
+    "NLP",
+    "LLM",
+    "RAG Systems",
+    "Statistical Modeling",
+    "Econometric Analysis",
+    "KONAN Amani Dieudonné",
   ],
   authors: [{ name: "KONAN Amani Dieudonné" }],
+  icons: {
+    icon: "/images/profile.jpg",
+    apple: "/images/profile.jpg",
+  },
   openGraph: {
     type: "website",
     locale: "en_US",
     url: "https://www.konanamanidieudonne.org",
     siteName: "KONAN Amani Dieudonné",
-    title: "KONAN Amani Dieudonné | Data Scientist, AI Engineer & Statistician-Econometrician",
+    title: "KONAN Amani Dieudonné | Full-Stack Senior Statistician, Data, ML & AI Professional",
     description:
-      "Senior Data Scientist, Principal AI Engineer & Statistician-Econometrician with 13+ years of international experience.",
+      "Full-Stack Senior Statistician, Data Scientist, ML & AI Professional with 13+ years of international experience across the UN system, development finance, and global organizations.",
+    images: [
+      {
+        url: "/images/profile.jpg",
+        width: 800,
+        height: 800,
+        alt: "KONAN Amani Dieudonné - Full-Stack Senior Statistician, Data, ML & AI Professional",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary",
+    title: "KONAN Amani Dieudonné | Full-Stack Senior Statistician, Data, ML & AI Professional",
+    description:
+      "Full-Stack Senior Statistician, Data Scientist, ML & AI Professional with 13+ years of international experience.",
+    images: ["/images/profile.jpg"],
   },
 };
 
@@ -57,22 +84,57 @@ export default async function LocaleLayout({
     "@type": "Person",
     name: "KONAN Amani Dieudonné",
     url: "https://www.konanamanidieudonne.org",
-    jobTitle: "Senior Data Scientist, AI Engineer & Statistician-Econometrician",
+    image: "https://www.konanamanidieudonne.org/images/profile.jpg",
+    jobTitle: "Full-Stack Senior Statistician, Data, ML & AI Professional",
     worksFor: {
       "@type": "Organization",
       name: "African Export-Import Bank (Afreximbank)",
     },
+    alumniOf: [
+      {
+        "@type": "EducationalOrganization",
+        name: "ENSEA Abidjan",
+      },
+      {
+        "@type": "EducationalOrganization",
+        name: "Université Toulouse I Capitole",
+      },
+      {
+        "@type": "EducationalOrganization",
+        name: "Massachusetts Institute of Technology (MIT)",
+      },
+    ],
     sameAs: [
       "https://www.linkedin.com/in/amanidieudonnekonan",
       "https://github.com/amani-konan",
     ],
     knowsAbout: [
-      "Data Science",
+      "Statistics & Econometrics",
+      "Data Science & Analytics",
       "Artificial Intelligence",
-      "Machine Learning",
-      "Statistics",
-      "Econometrics",
-      "Data Engineering",
+      "Machine Learning & Deep Learning",
+      "Natural Language Processing",
+      "Large Language Models (LLMs)",
+      "Data Engineering & Architecture",
+      "Full-Stack Web Development",
+      "MLOps & AI Engineering",
+      "Strategic Data Consulting",
+      "Predictive Analytics",
+      "Causal Inference & Impact Evaluation",
+    ],
+    hasCredential: [
+      {
+        "@type": "EducationalOccupationalCredential",
+        name: "Professional Certificate in Data Engineering",
+        credentialCategory: "Professional Certificate",
+        recognizedBy: { "@type": "Organization", name: "MIT" },
+      },
+      {
+        "@type": "EducationalOccupationalCredential",
+        name: "Professional Certificate in AI & Data Science",
+        credentialCategory: "Professional Certificate",
+        recognizedBy: { "@type": "Organization", name: "MIT" },
+      },
     ],
     email: "amanidieudonnekonan@gmail.com",
     address: {

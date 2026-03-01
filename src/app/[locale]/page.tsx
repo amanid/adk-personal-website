@@ -22,6 +22,7 @@ import {
   Heart,
   FileText,
   Download,
+  Code2,
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import HeroSection from "@/components/home/HeroSection";
@@ -31,6 +32,11 @@ import { experiences as staticExperiences } from "@/data/experience";
 import { publications as staticPublications } from "@/data/publications";
 
 const services = [
+  {
+    icon: BarChart3,
+    titleKey: "statistics",
+    descKey: "statistics_desc",
+  },
   {
     icon: Brain,
     titleKey: "consulting",
@@ -47,22 +53,23 @@ const services = [
     descKey: "mlops_desc",
   },
   {
+    icon: Code2,
+    titleKey: "fullstack",
+    descKey: "fullstack_desc",
+  },
+  {
     icon: GraduationCap,
     titleKey: "training",
     descKey: "training_desc",
   },
-  {
-    icon: BarChart3,
-    titleKey: "statistics",
-    descKey: "statistics_desc",
-  },
 ];
 
 const expertiseAreas = [
+  { iconKey: "stats", icon: BarChart3 },
   { iconKey: "ds", icon: Database },
   { iconKey: "ai", icon: Brain },
-  { iconKey: "stats", icon: BarChart3 },
   { iconKey: "de", icon: Server },
+  { iconKey: "fullstack", icon: Code2 },
   { iconKey: "strategy", icon: Lightbulb },
 ];
 
