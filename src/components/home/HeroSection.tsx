@@ -76,7 +76,7 @@ export default function HeroSection() {
               className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full glass text-sm text-gold mb-6"
             >
               <Sparkles className="w-4 h-4" />
-              <span>13+ Years of International Experience</span>
+              <span>{t("badge_text")}</span>
             </motion.div>
 
             {/* Greeting */}

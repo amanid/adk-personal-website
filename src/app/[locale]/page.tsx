@@ -11,7 +11,6 @@ import {
   GraduationCap,
   BarChart3,
   Lightbulb,
-  BookOpen,
   Calendar,
   Users,
   Globe,
@@ -27,6 +26,12 @@ import {
 import { useState, useEffect } from "react";
 import HeroSection from "@/components/home/HeroSection";
 import StatsCounter from "@/components/home/StatsCounter";
+import MarketTicker from "@/components/home/MarketTicker";
+import MarketIntelligence from "@/components/home/MarketIntelligence";
+import TrustedBySection from "@/components/home/TrustedBySection";
+import TechStackSection from "@/components/home/TechStackSection";
+import GlobalReachSection from "@/components/home/GlobalReachSection";
+import CertificationsShowcase from "@/components/home/CertificationsShowcase";
 import { projects as staticProjects } from "@/data/projects";
 import { experiences as staticExperiences } from "@/data/experience";
 import { publications as staticPublications } from "@/data/publications";
@@ -74,12 +79,12 @@ const expertiseAreas = [
 ];
 
 const impactMetrics = [
-  { value: "11", label: "Organizations", icon: Building2 },
-  { value: "6+", label: "Countries", icon: Globe },
-  { value: "27", label: "Analytical Reports", icon: FileText },
-  { value: "9", label: "Degrees & Certificates", icon: Award },
-  { value: "50+", label: "Projects Delivered", icon: TrendingUp },
-  { value: "13+", label: "Years Experience", icon: Calendar },
+  { value: 11, suffix: "", labelKey: "organizations", icon: Building2 },
+  { value: 6, suffix: "+", labelKey: "countries", icon: Globe },
+  { value: 27, suffix: "", labelKey: "publications", icon: FileText },
+  { value: 9, suffix: "", labelKey: "certifications", icon: Award },
+  { value: 50, suffix: "+", labelKey: "projects", icon: TrendingUp },
+  { value: 13, suffix: "+", labelKey: "years", icon: Calendar },
 ];
 
 interface ProjectEntry {
@@ -146,7 +151,10 @@ export default function HomePage() {
       {/* 1. Hero */}
       <HeroSection />
 
-      {/* 2. Who I Am — Personal Story */}
+      {/* 2. Market Ticker */}
+      <MarketTicker />
+
+      {/* 3. Who I Am — Personal Story */}
       <section className="section-padding">
         <div className="max-w-4xl mx-auto">
           <motion.div
@@ -168,7 +176,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* 3. Stats */}
+      {/* 4. Stats */}
       <section className="section-padding bg-navy/30">
         <div className="max-w-5xl mx-auto">
           <div className="grid grid-cols-2 md:grid-cols-5 gap-8">
@@ -181,7 +189,13 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* 4. Expertise Areas */}
+      {/* 5. Trusted By Organizations */}
+      <TrustedBySection />
+
+      {/* 6. Market Intelligence */}
+      <MarketIntelligence />
+
+      {/* 7. Expertise Areas */}
       <section className="section-padding">
         <div className="max-w-6xl mx-auto">
           <motion.div
@@ -220,8 +234,11 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* 5. Career Highlights */}
-      <section className="section-padding bg-navy/30">
+      {/* 8. Technology Stack */}
+      <TechStackSection />
+
+      {/* 9. Career Highlights */}
+      <section className="section-padding">
         <div className="max-w-6xl mx-auto">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -291,8 +308,8 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* 6. Featured Publications */}
-      <section className="section-padding">
+      {/* 10. Featured Publications */}
+      <section className="section-padding bg-navy/30">
         <div className="max-w-6xl mx-auto">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -358,8 +375,8 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* 7. Featured Projects */}
-      <section className="section-padding bg-navy/30">
+      {/* 11. Featured Projects */}
+      <section className="section-padding">
         <div className="max-w-6xl mx-auto">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -422,8 +439,8 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* 8. Services Overview */}
-      <section className="section-padding">
+      {/* 12. Services Overview */}
+      <section className="section-padding bg-navy/30">
         <div className="max-w-6xl mx-auto">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -474,8 +491,14 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* 9. Impact & Achievements */}
-      <section className="section-padding bg-navy/30">
+      {/* 13. Global Reach */}
+      <GlobalReachSection />
+
+      {/* 14. Certifications Showcase */}
+      <CertificationsShowcase />
+
+      {/* 15. Impact & Achievements (enhanced with animated counters) */}
+      <section className="section-padding">
         <div className="max-w-6xl mx-auto">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -491,7 +514,7 @@ export default function HomePage() {
           <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
             {impactMetrics.map((metric, index) => (
               <motion.div
-                key={metric.label}
+                key={metric.labelKey}
                 initial={{ opacity: 0, scale: 0.95 }}
                 whileInView={{ opacity: 1, scale: 1 }}
                 viewport={{ once: true }}
@@ -499,18 +522,15 @@ export default function HomePage() {
                 className="glass rounded-xl p-6 text-center hover:border-gold/30 transition-all duration-300"
               >
                 <metric.icon className="w-6 h-6 text-gold mx-auto mb-3" />
-                <p className="text-2xl md:text-3xl font-bold gradient-text font-[family-name:var(--font-display)]">
-                  {metric.value}
-                </p>
-                <p className="text-text-secondary text-sm mt-1">{metric.label}</p>
+                <StatsCounter value={metric.value} suffix={metric.suffix} label={t(`stats.${metric.labelKey}`)} />
               </motion.div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* 10. CTA Section */}
-      <section className="section-padding">
+      {/* 16. CTA Section */}
+      <section className="section-padding bg-navy/30">
         <div className="max-w-4xl mx-auto text-center">
           <motion.div
             initial={{ opacity: 0, scale: 0.95 }}

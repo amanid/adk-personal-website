@@ -22,14 +22,16 @@
     "description": "Statisticien Senior Full-Stack, Data Scientist, Professionnel ML & IA avec plus de 13 ans d'expérience internationale en Afrique, en Europe et au Moyen-Orient. Formé à l'ENSEA Abidjan et à l'Université Toulouse I Capitole, avec des certificats avancés du MIT. Expert sur toute la chaîne données-intelligence : de la modélisation statistique, l'économétrie et l'ingénierie des données aux systèmes IA/ML, au développement web full-stack et au conseil stratégique pour les organisations internationales.",
     "cta_services": "Découvrir les Services",
     "cta_contact": "Me Contacter",
-    "download_cv": "Télécharger le CV"
+    "download_cv": "Télécharger le CV",
+    "badge_text": "13+ Ans d'Expérience Internationale"
   },
   "stats": {
     "years": "Années d'Expérience",
     "organizations": "Organisations",
     "countries": "Pays",
     "projects": "Projets Livrés",
-    "publications": "Publications"
+    "publications": "Publications",
+    "certifications": "Diplômes & Certificats"
   },
   "home": {
     "who_i_am_title": "Qui Suis-Je",
@@ -53,6 +55,43 @@
     "publications_title": "Publications en Vedette",
     "impact_title": "Impact & Réalisations",
     "view_all": "Voir Tout"
+  },
+  "market": {
+    "live": "Marchés en Direct",
+    "title": "Intelligence des Marchés",
+    "subtitle": "Prix des matières premières en temps réel et données boursières ouest-africaines — les marchés qui façonnent les économies africaines.",
+    "brvm_title": "Indices de la Bourse BRVM",
+    "last_updated": "Dernière mise à jour"
+  },
+  "organizations": {
+    "title": "Reconnu par des Organisations de Premier Plan",
+    "subtitle": "Plus de 13 ans d'impact au sein d'institutions internationales, d'agences des Nations Unies et d'organisations mondiales.",
+    "core_title": "Institutions Principales",
+    "advisory_title": "Conseil & Consulting International"
+  },
+  "techStack": {
+    "title": "Stack Technologique",
+    "subtitle": "Une boîte à outils complète couvrant toute la chaîne données-intelligence et le développement logiciel moderne.",
+    "domain_ai_ml": "IA & Apprentissage Automatique",
+    "domain_data_engineering": "Ingénierie des Données",
+    "domain_statistics": "Statistique & Économétrie",
+    "domain_cloud": "Cloud & DevOps",
+    "domain_fullstack": "Développement Full-Stack"
+  },
+  "globalReach": {
+    "title": "Portée Mondiale",
+    "subtitle": "Une expérience professionnelle couvrant plusieurs continents et des contextes internationaux diversifiés.",
+    "continent_africa": "Afrique",
+    "continent_europe": "Europe",
+    "continent_middle_east": "Moyen-Orient",
+    "continent_global": "À Distance / Mondial",
+    "primary": "Principal"
+  },
+  "certifications_showcase": {
+    "title": "Formation & Certifications",
+    "subtitle": "Des diplômes de renommée mondiale issus d'institutions de premier plan alimentant une expertise approfondie.",
+    "education_title": "Diplômes Académiques",
+    "certifications_title": "Certifications Professionnelles"
   },
   "about": {
     "title": "À Propos",

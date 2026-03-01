@@ -22,14 +22,16 @@
     "description": "Full-Stack Senior Statistician, Data Scientist, Machine Learning & AI Professional with 13+ years of international experience across Africa, Europe, and the Middle East. Trained at ENSEA Abidjan and Université Toulouse I Capitole, with advanced certificates from MIT. Expert in the full data-to-intelligence pipeline: from statistical modeling, econometrics, and data engineering to AI/ML systems, full-stack web development, and strategic consulting for international organizations.",
     "cta_services": "Explore Services",
     "cta_contact": "Get in Touch",
-    "download_cv": "Download CV"
+    "download_cv": "Download CV",
+    "badge_text": "13+ Years of International Experience"
   },
   "stats": {
     "years": "Years Experience",
     "organizations": "Organizations",
     "countries": "Countries",
     "projects": "Projects Delivered",
-    "publications": "Publications"
+    "publications": "Publications",
+    "certifications": "Degrees & Certificates"
   },
   "home": {
     "who_i_am_title": "Who I Am",
@@ -53,6 +55,43 @@
     "publications_title": "Featured Publications",
     "impact_title": "Impact & Achievements",
     "view_all": "View All"
+  },
+  "market": {
+    "live": "Live Markets",
+    "title": "Market Intelligence",
+    "subtitle": "Real-time commodity prices and West African stock market data — the markets that drive Africa's economies.",
+    "brvm_title": "BRVM Stock Exchange Indices",
+    "last_updated": "Last updated"
+  },
+  "organizations": {
+    "title": "Trusted by Leading Organizations",
+    "subtitle": "Over 13 years of impact across international institutions, UN agencies, and global organizations.",
+    "core_title": "Core Institutions",
+    "advisory_title": "International Advisory & Consulting"
+  },
+  "techStack": {
+    "title": "Technology Stack",
+    "subtitle": "A comprehensive toolkit spanning the full data-to-intelligence pipeline and modern software development.",
+    "domain_ai_ml": "AI & Machine Learning",
+    "domain_data_engineering": "Data Engineering",
+    "domain_statistics": "Statistics & Econometrics",
+    "domain_cloud": "Cloud & DevOps",
+    "domain_fullstack": "Full-Stack Development"
+  },
+  "globalReach": {
+    "title": "Global Reach",
+    "subtitle": "Professional experience spanning multiple continents and diverse international contexts.",
+    "continent_africa": "Africa",
+    "continent_europe": "Europe",
+    "continent_middle_east": "Middle East",
+    "continent_global": "Remote / Global",
+    "primary": "Primary"
+  },
+  "certifications_showcase": {
+    "title": "Education & Certifications",
+    "subtitle": "World-class credentials from leading institutions powering deep expertise.",
+    "education_title": "Academic Credentials",
+    "certifications_title": "Professional Certifications"
   },
   "about": {
     "title": "About Me",

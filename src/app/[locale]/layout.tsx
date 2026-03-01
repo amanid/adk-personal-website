@@ -8,6 +8,7 @@ import PageViewTracker from "@/components/PageViewTracker";
 import "../globals.css";
 
 export const metadata = {
+  metadataBase: new URL("https://www.konanamanidieudonne.org"),
   title: {
     default: "KONAN Amani Dieudonné | Full-Stack Senior Statistician, Data, ML & AI Professional",
     template: "%s | KONAN Amani Dieudonné",
@@ -35,6 +36,13 @@ export const metadata = {
     "KONAN Amani Dieudonné",
   ],
   authors: [{ name: "KONAN Amani Dieudonné" }],
+  alternates: {
+    canonical: "https://www.konanamanidieudonne.org",
+    languages: {
+      en: "https://www.konanamanidieudonne.org/en",
+      fr: "https://www.konanamanidieudonne.org/fr",
+    },
+  },
   icons: {
     icon: "/images/profile.jpg",
     apple: "/images/profile.jpg",
@@ -144,12 +152,32 @@ export default async function LocaleLayout({
     },
   };
 
+  const websiteJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    name: "KONAN Amani Dieudonné",
+    url: "https://www.konanamanidieudonne.org",
+    inLanguage: [locale === "fr" ? "fr-FR" : "en-US"],
+    potentialAction: {
+      "@type": "SearchAction",
+      target: {
+        "@type": "EntryPoint",
+        urlTemplate: `https://www.konanamanidieudonne.org/${locale}/publications?q={search_term_string}`,
+      },
+      "query-input": "required name=search_term_string",
+    },
+  };
+
   return (
     <html lang={locale} className="dark" data-theme="midnight-gold">
       <head>
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteJsonLd) }}
         />
       </head>
       <body className="min-h-screen flex flex-col bg-charcoal text-text-primary antialiased">
