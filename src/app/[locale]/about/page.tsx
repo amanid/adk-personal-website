@@ -90,7 +90,7 @@ export default function AboutPage() {
               <div className="relative w-40 h-40 rounded-xl overflow-hidden border-2 border-gold/30">
                 <Image
                   src={profilePhoto}
-                  alt="Amani Konan Dieudonné"
+                  alt="KONAN Amani Dieudonné"
                   fill
                   className="object-cover"
                 />

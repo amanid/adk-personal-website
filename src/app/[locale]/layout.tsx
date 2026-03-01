@@ -9,8 +9,8 @@ import "../globals.css";
 
 export const metadata = {
   title: {
-    default: "Amani Konan Dieudonné | Data Scientist, AI Engineer & Statistician-Econometrician",
-    template: "%s | Amani Konan Dieudonné",
+    default: "KONAN Amani Dieudonné | Data Scientist, AI Engineer & Statistician-Econometrician",
+    template: "%s | KONAN Amani Dieudonné",
   },
   description:
     "Senior Data Scientist, Principal AI Engineer & Statistician-Econometrician with 13+ years of international experience. Specializing in AI/ML, Statistics, Econometrics, Data Architecture, and Strategic Consulting.",
@@ -24,15 +24,15 @@ export const metadata = {
     "Econometrics",
     "Statistical Analysis",
     "Consulting",
-    "Amani Konan",
+    "KONAN Amani",
   ],
-  authors: [{ name: "Amani Konan Dieudonné" }],
+  authors: [{ name: "KONAN Amani Dieudonné" }],
   openGraph: {
     type: "website",
     locale: "en_US",
     url: "https://www.konanamanidieudonne.org",
-    siteName: "Amani Konan Dieudonné",
-    title: "Amani Konan Dieudonné | Data Scientist, AI Engineer & Statistician-Econometrician",
+    siteName: "KONAN Amani Dieudonné",
+    title: "KONAN Amani Dieudonné | Data Scientist, AI Engineer & Statistician-Econometrician",
     description:
       "Senior Data Scientist, Principal AI Engineer & Statistician-Econometrician with 13+ years of international experience.",
   },
@@ -55,7 +55,7 @@ export default async function LocaleLayout({
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "Person",
-    name: "Amani Konan Dieudonné",
+    name: "KONAN Amani Dieudonné",
     url: "https://www.konanamanidieudonne.org",
     jobTitle: "Senior Data Scientist, AI Engineer & Statistician-Econometrician",
     worksFor: {

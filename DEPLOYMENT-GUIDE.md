@@ -2,9 +2,9 @@
 
 ## Complete Render.com Deployment & Configuration Manual
 
-**Project**: Amani Konan Dieudonne - Personal Website & CMS
+**Project**: KONAN Amani Dieudonné - Personal Website & CMS
 **Stack**: Next.js 16 | PostgreSQL | Prisma 6 | NextAuth.js v5
-**Author**: Amani Konan Dieudonne
+**Author**: KONAN Amani Dieudonné
 **Last Updated**: March 2026
 
 ---
@@ -420,7 +420,7 @@ If you initially deployed with the Render URL, update the `AUTH_URL` environment
 1. Go to **APIs & Services** → **OAuth consent screen**
 2. Select **External** user type
 3. Fill in:
-   - App name: `Amani Konan Dieudonne`
+   - App name: `KONAN Amani Dieudonné`
    - User support email: your email
    - Developer contact email: your email
 4. Add scopes: `email`, `profile`, `openid`

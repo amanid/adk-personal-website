@@ -35,7 +35,7 @@ export default function Footer() {
           {/* Brand */}
           <div>
             <h3 className="text-xl font-bold font-[family-name:var(--font-display)] gradient-text mb-3">
-              Amani Konan Dieudonné
+              KONAN Amani Dieudonné
             </h3>
             <p className="text-text-secondary text-sm leading-relaxed mb-4">
               {t("description")}
@@ -116,7 +116,7 @@ export default function Footer() {
         {/* Bottom */}
         <div className="mt-8 pt-8 border-t border-glass-border flex items-center justify-between">
           <p className="text-text-muted text-xs">
-            &copy; {new Date().getFullYear()} Amani Konan Dieudonné. {t("rights")}
+            &copy; {new Date().getFullYear()} KONAN Amani Dieudonné. {t("rights")}
           </p>
           <button
             onClick={scrollToTop}

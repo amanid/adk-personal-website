@@ -1,4 +1,4 @@
-# Amani Konan Dieudonne - Personal Website
+# KONAN Amani Dieudonné - Personal Website
 
 > Senior Data Scientist, Principal AI Engineer & Statistician-Econometrician with 13+ years of international experience.
 
