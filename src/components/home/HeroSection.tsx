@@ -9,7 +9,12 @@ import { useState, useEffect } from "react";
 import ParticleBackground from "./ParticleBackground";
 import TypingEffect from "./TypingEffect";
 
-export default function HeroSection() {
+interface HeroSectionProps {
+  showCvDownload?: boolean;
+  cvUrl?: string;
+}
+
+export default function HeroSection({ showCvDownload = false, cvUrl }: HeroSectionProps) {
   const t = useTranslations("hero");
   const [profilePhoto, setProfilePhoto] = useState("/images/profile.jpg");
 
@@ -112,14 +117,16 @@ export default function HeroSection() {
               >
                 {t("cta_contact")}
               </Link>
-              <a
-                href="/cv/CV-Amani-Konan-Senior-Data-Scientist.pdf"
-                download
-                className="flex items-center gap-2 px-6 py-3 text-text-secondary hover:text-gold transition-colors"
-              >
-                <Download className="w-4 h-4" />
-                {t("download_cv")}
-              </a>
+              {showCvDownload && (
+                <a
+                  href={cvUrl || "/cv/CV-Amani-Konan-Senior-Data-Scientist.pdf"}
+                  download
+                  className="flex items-center gap-2 px-6 py-3 text-text-secondary hover:text-gold transition-colors"
+                >
+                  <Download className="w-4 h-4" />
+                  {t("download_cv")}
+                </a>
+              )}
             </div>
           </motion.div>
         </div>

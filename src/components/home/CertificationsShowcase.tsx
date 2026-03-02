@@ -11,7 +11,7 @@ export default function CertificationsShowcase() {
 
   // Combine key credentials: select notable education entries and certifications
   const keyEducation = education.filter((e) =>
-    ["MIT", "ENSEA", "Toulouse", "Johns Hopkins", "Nexford"].some((k) =>
+    ["MIT", "ENSEA", "Toulouse", "Johns Hopkins"].some((k) =>
       e.institution.includes(k)
     )
   );
@@ -50,7 +50,7 @@ export default function CertificationsShowcase() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {keyEducation.map((edu, index) => (
               <motion.div
-                key={`${edu.institution}-${edu.year}`}
+                key={`${edu.institution}-${edu.year}-${index}`}
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
@@ -87,7 +87,7 @@ export default function CertificationsShowcase() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {certifications.map((cert, index) => (
               <motion.div
-                key={`${cert.issuer}-${cert.year}`}
+                key={`${cert.issuer}-${cert.year}-${index}`}
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}

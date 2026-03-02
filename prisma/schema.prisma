@@ -120,24 +120,51 @@ model ServiceRequest {
 }
 
 model Question {
-  id         String   @id @default(cuid())
+  id         String         @id @default(cuid())
   title      String
-  content    String   @db.Text
+  content    String         @db.Text
   authorId   String
-  isAnswered Boolean  @default(false)
-  createdAt  DateTime @default(now())
-  author     User     @relation(fields: [authorId], references: [id])
+  isAnswered Boolean        @default(false)
+  votes      Int            @default(0)
+  createdAt  DateTime       @default(now())
+  author     User           @relation(fields: [authorId], references: [id])
   answers    Answer[]
+  questionVotes QuestionVote[]
 }
 
 model Answer {
+  id           String       @id @default(cuid())
+  content      String       @db.Text
+  questionId   String
+  authorId     String
+  votes        Int          @default(0)
+  isBestAnswer Boolean      @default(false)
+  createdAt    DateTime     @default(now())
+  question     Question     @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  author       User         @relation(fields: [authorId], references: [id])
+  answerVotes  AnswerVote[]
+}
+
+model QuestionVote {
   id         String   @id @default(cuid())
-  content    String   @db.Text
   questionId String
-  authorId   String
+  userId     String
+  value      Int      // 1 for upvote, -1 for downvote
   createdAt  DateTime @default(now())
   question   Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
-  author     User     @relation(fields: [authorId], references: [id])
+
+  @@unique([questionId, userId])
+}
+
+model AnswerVote {
+  id        String   @id @default(cuid())
+  answerId  String
+  userId    String
+  value     Int      // 1 for upvote, -1 for downvote
+  createdAt DateTime @default(now())
+  answer    Answer   @relation(fields: [answerId], references: [id], onDelete: Cascade)
+
+  @@unique([answerId, userId])
 }
 
 model ContactMessage {

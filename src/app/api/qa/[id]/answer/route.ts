@@ -43,3 +43,43 @@ export async function POST(
     );
   }
 }
+
+export async function PUT(
+  request: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const session = await auth();
+    if (!session || (session.user as { role?: string })?.role !== "ADMIN") {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const { id } = await params;
+    const { answerId, isBestAnswer } = await request.json();
+
+    if (!answerId) {
+      return NextResponse.json({ error: "answerId is required" }, { status: 400 });
+    }
+
+    // If marking as best, unmark all other answers for this question first
+    if (isBestAnswer) {
+      await prisma.answer.updateMany({
+        where: { questionId: id },
+        data: { isBestAnswer: false },
+      });
+    }
+
+    const answer = await prisma.answer.update({
+      where: { id: answerId },
+      data: { isBestAnswer: isBestAnswer ?? true },
+    });
+
+    return NextResponse.json({ answer });
+  } catch (error) {
+    console.error("Best answer error:", error);
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 }
+    );
+  }
+}

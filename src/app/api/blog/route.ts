@@ -4,11 +4,19 @@ import { auth } from "@/lib/auth";
 import { blogPostSchema } from "@/lib/validations";
 import { slugify } from "@/lib/utils";
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
+    const { searchParams } = new URL(request.url);
+    const category = searchParams.get("category");
+    const limit = searchParams.get("limit");
+
+    const where: Record<string, unknown> = { published: true };
+    if (category) where.category = category;
+
     const posts = await prisma.blogPost.findMany({
-      where: { published: true },
+      where,
       orderBy: { createdAt: "desc" },
+      ...(limit ? { take: parseInt(limit) } : {}),
       select: {
         id: true,
         title: true,
@@ -52,7 +60,11 @@ export async function POST(request: Request) {
       );
     }
 
-    const slug = slugify(validation.data.title);
+    let slug = slugify(validation.data.title);
+    const existing = await prisma.blogPost.findFirst({ where: { slug } });
+    if (existing) {
+      slug = `${slug}-${Date.now().toString(36)}`;
+    }
 
     const post = await prisma.blogPost.create({
       data: {

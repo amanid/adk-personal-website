@@ -16,6 +16,14 @@ export async function PUT(
     const { id } = await params;
     const body = await request.json();
 
+    let slug = slugify(body.title);
+    const existing = await prisma.blogPost.findFirst({
+      where: { slug, NOT: { id } },
+    });
+    if (existing) {
+      slug = `${slug}-${Date.now().toString(36)}`;
+    }
+
     const post = await prisma.blogPost.update({
       where: { id },
       data: {
@@ -25,7 +33,8 @@ export async function PUT(
         contentFr: body.contentFr || null,
         excerpt: body.excerpt || null,
         excerptFr: body.excerptFr || null,
-        slug: slugify(body.title),
+        coverImage: body.coverImage || null,
+        slug,
         category: body.category || null,
         tags: body.tags || [],
         published: body.published || false,

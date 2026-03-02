@@ -185,7 +185,14 @@
     "comments": "Commentaires",
     "leave_comment": "Laisser un commentaire",
     "post_comment": "Publier le Commentaire",
-    "login_to_comment": "Connectez-vous pour commenter"
+    "login_to_comment": "Connectez-vous pour commenter",
+    "reading_time": "min de lecture",
+    "share": "Partager",
+    "copied": "Copié !",
+    "related": "Articles Similaires",
+    "toc": "Table des Matières",
+    "loading": "Chargement...",
+    "not_found": "Article introuvable"
   },
   "qa": {
     "title": "Questions & Réponses",
@@ -197,7 +204,16 @@
     "answered": "Répondu",
     "unanswered": "En Attente de Réponse",
     "login_to_ask": "Connectez-vous pour poser une question",
-    "no_questions": "Aucune question pour le moment. Soyez le premier à demander !"
+    "no_questions": "Aucune question pour le moment. Soyez le premier à demander !",
+    "search": "Rechercher des questions...",
+    "sort_recent": "Récent",
+    "sort_popular": "Populaire",
+    "sort_unanswered": "Sans Réponse",
+    "vote": "Voter",
+    "best_answer": "Meilleure Réponse",
+    "answers": "réponses",
+    "question_submitted": "Question soumise avec succès !",
+    "loading": "Chargement..."
   },
   "contact": {
     "title": "Me Contacter",

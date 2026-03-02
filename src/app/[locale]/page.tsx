@@ -123,22 +123,37 @@ interface PublicationEntry {
   featured: boolean;
 }
 
+interface SectionVisibility {
+  [key: string]: boolean;
+}
+
 export default function HomePage() {
   const t = useTranslations();
   const locale = useLocale();
   const [projects, setProjects] = useState<ProjectEntry[]>(staticProjects);
   const [experiences, setExperiences] = useState<ExperienceEntry[]>(staticExperiences);
   const [publications, setPublications] = useState<PublicationEntry[]>(staticPublications);
+  const [vis, setVis] = useState<SectionVisibility>({});
+  const [cvUrl, setCvUrl] = useState<string>("");
 
   useEffect(() => {
     Promise.all([
       fetch("/api/projects").then((r) => r.json()).catch(() => null),
       fetch("/api/experience").then((r) => r.json()).catch(() => null),
       fetch("/api/publications").then((r) => r.json()).catch(() => null),
-    ]).then(([projData, expData, pubData]) => {
+      fetch("/api/settings").then((r) => r.json()).catch(() => null),
+    ]).then(([projData, expData, pubData, settingsData]) => {
       if (projData?.projects?.length > 0) setProjects(projData.projects);
       if (expData?.experiences?.length > 0) setExperiences(expData.experiences);
       if (pubData?.publications?.length > 0) setPublications(pubData.publications);
+      if (settingsData?.settings) {
+        if (settingsData.settings.sectionVisibility) {
+          setVis(settingsData.settings.sectionVisibility);
+        }
+        if (settingsData.settings.cvFileUrl) {
+          setCvUrl(settingsData.settings.cvFileUrl);
+        }
+      }
     });
   }, []);
 
@@ -149,13 +164,13 @@ export default function HomePage() {
   return (
     <>
       {/* 1. Hero */}
-      <HeroSection />
+      <HeroSection showCvDownload={vis.cvDownload !== false && vis.cvDownload === true} cvUrl={cvUrl} />
 
       {/* 2. Market Ticker */}
-      <MarketTicker />
+      {vis.marketTicker !== false && <MarketTicker />}
 
       {/* 3. Who I Am — Personal Story */}
-      <section className="section-padding">
+      {vis.whoIAm !== false && <section className="section-padding">
         <div className="max-w-4xl mx-auto">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -174,10 +189,10 @@ export default function HomePage() {
             </p>
           </motion.div>
         </div>
-      </section>
+      </section>}
 
       {/* 4. Stats */}
-      <section className="section-padding bg-navy/30">
+      {vis.stats !== false && <section className="section-padding bg-navy/30">
         <div className="max-w-5xl mx-auto">
           <div className="grid grid-cols-2 md:grid-cols-5 gap-8">
             <StatsCounter value={13} suffix="+" label={t("stats.years")} />
@@ -187,16 +202,16 @@ export default function HomePage() {
             <StatsCounter value={50} suffix="+" label={t("stats.projects")} />
           </div>
         </div>
-      </section>
+      </section>}
 
       {/* 5. Trusted By Organizations */}
-      <TrustedBySection />
+      {vis.trustedBy !== false && <TrustedBySection />}
 
       {/* 6. Market Intelligence */}
-      <MarketIntelligence />
+      {vis.marketIntelligence !== false && <MarketIntelligence />}
 
       {/* 7. Expertise Areas */}
-      <section className="section-padding">
+      {vis.expertise !== false && <section className="section-padding">
         <div className="max-w-6xl mx-auto">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -232,13 +247,13 @@ export default function HomePage() {
             ))}
           </div>
         </div>
-      </section>
+      </section>}
 
       {/* 8. Technology Stack */}
-      <TechStackSection />
+      {vis.techStack !== false && <TechStackSection />}
 
       {/* 9. Career Highlights */}
-      <section className="section-padding">
+      {vis.careerHighlights !== false && <section className="section-padding">
         <div className="max-w-6xl mx-auto">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -306,10 +321,10 @@ export default function HomePage() {
             </Link>
           </div>
         </div>
-      </section>
+      </section>}
 
       {/* 10. Featured Publications */}
-      <section className="section-padding bg-navy/30">
+      {vis.publications !== false && <section className="section-padding bg-navy/30">
         <div className="max-w-6xl mx-auto">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -373,10 +388,10 @@ export default function HomePage() {
             </Link>
           </div>
         </div>
-      </section>
+      </section>}
 
       {/* 11. Featured Projects */}
-      <section className="section-padding">
+      {vis.projects !== false && <section className="section-padding">
         <div className="max-w-6xl mx-auto">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -437,10 +452,10 @@ export default function HomePage() {
             </Link>
           </div>
         </div>
-      </section>
+      </section>}
 
       {/* 12. Services Overview */}
-      <section className="section-padding bg-navy/30">
+      {vis.services !== false && <section className="section-padding bg-navy/30">
         <div className="max-w-6xl mx-auto">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -489,16 +504,16 @@ export default function HomePage() {
             </Link>
           </div>
         </div>
-      </section>
+      </section>}
 
       {/* 13. Global Reach */}
-      <GlobalReachSection />
+      {vis.globalReach !== false && <GlobalReachSection />}
 
       {/* 14. Certifications Showcase */}
-      <CertificationsShowcase />
+      {vis.certifications !== false && <CertificationsShowcase />}
 
       {/* 15. Impact & Achievements (enhanced with animated counters) */}
-      <section className="section-padding">
+      {vis.impact !== false && <section className="section-padding">
         <div className="max-w-6xl mx-auto">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -527,10 +542,10 @@ export default function HomePage() {
             ))}
           </div>
         </div>
-      </section>
+      </section>}
 
       {/* 16. CTA Section */}
-      <section className="section-padding bg-navy/30">
+      {vis.cta !== false && <section className="section-padding bg-navy/30">
         <div className="max-w-4xl mx-auto text-center">
           <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
@@ -553,7 +568,7 @@ export default function HomePage() {
             </Link>
           </motion.div>
         </div>
-      </section>
+      </section>}
     </>
   );
 }

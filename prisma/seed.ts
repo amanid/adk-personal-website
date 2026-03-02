@@ -381,15 +381,14 @@ async function main() {
   if (eduCount === 0) {
     console.log("Seeding education...");
     const educations = [
-      { degree: "MBA, Specialization in Artificial Intelligence", degreeFr: "MBA, Spécialisation en Intelligence Artificielle", institution: "Nexford University", year: "2026", location: "USA (Online)", sortOrder: 0 },
-      { degree: "Professional Certificate in Data Engineering, AI & Data Science", degreeFr: "Certificat Professionnel en Ingénierie des Données, IA & Science des Données", institution: "Massachusetts Institute of Technology (MIT)", year: "2025", location: "USA (Online)", sortOrder: 1 },
-      { degree: "Applied AI and Data Science Program", degreeFr: "Programme Appliqué en IA et Science des Données", institution: "Massachusetts Institute of Technology (MIT)", year: "2025", location: "USA (Online)", sortOrder: 2 },
-      { degree: "MicroMasters in Data, Economics & Development Policy", degreeFr: "MicroMasters en Données, Économie & Politique de Développement", institution: "Massachusetts Institute of Technology (MIT)", year: "2021", location: "USA (Online)", sortOrder: 3 },
-      { degree: "Financial Modelling & Valuation Analyst (FMVA)", degreeFr: "Analyste en Modélisation Financière & Valorisation (FMVA)", institution: "Corporate Finance Institute (CFI)", year: "2020", location: "Canada (Online)", sortOrder: 4 },
-      { degree: "Master's in Statistics & Econometrics", degreeFr: "Master en Statistique & Économétrie", institution: "Université Toulouse I Capitole", year: "2017", location: "Toulouse, France", sortOrder: 5 },
-      { degree: "Data Science Specialization Certificate", degreeFr: "Certificat de Spécialisation en Science des Données", institution: "Johns Hopkins University", year: "2015", location: "USA (Online)", sortOrder: 6 },
-      { degree: "Ingénieur Statisticien (Statistics & Information System Engineer)", degreeFr: "Ingénieur Statisticien (Statistique & Systèmes d'Information)", institution: "ENSEA (École Nationale Supérieure de Statistique et d'Économie Appliquée)", year: "2012", location: "Abidjan, Côte d'Ivoire", sortOrder: 7 },
-      { degree: "Bachelor in Statistics & Information Systems", degreeFr: "Licence en Statistique & Systèmes d'Information", institution: "ENSEA (École Nationale Supérieure de Statistique et d'Économie Appliquée)", year: "2009", location: "Abidjan, Côte d'Ivoire", sortOrder: 8 },
+      { degree: "Professional Certificate in Data Engineering, AI & Data Science", degreeFr: "Certificat Professionnel en Ingénierie des Données, IA & Science des Données", institution: "Massachusetts Institute of Technology (MIT)", year: "2025", location: "USA (Online)", sortOrder: 0 },
+      { degree: "Applied AI and Data Science Program", degreeFr: "Programme Appliqué en IA et Science des Données", institution: "Massachusetts Institute of Technology (MIT)", year: "2025", location: "USA (Online)", sortOrder: 1 },
+      { degree: "MicroMasters in Data, Economics & Development Policy", degreeFr: "MicroMasters en Données, Économie & Politique de Développement", institution: "Massachusetts Institute of Technology (MIT)", year: "2021", location: "USA (Online)", sortOrder: 2 },
+      { degree: "Financial Modelling & Valuation Analyst (FMVA)", degreeFr: "Analyste en Modélisation Financière & Valorisation (FMVA)", institution: "Corporate Finance Institute (CFI)", year: "2020", location: "Canada (Online)", sortOrder: 3 },
+      { degree: "Master's in Statistics & Econometrics", degreeFr: "Master en Statistique & Économétrie", institution: "Université Toulouse I Capitole", year: "2017", location: "Toulouse, France", sortOrder: 4 },
+      { degree: "Data Science Specialization Certificate", degreeFr: "Certificat de Spécialisation en Science des Données", institution: "Johns Hopkins University", year: "2015", location: "USA (Online)", sortOrder: 5 },
+      { degree: "Ingénieur Statisticien (Statistics & Information System Engineer)", degreeFr: "Ingénieur Statisticien (Statistique & Systèmes d'Information)", institution: "ENSEA (École Nationale Supérieure de Statistique et d'Économie Appliquée)", year: "2012", location: "Abidjan, Côte d'Ivoire", sortOrder: 6 },
+      { degree: "Bachelor in Statistics & Information Systems", degreeFr: "Licence en Statistique & Systèmes d'Information", institution: "ENSEA (École Nationale Supérieure de Statistique et d'Économie Appliquée)", year: "2009", location: "Abidjan, Côte d'Ivoire", sortOrder: 7 },
     ];
 
     for (const edu of educations) {

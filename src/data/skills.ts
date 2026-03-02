@@ -60,13 +60,6 @@ export const skillCategories: SkillCategory[] = [
 
 export const education: Education[] = [
   {
-    degree: "MBA, Specialization in Artificial Intelligence",
-    degreeFr: "MBA, Spécialisation en Intelligence Artificielle",
-    institution: "Nexford University",
-    year: "2026",
-    location: "USA (Online)",
-  },
-  {
     degree: "Professional Certificate in Data Engineering, AI & Data Science",
     degreeFr: "Certificat Professionnel en Ingénierie des Données, IA & Science des Données",
     institution: "Massachusetts Institute of Technology (MIT)",

@@ -185,7 +185,14 @@
     "comments": "Comments",
     "leave_comment": "Leave a comment",
     "post_comment": "Post Comment",
-    "login_to_comment": "Login to comment"
+    "login_to_comment": "Login to comment",
+    "reading_time": "min read",
+    "share": "Share",
+    "copied": "Copied!",
+    "related": "Related Posts",
+    "toc": "Table of Contents",
+    "loading": "Loading...",
+    "not_found": "Post not found"
   },
   "qa": {
     "title": "Questions & Answers",
@@ -197,7 +204,16 @@
     "answered": "Answered",
     "unanswered": "Awaiting Answer",
     "login_to_ask": "Login to ask a question",
-    "no_questions": "No questions yet. Be the first to ask!"
+    "no_questions": "No questions yet. Be the first to ask!",
+    "search": "Search questions...",
+    "sort_recent": "Recent",
+    "sort_popular": "Popular",
+    "sort_unanswered": "Unanswered",
+    "vote": "Vote",
+    "best_answer": "Best Answer",
+    "answers": "answers",
+    "question_submitted": "Question submitted successfully!",
+    "loading": "Loading..."
   },
   "contact": {
     "title": "Get in Touch",
