@@ -19,7 +19,7 @@
     "greeting": "Hello, I'm",
     "name": "KONAN Amani Dieudonné",
     "roles": "Full-Stack Senior Statistician | Data Scientist | ML & AI Architect | Data Engineer | Full-Stack Developer | Strategic Consultant",
-    "description": "Full-Stack Senior Statistician, Data Scientist, Machine Learning & AI Professional with 13+ years of international experience across Africa, Europe, and the Middle East. Trained at ENSEA Abidjan and Université Toulouse I Capitole, with advanced certificates from MIT. Expert in the full data-to-intelligence pipeline: from statistical modeling, econometrics, and data engineering to AI/ML systems, full-stack web development, and strategic consulting for international organizations.",
+    "description": "Full-Stack Senior Statistician, Data Scientist, Machine Learning & AI Professional with 13+ years of experience across the United Nations system, international development finance, and global organizations. MIT-certified in Data Engineering and AI, with advanced degrees in Statistics & Econometrics. Expert in the full data-to-intelligence pipeline: from statistical modeling and data engineering to AI/ML systems, full-stack development, and strategic consulting.",
     "cta_services": "Explore Services",
     "cta_contact": "Get in Touch",
     "download_cv": "Download CV",
@@ -35,7 +35,7 @@
   },
   "home": {
     "who_i_am_title": "Who I Am",
-    "who_i_am_text": "Born in Didiévi, Côte d'Ivoire, I discovered my passion for numbers and data early on. That journey took me from ENSEA Abidjan — one of Africa's premier statistics schools — to a Master's in Statistics & Econometrics at Université Toulouse I Capitole in France, and advanced programs at MIT. Over 13+ years, I've served 11 organizations across 6+ countries — from the United Nations system (ITU, IOM, UNHCR, UNIDIR) to the International Cocoa Organization and the African Export-Import Bank. Today, I operate as a full-stack professional spanning the entire data-to-intelligence continuum: from rigorous statistical and econometric analysis, through data engineering and architecture, to machine learning, AI systems, and full-stack web application development. I am driven by a singular belief: Africa's prosperity must be built by Africans, powered by data and intelligence.",
+    "who_i_am_text": "With a Master's in Statistics & Econometrics from Université Toulouse I Capitole (France) and professional certificates from MIT, I bring 13+ years of expertise across 11 organizations in 6+ countries. My career spans the United Nations system (ITU, IOM, UNHCR, UNIDIR), the International Cocoa Organization, and the African Export-Import Bank — where I've built enterprise AI systems, led econometric analysis of global commodity markets, and designed data architectures at institutional scale. Today, I operate as a full-stack professional spanning the entire data-to-intelligence continuum: from rigorous statistical and econometric analysis, through data engineering and architecture, to machine learning, AI systems, and full-stack web application development. I am driven by a conviction that data and intelligence are the most powerful levers for economic transformation and institutional excellence.",
     "summary_title": "Professional Summary",
     "summary_text": "A uniquely versatile full-stack professional combining deep expertise across the entire data value chain — from statistics and econometrics, through data engineering and science, to machine learning, AI systems, and full-stack application development. With over 13 years across 11 international organizations spanning the UN system, the International Cocoa Organization, development finance, and the private sector, I bridge the gap between rigorous quantitative analysis and production-grade technology solutions. From building enterprise AI systems, data architectures, and full-stack web platforms at Afreximbank to leading econometric analysis of global cocoa markets at ICCO, I bring a rare blend of statistical rigor, engineering depth, and strategic vision to every engagement.",
     "expertise_title": "Areas of Expertise",
@@ -59,7 +59,7 @@
   "market": {
     "live": "Live Markets",
     "title": "Market Intelligence",
-    "subtitle": "Real-time commodity prices and West African stock market data — the markets that drive Africa's economies.",
+    "subtitle": "Real-time global commodity prices and regional equity indices — tracking the markets that shape trade and investment decisions.",
     "brvm_title": "BRVM Stock Exchange Indices",
     "last_updated": "Last updated"
   },
@@ -231,7 +231,7 @@
       "email": "Email",
       "phone": "Phone",
       "location": "Location",
-      "location_value": "Abidjan, Côte d'Ivoire",
+      "location_value": "Available Globally (Remote & On-site)",
       "social": "Social Media"
     }
   },

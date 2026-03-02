@@ -14,7 +14,7 @@ export const metadata = {
     template: "%s | KONAN Amani Dieudonné",
   },
   description:
-    "Full-Stack Senior Statistician, Data Scientist, Machine Learning & AI Professional with 13+ years of international experience. Expert in Statistics, Econometrics, Data Science, AI/ML Engineering, Data Architecture, Full-Stack Development, and Strategic Consulting across the UN system, development finance, and international organizations.",
+    "MIT-certified Full-Stack Senior Statistician, Data Scientist, Machine Learning & AI Professional with 13+ years of experience across the UN system, development finance, and international organizations. Expert in Statistics, Econometrics, Data Science, AI/ML Engineering, Data Architecture, Full-Stack Development, and Strategic Consulting.",
   keywords: [
     "Full-Stack Statistician",
     "Senior Data Scientist",
@@ -44,8 +44,11 @@ export const metadata = {
     },
   },
   icons: {
-    icon: "/images/profile.jpg",
-    apple: "/images/profile.jpg",
+    icon: [
+      { url: "/favicon-32.png", sizes: "32x32", type: "image/png" },
+      { url: "/icon-192.png", sizes: "192x192", type: "image/png" },
+    ],
+    apple: "/apple-icon.png",
   },
   openGraph: {
     type: "website",
@@ -54,7 +57,7 @@ export const metadata = {
     siteName: "KONAN Amani Dieudonné",
     title: "KONAN Amani Dieudonné | Full-Stack Senior Statistician, Data, ML & AI Professional",
     description:
-      "Full-Stack Senior Statistician, Data Scientist, ML & AI Professional with 13+ years of international experience across the UN system, development finance, and global organizations.",
+      "MIT-certified Full-Stack Senior Statistician, Data Scientist, ML & AI Professional with 13+ years of experience across the UN system, development finance, and global organizations.",
     images: [
       {
         url: "/images/profile.jpg",
@@ -101,7 +104,7 @@ export default async function LocaleLayout({
     alumniOf: [
       {
         "@type": "EducationalOrganization",
-        name: "ENSEA Abidjan",
+        name: "Massachusetts Institute of Technology (MIT)",
       },
       {
         "@type": "EducationalOrganization",
@@ -109,7 +112,7 @@ export default async function LocaleLayout({
       },
       {
         "@type": "EducationalOrganization",
-        name: "Massachusetts Institute of Technology (MIT)",
+        name: "ENSEA Abidjan",
       },
     ],
     sameAs: [
@@ -145,11 +148,6 @@ export default async function LocaleLayout({
       },
     ],
     email: "amanidieudonnekonan@gmail.com",
-    address: {
-      "@type": "PostalAddress",
-      addressLocality: "Abidjan",
-      addressCountry: "CI",
-    },
   };
 
   const websiteJsonLd = {

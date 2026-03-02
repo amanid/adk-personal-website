@@ -16,13 +16,17 @@ interface HeroSectionProps {
 
 export default function HeroSection({ showCvDownload = false, cvUrl }: HeroSectionProps) {
   const t = useTranslations("hero");
-  const [profilePhoto, setProfilePhoto] = useState("/images/profile.jpg");
+  const cacheBust = "v2";
+  const [profilePhoto, setProfilePhoto] = useState(`/images/profile.jpg?${cacheBust}`);
 
   useEffect(() => {
     fetch("/api/settings")
       .then((r) => r.json())
       .then((data) => {
-        if (data.settings?.profilePhoto) setProfilePhoto(data.settings.profilePhoto);
+        if (data.settings?.profilePhoto) {
+          const url = data.settings.profilePhoto;
+          setProfilePhoto(url.includes("?") ? url : `${url}?${cacheBust}`);
+        }
       })
       .catch(() => {});
   }, []);
@@ -62,6 +66,7 @@ export default function HeroSection({ showCvDownload = false, cvUrl }: HeroSecti
                 fill
                 className="object-cover"
                 priority
+                unoptimized
               />
             </div>
           </motion.div>

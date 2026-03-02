@@ -19,7 +19,7 @@
     "greeting": "Bonjour, je suis",
     "name": "KONAN Amani Dieudonné",
     "roles": "Statisticien Senior Full-Stack | Data Scientist | Architecte ML & IA | Ingénieur de Données | Développeur Full-Stack | Consultant Stratégique",
-    "description": "Statisticien Senior Full-Stack, Data Scientist, Professionnel ML & IA avec plus de 13 ans d'expérience internationale en Afrique, en Europe et au Moyen-Orient. Formé à l'ENSEA Abidjan et à l'Université Toulouse I Capitole, avec des certificats avancés du MIT. Expert sur toute la chaîne données-intelligence : de la modélisation statistique, l'économétrie et l'ingénierie des données aux systèmes IA/ML, au développement web full-stack et au conseil stratégique pour les organisations internationales.",
+    "description": "Statisticien Senior Full-Stack, Data Scientist, Professionnel ML & IA avec plus de 13 ans d'expérience au sein du système des Nations Unies, de la finance de développement internationale et d'organisations mondiales. Certifié MIT en Ingénierie des Données et IA, avec des diplômes avancés en Statistique & Économétrie. Expert sur toute la chaîne données-intelligence : de la modélisation statistique et l'ingénierie des données aux systèmes IA/ML, au développement full-stack et au conseil stratégique.",
     "cta_services": "Découvrir les Services",
     "cta_contact": "Me Contacter",
     "download_cv": "Télécharger le CV",
@@ -35,7 +35,7 @@
   },
   "home": {
     "who_i_am_title": "Qui Suis-Je",
-    "who_i_am_text": "Né à Didiévi, en Côte d'Ivoire, j'ai découvert très tôt ma passion pour les chiffres et les données. Ce parcours m'a conduit de l'ENSEA Abidjan — l'une des écoles de statistique les plus prestigieuses d'Afrique — à un Master en Statistique & Économétrie à l'Université Toulouse I Capitole en France, puis à des programmes avancés au MIT. En plus de 13 ans, j'ai servi 11 organisations dans plus de 6 pays — du système des Nations Unies (UIT, OIM, HCR, UNIDIR) à l'Organisation Internationale du Cacao et à la Banque Africaine d'Import-Export. Aujourd'hui, j'opère en tant que professionnel full-stack couvrant tout le continuum données-intelligence : de l'analyse statistique et économétrique rigoureuse, en passant par l'ingénierie et l'architecture des données, jusqu'à l'apprentissage automatique, les systèmes d'IA et le développement d'applications web full-stack. Je suis animé par une conviction : la prospérité de l'Afrique doit être construite par les Africains, alimentée par les données et l'intelligence.",
+    "who_i_am_text": "Titulaire d'un Master en Statistique & Économétrie de l'Université Toulouse I Capitole (France) et de certificats professionnels du MIT, j'apporte plus de 13 ans d'expertise au sein de 11 organisations dans plus de 6 pays. Ma carrière couvre le système des Nations Unies (UIT, OIM, HCR, UNIDIR), l'Organisation Internationale du Cacao et la Banque Africaine d'Import-Export — où j'ai construit des systèmes d'IA d'entreprise, dirigé l'analyse économétrique des marchés mondiaux de matières premières et conçu des architectures de données à l'échelle institutionnelle. Aujourd'hui, j'opère en tant que professionnel full-stack couvrant tout le continuum données-intelligence : de l'analyse statistique et économétrique rigoureuse, en passant par l'ingénierie et l'architecture des données, jusqu'à l'apprentissage automatique, les systèmes d'IA et le développement d'applications web full-stack. Je suis animé par la conviction que les données et l'intelligence sont les leviers les plus puissants pour la transformation économique et l'excellence institutionnelle.",
     "summary_title": "Résumé Professionnel",
     "summary_text": "Un professionnel full-stack polyvalent combinant une expertise approfondie sur toute la chaîne de valeur des données — de la statistique et l'économétrie, en passant par l'ingénierie et la science des données, jusqu'à l'apprentissage automatique, les systèmes d'IA et le développement d'applications full-stack. Avec plus de 13 ans d'expérience dans 11 organisations internationales couvrant le système des Nations Unies, l'Organisation Internationale du Cacao, la finance du développement et le secteur privé, je fais le pont entre l'analyse quantitative rigoureuse et les solutions technologiques de production. De la construction de systèmes d'IA d'entreprise, d'architectures de données et de plateformes web full-stack à Afreximbank à la direction de l'analyse économétrique des marchés mondiaux du cacao à l'OICAO, j'apporte un mélange rare de rigueur statistique, de profondeur technique et de vision stratégique à chaque engagement.",
     "expertise_title": "Domaines d'Expertise",
@@ -59,7 +59,7 @@
   "market": {
     "live": "Marchés en Direct",
     "title": "Intelligence des Marchés",
-    "subtitle": "Prix des matières premières en temps réel et données boursières ouest-africaines — les marchés qui façonnent les économies africaines.",
+    "subtitle": "Prix des matières premières mondiales en temps réel et indices boursiers régionaux — les marchés qui façonnent les décisions de commerce et d'investissement.",
     "brvm_title": "Indices de la Bourse BRVM",
     "last_updated": "Dernière mise à jour"
   },
@@ -231,7 +231,7 @@
       "email": "Email",
       "phone": "Téléphone",
       "location": "Localisation",
-      "location_value": "Abidjan, Côte d'Ivoire",
+      "location_value": "Disponible Mondialement (Distant & Sur site)",
       "social": "Réseaux Sociaux"
     }
   },
