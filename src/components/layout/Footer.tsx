@@ -3,6 +3,7 @@
 import { useTranslations, useLocale } from "next-intl";
 import { Link } from "@/i18n/routing";
 import { Github, Linkedin, Mail, MapPin, ArrowUp, Phone } from "lucide-react";
+import NewsletterSignup from "@/components/NewsletterSignup";
 
 const socialLinks = [
   { icon: Linkedin, href: "https://www.linkedin.com/in/amanidieudonnekonan", label: "LinkedIn" },
@@ -42,7 +43,7 @@ export default function Footer() {
             <div className="space-y-2">
               <div className="flex items-center gap-2 text-text-muted text-sm">
                 <MapPin className="w-4 h-4 shrink-0" />
-                <span>Abidjan, Côte d&apos;Ivoire</span>
+                <span>Available Globally</span>
               </div>
               <div className="flex items-center gap-2 text-text-muted text-sm">
                 <Mail className="w-4 h-4 shrink-0" />
@@ -95,6 +96,7 @@ export default function Footer() {
             <h4 className="text-sm font-semibold text-text-primary uppercase tracking-wider mb-4">
               {t("connect")}
             </h4>
+            <NewsletterSignup />
             <div className="flex items-center gap-3 mb-4">
               {socialLinks.map((social) => (
                 <a

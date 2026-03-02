@@ -4,6 +4,9 @@ import { routing } from "@/i18n/routing";
 import Providers from "@/components/Providers";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
+import ScrollProgress from "@/components/layout/ScrollProgress";
+import BackToTop from "@/components/layout/BackToTop";
+import PageTransition from "@/components/layout/PageTransition";
 import PageViewTracker from "@/components/PageViewTracker";
 import "../globals.css";
 
@@ -181,9 +184,13 @@ export default async function LocaleLayout({
       <body className="min-h-screen flex flex-col bg-charcoal text-text-primary antialiased">
         <Providers>
           <NextIntlClientProvider locale={locale} messages={messages}>
+            <ScrollProgress />
             <Navbar />
-            <main className="flex-1 pt-16">{children}</main>
+            <main className="flex-1 pt-16">
+              <PageTransition>{children}</PageTransition>
+            </main>
             <Footer />
+            <BackToTop />
             <PageViewTracker />
           </NextIntlClientProvider>
         </Providers>

@@ -258,6 +258,19 @@
     "connect": "Connect",
     "rights": "All rights reserved."
   },
+  "newsletter": {
+    "title": "Stay Updated",
+    "subtitle": "Get notified when new research and insights are published.",
+    "placeholder_email": "Your email address",
+    "placeholder_name": "Your name (optional)",
+    "subscribe": "Subscribe",
+    "subscribing": "Subscribing...",
+    "success": "Check your email to confirm your subscription!",
+    "already": "This email is already subscribed.",
+    "error": "Something went wrong. Please try again.",
+    "confirmed": "Subscription confirmed! You'll receive notifications for new publications.",
+    "unsubscribed": "You've been unsubscribed. You won't receive further emails."
+  },
   "common": {
     "loading": "Loading...",
     "error": "An error occurred",

@@ -47,7 +47,8 @@ export default function AboutPage() {
   const [skillCategories, setSkillCategories] = useState<SkillCategoryEntry[]>(staticSkillCategories);
   const [education, setEducation] = useState<EducationEntry[]>(staticEducation);
   const [certifications, setCertifications] = useState<CertificationEntry[]>(staticCertifications);
-  const [profilePhoto, setProfilePhoto] = useState("/images/profile.jpg");
+  const cacheBust = "v2";
+  const [profilePhoto, setProfilePhoto] = useState(`/images/profile.jpg?${cacheBust}`);
 
   useEffect(() => {
     Promise.all([
@@ -59,7 +60,10 @@ export default function AboutPage() {
       if (skillsData?.categories?.length > 0) setSkillCategories(skillsData.categories);
       if (eduData?.education?.length > 0) setEducation(eduData.education);
       if (certData?.certifications?.length > 0) setCertifications(certData.certifications);
-      if (settingsData?.settings?.profilePhoto) setProfilePhoto(settingsData.settings.profilePhoto);
+      if (settingsData?.settings?.profilePhoto) {
+        const url = settingsData.settings.profilePhoto;
+        setProfilePhoto(url.includes("?") ? url : `${url}?${cacheBust}`);
+      }
     });
   }, []);
 
@@ -93,6 +97,7 @@ export default function AboutPage() {
                   alt="KONAN Amani Dieudonné"
                   fill
                   className="object-cover"
+                  unoptimized
                 />
               </div>
             </div>

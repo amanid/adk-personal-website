@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
 import { blogPostSchema } from "@/lib/validations";
 import { slugify } from "@/lib/utils";
+import { notifySubscribers } from "@/lib/email";
 
 export async function GET(request: Request) {
   try {
@@ -74,6 +75,15 @@ export async function POST(request: Request) {
         authorId: (session.user as { id: string }).id,
       },
     });
+
+    if (post.published) {
+      notifySubscribers({
+        title: post.title,
+        excerpt: post.excerpt || post.title,
+        url: `/blog/${post.slug}`,
+        type: "blog",
+      }).catch((err) => console.error("Notification error:", err));
+    }
 
     return NextResponse.json({ post }, { status: 201 });
   } catch (error) {

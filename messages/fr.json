@@ -258,6 +258,19 @@
     "connect": "Se Connecter",
     "rights": "Tous droits réservés."
   },
+  "newsletter": {
+    "title": "Restez Informé",
+    "subtitle": "Soyez notifié lors de la publication de nouvelles recherches et analyses.",
+    "placeholder_email": "Votre adresse email",
+    "placeholder_name": "Votre nom (optionnel)",
+    "subscribe": "S'abonner",
+    "subscribing": "Abonnement...",
+    "success": "Vérifiez votre email pour confirmer votre abonnement !",
+    "already": "Cet email est déjà abonné.",
+    "error": "Une erreur est survenue. Veuillez réessayer.",
+    "confirmed": "Abonnement confirmé ! Vous recevrez des notifications pour les nouvelles publications.",
+    "unsubscribed": "Vous avez été désabonné. Vous ne recevrez plus d'emails."
+  },
   "common": {
     "loading": "Chargement...",
     "error": "Une erreur est survenue",

@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
 import { slugify } from "@/lib/utils";
+import { notifySubscribers } from "@/lib/email";
 
 export async function PUT(
   request: Request,
@@ -15,6 +16,11 @@ export async function PUT(
 
     const { id } = await params;
     const body = await request.json();
+
+    const currentPost = await prisma.blogPost.findUnique({
+      where: { id },
+      select: { published: true },
+    });
 
     let slug = slugify(body.title);
     const existing = await prisma.blogPost.findFirst({
@@ -40,6 +46,15 @@ export async function PUT(
         published: body.published || false,
       },
     });
+
+    if (currentPost && !currentPost.published && post.published) {
+      notifySubscribers({
+        title: post.title,
+        excerpt: post.excerpt || post.title,
+        url: `/blog/${post.slug}`,
+        type: "blog",
+      }).catch((err) => console.error("Notification error:", err));
+    }
 
     return NextResponse.json({ post });
   } catch (error) {

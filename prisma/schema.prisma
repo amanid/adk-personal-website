@@ -304,3 +304,12 @@ model PageView {
   @@index([createdAt])
   @@index([country])
 }
+
+model Subscriber {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String?
+  confirmed Boolean  @default(false)
+  token     String   @unique @default(cuid())
+  createdAt DateTime @default(now())
+}

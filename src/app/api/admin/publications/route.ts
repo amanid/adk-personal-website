@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
 import { publicationSchema } from "@/lib/validations";
+import { notifySubscribers } from "@/lib/email";
 
 export async function GET() {
   try {
@@ -68,6 +69,13 @@ export async function POST(request: Request) {
         featured: validation.data.featured || false,
       },
     });
+
+    notifySubscribers({
+      title: publication.title,
+      excerpt: publication.abstract.substring(0, 200),
+      url: `/publications/${publication.slug}`,
+      type: "publication",
+    }).catch((err) => console.error("Notification error:", err));
 
     return NextResponse.json({ publication }, { status: 201 });
   } catch (error) {

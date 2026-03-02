@@ -2,7 +2,7 @@
 
 import { useTranslations } from "next-intl";
 import { motion } from "framer-motion";
-import { ArrowRight, Download, Sparkles } from "lucide-react";
+import { ArrowRight, Download } from "lucide-react";
 import { Link } from "@/i18n/routing";
 import Image from "next/image";
 import { useState, useEffect } from "react";
@@ -78,17 +78,6 @@ export default function HeroSection({ showCvDownload = false, cvUrl }: HeroSecti
             transition={{ duration: 0.8, delay: 0.2 }}
             className="text-center md:text-left"
           >
-            {/* Badge */}
-            <motion.div
-              initial={{ opacity: 0, scale: 0.8 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: 0.4 }}
-              className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full glass text-sm text-gold mb-6"
-            >
-              <Sparkles className="w-4 h-4" />
-              <span>{t("badge_text")}</span>
-            </motion.div>
-
             {/* Greeting */}
             <p className="text-text-secondary text-lg mb-2">{t("greeting")}</p>
 
