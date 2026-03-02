@@ -35,7 +35,8 @@ export async function GET() {
       return NextResponse.json(cached);
     }
 
-    const yahooFinance = (await import("yahoo-finance2")).default;
+    const YahooFinance = (await import("yahoo-finance2")).default;
+    const yahooFinance = new YahooFinance();
 
     const results: CommodityResult[] = [];
 

@@ -2,7 +2,7 @@
 
 import { useTranslations } from "next-intl";
 import { motion } from "framer-motion";
-import { Mail, MapPin, Linkedin, Github, Twitter, Send, Phone } from "lucide-react";
+import { Mail, MapPin, Linkedin, Github, Send, Phone } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { contactSchema, ContactInput } from "@/lib/validations";
@@ -131,8 +131,7 @@ export default function ContactPage() {
               <div className="flex gap-3">
                 {[
                   { icon: Linkedin, href: "https://www.linkedin.com/in/amanidieudonnekonan" },
-                  { icon: Github, href: "https://github.com/amani-konan" },
-                  { icon: Twitter, href: "https://twitter.com/amani_konan" },
+                  { icon: Github, href: "https://github.com/amanid" },
                 ].map((social) => (
                   <a
                     key={social.href}

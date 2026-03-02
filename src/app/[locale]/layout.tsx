@@ -114,7 +114,7 @@ export default async function LocaleLayout({
     ],
     sameAs: [
       "https://www.linkedin.com/in/amanidieudonnekonan",
-      "https://github.com/amani-konan",
+      "https://github.com/amanid",
     ],
     knowsAbout: [
       "Statistics & Econometrics",

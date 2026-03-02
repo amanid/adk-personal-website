@@ -65,7 +65,7 @@ export default function TrustedBySection() {
           </div>
         </div>
 
-        {/* International Advisory & Consulting */}
+        {/* United Nations & International Research */}
         <div>
           <motion.div
             initial={{ opacity: 0, x: -20 }}

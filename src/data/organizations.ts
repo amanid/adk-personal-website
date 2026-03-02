@@ -64,7 +64,7 @@ export const organizations: Organization[] = [
     website: "https://www.pacci.ci",
     location: "Abidjan, Côte d'Ivoire",
   },
-  // International Advisory & Consulting (prestigious engagements)
+  // United Nations & International Research (prestigious engagements)
   {
     id: "itu",
     name: "International Telecommunication Union",

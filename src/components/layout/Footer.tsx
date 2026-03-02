@@ -2,12 +2,11 @@
 
 import { useTranslations, useLocale } from "next-intl";
 import { Link } from "@/i18n/routing";
-import { Github, Linkedin, Twitter, Mail, MapPin, ArrowUp, Phone } from "lucide-react";
+import { Github, Linkedin, Mail, MapPin, ArrowUp, Phone } from "lucide-react";
 
 const socialLinks = [
   { icon: Linkedin, href: "https://www.linkedin.com/in/amanidieudonnekonan", label: "LinkedIn" },
-  { icon: Github, href: "https://github.com/amani-konan", label: "GitHub" },
-  { icon: Twitter, href: "https://twitter.com/amani_konan", label: "Twitter" },
+  { icon: Github, href: "https://github.com/amanid", label: "GitHub" },
   { icon: Mail, href: "mailto:amanidieudonnekonan@gmail.com", label: "Email" },
 ];
 
