@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { getCached, setCache } from "@/lib/cache";
 
-const CACHE_KEY = "brvm";
+const CACHE_KEY = "brvm_public";
 const CACHE_TTL = 15 * 60 * 1000; // 15 minutes
 
 interface BRVMIndex {
@@ -55,31 +55,53 @@ export async function GET() {
     const indices: BRVMIndex[] = [];
     const stocks: BRVMStock[] = [];
 
-    // Parse indices
-    $("table").first().find("tr").each((i, row) => {
-      if (i === 0) return;
-      const cells = $(row).find("td");
-      if (cells.length >= 3) {
+    // Table 0: Index summary — Row 0 is header, Row 1 has data
+    const indexRow = $("table").eq(0).find("tr").eq(1);
+    const indexCells = indexRow.find("td");
+    if (indexCells.length >= 2) {
+      const rawValue = $(indexCells[0]).text().trim();
+      const valueMatch = rawValue.match(/([\d,.]+)\s*\(([^)]+)\)/);
+      if (valueMatch) {
         indices.push({
-          name: $(cells[0]).text().trim(),
-          value: $(cells[1]).text().trim(),
-          change: $(cells[2]).text().trim(),
+          name: "BRVM-CI",
+          value: valueMatch[1],
+          change: valueMatch[2],
+        });
+      } else {
+        indices.push({ name: "BRVM-CI", value: rawValue, change: "" });
+      }
+
+      const ytdRaw = $(indexCells[1]).text().trim();
+      const ytdMatch = ytdRaw.match(/([+-]?[\d,.]+)\s*\(([^)]+)\)/);
+      if (ytdMatch) {
+        indices.push({
+          name: "Year-to-Date",
+          value: ytdMatch[2],
+          change: ytdMatch[1],
         });
       }
-    });
 
-    // Parse stocks (second table)
-    $("table").eq(1).find("tr").each((i, row) => {
+      if (indexCells.length >= 3) {
+        indices.push({
+          name: "Market Cap",
+          value: $(indexCells[2]).text().trim(),
+          change: "",
+        });
+      }
+    }
+
+    // Table 3: Full stock listing — Ticker | Name | Volume | Price | Change
+    $("table").eq(3).find("tr").each((i, row) => {
       if (i === 0) return;
-      if (stocks.length >= 15) return;
+      if (stocks.length >= 20) return;
       const cells = $(row).find("td");
-      if (cells.length >= 4) {
+      if (cells.length >= 5) {
         stocks.push({
           symbol: $(cells[0]).text().trim(),
           name: $(cells[1]).text().trim(),
-          price: $(cells[2]).text().trim(),
-          change: $(cells[3]).text().trim(),
-          volume: cells.length >= 5 ? $(cells[4]).text().trim() : "",
+          volume: $(cells[2]).text().trim(),
+          price: $(cells[3]).text().trim(),
+          change: $(cells[4]).text().trim(),
         });
       }
     });

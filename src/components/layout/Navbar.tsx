@@ -98,7 +98,7 @@ export default function Navbar() {
                   {session.user?.name?.split(" ")[0]}
                 </span>
                 <button
-                  onClick={() => signOut()}
+                  onClick={() => signOut({ callbackUrl: "/" })}
                   className="flex items-center gap-1 px-3 py-1.5 text-sm border border-glass-border rounded-lg hover:border-gold/50 hover:text-gold transition-all"
                 >
                   <LogOut className="w-4 h-4" />
@@ -165,7 +165,7 @@ export default function Navbar() {
                 </div>
                 {session ? (
                   <button
-                    onClick={() => signOut()}
+                    onClick={() => signOut({ callbackUrl: "/" })}
                     className="flex items-center gap-1 px-3 py-2 text-sm text-text-secondary hover:text-gold"
                   >
                     <LogOut className="w-4 h-4" />

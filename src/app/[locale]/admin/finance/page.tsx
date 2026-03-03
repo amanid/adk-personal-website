@@ -33,10 +33,10 @@ interface BRVMStock {
 }
 
 const TRADINGVIEW_SYMBOLS = [
-  { symbol: "CC1!", name: "Cocoa" },
-  { symbol: "KC1!", name: "Coffee" },
-  { symbol: "GC1!", name: "Gold" },
-  { symbol: "CL1!", name: "Crude Oil" },
+  { symbol: "ICEUS:CC1!", name: "Cocoa" },
+  { symbol: "ICEUS:KC1!", name: "Coffee" },
+  { symbol: "COMEX:GC1!", name: "Gold" },
+  { symbol: "NYMEX:CL1!", name: "Crude Oil" },
 ];
 
 export default function FinancePage() {
@@ -80,51 +80,46 @@ export default function FinancePage() {
     fetchData();
   }, [fetchData]);
 
-  // TradingView widgets
+  // TradingView widgets — initialize after loading completes
+  const [widgetsReady, setWidgetsReady] = useState(false);
+
   useEffect(() => {
-    if (typeof window === "undefined") return;
+    if (loading || widgetsReady) return;
+    // Small delay to ensure refs are populated after render
+    const timer = setTimeout(() => {
+      TRADINGVIEW_SYMBOLS.forEach((item, index) => {
+        const container = widgetRefs.current[index];
+        if (!container || container.hasChildNodes()) return;
 
-    const cleanups: Array<() => void> = [];
+        const widgetDiv = document.createElement("div");
+        widgetDiv.className = "tradingview-widget-container__widget";
+        widgetDiv.style.height = "100%";
+        widgetDiv.style.width = "100%";
+        container.appendChild(widgetDiv);
 
-    TRADINGVIEW_SYMBOLS.forEach((item, index) => {
-      const container = widgetRefs.current[index];
-      if (!container) return;
+        const script = document.createElement("script");
+        script.src = "https://s3.tradingview.com/external-embedding/embed-widget-mini-symbol-overview.js";
+        script.type = "text/javascript";
+        script.async = true;
+        script.textContent = JSON.stringify({
+          symbol: item.symbol,
+          width: "100%",
+          height: "100%",
+          locale: "en",
+          dateRange: "1M",
+          colorTheme: "dark",
+          isTransparent: true,
+          autosize: true,
+          largeChartUrl: "",
+        });
 
-      container.innerHTML = "";
-
-      const widgetDiv = document.createElement("div");
-      widgetDiv.className = "tradingview-widget-container__widget";
-      widgetDiv.style.height = "100%";
-      widgetDiv.style.width = "100%";
-      container.appendChild(widgetDiv);
-
-      const script = document.createElement("script");
-      script.src = "https://s3.tradingview.com/external-embedding/embed-widget-mini-symbol-overview.js";
-      script.type = "text/javascript";
-      script.async = true;
-      script.innerHTML = JSON.stringify({
-        symbol: item.symbol,
-        width: "100%",
-        height: "100%",
-        locale: "en",
-        dateRange: "1M",
-        colorTheme: "dark",
-        isTransparent: true,
-        autosize: true,
-        largeChartUrl: "",
+        container.appendChild(script);
       });
+      setWidgetsReady(true);
+    }, 100);
 
-      container.appendChild(script);
-
-      cleanups.push(() => {
-        container.innerHTML = "";
-      });
-    });
-
-    return () => {
-      cleanups.forEach((fn) => fn());
-    };
-  }, [loading]);
+    return () => clearTimeout(timer);
+  }, [loading, widgetsReady]);
 
   const handleRefresh = () => {
     setRefreshing(true);
@@ -237,13 +232,15 @@ export default function FinancePage() {
             <div key={idx.name} className="glass rounded-xl p-5">
               <p className="text-text-secondary text-sm mb-1">{idx.name}</p>
               <p className="text-xl font-bold">{idx.value}</p>
-              <p
-                className={`text-sm ${
-                  idx.change.startsWith("-") ? "text-red-400" : "text-green-400"
-                }`}
-              >
-                {idx.change}
-              </p>
+              {idx.change && (
+                <p
+                  className={`text-sm ${
+                    idx.change.startsWith("-") ? "text-red-400" : "text-green-400"
+                  }`}
+                >
+                  {idx.change}
+                </p>
+              )}
             </div>
           ))}
         </div>
@@ -274,7 +271,7 @@ export default function FinancePage() {
                     <td className="p-3 text-right">{stock.price}</td>
                     <td
                       className={`p-3 text-right ${
-                        stock.change.startsWith("-") ? "text-red-400" : "text-green-400"
+                        stock.change.startsWith("-") ? "text-red-400" : stock.change === "+0" ? "text-text-secondary" : "text-green-400"
                       }`}
                     >
                       {stock.change}

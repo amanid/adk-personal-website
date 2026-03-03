@@ -36,36 +36,46 @@ export async function GET() {
     }
 
     const YahooFinance = (await import("yahoo-finance2")).default;
-    const yahooFinance = new YahooFinance();
+    const yahooFinance = new YahooFinance({ suppressNotices: ["yahooSurvey"] });
 
-    const results: CommodityResult[] = [];
-
-    for (const commodity of COMMODITIES) {
-      try {
-        const quote = await yahooFinance.quote(commodity.symbol) as {
+    // Fetch all commodities in parallel with per-item timeout
+    const results = await Promise.allSettled(
+      COMMODITIES.map(async (commodity) => {
+        const quote = (await Promise.race([
+          yahooFinance.quote(commodity.symbol),
+          new Promise((_, reject) =>
+            setTimeout(() => reject(new Error("Timeout")), 8000)
+          ),
+        ])) as {
           regularMarketPrice?: number;
           regularMarketChange?: number;
           regularMarketChangePercent?: number;
         };
-        results.push({
+        return {
           symbol: commodity.symbol,
           name: commodity.name,
           unit: commodity.unit,
           price: quote.regularMarketPrice ?? 0,
           change: quote.regularMarketChange ?? 0,
           changePercent: quote.regularMarketChangePercent ?? 0,
-        });
-      } catch {
-        results.push({
-          ...commodity,
-          price: 0,
-          change: 0,
-          changePercent: 0,
-        });
-      }
-    }
+        };
+      })
+    );
 
-    const response = { commodities: results, fetchedAt: new Date().toISOString() };
+    const commodities: CommodityResult[] = results.map((result, i) => {
+      if (result.status === "fulfilled") {
+        return result.value;
+      }
+      console.error(`Failed to fetch ${COMMODITIES[i].symbol}:`, result.reason);
+      return {
+        ...COMMODITIES[i],
+        price: 0,
+        change: 0,
+        changePercent: 0,
+      };
+    });
+
+    const response = { commodities, fetchedAt: new Date().toISOString() };
     setCache(CACHE_KEY, response, CACHE_TTL);
 
     return NextResponse.json(response);
