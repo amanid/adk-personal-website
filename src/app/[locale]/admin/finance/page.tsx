@@ -1,13 +1,20 @@
 "use client";
 
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback } from "react";
 import {
   RefreshCw,
   TrendingUp,
   TrendingDown,
   ExternalLink,
   Clock,
+  BarChart3,
+  Activity,
+  Percent,
+  Layers,
 } from "lucide-react";
+import StatCard from "@/components/admin/charts/StatCard";
+import SparklineChart from "@/components/admin/charts/SparklineChart";
+import CommodityPriceChart from "@/components/admin/charts/CommodityPriceChart";
 
 interface Commodity {
   symbol: string;
@@ -32,28 +39,27 @@ interface BRVMStock {
   volume: string;
 }
 
-const TRADINGVIEW_SYMBOLS = [
-  { symbol: "ICEUS:CC1!", name: "Cocoa" },
-  { symbol: "ICEUS:KC1!", name: "Coffee" },
-  { symbol: "COMEX:GC1!", name: "Gold" },
-  { symbol: "NYMEX:CL1!", name: "Crude Oil" },
-];
+interface HistoryPoint {
+  date: string;
+  close: number;
+}
 
 export default function FinancePage() {
   const [commodities, setCommodities] = useState<Commodity[]>([]);
   const [brvmIndices, setBrvmIndices] = useState<BRVMIndex[]>([]);
   const [brvmStocks, setBrvmStocks] = useState<BRVMStock[]>([]);
+  const [historyData, setHistoryData] = useState<Record<string, HistoryPoint[]>>({});
   const [commoditiesFetchedAt, setCommoditiesFetchedAt] = useState("");
   const [brvmFetchedAt, setBrvmFetchedAt] = useState("");
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
-  const widgetRefs = useRef<(HTMLDivElement | null)[]>([]);
 
   const fetchData = useCallback(async () => {
     try {
-      const [commoditiesRes, brvmRes] = await Promise.all([
+      const [commoditiesRes, brvmRes, historyRes] = await Promise.all([
         fetch("/api/admin/finance/commodities"),
         fetch("/api/admin/finance/brvm"),
+        fetch("/api/admin/finance/history"),
       ]);
 
       if (commoditiesRes.ok) {
@@ -68,6 +74,11 @@ export default function FinancePage() {
         setBrvmStocks(data.stocks || []);
         setBrvmFetchedAt(data.fetchedAt || "");
       }
+
+      if (historyRes.ok) {
+        const data = await historyRes.json();
+        setHistoryData(data.history || {});
+      }
     } catch (err) {
       console.error("Finance fetch error:", err);
     } finally {
@@ -79,47 +90,6 @@ export default function FinancePage() {
   useEffect(() => {
     fetchData();
   }, [fetchData]);
-
-  // TradingView widgets — initialize after loading completes
-  const [widgetsReady, setWidgetsReady] = useState(false);
-
-  useEffect(() => {
-    if (loading || widgetsReady) return;
-    // Small delay to ensure refs are populated after render
-    const timer = setTimeout(() => {
-      TRADINGVIEW_SYMBOLS.forEach((item, index) => {
-        const container = widgetRefs.current[index];
-        if (!container || container.hasChildNodes()) return;
-
-        const widgetDiv = document.createElement("div");
-        widgetDiv.className = "tradingview-widget-container__widget";
-        widgetDiv.style.height = "100%";
-        widgetDiv.style.width = "100%";
-        container.appendChild(widgetDiv);
-
-        const script = document.createElement("script");
-        script.src = "https://s3.tradingview.com/external-embedding/embed-widget-mini-symbol-overview.js";
-        script.type = "text/javascript";
-        script.async = true;
-        script.textContent = JSON.stringify({
-          symbol: item.symbol,
-          width: "100%",
-          height: "100%",
-          locale: "en",
-          dateRange: "1M",
-          colorTheme: "dark",
-          isTransparent: true,
-          autosize: true,
-          largeChartUrl: "",
-        });
-
-        container.appendChild(script);
-      });
-      setWidgetsReady(true);
-    }, 100);
-
-    return () => clearTimeout(timer);
-  }, [loading, widgetsReady]);
 
   const handleRefresh = () => {
     setRefreshing(true);
@@ -133,6 +103,13 @@ export default function FinancePage() {
       minute: "2-digit",
     });
   };
+
+  // Computed stats
+  const trendingUp = commodities.filter((c) => c.changePercent > 0).length;
+  const avgChange =
+    commodities.length > 0
+      ? commodities.reduce((sum, c) => sum + Math.abs(c.changePercent), 0) / commodities.length
+      : 0;
 
   if (loading) {
     return (
@@ -167,56 +144,98 @@ export default function FinancePage() {
         </div>
       </div>
 
-      {/* Commodity Cards */}
-      <h2 className="text-lg font-semibold mb-3">Commodity Prices</h2>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
-        {commodities.map((c) => (
-          <div key={c.symbol} className="glass rounded-xl p-5">
-            <div className="flex items-center justify-between mb-2">
-              <h3 className="font-medium">{c.name}</h3>
-              <span className="text-text-secondary text-xs">{c.unit}</span>
-            </div>
-            <p className="text-2xl font-bold mb-1">
-              ${c.price > 0 ? c.price.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : "N/A"}
-            </p>
-            {c.price > 0 && (
-              <div
-                className={`flex items-center gap-1 text-sm ${
-                  c.change >= 0 ? "text-green-400" : "text-red-400"
-                }`}
-              >
-                {c.change >= 0 ? (
-                  <TrendingUp className="w-4 h-4" />
-                ) : (
-                  <TrendingDown className="w-4 h-4" />
-                )}
-                <span>
-                  {c.change >= 0 ? "+" : ""}
-                  {c.change.toFixed(2)} ({c.changePercent.toFixed(2)}%)
-                </span>
-              </div>
-            )}
-          </div>
-        ))}
+      {/* Summary Stat Cards */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+        <StatCard
+          label="Commodities Tracked"
+          value={commodities.length}
+          icon={Layers}
+          color="text-gold"
+        />
+        <StatCard
+          label="Trending Up"
+          value={trendingUp}
+          icon={TrendingUp}
+          color="text-green-400"
+        />
+        <StatCard
+          label="Avg Change %"
+          value={`${avgChange.toFixed(2)}%`}
+          icon={Percent}
+          color="text-cyan-400"
+        />
+        <StatCard
+          label="BRVM Stocks"
+          value={brvmStocks.length}
+          icon={BarChart3}
+          color="text-purple-400"
+        />
       </div>
 
-      {/* TradingView Widgets */}
+      {/* Commodity Cards with Sparklines */}
+      <h2 className="text-lg font-semibold mb-3">Commodity Prices</h2>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
+        {commodities.map((c) => {
+          const sparkData = (historyData[c.symbol] || []).map((p) => ({
+            date: p.date,
+            value: p.close,
+          }));
+          return (
+            <div key={c.symbol} className="glass rounded-xl p-5">
+              <div className="flex items-center justify-between mb-2">
+                <h3 className="font-medium">{c.name}</h3>
+                <span className="text-text-secondary text-xs">{c.unit}</span>
+              </div>
+              <p className="text-2xl font-bold mb-1">
+                ${c.price > 0 ? c.price.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : "N/A"}
+              </p>
+              {c.price > 0 && (
+                <div
+                  className={`flex items-center gap-1 text-sm ${
+                    c.change >= 0 ? "text-green-400" : "text-red-400"
+                  }`}
+                >
+                  {c.change >= 0 ? (
+                    <TrendingUp className="w-4 h-4" />
+                  ) : (
+                    <TrendingDown className="w-4 h-4" />
+                  )}
+                  <span>
+                    {c.change >= 0 ? "+" : ""}
+                    {c.change.toFixed(2)} ({c.changePercent.toFixed(2)}%)
+                  </span>
+                </div>
+              )}
+              {sparkData.length >= 2 && (
+                <div className="mt-3 -mx-1">
+                  <SparklineChart
+                    data={sparkData}
+                    positive={c.changePercent >= 0}
+                    height={40}
+                  />
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Price Charts */}
       <h2 className="text-lg font-semibold mb-3">Price Charts</h2>
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-8">
-        {TRADINGVIEW_SYMBOLS.map((item, index) => (
-          <div key={item.symbol} className="glass rounded-xl p-4">
-            <h3 className="text-sm font-medium mb-2 text-text-secondary">{item.name}</h3>
-            <div
-              ref={(el) => { widgetRefs.current[index] = el; }}
-              className="h-[200px] overflow-hidden rounded-lg"
-            />
-          </div>
+        {commodities.map((c) => (
+          <CommodityPriceChart
+            key={c.symbol}
+            title={c.name}
+            symbol={c.symbol}
+            data={historyData[c.symbol] || []}
+          />
         ))}
       </div>
 
       {/* BRVM Section */}
       <div className="flex items-center justify-between mb-3">
-        <h2 className="text-lg font-semibold">BRVM - Bourse Régionale</h2>
+        <h2 className="text-lg font-semibold">BRVM - Bourse R&eacute;gionale</h2>
         {brvmFetchedAt && (
           <span className="text-text-secondary text-xs flex items-center gap-1">
             <Clock className="w-3 h-3" />

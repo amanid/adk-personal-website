@@ -17,6 +17,7 @@ import StatCard from "./charts/StatCard";
 import AreaChartCard from "./charts/AreaChartCard";
 import BarChartCard from "./charts/BarChartCard";
 import PieChartCard from "./charts/PieChartCard";
+import SparklineChart from "./charts/SparklineChart";
 
 interface DashboardClientProps {
   usersCount: number;
@@ -74,15 +75,17 @@ export default function DashboardClient({
   const [analytics, setAnalytics] = useState<AnalyticsData | null>(null);
   const [topPubs, setTopPubs] = useState<Array<{ title: string; views: number }>>([]);
   const [commodities, setCommodities] = useState<CommodityData[]>([]);
+  const [historyData, setHistoryData] = useState<Record<string, Array<{ date: string; close: number }>>>({});
   const [loading, setLoading] = useState(true);
 
   const fetchAnalytics = useCallback(async () => {
     setLoading(true);
     try {
-      const [analyticsRes, pubsRes, commoditiesRes] = await Promise.all([
+      const [analyticsRes, pubsRes, commoditiesRes, historyRes] = await Promise.all([
         fetch(`/api/admin/analytics?days=${days}`),
         fetch("/api/admin/analytics/top-publications"),
         fetch("/api/admin/finance/commodities").catch(() => null),
+        fetch("/api/admin/finance/history?days=7").catch(() => null),
       ]);
 
       if (analyticsRes.ok) {
@@ -95,6 +98,10 @@ export default function DashboardClient({
       if (commoditiesRes?.ok) {
         const data = await commoditiesRes.json();
         setCommodities(data.commodities || []);
+      }
+      if (historyRes?.ok) {
+        const data = await historyRes.json();
+        setHistoryData(data.history || {});
       }
     } catch (err) {
       console.error("Dashboard fetch error:", err);
@@ -221,24 +228,39 @@ export default function DashboardClient({
             <div className="mb-6">
               <h3 className="text-lg font-semibold mb-3">Market Prices</h3>
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
-                {commodities.map((c) => (
-                  <div key={c.symbol} className="glass rounded-lg p-3">
-                    <p className="text-xs text-text-secondary mb-1">{c.name}</p>
-                    <p className="text-lg font-bold">${c.price.toFixed(2)}</p>
-                    <div
-                      className={`flex items-center gap-1 text-xs ${
-                        c.change >= 0 ? "text-green-400" : "text-red-400"
-                      }`}
-                    >
-                      {c.change >= 0 ? (
-                        <TrendingUp className="w-3 h-3" />
-                      ) : (
-                        <TrendingDown className="w-3 h-3" />
+                {commodities.map((c) => {
+                  const sparkData = (historyData[c.symbol] || []).map((p) => ({
+                    date: p.date,
+                    value: p.close,
+                  }));
+                  return (
+                    <div key={c.symbol} className="glass rounded-lg p-3">
+                      <p className="text-xs text-text-secondary mb-1">{c.name}</p>
+                      <p className="text-lg font-bold">${c.price.toFixed(2)}</p>
+                      <div
+                        className={`flex items-center gap-1 text-xs ${
+                          c.change >= 0 ? "text-green-400" : "text-red-400"
+                        }`}
+                      >
+                        {c.change >= 0 ? (
+                          <TrendingUp className="w-3 h-3" />
+                        ) : (
+                          <TrendingDown className="w-3 h-3" />
+                        )}
+                        <span>{c.changePercent.toFixed(2)}%</span>
+                      </div>
+                      {sparkData.length >= 2 && (
+                        <div className="mt-2 -mx-1">
+                          <SparklineChart
+                            data={sparkData}
+                            positive={c.changePercent >= 0}
+                            height={32}
+                          />
+                        </div>
                       )}
-                      <span>{c.changePercent.toFixed(2)}%</span>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
           )}

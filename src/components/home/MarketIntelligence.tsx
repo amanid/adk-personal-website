@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { TrendingUp, TrendingDown, BarChart3, Activity } from "lucide-react";
 import { useTranslations } from "next-intl";
+import SparklineChart from "@/components/admin/charts/SparklineChart";
 
 interface Commodity {
   symbol: string;
@@ -24,6 +25,7 @@ export default function MarketIntelligence() {
   const t = useTranslations("market");
   const [commodities, setCommodities] = useState<Commodity[]>([]);
   const [indices, setIndices] = useState<BRVMIndex[]>([]);
+  const [historyData, setHistoryData] = useState<Record<string, Array<{ date: string; close: number }>>>({});
   const [fetchedAt, setFetchedAt] = useState("");
   const [loading, setLoading] = useState(true);
 
@@ -31,13 +33,17 @@ export default function MarketIntelligence() {
     Promise.all([
       fetch("/api/market/commodities").then((r) => r.json()).catch(() => null),
       fetch("/api/market/brvm").then((r) => r.json()).catch(() => null),
-    ]).then(([commData, brvmData]) => {
+      fetch("/api/market/history").then((r) => r.json()).catch(() => null),
+    ]).then(([commData, brvmData, histData]) => {
       if (commData?.commodities) {
         setCommodities(commData.commodities);
         setFetchedAt(commData.fetchedAt);
       }
       if (brvmData?.indices) {
         setIndices(brvmData.indices);
+      }
+      if (histData?.history) {
+        setHistoryData(histData.history);
       }
       setLoading(false);
     });
@@ -118,6 +124,18 @@ export default function MarketIntelligence() {
                   ${commodity.price.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                 </p>
                 <p className="text-xs text-text-muted mt-1">{commodity.unit}</p>
+                {(historyData[commodity.symbol] || []).length >= 2 && (
+                  <div className="mt-2 -mx-1">
+                    <SparklineChart
+                      data={(historyData[commodity.symbol] || []).map((p) => ({
+                        date: p.date,
+                        value: p.close,
+                      }))}
+                      positive={isPositive}
+                      height={36}
+                    />
+                  </div>
+                )}
               </motion.div>
             );
           })}
