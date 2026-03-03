@@ -137,12 +137,18 @@ export default function BlogPage() {
                   className="glass rounded-xl overflow-hidden group hover:border-gold/30 transition-all duration-300 block"
                 >
                   {post.coverImage ? (
-                    <div className="h-40 overflow-hidden">
+                    <div className="h-40 overflow-hidden relative bg-gradient-to-br from-navy to-navy-light">
                       <img
                         src={post.coverImage}
                         alt={post.title}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300 relative z-10"
+                        onError={(e) => {
+                          (e.target as HTMLImageElement).style.display = "none";
+                        }}
                       />
+                      <span className="absolute inset-0 flex items-center justify-center text-4xl font-bold text-gold/20 font-[family-name:var(--font-display)]">
+                        {post.title.charAt(0)}
+                      </span>
                     </div>
                   ) : (
                     <div className="h-40 bg-gradient-to-br from-navy to-navy-light flex items-center justify-center">

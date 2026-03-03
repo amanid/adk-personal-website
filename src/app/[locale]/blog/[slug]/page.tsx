@@ -87,6 +87,46 @@ export default function BlogPostPage({
     }
   };
 
+  const title = post
+    ? locale === "fr" && post.titleFr
+      ? post.titleFr
+      : post.title
+    : "";
+  const content = post
+    ? locale === "fr" && post.contentFr
+      ? post.contentFr
+      : post.content
+    : "";
+
+  const readingTime = useMemo(() => {
+    if (!content) return 0;
+    const text = content.replace(/<[^>]*>/g, "");
+    const words = text.split(/\s+/).filter(Boolean).length;
+    return Math.max(1, Math.ceil(words / 200));
+  }, [content]);
+
+  const tocItems = useMemo(() => {
+    if (!content) return [];
+    const regex = /<h([23])[^>]*>(.*?)<\/h[23]>/gi;
+    const items: { level: number; text: string; id: string }[] = [];
+    let match;
+    while ((match = regex.exec(content)) !== null) {
+      const text = match[2].replace(/<[^>]*>/g, "");
+      const id = text.toLowerCase().replace(/\s+/g, "-").replace(/[^\w-]/g, "");
+      items.push({ level: parseInt(match[1]), text, id });
+    }
+    return items;
+  }, [content]);
+
+  const contentWithIds = useMemo(() => {
+    if (!content) return "";
+    return content.replace(/<h([23])([^>]*)>(.*?)<\/h([23])>/gi, (match, level, attrs, text) => {
+      const plainText = text.replace(/<[^>]*>/g, "");
+      const id = plainText.toLowerCase().replace(/\s+/g, "-").replace(/[^\w-]/g, "");
+      return `<h${level}${attrs} id="${id}">${text}</h${level}>`;
+    });
+  }, [content]);
+
   if (loading) {
     return (
       <div className="section-padding text-center text-text-secondary">
@@ -107,36 +147,6 @@ export default function BlogPostPage({
       </div>
     );
   }
-
-  const title = locale === "fr" && post.titleFr ? post.titleFr : post.title;
-  const content =
-    locale === "fr" && post.contentFr ? post.contentFr : post.content;
-
-  const readingTime = useMemo(() => {
-    const text = content.replace(/<[^>]*>/g, "");
-    const words = text.split(/\s+/).filter(Boolean).length;
-    return Math.max(1, Math.ceil(words / 200));
-  }, [content]);
-
-  const tocItems = useMemo(() => {
-    const regex = /<h([23])[^>]*>(.*?)<\/h[23]>/gi;
-    const items: { level: number; text: string; id: string }[] = [];
-    let match;
-    while ((match = regex.exec(content)) !== null) {
-      const text = match[2].replace(/<[^>]*>/g, "");
-      const id = text.toLowerCase().replace(/\s+/g, "-").replace(/[^\w-]/g, "");
-      items.push({ level: parseInt(match[1]), text, id });
-    }
-    return items;
-  }, [content]);
-
-  const contentWithIds = useMemo(() => {
-    return content.replace(/<h([23])([^>]*)>(.*?)<\/h([23])>/gi, (match, level, attrs, text) => {
-      const plainText = text.replace(/<[^>]*>/g, "");
-      const id = plainText.toLowerCase().replace(/\s+/g, "-").replace(/[^\w-]/g, "");
-      return `<h${level}${attrs} id="${id}">${text}</h${level}>`;
-    });
-  }, [content]);
 
   const shareUrl = () => {
     navigator.clipboard.writeText(window.location.href);

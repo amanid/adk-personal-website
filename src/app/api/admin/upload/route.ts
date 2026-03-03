@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
-import { writeFile, mkdir } from "fs/promises";
-import path from "path";
+import { prisma } from "@/lib/prisma";
 import { randomUUID } from "crypto";
 
 const ALLOWED_TYPES = [
@@ -42,14 +41,17 @@ export async function POST(request: Request) {
 
     const ext = file.name.split(".").pop()?.toLowerCase() || "bin";
     const filename = `${randomUUID()}.${ext}`;
-    const uploadDir = path.join(process.cwd(), "public", "uploads");
-
-    await mkdir(uploadDir, { recursive: true });
-
     const buffer = Buffer.from(await file.arrayBuffer());
-    await writeFile(path.join(uploadDir, filename), buffer);
 
-    return NextResponse.json({ url: `/uploads/${filename}` });
+    const upload = await prisma.upload.create({
+      data: {
+        filename,
+        mimeType: file.type,
+        data: buffer,
+      },
+    });
+
+    return NextResponse.json({ url: `/api/uploads/${upload.id}` });
   } catch (error) {
     console.error("Upload error:", error);
     return NextResponse.json(

@@ -313,3 +313,11 @@ model Subscriber {
   token     String   @unique @default(cuid())
   createdAt DateTime @default(now())
 }
+
+model Upload {
+  id        String   @id @default(cuid())
+  filename  String
+  mimeType  String
+  data      Bytes
+  createdAt DateTime @default(now())
+}
