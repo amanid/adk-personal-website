@@ -7,6 +7,7 @@ const ALLOWED_TYPES = [
   "image/jpeg",
   "image/png",
   "image/webp",
+  "image/gif",
   "application/pdf",
 ];
 const MAX_SIZE = 10 * 1024 * 1024; // 10MB
@@ -27,7 +28,7 @@ export async function POST(request: Request) {
 
     if (!ALLOWED_TYPES.includes(file.type)) {
       return NextResponse.json(
-        { error: "Invalid file type. Allowed: jpg, png, webp, pdf" },
+        { error: "Invalid file type. Allowed: jpg, png, webp, gif, pdf" },
         { status: 400 }
       );
     }
