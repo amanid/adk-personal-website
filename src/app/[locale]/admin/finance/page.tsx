@@ -20,9 +20,9 @@ interface Commodity {
   symbol: string;
   name: string;
   unit: string;
-  price: number;
-  change: number;
-  changePercent: number;
+  price: number | null;
+  change: number | null;
+  changePercent: number | null;
 }
 
 interface BRVMIndex {
@@ -104,11 +104,12 @@ export default function FinancePage() {
     });
   };
 
-  // Computed stats
-  const trendingUp = commodities.filter((c) => c.changePercent > 0).length;
+  // Computed stats (only count commodities with valid data)
+  const validCommodities = commodities.filter((c) => c.price !== null && c.price !== 0);
+  const trendingUp = validCommodities.filter((c) => (c.changePercent ?? 0) > 0).length;
   const avgChange =
-    commodities.length > 0
-      ? commodities.reduce((sum, c) => sum + Math.abs(c.changePercent), 0) / commodities.length
+    validCommodities.length > 0
+      ? validCommodities.reduce((sum, c) => sum + Math.abs(c.changePercent ?? 0), 0) / validCommodities.length
       : 0;
 
   if (loading) {
@@ -176,6 +177,8 @@ export default function FinancePage() {
       <h2 className="text-lg font-semibold mb-3">Commodity Prices</h2>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
         {commodities.map((c) => {
+          const hasData = c.price !== null && c.price !== 0;
+          const isPositive = (c.changePercent ?? 0) >= 0;
           const sparkData = (historyData[c.symbol] || []).map((p) => ({
             date: p.date,
             value: p.close,
@@ -187,30 +190,32 @@ export default function FinancePage() {
                 <span className="text-text-secondary text-xs">{c.unit}</span>
               </div>
               <p className="text-2xl font-bold mb-1">
-                ${c.price > 0 ? c.price.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : "N/A"}
+                {hasData ? `$${c.price!.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : "N/A"}
               </p>
-              {c.price > 0 && (
+              {hasData && c.change !== null && c.changePercent !== null ? (
                 <div
                   className={`flex items-center gap-1 text-sm ${
-                    c.change >= 0 ? "text-green-400" : "text-red-400"
+                    isPositive ? "text-green-400" : "text-red-400"
                   }`}
                 >
-                  {c.change >= 0 ? (
+                  {isPositive ? (
                     <TrendingUp className="w-4 h-4" />
                   ) : (
                     <TrendingDown className="w-4 h-4" />
                   )}
                   <span>
-                    {c.change >= 0 ? "+" : ""}
+                    {isPositive ? "+" : ""}
                     {c.change.toFixed(2)} ({c.changePercent.toFixed(2)}%)
                   </span>
                 </div>
-              )}
-              {sparkData.length >= 2 && (
+              ) : !hasData ? (
+                <p className="text-xs text-yellow-400">Unavailable</p>
+              ) : null}
+              {hasData && sparkData.length >= 2 && (
                 <div className="mt-3 -mx-1">
                   <SparklineChart
                     data={sparkData}
-                    positive={c.changePercent >= 0}
+                    positive={isPositive}
                     height={40}
                   />
                 </div>

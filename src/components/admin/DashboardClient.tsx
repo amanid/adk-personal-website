@@ -55,9 +55,9 @@ interface CommodityData {
   symbol: string;
   name: string;
   unit: string;
-  price: number;
-  change: number;
-  changePercent: number;
+  price: number | null;
+  change: number | null;
+  changePercent: number | null;
 }
 
 export default function DashboardClient({
@@ -229,6 +229,8 @@ export default function DashboardClient({
               <h3 className="text-lg font-semibold mb-3">Market Prices</h3>
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
                 {commodities.map((c) => {
+                  const hasData = c.price !== null && c.price !== 0;
+                  const isPositive = (c.changePercent ?? 0) >= 0;
                   const sparkData = (historyData[c.symbol] || []).map((p) => ({
                     date: p.date,
                     value: p.close,
@@ -236,24 +238,30 @@ export default function DashboardClient({
                   return (
                     <div key={c.symbol} className="glass rounded-lg p-3">
                       <p className="text-xs text-text-secondary mb-1">{c.name}</p>
-                      <p className="text-lg font-bold">${c.price.toFixed(2)}</p>
-                      <div
-                        className={`flex items-center gap-1 text-xs ${
-                          c.change >= 0 ? "text-green-400" : "text-red-400"
-                        }`}
-                      >
-                        {c.change >= 0 ? (
-                          <TrendingUp className="w-3 h-3" />
-                        ) : (
-                          <TrendingDown className="w-3 h-3" />
-                        )}
-                        <span>{c.changePercent.toFixed(2)}%</span>
-                      </div>
-                      {sparkData.length >= 2 && (
+                      <p className="text-lg font-bold">
+                        {hasData ? `$${c.price!.toFixed(2)}` : "N/A"}
+                      </p>
+                      {hasData && c.changePercent !== null ? (
+                        <div
+                          className={`flex items-center gap-1 text-xs ${
+                            isPositive ? "text-green-400" : "text-red-400"
+                          }`}
+                        >
+                          {isPositive ? (
+                            <TrendingUp className="w-3 h-3" />
+                          ) : (
+                            <TrendingDown className="w-3 h-3" />
+                          )}
+                          <span>{c.changePercent.toFixed(2)}%</span>
+                        </div>
+                      ) : (
+                        <p className="text-xs text-yellow-400">Unavailable</p>
+                      )}
+                      {hasData && sparkData.length >= 2 && (
                         <div className="mt-2 -mx-1">
                           <SparklineChart
                             data={sparkData}
-                            positive={c.changePercent >= 0}
+                            positive={isPositive}
                             height={32}
                           />
                         </div>
