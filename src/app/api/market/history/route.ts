@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { getCached, setCache } from "@/lib/cache";
+import { rateLimit } from "@/lib/rate-limit";
 
 const COMMODITIES = [
   { symbol: "CC=F", name: "Cocoa" },
@@ -18,8 +19,11 @@ interface HistoryPoint {
   close: number;
 }
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
+    const rateLimited = rateLimit(request, { limit: 30, windowSeconds: 60 });
+    if (rateLimited) return rateLimited;
+
     const cached = getCached<{ history: Record<string, HistoryPoint[]>; fetchedAt: string }>(CACHE_KEY);
     if (cached) {
       return NextResponse.json(cached);
@@ -28,23 +32,28 @@ export async function GET() {
     const YahooFinance = (await import("yahoo-finance2")).default;
     const yahooFinance = new YahooFinance({ suppressNotices: ["yahooSurvey"] });
 
-    const period1 = new Date();
+    const now = new Date();
+    const period1 = new Date(now);
     period1.setDate(period1.getDate() - 7);
+    const period1Str = period1.toISOString().split("T")[0];
+    const period2Str = now.toISOString().split("T")[0];
 
     const results = await Promise.allSettled(
       COMMODITIES.map(async (commodity) => {
         const chart = (await Promise.race([
           yahooFinance.chart(commodity.symbol, {
-            period1,
+            period1: period1Str,
+            period2: period2Str,
             interval: "1d",
           }),
           new Promise((_, reject) =>
             setTimeout(() => reject(new Error("Timeout")), 8000)
           ),
-        ])) as { quotes: Array<{ date: Date; close: number | null }> };
+        ])) as { quotes?: Array<{ date: Date; close?: number | null }> };
 
-        const points: HistoryPoint[] = (chart.quotes || [])
-          .filter((q) => q.close !== null && q.close !== undefined)
+        const quotes = chart.quotes || [];
+        const points: HistoryPoint[] = quotes
+          .filter((q) => q.close != null)
           .map((q) => ({
             date: new Date(q.date).toISOString().split("T")[0],
             close: q.close as number,

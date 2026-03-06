@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { getCached, setCache } from "@/lib/cache";
+import { rateLimit } from "@/lib/rate-limit";
 
 const COMMODITIES = [
   { symbol: "CC=F", name: "Cocoa", unit: "$/ton" },
@@ -22,8 +23,11 @@ interface CommodityResult {
   changePercent: number;
 }
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
+    const rateLimited = rateLimit(request, { limit: 30, windowSeconds: 60 });
+    if (rateLimited) return rateLimited;
+
     const cached = getCached<{ commodities: CommodityResult[]; fetchedAt: string }>(CACHE_KEY);
     if (cached) {
       return NextResponse.json(cached);

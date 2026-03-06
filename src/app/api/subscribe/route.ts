@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { sendEmail, buildConfirmationEmail } from "@/lib/email";
+import { rateLimit } from "@/lib/rate-limit";
 
 const subscribeSchema = z.object({
   email: z.string().email("Invalid email address"),
@@ -10,6 +11,9 @@ const subscribeSchema = z.object({
 
 export async function POST(request: Request) {
   try {
+    const rateLimited = rateLimit(request, { limit: 5, windowSeconds: 300 });
+    if (rateLimited) return rateLimited;
+
     const body = await request.json();
     const validation = subscribeSchema.safeParse(body);
 
