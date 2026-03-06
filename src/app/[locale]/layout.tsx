@@ -17,7 +17,7 @@ export const metadata = {
     template: "%s | KONAN Amani Dieudonné",
   },
   description:
-    "MIT-certified Full-Stack Senior Statistician, Data Scientist, Machine Learning & AI Professional with 13+ years of experience across the UN system, development finance, and international organizations. Expert in Statistics, Econometrics, Data Science, AI/ML Engineering, Data Architecture, Full-Stack Development, and Strategic Consulting.",
+    "MIT-certified Full-Stack Senior Statistician, Data Scientist, Machine Learning & AI Professional with 13+ years of experience across the UN system, development finance, and international organizations. Expert in Statistics, Econometrics, Data Science, AI/ML Engineering, Data Architecture, Full-Stack Development, and Strategic Advisory.",
   keywords: [
     "Full-Stack Statistician",
     "Senior Data Scientist",
@@ -132,7 +132,7 @@ export default async function LocaleLayout({
       "Data Engineering & Architecture",
       "Full-Stack Web Development",
       "MLOps & AI Engineering",
-      "Strategic Data Consulting",
+      "Strategic Data Advisory",
       "Predictive Analytics",
       "Causal Inference & Impact Evaluation",
     ],

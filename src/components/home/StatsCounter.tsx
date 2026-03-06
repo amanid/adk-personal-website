@@ -10,6 +10,10 @@ interface StatsCounterProps {
   duration?: number;
 }
 
+function easeOutCubic(t: number): number {
+  return 1 - Math.pow(1 - t, 3);
+}
+
 export default function StatsCounter({
   value,
   suffix,
@@ -23,17 +27,21 @@ export default function StatsCounter({
   useEffect(() => {
     if (!isInView) return;
 
-    let start = 0;
-    const end = value;
-    const stepTime = (duration * 1000) / end;
+    const totalMs = duration * 1000;
+    const startTime = performance.now();
 
-    const timer = setInterval(() => {
-      start += 1;
-      setCount(start);
-      if (start >= end) clearInterval(timer);
-    }, stepTime);
+    const tick = (now: number) => {
+      const elapsed = now - startTime;
+      const progress = Math.min(elapsed / totalMs, 1);
+      const eased = easeOutCubic(progress);
+      setCount(Math.round(eased * value));
 
-    return () => clearInterval(timer);
+      if (progress < 1) {
+        requestAnimationFrame(tick);
+      }
+    };
+
+    requestAnimationFrame(tick);
   }, [isInView, value, duration]);
 
   return (

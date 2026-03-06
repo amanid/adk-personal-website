@@ -38,7 +38,7 @@ export default function HeroSection({ showCvDownload = false, cvUrl }: HeroSecti
     "Data Engineering & Architecture Expert",
     "Full-Stack Developer & MLOps Engineer",
     "Econometrician & Causal Inference Specialist",
-    "Strategic AI & Data Consultant",
+    "Strategic AI & Data Advisor",
   ];
 
   return (

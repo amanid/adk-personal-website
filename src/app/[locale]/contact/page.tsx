@@ -155,14 +155,24 @@ export default function ContactPage() {
             className="lg:col-span-2 glass rounded-xl p-8"
           >
             {submitted && (
-              <div className="mb-4 p-3 rounded-lg bg-green-500/10 border border-green-500/30 text-green-400 text-sm">
+              <motion.div
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="mb-4 p-3 rounded-lg bg-green-500/10 border border-green-500/30 text-green-400 text-sm flex items-center gap-2"
+              >
+                <svg className="w-4 h-4 shrink-0" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd"/></svg>
                 {t("form.success")}
-              </div>
+              </motion.div>
             )}
             {error && (
-              <div className="mb-4 p-3 rounded-lg bg-red-500/10 border border-red-500/30 text-red-400 text-sm">
+              <motion.div
+                initial={{ opacity: 0, x: -10 }}
+                animate={{ opacity: 1, x: [0, -5, 5, -3, 3, 0] }}
+                transition={{ duration: 0.4 }}
+                className="mb-4 p-3 rounded-lg bg-red-500/10 border border-red-500/30 text-red-400 text-sm"
+              >
                 {t("form.error")}
-              </div>
+              </motion.div>
             )}
 
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
@@ -224,10 +234,14 @@ export default function ContactPage() {
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-gold text-charcoal font-semibold rounded-lg hover:bg-gold-light transition-all disabled:opacity-50"
+                className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-gold text-charcoal font-semibold rounded-lg hover:bg-gold-light transition-all disabled:opacity-50 hover:shadow-lg hover:shadow-gold/20 active:scale-[0.98]"
               >
-                <Send className="w-4 h-4" />
-                {isSubmitting ? "..." : t("form.submit")}
+                {isSubmitting ? (
+                  <div className="w-5 h-5 border-2 border-charcoal border-t-transparent rounded-full animate-spin" />
+                ) : (
+                  <Send className="w-4 h-4" />
+                )}
+                {isSubmitting ? "" : t("form.submit")}
               </button>
             </form>
           </motion.div>

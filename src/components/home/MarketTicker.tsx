@@ -44,8 +44,8 @@ export default function MarketTicker() {
         <span className="shrink-0 px-4 text-xs font-semibold text-gold uppercase tracking-wider border-r border-glass-border">
           {t("live")}
         </span>
-        <div className="overflow-hidden flex-1">
-          <div className="animate-ticker flex items-center gap-8 whitespace-nowrap">
+        <div className="overflow-hidden flex-1 group/ticker">
+          <div className="animate-ticker group-hover/ticker:[animation-play-state:paused] flex items-center gap-8 whitespace-nowrap">
             {tickerItems.map((commodity, index) => {
               const isPositive = commodity.changePercent >= 0;
               return (
