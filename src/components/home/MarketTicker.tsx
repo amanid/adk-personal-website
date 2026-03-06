@@ -8,9 +8,9 @@ interface Commodity {
   symbol: string;
   name: string;
   unit: string;
-  price: number;
-  change: number;
-  changePercent: number;
+  price: number | null;
+  change: number | null;
+  changePercent: number | null;
 }
 
 export default function MarketTicker() {
@@ -47,24 +47,32 @@ export default function MarketTicker() {
         <div className="overflow-hidden flex-1 group/ticker">
           <div className="animate-ticker group-hover/ticker:[animation-play-state:paused] flex items-center gap-8 whitespace-nowrap">
             {tickerItems.map((commodity, index) => {
-              const isPositive = commodity.changePercent >= 0;
+              const hasData = commodity.price !== null && commodity.price !== 0;
+              const isPositive = (commodity.changePercent ?? 0) >= 0;
               return (
                 <div key={`${commodity.symbol}-${index}`} className="flex items-center gap-2 shrink-0">
                   <span className="text-sm font-medium text-text-primary">
                     {commodity.name}
                   </span>
                   <span className="text-sm font-semibold text-gold">
-                    ${commodity.price.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                    {hasData
+                      ? `$${commodity.price!.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+                      : "N/A"
+                    }
                   </span>
-                  <span className={`flex items-center gap-0.5 text-xs font-medium ${isPositive ? "text-emerald-400" : "text-red-400"}`}>
-                    {isPositive ? (
-                      <TrendingUp className="w-3 h-3" />
-                    ) : (
-                      <TrendingDown className="w-3 h-3" />
-                    )}
-                    {isPositive ? "+" : ""}
-                    {commodity.changePercent.toFixed(2)}%
-                  </span>
+                  {hasData && commodity.changePercent !== null ? (
+                    <span className={`flex items-center gap-0.5 text-xs font-medium ${isPositive ? "text-emerald-400" : "text-red-400"}`}>
+                      {isPositive ? (
+                        <TrendingUp className="w-3 h-3" />
+                      ) : (
+                        <TrendingDown className="w-3 h-3" />
+                      )}
+                      {isPositive ? "+" : ""}
+                      {commodity.changePercent.toFixed(2)}%
+                    </span>
+                  ) : (
+                    <span className="text-xs text-yellow-400">--</span>
+                  )}
                   <span className="text-text-muted text-[10px]">
                     {commodity.unit}
                   </span>

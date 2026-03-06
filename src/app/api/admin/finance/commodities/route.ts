@@ -18,9 +18,9 @@ interface CommodityResult {
   symbol: string;
   name: string;
   unit: string;
-  price: number;
-  change: number;
-  changePercent: number;
+  price: number | null;
+  change: number | null;
+  changePercent: number | null;
 }
 
 export async function GET() {
@@ -44,7 +44,7 @@ export async function GET() {
         const quote = (await Promise.race([
           yahooFinance.quote(commodity.symbol),
           new Promise((_, reject) =>
-            setTimeout(() => reject(new Error("Timeout")), 8000)
+            setTimeout(() => reject(new Error("Timeout")), 12000)
           ),
         ])) as {
           regularMarketPrice?: number;
@@ -55,28 +55,36 @@ export async function GET() {
           symbol: commodity.symbol,
           name: commodity.name,
           unit: commodity.unit,
-          price: quote.regularMarketPrice ?? 0,
-          change: quote.regularMarketChange ?? 0,
-          changePercent: quote.regularMarketChangePercent ?? 0,
+          price: quote.regularMarketPrice ?? null,
+          change: quote.regularMarketChange ?? null,
+          changePercent: quote.regularMarketChangePercent ?? null,
         };
       })
     );
 
     const commodities: CommodityResult[] = results.map((result, i) => {
-      if (result.status === "fulfilled") {
+      if (result.status === "fulfilled" && result.value.price !== null) {
         return result.value;
       }
-      console.error(`Failed to fetch ${COMMODITIES[i].symbol}:`, result.reason);
+      if (result.status === "rejected") {
+        console.error(`Failed to fetch ${COMMODITIES[i].symbol}:`, result.reason);
+      }
       return {
         ...COMMODITIES[i],
-        price: 0,
-        change: 0,
-        changePercent: 0,
+        price: null,
+        change: null,
+        changePercent: null,
       };
     });
 
     const response = { commodities, fetchedAt: new Date().toISOString() };
-    setCache(CACHE_KEY, response, CACHE_TTL);
+
+    // Only cache if at least some commodities fetched successfully
+    const successCount = commodities.filter((c) => c.price !== null).length;
+    if (successCount > 0) {
+      const ttl = successCount === commodities.length ? CACHE_TTL : 2 * 60 * 1000;
+      setCache(CACHE_KEY, response, ttl);
+    }
 
     return NextResponse.json(response);
   } catch (error) {

@@ -1,11 +1,28 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useTranslations, useLocale } from "next-intl";
 import { motion } from "framer-motion";
 import { Link } from "@/i18n/routing";
 import { Search, BookOpen, Calendar, Users, Eye } from "lucide-react";
-import { publications } from "@/data/publications";
+import { publications as staticPublications } from "@/data/publications";
+
+interface Publication {
+  id: string;
+  title: string;
+  titleFr: string;
+  slug: string;
+  abstract: string;
+  abstractFr: string;
+  authors: string[];
+  journal: string;
+  year: number;
+  category: string;
+  pdfUrl?: string;
+  tags: string[];
+  featured: boolean;
+  views?: number;
+}
 
 const categories = [
   "All",
@@ -24,14 +41,51 @@ export default function PublicationsPage() {
   const [search, setSearch] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [selectedYear, setSelectedYear] = useState<number | null>(null);
+  const [allPublications, setAllPublications] = useState<Publication[]>(staticPublications);
+
+  // Merge static publications with database publications
+  useEffect(() => {
+    fetch("/api/publications")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.publications && Array.isArray(data.publications)) {
+          const dbPubs: Publication[] = data.publications.map((p: Record<string, unknown>) => ({
+            id: p.id as string,
+            title: p.title as string,
+            titleFr: (p.titleFr as string) || (p.title as string),
+            slug: p.slug as string,
+            abstract: p.abstract as string,
+            abstractFr: (p.abstractFr as string) || (p.abstract as string),
+            authors: (p.authors as string[]) || [],
+            journal: (p.journal as string) || "",
+            year: p.year as number,
+            category: (p.category as string) || "",
+            pdfUrl: p.pdfUrl as string | undefined,
+            tags: (p.tags as string[]) || [],
+            featured: (p.featured as boolean) || false,
+            views: (p.views as number) || 0,
+          }));
+
+          // Merge: use static as base, add DB publications that don't exist in static
+          const staticSlugs = new Set(staticPublications.map((p) => p.slug));
+          const newFromDb = dbPubs.filter((p) => !staticSlugs.has(p.slug));
+          if (newFromDb.length > 0) {
+            setAllPublications([...staticPublications, ...newFromDb]);
+          }
+        }
+      })
+      .catch(() => {
+        // Keep static publications on error
+      });
+  }, []);
 
   const years = useMemo(
-    () => [...new Set(publications.map((p) => p.year))].sort((a, b) => b - a),
-    []
+    () => [...new Set(allPublications.map((p) => p.year))].sort((a, b) => b - a),
+    [allPublications]
   );
 
   const filtered = useMemo(() => {
-    return publications.filter((pub) => {
+    return allPublications.filter((pub) => {
       const title = locale === "fr" ? pub.titleFr : pub.title;
       const matchesSearch =
         !search ||
@@ -43,7 +97,7 @@ export default function PublicationsPage() {
       const matchesYear = !selectedYear || pub.year === selectedYear;
       return matchesSearch && matchesCategory && matchesYear;
     });
-  }, [search, selectedCategory, selectedYear, locale]);
+  }, [search, selectedCategory, selectedYear, locale, allPublications]);
 
   return (
     <div className="section-padding">
@@ -176,6 +230,12 @@ export default function PublicationsPage() {
                           <span className="flex items-center gap-1">
                             <BookOpen className="w-3.5 h-3.5" />
                             {pub.journal}
+                          </span>
+                        )}
+                        {pub.views !== undefined && pub.views > 0 && (
+                          <span className="flex items-center gap-1">
+                            <Eye className="w-3.5 h-3.5" />
+                            {pub.views}
                           </span>
                         )}
                       </div>

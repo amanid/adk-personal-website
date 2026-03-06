@@ -15,7 +15,32 @@ import {
 } from "lucide-react";
 import { publications } from "@/data/publications";
 import { useSession } from "next-auth/react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+
+interface Comment {
+  id: string;
+  content: string;
+  createdAt: string;
+  author: { name: string | null };
+}
+
+interface DbPublication {
+  id: string;
+  title: string;
+  titleFr: string | null;
+  slug: string;
+  abstract: string;
+  abstractFr: string | null;
+  authors: string[];
+  journal: string | null;
+  year: number;
+  category: string | null;
+  pdfUrl: string | null;
+  tags: string[];
+  featured: boolean;
+  views: number;
+  comments: Comment[];
+}
 
 export default function PublicationDetailPage() {
   const params = useParams();
@@ -24,9 +49,43 @@ export default function PublicationDetailPage() {
   const { data: session } = useSession();
   const [commentText, setCommentText] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [dbPub, setDbPub] = useState<DbPublication | null>(null);
+  const [comments, setComments] = useState<Comment[]>([]);
+  const [loading, setLoading] = useState(true);
 
   const slug = params.slug as string;
-  const pub = publications.find((p) => p.slug === slug);
+
+  // Try to find in static data first
+  const staticPub = publications.find((p) => p.slug === slug);
+
+  // Also fetch from database (for DB-only publications and for comments/views)
+  useEffect(() => {
+    fetch(`/api/publications/${slug}`)
+      .then((res) => {
+        if (res.ok) return res.json();
+        return null;
+      })
+      .then((data) => {
+        if (data?.publication) {
+          setDbPub(data.publication);
+          setComments(data.publication.comments || []);
+        }
+        setLoading(false);
+      })
+      .catch(() => setLoading(false));
+  }, [slug]);
+
+  // Use static data if available, otherwise use DB data
+  const pub = staticPub || dbPub;
+
+  if (!pub && loading) {
+    return (
+      <div className="section-padding text-center text-text-secondary">
+        <div className="inline-block w-5 h-5 border-2 border-gold/30 border-t-gold rounded-full animate-spin mb-3" />
+        <p>{t("loading") || "Loading..."}</p>
+      </div>
+    );
+  }
 
   if (!pub) {
     return (
@@ -42,18 +101,27 @@ export default function PublicationDetailPage() {
     );
   }
 
+  const title = locale === "fr" ? (pub.titleFr || pub.title) : pub.title;
+  const abstract = locale === "fr" ? (pub.abstractFr || pub.abstract) : pub.abstract;
+  const pdfUrl = pub.pdfUrl;
+  const views = dbPub?.views;
+
   const handleComment = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!commentText.trim()) return;
 
     setSubmitting(true);
     try {
-      await fetch(`/api/publications/${slug}/comments`, {
+      const res = await fetch(`/api/publications/${slug}/comments`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ content: commentText }),
       });
-      setCommentText("");
+      if (res.ok) {
+        const data = await res.json();
+        setComments([...comments, data.comment]);
+        setCommentText("");
+      }
     } catch {
       // Handle error silently
     } finally {
@@ -96,7 +164,7 @@ export default function PublicationDetailPage() {
           </div>
 
           <h1 className="text-3xl md:text-4xl font-bold font-[family-name:var(--font-display)] mb-6">
-            {locale === "fr" ? pub.titleFr : pub.title}
+            {title}
           </h1>
 
           {/* Meta info */}
@@ -133,10 +201,21 @@ export default function PublicationDetailPage() {
                   <p className="text-text-primary text-sm">{pub.year}</p>
                 </div>
               </div>
-              {pub.pdfUrl && (
+              {views !== undefined && views > 0 && (
+                <div className="flex items-start gap-3">
+                  <Eye className="w-5 h-5 text-gold mt-0.5" />
+                  <div>
+                    <p className="text-xs text-text-muted uppercase tracking-wider mb-1">
+                      {t("views") || "Views"}
+                    </p>
+                    <p className="text-text-primary text-sm">{views}</p>
+                  </div>
+                </div>
+              )}
+              {pdfUrl && (
                 <div className="flex items-center">
                   <a
-                    href={pub.pdfUrl}
+                    href={pdfUrl}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="inline-flex items-center gap-2 px-4 py-2 bg-gold text-charcoal font-medium text-sm rounded-lg hover:bg-gold-light transition-colors"
@@ -155,7 +234,7 @@ export default function PublicationDetailPage() {
               {t("abstract")}
             </h2>
             <p className="text-text-secondary leading-relaxed">
-              {locale === "fr" ? pub.abstractFr : pub.abstract}
+              {abstract}
             </p>
           </div>
 
@@ -180,8 +259,20 @@ export default function PublicationDetailPage() {
           <div className="border-t border-glass-border pt-8">
             <h2 className="text-xl font-semibold font-[family-name:var(--font-display)] mb-6 flex items-center gap-2">
               <MessageSquare className="w-5 h-5 text-gold" />
-              {t("comments")}
+              {t("comments")} ({comments.length})
             </h2>
+
+            {comments.map((c) => (
+              <div key={c.id} className="glass rounded-lg p-4 mb-4">
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="text-sm font-medium">{c.author.name}</span>
+                  <span className="text-text-muted text-xs">
+                    {new Date(c.createdAt).toLocaleDateString()}
+                  </span>
+                </div>
+                <p className="text-text-secondary text-sm">{c.content}</p>
+              </div>
+            ))}
 
             {session ? (
               <form onSubmit={handleComment} className="mb-6">

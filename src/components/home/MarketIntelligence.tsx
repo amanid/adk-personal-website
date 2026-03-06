@@ -10,9 +10,9 @@ interface Commodity {
   symbol: string;
   name: string;
   unit: string;
-  price: number;
-  change: number;
-  changePercent: number;
+  price: number | null;
+  change: number | null;
+  changePercent: number | null;
 }
 
 interface BRVMIndex {
@@ -92,7 +92,8 @@ export default function MarketIntelligence() {
         {/* Commodity Cards */}
         <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-8">
           {commodities.map((commodity, index) => {
-            const isPositive = commodity.changePercent >= 0;
+            const hasData = commodity.price !== null && commodity.price !== 0;
+            const isPositive = (commodity.changePercent ?? 0) >= 0;
             return (
               <motion.div
                 key={commodity.symbol}
@@ -106,25 +107,34 @@ export default function MarketIntelligence() {
                   <span className="text-sm font-medium text-text-secondary">
                     {commodity.name}
                   </span>
-                  <span className={`flex items-center gap-0.5 text-xs font-medium px-2 py-0.5 rounded-full ${
-                    isPositive
-                      ? "bg-emerald-500/10 text-emerald-400"
-                      : "bg-red-500/10 text-red-400"
-                  }`}>
-                    {isPositive ? (
-                      <TrendingUp className="w-3 h-3" />
-                    ) : (
-                      <TrendingDown className="w-3 h-3" />
-                    )}
-                    {isPositive ? "+" : ""}
-                    {commodity.changePercent.toFixed(2)}%
-                  </span>
+                  {hasData && commodity.changePercent !== null ? (
+                    <span className={`flex items-center gap-0.5 text-xs font-medium px-2 py-0.5 rounded-full ${
+                      isPositive
+                        ? "bg-emerald-500/10 text-emerald-400"
+                        : "bg-red-500/10 text-red-400"
+                    }`}>
+                      {isPositive ? (
+                        <TrendingUp className="w-3 h-3" />
+                      ) : (
+                        <TrendingDown className="w-3 h-3" />
+                      )}
+                      {isPositive ? "+" : ""}
+                      {commodity.changePercent.toFixed(2)}%
+                    </span>
+                  ) : (
+                    <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-yellow-500/10 text-yellow-400">
+                      Unavailable
+                    </span>
+                  )}
                 </div>
                 <p className="text-2xl font-bold gradient-text font-[family-name:var(--font-display)]">
-                  ${commodity.price.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                  {hasData
+                    ? `$${commodity.price!.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+                    : "N/A"
+                  }
                 </p>
                 <p className="text-xs text-text-muted mt-1">{commodity.unit}</p>
-                {(historyData[commodity.symbol] || []).length >= 2 && (
+                {hasData && (historyData[commodity.symbol] || []).length >= 2 && (
                   <div className="mt-2 -mx-1">
                     <SparklineChart
                       data={(historyData[commodity.symbol] || []).map((p) => ({
