@@ -67,7 +67,7 @@ export default function HeroSection({ showCvDownload = false, cvUrl }: HeroSecti
                 className="object-cover"
                 priority
                 sizes="(max-width: 768px) 192px, 256px"
-                unoptimized={profilePhoto.startsWith("/api/")}
+                unoptimized
               />
             </div>
           </motion.div>
