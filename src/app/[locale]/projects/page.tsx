@@ -133,7 +133,7 @@ export default function ProjectsPage() {
                       className="flex items-center gap-1 text-sm text-gold hover:text-gold-light transition-colors"
                     >
                       <ExternalLink className="w-3.5 h-3.5" />
-                      Live
+                      {t("live")}
                     </a>
                   )}
                   {project.githubUrl && (
@@ -144,7 +144,7 @@ export default function ProjectsPage() {
                       className="flex items-center gap-1 text-sm text-text-secondary hover:text-gold transition-colors"
                     >
                       <Github className="w-3.5 h-3.5" />
-                      Code
+                      {t("code")}
                     </a>
                   )}
                 </div>

@@ -147,7 +147,9 @@
     "view_project": "View Project",
     "technologies": "Technologies",
     "all": "All",
-    "featured": "Featured"
+    "featured": "Featured",
+    "live": "Live",
+    "code": "Code"
   },
   "publications": {
     "title": "Publications",
@@ -392,6 +394,13 @@
     "delete": "Delete",
     "edit": "Edit",
     "view": "View",
-    "close": "Close"
+    "close": "Close",
+    "error_title": "Something Went Wrong",
+    "error_desc": "An unexpected error occurred. Please try again or return to the homepage.",
+    "try_again": "Try Again",
+    "go_home": "Go Home",
+    "not_found_title": "Page Not Found",
+    "not_found_desc": "The page you're looking for doesn't exist or has been moved.",
+    "publications": "Publications"
   }
 }

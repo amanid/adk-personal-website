@@ -147,7 +147,9 @@
     "view_project": "Voir le Projet",
     "technologies": "Technologies",
     "all": "Tous",
-    "featured": "En Vedette"
+    "featured": "En Vedette",
+    "live": "Démo",
+    "code": "Code"
   },
   "publications": {
     "title": "Publications",
@@ -392,6 +394,13 @@
     "delete": "Supprimer",
     "edit": "Modifier",
     "view": "Voir",
-    "close": "Fermer"
+    "close": "Fermer",
+    "error_title": "Une Erreur est Survenue",
+    "error_desc": "Une erreur inattendue s'est produite. Veuillez réessayer ou retourner à la page d'accueil.",
+    "try_again": "Réessayer",
+    "go_home": "Accueil",
+    "not_found_title": "Page Introuvable",
+    "not_found_desc": "La page que vous recherchez n'existe pas ou a été déplacée.",
+    "publications": "Publications"
   }
 }

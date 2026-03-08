@@ -66,7 +66,7 @@ export default function HeroSection({ showCvDownload = false, cvUrl }: HeroSecti
                 fill
                 className="object-cover"
                 priority
-                unoptimized
+                sizes="(max-width: 768px) 192px, 256px"
               />
             </div>
           </motion.div>

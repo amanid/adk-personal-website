@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Plus, Edit, Trash2, Star, BookOpen, Eye, Download } from "lucide-react";
+import { Plus, Edit, Trash2, Star, BookOpen, Eye, Download, Lock, Unlock } from "lucide-react";
 import FileUpload from "@/components/admin/FileUpload";
 import { PUBLICATION_TYPES } from "@/lib/publication-types";
 
@@ -38,6 +38,8 @@ interface Publication {
   month: number | null;
   url: string | null;
   citationCount: number | null;
+  accessLevel: string;
+  dataUrl: string | null;
   _count: { comments: number };
 }
 
@@ -80,6 +82,8 @@ const emptyForm = {
   month: 0,
   url: "",
   citationCount: 0,
+  accessLevel: "FREE",
+  dataUrl: "",
 };
 
 const INPUT_CLASS = "w-full px-4 py-2.5 bg-navy/50 border border-glass-border rounded-lg text-text-primary focus:border-gold/50 focus:outline-none text-sm";
@@ -149,6 +153,8 @@ export default function AdminPublicationsPage() {
       month: pub.month || 0,
       url: pub.url || "",
       citationCount: pub.citationCount || 0,
+      accessLevel: pub.accessLevel || "FREE",
+      dataUrl: pub.dataUrl || "",
     });
     setError(null);
     setShowEditor(true);
@@ -193,6 +199,8 @@ export default function AdminPublicationsPage() {
       month: form.month || undefined,
       url: form.url || undefined,
       citationCount: form.citationCount || undefined,
+      accessLevel: form.accessLevel as "FREE" | "GATED",
+      dataUrl: form.dataUrl || undefined,
     };
 
     try {
@@ -440,6 +448,38 @@ export default function AdminPublicationsPage() {
               </div>
             </div>
 
+            {/* Access Level & Data URL */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 border border-gold/20 rounded-lg">
+              <div>
+                <label className="block text-sm text-gold mb-1">Access Level</label>
+                <select
+                  value={form.accessLevel}
+                  onChange={(e) => setForm({ ...form, accessLevel: e.target.value })}
+                  className={INPUT_CLASS}
+                >
+                  <option value="FREE">Free — Open access</option>
+                  <option value="GATED">Premium — Subscription required</option>
+                </select>
+                <p className="text-xs text-text-muted mt-1">
+                  {form.accessLevel === "GATED"
+                    ? "Users need an active subscription to download/view this publication."
+                    : "This publication is freely accessible to all visitors."}
+                </p>
+              </div>
+              <div>
+                <label className="block text-sm text-gold mb-1">Data File URL</label>
+                <input
+                  value={form.dataUrl}
+                  onChange={(e) => setForm({ ...form, dataUrl: e.target.value })}
+                  className={INPUT_CLASS}
+                  placeholder="URL to dataset (CSV, Excel, etc.)"
+                />
+                <p className="text-xs text-text-muted mt-1">
+                  Optional. Link to the underlying data for data-tier subscribers.
+                </p>
+              </div>
+            </div>
+
             {/* Featured checkbox */}
             <div className="flex items-center gap-2">
               <input
@@ -504,6 +544,15 @@ export default function AdminPublicationsPage() {
                   <span className="text-[9px] px-1.5 py-0.5 rounded bg-blue-500/10 text-blue-400 font-medium uppercase">
                     {PUBLICATION_TYPES.find((t) => t.value === pub.publicationType)?.shortEn || "Report"}
                   </span>
+                  {pub.accessLevel === "GATED" ? (
+                    <span className="text-[9px] px-1.5 py-0.5 rounded bg-purple-500/10 text-purple-400 font-medium uppercase flex items-center gap-0.5">
+                      <Lock className="w-2.5 h-2.5" />Premium
+                    </span>
+                  ) : (
+                    <span className="text-[9px] px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-400 font-medium uppercase flex items-center gap-0.5">
+                      <Unlock className="w-2.5 h-2.5" />Free
+                    </span>
+                  )}
                   <h3 className="text-sm font-medium truncate">{pub.title}</h3>
                   {pub.featured && <Star className="w-3.5 h-3.5 text-gold shrink-0" />}
                 </div>

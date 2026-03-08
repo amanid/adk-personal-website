@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { subscriptionRequestSchema } from "@/lib/validations";
 import { sendEmail } from "@/lib/email";
 import { rateLimit } from "@/lib/rate-limit";
+import { checkOrigin } from "@/lib/origin-check";
 
 const NOTIFY_EMAILS = [
   "amani_dieudonne@yahoo.fr",
@@ -17,6 +18,9 @@ const TIER_LABELS: Record<string, { en: string; fr: string }> = {
 export async function POST(request: NextRequest) {
   const limited = rateLimit(request, { limit: 3, windowSeconds: 300 });
   if (limited) return limited;
+
+  const originBlocked = checkOrigin(request);
+  if (originBlocked) return originBlocked;
 
   try {
     const body = await request.json();

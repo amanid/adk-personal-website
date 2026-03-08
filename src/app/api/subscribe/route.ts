@@ -3,6 +3,7 @@ import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { sendEmail, buildConfirmationEmail } from "@/lib/email";
 import { rateLimit } from "@/lib/rate-limit";
+import { checkOrigin } from "@/lib/origin-check";
 
 const subscribeSchema = z.object({
   email: z.string().email("Invalid email address"),
@@ -13,6 +14,9 @@ export async function POST(request: Request) {
   try {
     const rateLimited = rateLimit(request, { limit: 3, windowSeconds: 300 });
     if (rateLimited) return rateLimited;
+
+    const originBlocked = checkOrigin(request);
+    if (originBlocked) return originBlocked;
 
     const body = await request.json();
     const validation = subscribeSchema.safeParse(body);

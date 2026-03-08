@@ -25,34 +25,34 @@ export const registerSchema = z
   });
 
 export const contactSchema = z.object({
-  name: z.string().min(2, "Name is required"),
+  name: z.string().min(2, "Name is required").max(100),
   email: z.string().email("Invalid email address"),
-  subject: z.string().min(2, "Subject is required"),
-  message: z.string().min(10, "Message must be at least 10 characters"),
+  subject: z.string().min(2, "Subject is required").max(200),
+  message: z.string().min(10, "Message must be at least 10 characters").max(5000, "Message is too long"),
 });
 
 export const serviceRequestSchema = z.object({
-  name: z.string().min(2, "Name is required"),
+  name: z.string().min(2, "Name is required").max(100),
   email: z.string().email("Invalid email address"),
   company: z.string().optional(),
   serviceType: z.enum(["CONSULTING", "TRAINING", "SPEAKING", "AI_DEVELOPMENT", "OTHER"]),
-  description: z.string().min(20, "Please provide more details"),
+  description: z.string().min(20, "Please provide more details").max(5000),
   budget: z.string().optional(),
 });
 
 export const questionSchema = z.object({
-  title: z.string().min(5, "Title must be at least 5 characters"),
-  content: z.string().min(20, "Question must be at least 20 characters"),
+  title: z.string().min(5, "Title must be at least 5 characters").max(200, "Title is too long"),
+  content: z.string().min(20, "Question must be at least 20 characters").max(10000, "Question is too long"),
 });
 
 export const commentSchema = z.object({
-  content: z.string().min(2, "Comment cannot be empty"),
+  content: z.string().min(2, "Comment cannot be empty").max(5000, "Comment is too long"),
 });
 
 export const blogPostSchema = z.object({
-  title: z.string().min(3, "Title is required"),
+  title: z.string().min(3, "Title is required").max(200),
   titleFr: z.string().optional(),
-  content: z.string().min(50, "Content must be at least 50 characters"),
+  content: z.string().min(50, "Content must be at least 50 characters").max(100000),
   contentFr: z.string().optional(),
   excerpt: z.string().optional(),
   excerptFr: z.string().optional(),
@@ -101,6 +101,8 @@ export const publicationSchema = z.object({
   month: z.number().int().min(1).max(12).optional(),
   url: z.string().optional(),
   citationCount: z.number().int().min(0).optional(),
+  accessLevel: z.enum(["FREE", "GATED"]).optional(),
+  dataUrl: z.string().optional(),
 });
 
 export const researchActivitySchema = z.object({
@@ -184,12 +186,12 @@ export type SkillInput = z.infer<typeof skillSchema>;
 export type ResearchActivityInput = z.infer<typeof researchActivitySchema>;
 
 export const subscriptionRequestSchema = z.object({
-  name: z.string().min(2, "Name is required"),
+  name: z.string().min(2, "Name is required").max(100),
   email: z.string().email("Invalid email address"),
   organization: z.string().optional(),
   tier: z.enum(["DOCUMENT_ACCESS", "DATA_ACCESS", "FULL_ACCESS"]),
   billing: z.enum(["monthly", "yearly"]),
-  message: z.string().optional(),
+  message: z.string().max(2000).optional(),
 });
 
 export type SubscriptionRequestInput = z.infer<typeof subscriptionRequestSchema>;

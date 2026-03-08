@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import { useTranslations } from "next-intl";
 import { motion } from "framer-motion";
 import { AlertTriangle, RefreshCw, Home } from "lucide-react";
 import { Link } from "@/i18n/routing";
@@ -12,6 +13,7 @@ export default function Error({
   error: Error & { digest?: string };
   reset: () => void;
 }) {
+  const t = useTranslations("common");
   useEffect(() => {
     console.error("Application error:", error);
   }, [error]);
@@ -27,10 +29,10 @@ export default function Error({
           <AlertTriangle className="w-8 h-8 text-red-400" />
         </div>
         <h2 className="text-2xl font-bold font-[family-name:var(--font-display)] mb-3">
-          Something went wrong
+          {t("error_title")}
         </h2>
         <p className="text-text-secondary text-sm mb-8">
-          An unexpected error occurred. Please try again or return to the homepage.
+          {t("error_desc")}
         </p>
         <div className="flex items-center justify-center gap-4">
           <button
@@ -38,14 +40,14 @@ export default function Error({
             className="inline-flex items-center gap-2 px-5 py-2.5 bg-gold text-charcoal font-medium rounded-lg hover:bg-gold-light transition-colors text-sm"
           >
             <RefreshCw className="w-4 h-4" />
-            Try Again
+            {t("try_again")}
           </button>
           <Link
             href="/"
             className="inline-flex items-center gap-2 px-5 py-2.5 glass rounded-lg text-text-secondary hover:text-gold transition-colors text-sm"
           >
             <Home className="w-4 h-4" />
-            Go Home
+            {t("go_home")}
           </Link>
         </div>
         {error.digest && (

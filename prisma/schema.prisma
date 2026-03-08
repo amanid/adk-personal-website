@@ -93,6 +93,9 @@ model BlogPost {
   updatedAt  DateTime  @updatedAt
   author     User      @relation(fields: [authorId], references: [id])
   comments   Comment[]
+
+  @@index([published, createdAt])
+  @@index([category])
 }
 
 model Comment {
@@ -131,6 +134,8 @@ model Question {
   author        User           @relation(fields: [authorId], references: [id])
   answers       Answer[]
   questionVotes QuestionVote[]
+
+  @@index([isAnswered, createdAt])
 }
 
 model Answer {
@@ -176,6 +181,8 @@ model ContactMessage {
   message   String   @db.Text
   isRead    Boolean  @default(false)
   createdAt DateTime @default(now())
+
+  @@index([isRead, createdAt])
 }
 
 model Project {
@@ -337,6 +344,10 @@ model Publication {
   createdAt          DateTime             @default(now())
   updatedAt          DateTime             @updatedAt
   comments           PublicationComment[]
+
+  @@index([year])
+  @@index([category])
+  @@index([accessLevel])
 }
 
 model PublicationComment {
@@ -413,4 +424,6 @@ model Subscription {
   createdAt            DateTime           @default(now())
   updatedAt            DateTime           @updatedAt
   user                 User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([status])
 }
