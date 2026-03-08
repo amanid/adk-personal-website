@@ -17,6 +17,7 @@ const navItems = [
   { key: "services", href: "/services" },
   { key: "projects", href: "/projects" },
   { key: "publications", href: "/publications" },
+  { key: "subscribe", href: "/subscribe" },
   { key: "research", href: "/research" },
   { key: "blog", href: "/blog" },
   { key: "qa", href: "/qa" },

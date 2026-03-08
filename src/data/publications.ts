@@ -16,6 +16,7 @@ export const publications: PublicationData[] = [
     tags: ["Africa", "Economic Growth", "Regional Dynamics", "Trade", "Investment"],
     featured: true,
     publicationType: "ANALYTICAL_REPORT",
+    accessLevel: "GATED",
   },
   {
     id: "pub-2",
@@ -80,6 +81,7 @@ export const publications: PublicationData[] = [
     tags: ["Trade Finance", "Africa", "Infrastructure", "AfCFTA", "Development Finance"],
     featured: true,
     publicationType: "ANALYTICAL_REPORT",
+    accessLevel: "GATED",
   },
   {
     id: "pub-6",
@@ -128,6 +130,7 @@ export const publications: PublicationData[] = [
     tags: ["AI", "Finance", "Data Sovereignty", "Africa", "Fintech"],
     featured: true,
     publicationType: "ANALYTICAL_REPORT",
+    accessLevel: "GATED",
   },
   {
     id: "pub-9",
@@ -256,6 +259,7 @@ export const publications: PublicationData[] = [
     tags: ["Fintech", "Digital Payments", "Mobile Money", "Africa", "Financial Inclusion"],
     featured: true,
     publicationType: "ANALYTICAL_REPORT",
+    accessLevel: "GATED",
   },
   {
     id: "pub-17",

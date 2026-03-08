@@ -2,7 +2,8 @@
 
 import { useTranslations } from "next-intl";
 import { motion } from "framer-motion";
-import { Mail, MapPin, Linkedin, Github, Send, Phone } from "lucide-react";
+import { Mail, MapPin, Linkedin, Github, Send, Phone, ArrowRight } from "lucide-react";
+import { Link } from "@/i18n/routing";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { contactSchema, ContactInput } from "@/lib/validations";
@@ -246,6 +247,22 @@ export default function ContactPage() {
             </form>
           </motion.div>
         </div>
+
+        {/* Subtle consulting link */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          viewport={{ once: true }}
+          className="text-center mt-12"
+        >
+          <p className="text-text-muted text-sm">
+            {t("consulting_hint")}{" "}
+            <Link href="/consulting" className="text-gold hover:text-gold-light transition-colors inline-flex items-center gap-1">
+              {t("consulting_link")}
+              <ArrowRight className="w-3 h-3" />
+            </Link>
+          </p>
+        </motion.div>
       </div>
     </div>
   );

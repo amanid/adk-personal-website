@@ -44,6 +44,7 @@ model User {
   answers             Answer[]
   serviceRequests     ServiceRequest[]
   publicationComments PublicationComment[]
+  subscription        Subscription?
 }
 
 model Account {
@@ -257,6 +258,25 @@ model SiteSetting {
   value String @db.Text
 }
 
+enum SubscriptionTier {
+  DOCUMENT_ACCESS
+  DATA_ACCESS
+  FULL_ACCESS
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  CANCELLED
+  PAST_DUE
+  EXPIRED
+  TRIALING
+}
+
+enum PublicationAccessLevel {
+  FREE
+  GATED
+}
+
 enum PublicationType {
   JOURNAL_ARTICLE
   CONFERENCE_PAPER
@@ -312,6 +332,8 @@ model Publication {
   citationCount      Int?
   featured           Boolean              @default(false)
   views              Int                  @default(0)
+  accessLevel        PublicationAccessLevel @default(FREE)
+  dataUrl            String?
   createdAt          DateTime             @default(now())
   updatedAt          DateTime             @updatedAt
   comments           PublicationComment[]
@@ -375,4 +397,20 @@ model Upload {
   mimeType  String
   data      Bytes
   createdAt DateTime @default(now())
+}
+
+model Subscription {
+  id                   String             @id @default(cuid())
+  userId               String             @unique
+  tier                 SubscriptionTier
+  status               SubscriptionStatus @default(ACTIVE)
+  stripeCustomerId     String?            @unique
+  stripeSubscriptionId String?            @unique
+  stripePriceId        String?
+  currentPeriodStart   DateTime?
+  currentPeriodEnd     DateTime?
+  cancelAtPeriodEnd    Boolean            @default(false)
+  createdAt            DateTime           @default(now())
+  updatedAt            DateTime           @updatedAt
+  user                 User               @relation(fields: [userId], references: [id], onDelete: Cascade)
 }

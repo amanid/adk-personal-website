@@ -570,6 +570,14 @@ export default function HomePage() {
               {t("hero.cta_contact")}
               <ArrowRight className="w-4 h-4" />
             </Link>
+            <div className="mt-4">
+              <Link
+                href="/consulting"
+                className="text-sm text-text-muted hover:text-gold transition-colors"
+              >
+                {t("services.view_packages")}
+              </Link>
+            </div>
           </motion.div>
         </div>
       </section>}

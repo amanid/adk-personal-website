@@ -10,6 +10,7 @@ import { useSession } from "next-auth/react";
 import BlogJsonLd from "@/components/blog/BlogJsonLd";
 import ShareBar from "@/components/blog/ShareBar";
 import ReadingProgress from "@/components/blog/ReadingProgress";
+import CTABanner from "@/components/CTABanner";
 
 interface BlogPostFull {
   id: string;
@@ -264,6 +265,9 @@ export default function BlogPostPage({
               ))}
             </div>
           )}
+
+          {/* CTA */}
+          <CTABanner variant="consulting" />
 
           {/* Share Bar */}
           <ShareBar title={title} slug={post.slug} />

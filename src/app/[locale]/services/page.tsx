@@ -2,7 +2,8 @@
 
 import { useTranslations } from "next-intl";
 import { motion } from "framer-motion";
-import { Brain, Database, Server, GraduationCap, BarChart3, Code2, CheckCircle, Send } from "lucide-react";
+import { Brain, Database, Server, GraduationCap, BarChart3, Code2, CheckCircle, Send, ArrowRight } from "lucide-react";
+import { Link } from "@/i18n/routing";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { serviceRequestSchema, ServiceRequestInput } from "@/lib/validations";
@@ -159,6 +160,22 @@ export default function ServicesPage() {
             </motion.div>
           ))}
         </div>
+
+        {/* Subtle consulting packages link */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          viewport={{ once: true }}
+          className="text-center mb-12"
+        >
+          <Link
+            href="/consulting"
+            className="inline-flex items-center gap-2 text-sm text-text-muted hover:text-gold transition-colors"
+          >
+            {t("view_packages")}
+            <ArrowRight className="w-3.5 h-3.5" />
+          </Link>
+        </motion.div>
 
         {/* Request Form */}
         <motion.div

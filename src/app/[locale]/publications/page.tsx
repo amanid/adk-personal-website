@@ -17,6 +17,7 @@ import {
   ArrowUpDown,
   ExternalLink,
   FileText,
+  Lock,
 } from "lucide-react";
 import { publications as staticPublications } from "@/data/publications";
 import { PUBLICATION_TYPES, getPublicationTypeLabel } from "@/lib/publication-types";
@@ -44,6 +45,7 @@ interface Publication {
   conferenceName?: string;
   bookTitle?: string;
   institution?: string;
+  accessLevel?: "FREE" | "GATED";
 }
 
 const categories = [
@@ -369,6 +371,12 @@ export default function PublicationsPage() {
                     {pub.featured && (
                       <Star className="w-3 h-3 text-gold" />
                     )}
+                    {pub.accessLevel === "GATED" && (
+                      <span className="flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full bg-purple-500/10 text-purple-400 font-medium">
+                        <Lock className="w-2.5 h-2.5" />
+                        Premium
+                      </span>
+                    )}
                   </div>
                   <h2 className="text-sm font-semibold mb-2 group-hover:text-gold transition-colors line-clamp-2">
                     {locale === "fr" ? pub.titleFr : pub.title}
@@ -434,6 +442,12 @@ export default function PublicationsPage() {
                           <span className="text-xs px-2 py-1 rounded-full bg-gold/20 text-gold font-medium">
                             <Star className="w-3 h-3 inline -mt-0.5 mr-1" />
                             {t("featured")}
+                          </span>
+                        )}
+                        {pub.accessLevel === "GATED" && (
+                          <span className="flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full bg-purple-500/10 text-purple-400 font-medium">
+                            <Lock className="w-2.5 h-2.5" />
+                            Premium
                           </span>
                         )}
                         {pub.doi && (

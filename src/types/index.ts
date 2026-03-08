@@ -117,6 +117,8 @@ export interface PublicationData {
   downloadCount?: number;
   citationCount?: number;
   views?: number;
+  accessLevel?: "FREE" | "GATED";
+  dataUrl?: string;
 }
 
 export interface ResearchActivityData {

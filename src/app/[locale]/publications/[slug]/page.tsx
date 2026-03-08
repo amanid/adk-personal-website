@@ -17,6 +17,7 @@ import {
   Tag,
   Building2,
   User,
+  Lock,
 } from "lucide-react";
 import { publications } from "@/data/publications";
 import { useSession } from "next-auth/react";
@@ -26,6 +27,8 @@ import CitationExport from "@/components/publications/CitationExport";
 import PdfViewer from "@/components/publications/PdfViewer";
 import ShareButtons from "@/components/publications/ShareButtons";
 import type { PublicationType, PublicationData } from "@/types";
+import CTABanner from "@/components/CTABanner";
+import SubscriptionGate from "@/components/publications/SubscriptionGate";
 
 interface Comment {
   id: string;
@@ -173,6 +176,7 @@ export default function PublicationDetailPage() {
   const bookTitle = locale === "fr" ? (dbPub?.bookTitleFr || dbPub?.bookTitle) : dbPub?.bookTitle;
   const institution = locale === "fr" ? (dbPub?.institutionFr || dbPub?.institution) : dbPub?.institution;
   const citationCount = dbPub?.citationCount;
+  const accessLevel = (staticPub as PublicationData | undefined)?.accessLevel || "FREE";
 
   const trackDownload = () => {
     fetch(`/api/publications/${slug}/download`, { method: "POST" }).catch(() => {});
@@ -374,16 +378,30 @@ export default function PublicationDetailPage() {
                   </span>
                 )}
                 {pdfUrl && (
-                  <a
-                    href={pdfUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    onClick={trackDownload}
-                    className="inline-flex items-center gap-2 px-4 py-2 bg-gold text-charcoal font-medium text-sm rounded-lg hover:bg-gold-light transition-colors ml-auto"
+                  <SubscriptionGate
+                    accessLevel={accessLevel as "FREE" | "GATED"}
+                    requiredAccess="document"
+                    fallback={
+                      <Link
+                        href="/subscribe"
+                        className="inline-flex items-center gap-2 px-4 py-2 glass text-gold font-medium text-sm rounded-lg hover:bg-gold/10 transition-colors ml-auto"
+                      >
+                        <Lock className="w-4 h-4" />
+                        {t("download_pdf")}
+                      </Link>
+                    }
                   >
-                    <Download className="w-4 h-4" />
-                    {t("download_pdf")}
-                  </a>
+                    <a
+                      href={pdfUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      onClick={trackDownload}
+                      className="inline-flex items-center gap-2 px-4 py-2 bg-gold text-charcoal font-medium text-sm rounded-lg hover:bg-gold-light transition-colors ml-auto"
+                    >
+                      <Download className="w-4 h-4" />
+                      {t("download_pdf")}
+                    </a>
+                  </SubscriptionGate>
                 )}
               </div>
             </div>
@@ -440,18 +458,23 @@ export default function PublicationDetailPage() {
 
           {/* PDF Viewer */}
           {pdfUrl && (
-            <div className="mb-8">
-              <button
-                onClick={() => setShowPdf(!showPdf)}
-                className="flex items-center gap-2 text-sm text-text-secondary hover:text-gold transition-colors mb-3"
-              >
-                <FileText className="w-4 h-4" />
-                {showPdf ? "Hide PDF" : "View PDF"}
-              </button>
-              {showPdf && (
-                <PdfViewer url={pdfUrl} title={title} />
-              )}
-            </div>
+            <SubscriptionGate
+              accessLevel={accessLevel as "FREE" | "GATED"}
+              requiredAccess="document"
+            >
+              <div className="mb-8">
+                <button
+                  onClick={() => setShowPdf(!showPdf)}
+                  className="flex items-center gap-2 text-sm text-text-secondary hover:text-gold transition-colors mb-3"
+                >
+                  <FileText className="w-4 h-4" />
+                  {showPdf ? "Hide PDF" : "View PDF"}
+                </button>
+                {showPdf && (
+                  <PdfViewer url={pdfUrl} title={title} />
+                )}
+              </div>
+            </SubscriptionGate>
           )}
 
           {/* Tags */}
@@ -470,6 +493,9 @@ export default function PublicationDetailPage() {
               </div>
             </div>
           )}
+
+          {/* CTA */}
+          <CTABanner variant="consulting" />
 
           {/* Related Publications */}
           {related.length > 0 && (
