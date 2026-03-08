@@ -123,7 +123,7 @@ export default function MarketIntelligence() {
                     </span>
                   ) : (
                     <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-yellow-500/10 text-yellow-400">
-                      Unavailable
+                      —
                     </span>
                   )}
                 </div>

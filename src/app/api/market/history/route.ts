@@ -34,7 +34,7 @@ export async function GET(request: Request) {
 
     const now = new Date();
     const period1 = new Date(now);
-    period1.setDate(period1.getDate() - 7);
+    period1.setDate(period1.getDate() - 30);
     const period1Str = period1.toISOString().split("T")[0];
     const period2Str = now.toISOString().split("T")[0];
 
@@ -47,7 +47,7 @@ export async function GET(request: Request) {
             interval: "1d",
           }),
           new Promise((_, reject) =>
-            setTimeout(() => reject(new Error("Timeout")), 8000)
+            setTimeout(() => reject(new Error("Timeout")), 12000)
           ),
         ])) as { quotes?: Array<{ date: Date; close?: number | null }> };
 
@@ -74,7 +74,11 @@ export async function GET(request: Request) {
     });
 
     const response = { history, fetchedAt: new Date().toISOString() };
-    setCache(CACHE_KEY, response, CACHE_TTL);
+
+    // Use shorter cache if some commodities have no data, so we retry sooner
+    const successCount = Object.values(history).filter((pts) => pts.length >= 2).length;
+    const ttl = successCount === COMMODITIES.length ? CACHE_TTL : 2 * 60 * 1000;
+    setCache(CACHE_KEY, response, ttl);
 
     return NextResponse.json(response);
   } catch (error) {
