@@ -8,6 +8,7 @@ import { Menu, X, Globe, LogIn, LogOut, User, Shield } from "lucide-react";
 import { useSession, signOut } from "next-auth/react";
 import { cn } from "@/lib/utils";
 import ThemeSwitcher from "@/components/ThemeSwitcher";
+import SearchPalette from "@/components/SearchPalette";
 
 const navItems = [
   { key: "home", href: "/" },
@@ -17,7 +18,6 @@ const navItems = [
   { key: "projects", href: "/projects" },
   { key: "publications", href: "/publications" },
   { key: "research", href: "/research" },
-  { key: "consulting", href: "/consulting" },
   { key: "blog", href: "/blog" },
   { key: "qa", href: "/qa" },
   { key: "contact", href: "/contact" },
@@ -90,6 +90,8 @@ export default function Navbar() {
               <Globe className="w-4 h-4" />
               {t("language")}
             </button>
+
+            <SearchPalette />
 
             <ThemeSwitcher />
 

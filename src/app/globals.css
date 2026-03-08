@@ -474,3 +474,28 @@ body,
     background-size: 100% 100%;
   }
 }
+
+/* Print styles */
+@media print {
+  nav, footer, .glass, button, .ad-container, .breadcrumb {
+    display: none !important;
+  }
+  body {
+    background: white !important;
+    color: black !important;
+  }
+  main {
+    padding: 0 !important;
+  }
+  a {
+    color: black !important;
+    text-decoration: underline !important;
+  }
+  h1, h2, h3, h4 {
+    color: black !important;
+  }
+  .gradient-text {
+    -webkit-text-fill-color: black !important;
+    background: none !important;
+  }
+}

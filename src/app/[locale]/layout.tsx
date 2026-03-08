@@ -8,6 +8,7 @@ import ScrollProgress from "@/components/layout/ScrollProgress";
 import BackToTop from "@/components/layout/BackToTop";
 import PageTransition from "@/components/layout/PageTransition";
 import PageViewTracker from "@/components/PageViewTracker";
+import CookieConsent from "@/components/CookieConsent";
 import GoogleAnalytics from "@/components/GoogleAnalytics";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import "../globals.css";
@@ -174,6 +175,12 @@ export default async function LocaleLayout({
   return (
     <html lang={locale} className="dark" data-theme="midnight-gold">
       <head>
+        <link rel="manifest" href="/manifest.json" />
+        <meta name="theme-color" content="#c9a84c" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+        <link rel="alternate" type="application/rss+xml" title="Blog RSS Feed" href="/feed.xml" />
+        <link rel="alternate" type="application/rss+xml" title="Publications RSS Feed" href="/publications-feed.xml" />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
@@ -196,6 +203,7 @@ export default async function LocaleLayout({
             <Footer />
             <BackToTop />
             <PageViewTracker />
+            <CookieConsent />
           </NextIntlClientProvider>
         </Providers>
       </body>

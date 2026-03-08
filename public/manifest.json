@@ -1,0 +1,22 @@
+{
+  "name": "KONAN Amani Dieudonné - Data & AI Professional",
+  "short_name": "ADK Portfolio",
+  "description": "Full-Stack Senior Statistician, Data Scientist, ML & AI Professional",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0c0c14",
+  "theme_color": "#c9a84c",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/favicon-32.png",
+      "sizes": "32x32",
+      "type": "image/png"
+    }
+  ]
+}
