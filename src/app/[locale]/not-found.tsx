@@ -1,0 +1,43 @@
+"use client";
+
+import { motion } from "framer-motion";
+import { Search, Home, ArrowLeft } from "lucide-react";
+import { Link } from "@/i18n/routing";
+
+export default function NotFound() {
+  return (
+    <div className="section-padding min-h-[60vh] flex items-center justify-center">
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="text-center max-w-md"
+      >
+        <div className="text-8xl font-bold font-[family-name:var(--font-display)] gradient-text mb-4">
+          404
+        </div>
+        <h2 className="text-2xl font-bold font-[family-name:var(--font-display)] mb-3">
+          Page Not Found
+        </h2>
+        <p className="text-text-secondary text-sm mb-8">
+          The page you&apos;re looking for doesn&apos;t exist or has been moved.
+        </p>
+        <div className="flex items-center justify-center gap-4">
+          <Link
+            href="/"
+            className="inline-flex items-center gap-2 px-5 py-2.5 bg-gold text-charcoal font-medium rounded-lg hover:bg-gold-light transition-colors text-sm"
+          >
+            <Home className="w-4 h-4" />
+            Go Home
+          </Link>
+          <Link
+            href="/publications"
+            className="inline-flex items-center gap-2 px-5 py-2.5 glass rounded-lg text-text-secondary hover:text-gold transition-colors text-sm"
+          >
+            <Search className="w-4 h-4" />
+            Publications
+          </Link>
+        </div>
+      </motion.div>
+    </div>
+  );
+}

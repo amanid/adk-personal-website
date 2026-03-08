@@ -182,3 +182,14 @@ export type CertificationInput = z.infer<typeof certificationSchema>;
 export type SkillCategoryInput = z.infer<typeof skillCategorySchema>;
 export type SkillInput = z.infer<typeof skillSchema>;
 export type ResearchActivityInput = z.infer<typeof researchActivitySchema>;
+
+export const subscriptionRequestSchema = z.object({
+  name: z.string().min(2, "Name is required"),
+  email: z.string().email("Invalid email address"),
+  organization: z.string().optional(),
+  tier: z.enum(["DOCUMENT_ACCESS", "DATA_ACCESS", "FULL_ACCESS"]),
+  billing: z.enum(["monthly", "yearly"]),
+  message: z.string().optional(),
+});
+
+export type SubscriptionRequestInput = z.infer<typeof subscriptionRequestSchema>;

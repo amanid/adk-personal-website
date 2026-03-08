@@ -6,7 +6,7 @@ import { ArrowRight, Sparkles } from "lucide-react";
 import { useLocale } from "next-intl";
 
 interface CTABannerProps {
-  variant?: "consulting" | "newsletter" | "services";
+  variant?: "consulting" | "newsletter" | "services" | "premium";
 }
 
 export default function CTABanner({ variant = "consulting" }: CTABannerProps) {
@@ -45,6 +45,17 @@ export default function CTABanner({ variant = "consulting" }: CTABannerProps) {
         : "Statistics, AI, data engineering, and full-stack development.",
       cta: locale === "fr" ? "Demander un Devis" : "Request a Quote",
       href: "/services",
+    },
+    premium: {
+      badge: locale === "fr" ? "Acc\u00e8s Premium" : "Premium Access",
+      title: locale === "fr"
+        ? "Acc\u00e9dez aux Donn\u00e9es & Analyses Compl\u00e8tes"
+        : "Access Full Data & Analytics",
+      description: locale === "fr"
+        ? "D\u00e9bloquez les rapports complets, les jeux de donn\u00e9es et les analyses approfondies."
+        : "Unlock full reports, datasets, and in-depth analytics behind our publications.",
+      cta: locale === "fr" ? "En Savoir Plus" : "Learn More",
+      href: "/subscribe",
     },
   };
 

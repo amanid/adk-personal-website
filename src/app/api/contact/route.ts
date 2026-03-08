@@ -5,7 +5,7 @@ import { rateLimit } from "@/lib/rate-limit";
 
 export async function POST(request: Request) {
   try {
-    const rateLimited = rateLimit(request, { limit: 5, windowSeconds: 300 });
+    const rateLimited = rateLimit(request, { limit: 3, windowSeconds: 300 });
     if (rateLimited) return rateLimited;
 
     const body = await request.json();

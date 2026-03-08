@@ -2,10 +2,8 @@
 
 import { useState } from "react";
 import { useTranslations, useLocale } from "next-intl";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { Link } from "@/i18n/routing";
-import { useSession } from "next-auth/react";
-import { useSubscription } from "@/hooks/useSubscription";
 import {
   Check,
   FileText,
@@ -13,7 +11,11 @@ import {
   Crown,
   Sparkles,
   ArrowRight,
-  Settings,
+  Send,
+  User,
+  Mail,
+  Building2,
+  MessageSquare,
 } from "lucide-react";
 
 const tiers = [
@@ -21,7 +23,6 @@ const tiers = [
     id: "DOCUMENT_ACCESS" as const,
     icon: FileText,
     color: "text-cyan-400",
-    borderColor: "border-cyan-400/30",
     monthlyPrice: 9.99,
     yearlyPrice: 99,
     features: {
@@ -48,7 +49,6 @@ const tiers = [
     id: "DATA_ACCESS" as const,
     icon: Database,
     color: "text-emerald-400",
-    borderColor: "border-emerald-400/30",
     monthlyPrice: 14.99,
     yearlyPrice: 149,
     features: {
@@ -75,7 +75,6 @@ const tiers = [
     id: "FULL_ACCESS" as const,
     icon: Crown,
     color: "text-gold",
-    borderColor: "border-gold/30",
     monthlyPrice: 19.99,
     yearlyPrice: 199,
     features: {
@@ -102,52 +101,64 @@ const tiers = [
 export default function SubscribePage() {
   const t = useTranslations("subscribe");
   const locale = useLocale();
-  const { data: session } = useSession();
-  const subscription = useSubscription();
   const [billing, setBilling] = useState<"monthly" | "yearly">("yearly");
-  const [loadingTier, setLoadingTier] = useState<string | null>(null);
-
-  const handleSubscribe = async (tierId: string) => {
-    if (!session) {
-      window.location.href = `/${locale}/auth/login?callbackUrl=/${locale}/subscribe`;
-      return;
-    }
-
-    setLoadingTier(tierId);
-    try {
-      const res = await fetch("/api/stripe/checkout", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ tier: tierId, billing }),
-      });
-      const data = await res.json();
-      if (data.url) {
-        window.location.href = data.url;
-      }
-    } catch {
-      // Handle error silently
-    } finally {
-      setLoadingTier(null);
-    }
-  };
-
-  const handleManage = async () => {
-    try {
-      const res = await fetch("/api/stripe/portal", { method: "POST" });
-      const data = await res.json();
-      if (data.url) {
-        window.location.href = data.url;
-      }
-    } catch {
-      // Handle error silently
-    }
-  };
+  const [selectedTier, setSelectedTier] = useState<string | null>(null);
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    organization: "",
+    message: "",
+  });
+  const [submitting, setSubmitting] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
+  const [error, setError] = useState(false);
 
   const yearlySavings = Math.round(
     ((tiers[2].monthlyPrice * 12 - tiers[2].yearlyPrice) /
       (tiers[2].monthlyPrice * 12)) *
       100
   );
+
+  const handleSelectTier = (tierId: string) => {
+    setSelectedTier(tierId);
+    setSubmitted(false);
+    setError(false);
+    // Scroll to form
+    setTimeout(() => {
+      document.getElementById("subscription-form")?.scrollIntoView({ behavior: "smooth", block: "center" });
+    }, 100);
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedTier || !formData.name || !formData.email) return;
+
+    setSubmitting(true);
+    setError(false);
+    try {
+      const res = await fetch("/api/subscription/request", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          ...formData,
+          tier: selectedTier,
+          billing,
+        }),
+      });
+      if (res.ok) {
+        setSubmitted(true);
+        setFormData({ name: "", email: "", organization: "", message: "" });
+      } else {
+        setError(true);
+      }
+    } catch {
+      setError(true);
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const selectedTierData = tiers.find((t) => t.id === selectedTier);
 
   return (
     <div className="section-padding">
@@ -169,33 +180,6 @@ export default function SubscribePage() {
             {t("subtitle")}
           </p>
         </motion.div>
-
-        {/* Active subscription banner */}
-        {subscription.tier && subscription.status === "ACTIVE" && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="glass rounded-xl p-4 mb-8 flex items-center justify-between"
-          >
-            <div>
-              <span className="text-sm text-gold font-medium">
-                {t("current_plan")}: {t(`tier_${subscription.tier?.toLowerCase()}`)}
-              </span>
-              {subscription.cancelAtPeriodEnd && (
-                <p className="text-xs text-text-muted mt-1">
-                  {t("cancels_at_period_end")}
-                </p>
-              )}
-            </div>
-            <button
-              onClick={handleManage}
-              className="flex items-center gap-2 px-4 py-2 glass rounded-lg text-sm hover:text-gold transition-colors"
-            >
-              <Settings className="w-4 h-4" />
-              {t("manage_subscription")}
-            </button>
-          </motion.div>
-        )}
 
         {/* Billing toggle */}
         <div className="flex items-center justify-center gap-3 mb-10">
@@ -229,7 +213,7 @@ export default function SubscribePage() {
           {tiers.map((tier, i) => {
             const price =
               billing === "monthly" ? tier.monthlyPrice : tier.yearlyPrice;
-            const isCurrentTier = subscription.tier === tier.id;
+            const isSelected = selectedTier === tier.id;
             const features =
               locale === "fr" ? tier.features.fr : tier.features.en;
             const excluded =
@@ -241,21 +225,15 @@ export default function SubscribePage() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: i * 0.1 }}
-                className={`relative glass rounded-2xl p-6 flex flex-col ${
-                  tier.popular ? "ring-2 ring-gold/50" : ""
-                } ${isCurrentTier ? "ring-2 ring-green-500/50" : ""}`}
+                className={`relative glass rounded-2xl p-6 flex flex-col cursor-pointer transition-all duration-300 ${
+                  tier.popular && !isSelected ? "ring-2 ring-gold/50" : ""
+                } ${isSelected ? "ring-2 ring-gold scale-[1.02]" : "hover:border-gold/30"}`}
+                onClick={() => handleSelectTier(tier.id)}
               >
-                {tier.popular && !isCurrentTier && (
+                {tier.popular && (
                   <div className="absolute -top-3 left-1/2 -translate-x-1/2">
                     <span className="px-3 py-1 bg-gold text-charcoal text-xs font-bold rounded-full">
                       {t("best_value")}
-                    </span>
-                  </div>
-                )}
-                {isCurrentTier && (
-                  <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                    <span className="px-3 py-1 bg-green-500 text-white text-xs font-bold rounded-full">
-                      {t("current_plan")}
                     </span>
                   </div>
                 )}
@@ -307,34 +285,139 @@ export default function SubscribePage() {
                   ))}
                 </ul>
 
-                {isCurrentTier ? (
-                  <button
-                    onClick={handleManage}
-                    className="w-full text-center py-2.5 rounded-lg font-medium text-sm glass hover:text-gold transition-colors"
-                  >
-                    {t("manage_subscription")}
-                  </button>
-                ) : (
-                  <button
-                    onClick={() => handleSubscribe(tier.id)}
-                    disabled={loadingTier !== null}
-                    className={`w-full text-center py-2.5 rounded-lg font-medium text-sm transition-colors disabled:opacity-50 ${
-                      tier.popular
-                        ? "bg-gold text-charcoal hover:bg-gold-light"
+                <button
+                  className={`w-full text-center py-2.5 rounded-lg font-medium text-sm transition-colors ${
+                    isSelected
+                      ? "bg-gold text-charcoal"
+                      : tier.popular
+                        ? "bg-gold/80 text-charcoal hover:bg-gold"
                         : "glass hover:text-gold"
-                    }`}
-                  >
-                    {loadingTier === tier.id ? (
-                      <span className="inline-block w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
-                    ) : (
-                      t("subscribe_now")
-                    )}
-                  </button>
-                )}
+                  }`}
+                >
+                  {isSelected ? t("selected") : t("subscribe_now")}
+                </button>
               </motion.div>
             );
           })}
         </div>
+
+        {/* Subscription Request Form */}
+        <AnimatePresence>
+          {selectedTier && (
+            <motion.div
+              id="subscription-form"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              className="glass rounded-2xl p-8 max-w-2xl mx-auto mb-16"
+            >
+              <h2 className="text-2xl font-bold font-[family-name:var(--font-display)] text-gold mb-2">
+                {t("form_title")}
+              </h2>
+              <p className="text-text-secondary text-sm mb-6">
+                {selectedTierData && (
+                  <span className="text-gold font-medium">
+                    {t(`tier_${selectedTierData.id.toLowerCase()}`)}
+                  </span>
+                )}
+                {" — "}
+                {t("form_desc")}
+              </p>
+
+              {submitted && (
+                <motion.div
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="mb-4 p-4 rounded-lg bg-green-500/10 border border-green-500/30 text-green-400 text-sm"
+                >
+                  <p className="font-medium">{t("form_success_title")}</p>
+                  <p className="text-green-400/80 mt-1">{t("form_success_desc")}</p>
+                </motion.div>
+              )}
+
+              {error && (
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  className="mb-4 p-3 rounded-lg bg-red-500/10 border border-red-500/30 text-red-400 text-sm"
+                >
+                  {t("form_error")}
+                </motion.div>
+              )}
+
+              {!submitted && (
+                <form onSubmit={handleSubmit} className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="flex items-center gap-1.5 text-sm text-text-secondary mb-1.5">
+                        <User className="w-3.5 h-3.5" />
+                        {t("form_name")} *
+                      </label>
+                      <input
+                        value={formData.name}
+                        onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                        required
+                        className="w-full px-4 py-2.5 bg-navy/50 border border-glass-border rounded-lg text-text-primary focus:border-gold/50 focus:outline-none transition-colors"
+                      />
+                    </div>
+                    <div>
+                      <label className="flex items-center gap-1.5 text-sm text-text-secondary mb-1.5">
+                        <Mail className="w-3.5 h-3.5" />
+                        {t("form_email")} *
+                      </label>
+                      <input
+                        type="email"
+                        value={formData.email}
+                        onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                        required
+                        className="w-full px-4 py-2.5 bg-navy/50 border border-glass-border rounded-lg text-text-primary focus:border-gold/50 focus:outline-none transition-colors"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="flex items-center gap-1.5 text-sm text-text-secondary mb-1.5">
+                      <Building2 className="w-3.5 h-3.5" />
+                      {t("form_organization")}
+                    </label>
+                    <input
+                      value={formData.organization}
+                      onChange={(e) => setFormData({ ...formData, organization: e.target.value })}
+                      className="w-full px-4 py-2.5 bg-navy/50 border border-glass-border rounded-lg text-text-primary focus:border-gold/50 focus:outline-none transition-colors"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="flex items-center gap-1.5 text-sm text-text-secondary mb-1.5">
+                      <MessageSquare className="w-3.5 h-3.5" />
+                      {t("form_message")}
+                    </label>
+                    <textarea
+                      value={formData.message}
+                      onChange={(e) => setFormData({ ...formData, message: e.target.value })}
+                      rows={3}
+                      placeholder={locale === "fr" ? "Questions ou besoins spécifiques..." : "Any questions or specific requirements..."}
+                      className="w-full px-4 py-2.5 bg-navy/50 border border-glass-border rounded-lg text-text-primary focus:border-gold/50 focus:outline-none transition-colors resize-none"
+                    />
+                  </div>
+
+                  <button
+                    type="submit"
+                    disabled={submitting}
+                    className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-gold text-charcoal font-semibold rounded-lg hover:bg-gold-light transition-all disabled:opacity-50 hover:shadow-lg hover:shadow-gold/20 active:scale-[0.98]"
+                  >
+                    {submitting ? (
+                      <div className="w-5 h-5 border-2 border-charcoal border-t-transparent rounded-full animate-spin" />
+                    ) : (
+                      <Send className="w-4 h-4" />
+                    )}
+                    {submitting ? "" : t("form_submit")}
+                  </button>
+                </form>
+              )}
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {/* What's included */}
         <motion.div

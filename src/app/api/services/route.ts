@@ -2,9 +2,13 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { serviceRequestSchema } from "@/lib/validations";
 import { auth } from "@/lib/auth";
+import { rateLimit } from "@/lib/rate-limit";
 
 export async function POST(request: Request) {
   try {
+    const limited = rateLimit(request, { limit: 3, windowSeconds: 300 });
+    if (limited) return limited;
+
     const body = await request.json();
     const validation = serviceRequestSchema.safeParse(body);
 

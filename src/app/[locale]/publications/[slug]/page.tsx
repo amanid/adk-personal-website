@@ -495,6 +495,7 @@ export default function PublicationDetailPage() {
           )}
 
           {/* CTA */}
+          {accessLevel === "GATED" && <CTABanner variant="premium" />}
           <CTABanner variant="consulting" />
 
           {/* Related Publications */}
