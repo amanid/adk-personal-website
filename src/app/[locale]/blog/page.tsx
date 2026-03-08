@@ -4,7 +4,7 @@ import { useTranslations, useLocale } from "next-intl";
 import { motion } from "framer-motion";
 import { Link } from "@/i18n/routing";
 import { Search, Calendar, Eye, ArrowRight, Tag, Clock, ChevronLeft, ChevronRight } from "lucide-react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { formatDate } from "@/lib/utils";
 
 const POSTS_PER_PAGE = 12;
@@ -68,8 +68,32 @@ export default function BlogPage() {
     ...Array.from(new Set(posts.map((p) => p.category).filter(Boolean))),
   ];
 
+  const blogListJsonLd = useMemo(() => {
+    if (posts.length === 0) return null;
+    return {
+      "@context": "https://schema.org",
+      "@type": "ItemList",
+      name: "Blog Posts",
+      description: "Articles on data science, AI, and statistical analysis",
+      url: "https://www.konanamanidieudonne.org/en/blog",
+      numberOfItems: posts.length,
+      itemListElement: posts.slice(0, 20).map((post, index) => ({
+        "@type": "ListItem",
+        position: index + 1,
+        url: `https://www.konanamanidieudonne.org/en/blog/${post.slug}`,
+        name: post.title,
+      })),
+    };
+  }, [posts]);
+
   return (
     <div className="section-padding">
+      {blogListJsonLd && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(blogListJsonLd) }}
+        />
+      )}
       <div className="max-w-6xl mx-auto">
         {/* Header */}
         <motion.div

@@ -32,3 +32,20 @@ export default function PageViewTracker() {
 
   return null;
 }
+
+// Export helper for tracking conversions site-wide
+export function trackConversion(type: string, details?: Record<string, string>) {
+  try {
+    navigator.sendBeacon(
+      "/api/track",
+      JSON.stringify({
+        path: window.location.pathname,
+        referrer: document.referrer,
+        conversionType: type,
+        ...details,
+      })
+    );
+  } catch {
+    // Silent fail
+  }
+}

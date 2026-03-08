@@ -14,6 +14,7 @@ const socialLinks = [
 const quickLinks = [
   { key: "about", href: "/about" },
   { key: "services", href: "/services" },
+  { key: "consulting", href: "/consulting" },
   { key: "projects", href: "/projects" },
   { key: "publications", href: "/publications" },
   { key: "blog", href: "/blog" },

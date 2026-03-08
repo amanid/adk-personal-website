@@ -32,6 +32,7 @@ import TrustedBySection from "@/components/home/TrustedBySection";
 import TechStackSection from "@/components/home/TechStackSection";
 import GlobalReachSection from "@/components/home/GlobalReachSection";
 import CertificationsShowcase from "@/components/home/CertificationsShowcase";
+import TestimonialsSection from "@/components/home/TestimonialsSection";
 import { projects as staticProjects } from "@/data/projects";
 import { experiences as staticExperiences } from "@/data/experience";
 import { publications as staticPublications } from "@/data/publications";
@@ -544,7 +545,10 @@ export default function HomePage() {
         </div>
       </section>}
 
-      {/* 16. CTA Section */}
+      {/* 16. Client Testimonials */}
+      {vis.testimonials !== false && <TestimonialsSection />}
+
+      {/* 17. CTA Section */}
       {vis.cta !== false && <section className="section-padding bg-navy/30">
         <div className="max-w-4xl mx-auto text-center">
           <motion.div

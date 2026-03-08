@@ -7,6 +7,9 @@ import { Calendar, Eye, ArrowLeft, User, Send, Clock, Share2, Check, List } from
 import { useState, useEffect, use, useMemo } from "react";
 import { formatDate } from "@/lib/utils";
 import { useSession } from "next-auth/react";
+import BlogJsonLd from "@/components/blog/BlogJsonLd";
+import ShareBar from "@/components/blog/ShareBar";
+import ReadingProgress from "@/components/blog/ReadingProgress";
 
 interface BlogPostFull {
   id: string;
@@ -154,21 +157,16 @@ export default function BlogPostPage({
     setTimeout(() => setCopied(false), 2000);
   };
 
-  const jsonLd = {
-    "@context": "https://schema.org",
-    "@type": "BlogPosting",
-    headline: title,
-    author: { "@type": "Person", name: post.author.name },
-    datePublished: post.createdAt,
-    articleSection: post.category || undefined,
-    wordCount: content.replace(/<[^>]*>/g, "").split(/\s+/).length,
-  };
-
   return (
     <div className="section-padding">
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      <ReadingProgress />
+      <BlogJsonLd
+        title={title}
+        description={post.excerpt || title}
+        slug={post.slug}
+        publishedAt={post.createdAt}
+        authorName={post.author.name || "KONAN Amani Dieudonné"}
+        tags={post.tags}
       />
       <div className="max-w-3xl mx-auto">
         <Link
@@ -266,6 +264,9 @@ export default function BlogPostPage({
               ))}
             </div>
           )}
+
+          {/* Share Bar */}
+          <ShareBar title={title} slug={post.slug} />
 
           {/* Comments */}
           <div className="border-t border-glass-border pt-8">

@@ -14,7 +14,8 @@
     "logout": "Logout",
     "admin": "Admin",
     "language": "FR",
-    "research": "Research"
+    "research": "Research",
+    "consulting": "Consulting"
   },
   "hero": {
     "greeting": "Hello, I'm",

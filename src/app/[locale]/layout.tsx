@@ -8,6 +8,8 @@ import ScrollProgress from "@/components/layout/ScrollProgress";
 import BackToTop from "@/components/layout/BackToTop";
 import PageTransition from "@/components/layout/PageTransition";
 import PageViewTracker from "@/components/PageViewTracker";
+import GoogleAnalytics from "@/components/GoogleAnalytics";
+import Breadcrumbs from "@/components/Breadcrumbs";
 import "../globals.css";
 
 export const metadata = {
@@ -181,11 +183,13 @@ export default async function LocaleLayout({
           dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteJsonLd) }}
         />
       </head>
+      <GoogleAnalytics />
       <body className="min-h-screen flex flex-col bg-charcoal text-text-primary antialiased">
         <Providers>
           <NextIntlClientProvider locale={locale} messages={messages}>
             <ScrollProgress />
             <Navbar />
+            <Breadcrumbs />
             <main className="flex-1 pt-16">
               <PageTransition>{children}</PageTransition>
             </main>

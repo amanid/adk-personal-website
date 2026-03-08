@@ -14,7 +14,8 @@
     "logout": "Déconnexion",
     "admin": "Admin",
     "language": "EN",
-    "research": "Recherche"
+    "research": "Recherche",
+    "consulting": "Conseil"
   },
   "hero": {
     "greeting": "Bonjour, je suis",
