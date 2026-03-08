@@ -28,22 +28,22 @@ enum RequestStatus {
 }
 
 model User {
-  id                    String                @id @default(cuid())
-  name                  String?
-  email                 String                @unique
-  hashedPassword        String?
-  image                 String?
-  role                  Role                  @default(USER)
-  createdAt             DateTime              @default(now())
-  updatedAt             DateTime              @updatedAt
-  accounts              Account[]
-  sessions              Session[]
-  blogPosts             BlogPost[]
-  comments              Comment[]
-  questions             Question[]
-  answers               Answer[]
-  serviceRequests       ServiceRequest[]
-  publicationComments   PublicationComment[]
+  id                  String               @id @default(cuid())
+  name                String?
+  email               String               @unique
+  hashedPassword      String?
+  image               String?
+  role                Role                 @default(USER)
+  createdAt           DateTime             @default(now())
+  updatedAt           DateTime             @updatedAt
+  accounts            Account[]
+  sessions            Session[]
+  blogPosts           BlogPost[]
+  comments            Comment[]
+  questions           Question[]
+  answers             Answer[]
+  serviceRequests     ServiceRequest[]
+  publicationComments PublicationComment[]
 }
 
 model Account {
@@ -120,15 +120,15 @@ model ServiceRequest {
 }
 
 model Question {
-  id         String         @id @default(cuid())
-  title      String
-  content    String         @db.Text
-  authorId   String
-  isAnswered Boolean        @default(false)
-  votes      Int            @default(0)
-  createdAt  DateTime       @default(now())
-  author     User           @relation(fields: [authorId], references: [id])
-  answers    Answer[]
+  id            String         @id @default(cuid())
+  title         String
+  content       String         @db.Text
+  authorId      String
+  isAnswered    Boolean        @default(false)
+  votes         Int            @default(0)
+  createdAt     DateTime       @default(now())
+  author        User           @relation(fields: [authorId], references: [id])
+  answers       Answer[]
   questionVotes QuestionVote[]
 }
 
@@ -149,7 +149,7 @@ model QuestionVote {
   id         String   @id @default(cuid())
   questionId String
   userId     String
-  value      Int      // 1 for upvote, -1 for downvote
+  value      Int // 1 for upvote, -1 for downvote
   createdAt  DateTime @default(now())
   question   Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
 
@@ -160,7 +160,7 @@ model AnswerVote {
   id        String   @id @default(cuid())
   answerId  String
   userId    String
-  value     Int      // 1 for upvote, -1 for downvote
+  value     Int // 1 for upvote, -1 for downvote
   createdAt DateTime @default(now())
   answer    Answer   @relation(fields: [answerId], references: [id], onDelete: Cascade)
 
@@ -257,24 +257,64 @@ model SiteSetting {
   value String @db.Text
 }
 
+enum PublicationType {
+  JOURNAL_ARTICLE
+  CONFERENCE_PAPER
+  WORKING_PAPER
+  THESIS_DISSERTATION
+  BOOK_CHAPTER
+  TECHNICAL_REPORT
+  PREPRINT
+  ANALYTICAL_REPORT
+}
+
+enum ResearchActivityType {
+  CONFERENCE_ATTENDED
+  TALK_GIVEN
+  PEER_REVIEW
+  GRANT_RECEIVED
+  MILESTONE
+  WORKSHOP
+  AWARD
+  OTHER
+}
+
 model Publication {
-  id          String               @id @default(cuid())
-  title       String
-  titleFr     String?
-  slug        String               @unique
-  abstract    String               @db.Text
-  abstractFr  String?              @db.Text
-  authors     String[]
-  journal     String?
-  year        Int
-  category    String?
-  pdfUrl      String?
-  tags        String[]
-  featured    Boolean              @default(false)
-  views       Int                  @default(0)
-  createdAt   DateTime             @default(now())
-  updatedAt   DateTime             @updatedAt
-  comments    PublicationComment[]
+  id                 String               @id @default(cuid())
+  title              String
+  titleFr            String?
+  slug               String               @unique
+  abstract           String               @db.Text
+  abstractFr         String?              @db.Text
+  authors            String[]
+  journal            String?
+  year               Int
+  category           String?
+  pdfUrl             String?
+  tags               String[]
+  publicationType    PublicationType      @default(ANALYTICAL_REPORT)
+  doi                String?
+  volume             String?
+  issue              String?
+  pages              String?
+  publisher          String?
+  publisherFr        String?
+  conferenceName     String?
+  conferenceNameFr   String?
+  conferenceLocation String?
+  bookTitle          String?
+  bookTitleFr        String?
+  institution        String?
+  institutionFr      String?
+  month              Int?
+  url                String?
+  downloadCount      Int                  @default(0)
+  citationCount      Int?
+  featured           Boolean              @default(false)
+  views              Int                  @default(0)
+  createdAt          DateTime             @default(now())
+  updatedAt          DateTime             @updatedAt
+  comments           PublicationComment[]
 }
 
 model PublicationComment {
@@ -285,6 +325,21 @@ model PublicationComment {
   createdAt     DateTime    @default(now())
   publication   Publication @relation(fields: [publicationId], references: [id], onDelete: Cascade)
   author        User        @relation(fields: [authorId], references: [id])
+}
+
+model ResearchActivity {
+  id            String               @id @default(cuid())
+  type          ResearchActivityType
+  title         String
+  titleFr       String?
+  description   String?              @db.Text
+  descriptionFr String?              @db.Text
+  date          DateTime
+  location      String?
+  locationFr    String?
+  url           String?
+  createdAt     DateTime             @default(now())
+  updatedAt     DateTime             @updatedAt
 }
 
 model PageView {

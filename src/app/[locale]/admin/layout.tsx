@@ -15,6 +15,7 @@ import {
   Settings,
   BarChart3,
   DollarSign,
+  FlaskConical,
 } from "lucide-react";
 
 const adminLinks = [
@@ -23,6 +24,7 @@ const adminLinks = [
   { href: "/admin/finance", label: "Finance", icon: DollarSign },
   { href: "/admin/blog", label: "Blog", icon: FileText },
   { href: "/admin/publications", label: "Publications", icon: BookOpen },
+  { href: "/admin/research-activities", label: "Research Activities", icon: FlaskConical },
   { href: "/admin/experience", label: "Experience", icon: Building2 },
   { href: "/admin/projects", label: "Projects", icon: FolderOpen },
   { href: "/admin/skills", label: "Skills & Education", icon: GraduationCap },

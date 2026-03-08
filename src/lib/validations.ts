@@ -75,11 +75,47 @@ export const publicationSchema = z.object({
   abstractFr: z.string().optional(),
   authors: z.array(z.string()).min(1, "At least one author is required"),
   journal: z.string().optional(),
-  year: z.number().int().min(2000).max(2030),
+  year: z.number().int().min(1990).max(2040),
   category: z.string().optional(),
   pdfUrl: z.string().optional(),
   tags: z.array(z.string()).optional(),
   featured: z.boolean().optional(),
+  publicationType: z.enum([
+    "JOURNAL_ARTICLE", "CONFERENCE_PAPER", "WORKING_PAPER",
+    "THESIS_DISSERTATION", "BOOK_CHAPTER", "TECHNICAL_REPORT",
+    "PREPRINT", "ANALYTICAL_REPORT",
+  ]).optional(),
+  doi: z.string().optional(),
+  volume: z.string().optional(),
+  issue: z.string().optional(),
+  pages: z.string().optional(),
+  publisher: z.string().optional(),
+  publisherFr: z.string().optional(),
+  conferenceName: z.string().optional(),
+  conferenceNameFr: z.string().optional(),
+  conferenceLocation: z.string().optional(),
+  bookTitle: z.string().optional(),
+  bookTitleFr: z.string().optional(),
+  institution: z.string().optional(),
+  institutionFr: z.string().optional(),
+  month: z.number().int().min(1).max(12).optional(),
+  url: z.string().optional(),
+  citationCount: z.number().int().min(0).optional(),
+});
+
+export const researchActivitySchema = z.object({
+  type: z.enum([
+    "CONFERENCE_ATTENDED", "TALK_GIVEN", "PEER_REVIEW",
+    "GRANT_RECEIVED", "MILESTONE", "WORKSHOP", "AWARD", "OTHER",
+  ]),
+  title: z.string().min(3, "Title is required"),
+  titleFr: z.string().optional(),
+  description: z.string().optional(),
+  descriptionFr: z.string().optional(),
+  date: z.string().min(1, "Date is required"),
+  location: z.string().optional(),
+  locationFr: z.string().optional(),
+  url: z.string().optional(),
 });
 
 export const experienceSchema = z.object({
@@ -145,3 +181,4 @@ export type EducationInput = z.infer<typeof educationSchema>;
 export type CertificationInput = z.infer<typeof certificationSchema>;
 export type SkillCategoryInput = z.infer<typeof skillCategorySchema>;
 export type SkillInput = z.infer<typeof skillSchema>;
+export type ResearchActivityInput = z.infer<typeof researchActivitySchema>;

@@ -64,6 +64,26 @@ export interface ServiceData {
   features: string[];
 }
 
+export type PublicationType =
+  | "JOURNAL_ARTICLE"
+  | "CONFERENCE_PAPER"
+  | "WORKING_PAPER"
+  | "THESIS_DISSERTATION"
+  | "BOOK_CHAPTER"
+  | "TECHNICAL_REPORT"
+  | "PREPRINT"
+  | "ANALYTICAL_REPORT";
+
+export type ResearchActivityType =
+  | "CONFERENCE_ATTENDED"
+  | "TALK_GIVEN"
+  | "PEER_REVIEW"
+  | "GRANT_RECEIVED"
+  | "MILESTONE"
+  | "WORKSHOP"
+  | "AWARD"
+  | "OTHER";
+
 export interface PublicationData {
   id: string;
   title: string;
@@ -78,4 +98,36 @@ export interface PublicationData {
   pdfUrl?: string;
   tags: string[];
   featured: boolean;
+  publicationType: PublicationType;
+  doi?: string;
+  volume?: string;
+  issue?: string;
+  pages?: string;
+  publisher?: string;
+  publisherFr?: string;
+  conferenceName?: string;
+  conferenceNameFr?: string;
+  conferenceLocation?: string;
+  bookTitle?: string;
+  bookTitleFr?: string;
+  institution?: string;
+  institutionFr?: string;
+  month?: number;
+  url?: string;
+  downloadCount?: number;
+  citationCount?: number;
+  views?: number;
+}
+
+export interface ResearchActivityData {
+  id: string;
+  type: ResearchActivityType;
+  title: string;
+  titleFr?: string;
+  description?: string;
+  descriptionFr?: string;
+  date: string;
+  location?: string;
+  locationFr?: string;
+  url?: string;
 }

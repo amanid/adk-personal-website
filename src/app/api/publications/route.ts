@@ -4,27 +4,26 @@ import { auth } from "@/lib/auth";
 import { publicationSchema } from "@/lib/validations";
 import { slugify } from "@/lib/utils";
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
+    const { searchParams } = new URL(request.url);
+    const type = searchParams.get("type");
+    const sort = searchParams.get("sort") || "year";
+
+    const where: Record<string, unknown> = {};
+    if (type) where.publicationType = type;
+
+    const orderBy: Record<string, string> = {};
+    switch (sort) {
+      case "views": orderBy.views = "desc"; break;
+      case "downloads": orderBy.downloadCount = "desc"; break;
+      case "year_asc": orderBy.year = "asc"; break;
+      default: orderBy.year = "desc";
+    }
+
     const publications = await prisma.publication.findMany({
-      orderBy: { year: "desc" },
-      select: {
-        id: true,
-        title: true,
-        titleFr: true,
-        slug: true,
-        abstract: true,
-        abstractFr: true,
-        authors: true,
-        journal: true,
-        year: true,
-        category: true,
-        pdfUrl: true,
-        tags: true,
-        featured: true,
-        views: true,
-        createdAt: true,
-      },
+      where,
+      orderBy,
     });
 
     return NextResponse.json({ publications });

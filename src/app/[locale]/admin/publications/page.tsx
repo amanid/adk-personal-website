@@ -1,8 +1,9 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Plus, Edit, Trash2, Star, BookOpen, Eye } from "lucide-react";
+import { Plus, Edit, Trash2, Star, BookOpen, Eye, Download } from "lucide-react";
 import FileUpload from "@/components/admin/FileUpload";
+import { PUBLICATION_TYPES } from "@/lib/publication-types";
 
 interface Publication {
   id: string;
@@ -19,6 +20,24 @@ interface Publication {
   tags: string[];
   featured: boolean;
   views: number;
+  downloadCount: number;
+  publicationType: string;
+  doi: string | null;
+  volume: string | null;
+  issue: string | null;
+  pages: string | null;
+  publisher: string | null;
+  publisherFr: string | null;
+  conferenceName: string | null;
+  conferenceNameFr: string | null;
+  conferenceLocation: string | null;
+  bookTitle: string | null;
+  bookTitleFr: string | null;
+  institution: string | null;
+  institutionFr: string | null;
+  month: number | null;
+  url: string | null;
+  citationCount: number | null;
   _count: { comments: number };
 }
 
@@ -44,14 +63,32 @@ const emptyForm = {
   tags: "",
   featured: false,
   pdfUrl: "",
+  publicationType: "ANALYTICAL_REPORT",
+  doi: "",
+  volume: "",
+  issue: "",
+  pages: "",
+  publisher: "",
+  publisherFr: "",
+  conferenceName: "",
+  conferenceNameFr: "",
+  conferenceLocation: "",
+  bookTitle: "",
+  bookTitleFr: "",
+  institution: "",
+  institutionFr: "",
+  month: 0,
+  url: "",
+  citationCount: 0,
 };
+
+const INPUT_CLASS = "w-full px-4 py-2.5 bg-navy/50 border border-glass-border rounded-lg text-text-primary focus:border-gold/50 focus:outline-none text-sm";
 
 export default function AdminPublicationsPage() {
   const [publications, setPublications] = useState<Publication[]>([]);
   const [loading, setLoading] = useState(true);
   const [showEditor, setShowEditor] = useState(false);
-  const [editingPublication, setEditingPublication] =
-    useState<Publication | null>(null);
+  const [editingPublication, setEditingPublication] = useState<Publication | null>(null);
   const [form, setForm] = useState(emptyForm);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -68,7 +105,7 @@ export default function AdminPublicationsPage() {
         setPublications(data.publications || []);
       }
     } catch {
-      // Handle error silently
+      // Handle silently
     } finally {
       setLoading(false);
     }
@@ -95,6 +132,23 @@ export default function AdminPublicationsPage() {
       tags: pub.tags.join(", "),
       featured: pub.featured,
       pdfUrl: pub.pdfUrl || "",
+      publicationType: pub.publicationType || "ANALYTICAL_REPORT",
+      doi: pub.doi || "",
+      volume: pub.volume || "",
+      issue: pub.issue || "",
+      pages: pub.pages || "",
+      publisher: pub.publisher || "",
+      publisherFr: pub.publisherFr || "",
+      conferenceName: pub.conferenceName || "",
+      conferenceNameFr: pub.conferenceNameFr || "",
+      conferenceLocation: pub.conferenceLocation || "",
+      bookTitle: pub.bookTitle || "",
+      bookTitleFr: pub.bookTitleFr || "",
+      institution: pub.institution || "",
+      institutionFr: pub.institutionFr || "",
+      month: pub.month || 0,
+      url: pub.url || "",
+      citationCount: pub.citationCount || 0,
     });
     setError(null);
     setShowEditor(true);
@@ -115,19 +169,30 @@ export default function AdminPublicationsPage() {
       titleFr: form.titleFr || undefined,
       abstract: form.abstract,
       abstractFr: form.abstractFr || undefined,
-      authors: form.authors
-        .split(",")
-        .map((a) => a.trim())
-        .filter(Boolean),
+      authors: form.authors.split(",").map((a) => a.trim()).filter(Boolean),
       journal: form.journal || undefined,
       year: form.year,
       category: form.category || undefined,
-      tags: form.tags
-        .split(",")
-        .map((t) => t.trim())
-        .filter(Boolean),
+      tags: form.tags.split(",").map((t) => t.trim()).filter(Boolean),
       featured: form.featured,
       pdfUrl: form.pdfUrl || undefined,
+      publicationType: form.publicationType,
+      doi: form.doi || undefined,
+      volume: form.volume || undefined,
+      issue: form.issue || undefined,
+      pages: form.pages || undefined,
+      publisher: form.publisher || undefined,
+      publisherFr: form.publisherFr || undefined,
+      conferenceName: form.conferenceName || undefined,
+      conferenceNameFr: form.conferenceNameFr || undefined,
+      conferenceLocation: form.conferenceLocation || undefined,
+      bookTitle: form.bookTitle || undefined,
+      bookTitleFr: form.bookTitleFr || undefined,
+      institution: form.institution || undefined,
+      institutionFr: form.institutionFr || undefined,
+      month: form.month || undefined,
+      url: form.url || undefined,
+      citationCount: form.citationCount || undefined,
     };
 
     try {
@@ -136,12 +201,10 @@ export default function AdminPublicationsPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
-
       if (!res.ok) {
         const data = await res.json();
         throw new Error(data.error || "Failed to save publication");
       }
-
       setShowEditor(false);
       setEditingPublication(null);
       setForm(emptyForm);
@@ -155,18 +218,20 @@ export default function AdminPublicationsPage() {
 
   const handleDelete = async (id: string) => {
     if (!confirm("Are you sure you want to delete this publication?")) return;
-
     try {
-      const res = await fetch(`/api/admin/publications/${id}`, {
-        method: "DELETE",
-      });
-      if (res.ok) {
-        setPublications((prev) => prev.filter((p) => p.id !== id));
-      }
+      const res = await fetch(`/api/admin/publications/${id}`, { method: "DELETE" });
+      if (res.ok) setPublications((prev) => prev.filter((p) => p.id !== id));
     } catch {
-      // Handle error silently
+      // Handle silently
     }
   };
+
+  // Determine which conditional fields to show
+  const showJournalFields = ["JOURNAL_ARTICLE"].includes(form.publicationType);
+  const showConferenceFields = ["CONFERENCE_PAPER"].includes(form.publicationType);
+  const showBookFields = ["BOOK_CHAPTER"].includes(form.publicationType);
+  const showInstitutionFields = ["THESIS_DISSERTATION", "WORKING_PAPER", "TECHNICAL_REPORT", "ANALYTICAL_REPORT"].includes(form.publicationType);
+  const showVolumeIssue = showJournalFields;
 
   return (
     <div>
@@ -187,9 +252,7 @@ export default function AdminPublicationsPage() {
       {showEditor && (
         <div className="glass rounded-xl p-6 mb-8">
           <h2 className="text-xl font-semibold mb-4">
-            {editingPublication
-              ? "Edit Publication"
-              : "Create New Publication"}
+            {editingPublication ? "Edit Publication" : "Create New Publication"}
           </h2>
 
           {error && (
@@ -199,141 +262,181 @@ export default function AdminPublicationsPage() {
           )}
 
           <form onSubmit={handleSubmit} className="space-y-4">
+            {/* Publication Type */}
+            <div>
+              <label className="block text-sm text-text-secondary mb-1">Publication Type *</label>
+              <select
+                value={form.publicationType}
+                onChange={(e) => setForm({ ...form, publicationType: e.target.value })}
+                className={INPUT_CLASS}
+              >
+                {PUBLICATION_TYPES.map((pt) => (
+                  <option key={pt.value} value={pt.value}>{pt.labelEn}</option>
+                ))}
+              </select>
+            </div>
+
             {/* Title EN / FR */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm text-text-secondary mb-1">
-                  Title (EN) *
-                </label>
-                <input
-                  value={form.title}
-                  onChange={(e) => setForm({ ...form, title: e.target.value })}
-                  className="w-full px-4 py-2.5 bg-navy/50 border border-glass-border rounded-lg text-text-primary focus:border-gold/50 focus:outline-none"
-                  required
-                />
+                <label className="block text-sm text-text-secondary mb-1">Title (EN) *</label>
+                <input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} className={INPUT_CLASS} required />
               </div>
               <div>
-                <label className="block text-sm text-text-secondary mb-1">
-                  Title (FR)
-                </label>
-                <input
-                  value={form.titleFr}
-                  onChange={(e) =>
-                    setForm({ ...form, titleFr: e.target.value })
-                  }
-                  className="w-full px-4 py-2.5 bg-navy/50 border border-glass-border rounded-lg text-text-primary focus:border-gold/50 focus:outline-none"
-                />
+                <label className="block text-sm text-text-secondary mb-1">Title (FR)</label>
+                <input value={form.titleFr} onChange={(e) => setForm({ ...form, titleFr: e.target.value })} className={INPUT_CLASS} />
               </div>
             </div>
 
-            {/* Abstract EN */}
+            {/* Abstract EN / FR */}
             <div>
-              <label className="block text-sm text-text-secondary mb-1">
-                Abstract (EN) *
-              </label>
-              <textarea
-                value={form.abstract}
-                onChange={(e) =>
-                  setForm({ ...form, abstract: e.target.value })
-                }
-                rows={4}
-                className="w-full px-4 py-2.5 bg-navy/50 border border-glass-border rounded-lg text-text-primary focus:border-gold/50 focus:outline-none"
-                required
-              />
+              <label className="block text-sm text-text-secondary mb-1">Abstract (EN) *</label>
+              <textarea value={form.abstract} onChange={(e) => setForm({ ...form, abstract: e.target.value })} rows={4} className={INPUT_CLASS} required />
             </div>
-
-            {/* Abstract FR */}
             <div>
-              <label className="block text-sm text-text-secondary mb-1">
-                Abstract (FR)
-              </label>
-              <textarea
-                value={form.abstractFr}
-                onChange={(e) =>
-                  setForm({ ...form, abstractFr: e.target.value })
-                }
-                rows={4}
-                className="w-full px-4 py-2.5 bg-navy/50 border border-glass-border rounded-lg text-text-primary focus:border-gold/50 focus:outline-none"
-              />
+              <label className="block text-sm text-text-secondary mb-1">Abstract (FR)</label>
+              <textarea value={form.abstractFr} onChange={(e) => setForm({ ...form, abstractFr: e.target.value })} rows={4} className={INPUT_CLASS} />
             </div>
 
             {/* Authors / Journal */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm text-text-secondary mb-1">
-                  Authors (comma-separated) *
-                </label>
-                <input
-                  value={form.authors}
-                  onChange={(e) =>
-                    setForm({ ...form, authors: e.target.value })
-                  }
-                  className="w-full px-4 py-2.5 bg-navy/50 border border-glass-border rounded-lg text-text-primary focus:border-gold/50 focus:outline-none"
-                  placeholder="Author One, Author Two"
-                  required
-                />
+                <label className="block text-sm text-text-secondary mb-1">Authors (comma-separated) *</label>
+                <input value={form.authors} onChange={(e) => setForm({ ...form, authors: e.target.value })} className={INPUT_CLASS} placeholder="Author One, Author Two" required />
               </div>
               <div>
-                <label className="block text-sm text-text-secondary mb-1">
-                  Journal
-                </label>
-                <input
-                  value={form.journal}
-                  onChange={(e) =>
-                    setForm({ ...form, journal: e.target.value })
-                  }
-                  className="w-full px-4 py-2.5 bg-navy/50 border border-glass-border rounded-lg text-text-primary focus:border-gold/50 focus:outline-none"
-                />
+                <label className="block text-sm text-text-secondary mb-1">Journal / Venue</label>
+                <input value={form.journal} onChange={(e) => setForm({ ...form, journal: e.target.value })} className={INPUT_CLASS} />
               </div>
             </div>
 
-            {/* Year / Category / Tags */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {/* Year / Month / Category */}
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
               <div>
-                <label className="block text-sm text-text-secondary mb-1">
-                  Year *
-                </label>
-                <input
-                  type="number"
-                  value={form.year}
-                  onChange={(e) =>
-                    setForm({ ...form, year: parseInt(e.target.value) || 0 })
-                  }
-                  min={2000}
-                  max={2030}
-                  className="w-full px-4 py-2.5 bg-navy/50 border border-glass-border rounded-lg text-text-primary focus:border-gold/50 focus:outline-none"
-                  required
-                />
+                <label className="block text-sm text-text-secondary mb-1">Year *</label>
+                <input type="number" value={form.year} onChange={(e) => setForm({ ...form, year: parseInt(e.target.value) || 0 })} min={1990} max={2040} className={INPUT_CLASS} required />
               </div>
               <div>
-                <label className="block text-sm text-text-secondary mb-1">
-                  Category
-                </label>
-                <select
-                  value={form.category}
-                  onChange={(e) =>
-                    setForm({ ...form, category: e.target.value })
-                  }
-                  className="w-full px-4 py-2.5 bg-navy/50 border border-glass-border rounded-lg text-text-primary focus:border-gold/50 focus:outline-none"
-                >
-                  <option value="">Select category</option>
-                  {CATEGORIES.map((cat) => (
-                    <option key={cat} value={cat}>
-                      {cat}
-                    </option>
+                <label className="block text-sm text-text-secondary mb-1">Month</label>
+                <select value={form.month} onChange={(e) => setForm({ ...form, month: parseInt(e.target.value) })} className={INPUT_CLASS}>
+                  <option value={0}>--</option>
+                  {Array.from({ length: 12 }, (_, i) => (
+                    <option key={i + 1} value={i + 1}>{new Date(2000, i).toLocaleString("en", { month: "long" })}</option>
                   ))}
                 </select>
               </div>
               <div>
-                <label className="block text-sm text-text-secondary mb-1">
-                  Tags (comma-separated)
-                </label>
-                <input
-                  value={form.tags}
-                  onChange={(e) => setForm({ ...form, tags: e.target.value })}
-                  className="w-full px-4 py-2.5 bg-navy/50 border border-glass-border rounded-lg text-text-primary focus:border-gold/50 focus:outline-none"
-                  placeholder="AI, Economics, Trade"
-                />
+                <label className="block text-sm text-text-secondary mb-1">Category</label>
+                <select value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })} className={INPUT_CLASS}>
+                  <option value="">Select category</option>
+                  {CATEGORIES.map((cat) => (
+                    <option key={cat} value={cat}>{cat}</option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm text-text-secondary mb-1">DOI</label>
+                <input value={form.doi} onChange={(e) => setForm({ ...form, doi: e.target.value })} className={INPUT_CLASS} placeholder="10.xxxx/xxxxx" />
+              </div>
+            </div>
+
+            {/* Conditional: Journal fields */}
+            {showVolumeIssue && (
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 border border-blue-500/20 rounded-lg">
+                <div>
+                  <label className="block text-sm text-blue-400 mb-1">Volume</label>
+                  <input value={form.volume} onChange={(e) => setForm({ ...form, volume: e.target.value })} className={INPUT_CLASS} />
+                </div>
+                <div>
+                  <label className="block text-sm text-blue-400 mb-1">Issue</label>
+                  <input value={form.issue} onChange={(e) => setForm({ ...form, issue: e.target.value })} className={INPUT_CLASS} />
+                </div>
+                <div>
+                  <label className="block text-sm text-blue-400 mb-1">Pages</label>
+                  <input value={form.pages} onChange={(e) => setForm({ ...form, pages: e.target.value })} className={INPUT_CLASS} placeholder="123-145" />
+                </div>
+              </div>
+            )}
+
+            {/* Conditional: Conference fields */}
+            {showConferenceFields && (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 border border-purple-500/20 rounded-lg">
+                <div>
+                  <label className="block text-sm text-purple-400 mb-1">Conference Name (EN)</label>
+                  <input value={form.conferenceName} onChange={(e) => setForm({ ...form, conferenceName: e.target.value })} className={INPUT_CLASS} />
+                </div>
+                <div>
+                  <label className="block text-sm text-purple-400 mb-1">Conference Name (FR)</label>
+                  <input value={form.conferenceNameFr} onChange={(e) => setForm({ ...form, conferenceNameFr: e.target.value })} className={INPUT_CLASS} />
+                </div>
+                <div>
+                  <label className="block text-sm text-purple-400 mb-1">Conference Location</label>
+                  <input value={form.conferenceLocation} onChange={(e) => setForm({ ...form, conferenceLocation: e.target.value })} className={INPUT_CLASS} />
+                </div>
+                <div>
+                  <label className="block text-sm text-purple-400 mb-1">Pages</label>
+                  <input value={form.pages} onChange={(e) => setForm({ ...form, pages: e.target.value })} className={INPUT_CLASS} />
+                </div>
+              </div>
+            )}
+
+            {/* Conditional: Book Chapter fields */}
+            {showBookFields && (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 border border-emerald-500/20 rounded-lg">
+                <div>
+                  <label className="block text-sm text-emerald-400 mb-1">Book Title (EN)</label>
+                  <input value={form.bookTitle} onChange={(e) => setForm({ ...form, bookTitle: e.target.value })} className={INPUT_CLASS} />
+                </div>
+                <div>
+                  <label className="block text-sm text-emerald-400 mb-1">Book Title (FR)</label>
+                  <input value={form.bookTitleFr} onChange={(e) => setForm({ ...form, bookTitleFr: e.target.value })} className={INPUT_CLASS} />
+                </div>
+                <div>
+                  <label className="block text-sm text-emerald-400 mb-1">Pages</label>
+                  <input value={form.pages} onChange={(e) => setForm({ ...form, pages: e.target.value })} className={INPUT_CLASS} />
+                </div>
+              </div>
+            )}
+
+            {/* Conditional: Institution fields */}
+            {showInstitutionFields && (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 border border-amber-500/20 rounded-lg">
+                <div>
+                  <label className="block text-sm text-amber-400 mb-1">Institution (EN)</label>
+                  <input value={form.institution} onChange={(e) => setForm({ ...form, institution: e.target.value })} className={INPUT_CLASS} />
+                </div>
+                <div>
+                  <label className="block text-sm text-amber-400 mb-1">Institution (FR)</label>
+                  <input value={form.institutionFr} onChange={(e) => setForm({ ...form, institutionFr: e.target.value })} className={INPUT_CLASS} />
+                </div>
+              </div>
+            )}
+
+            {/* Publisher */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm text-text-secondary mb-1">Publisher (EN)</label>
+                <input value={form.publisher} onChange={(e) => setForm({ ...form, publisher: e.target.value })} className={INPUT_CLASS} />
+              </div>
+              <div>
+                <label className="block text-sm text-text-secondary mb-1">Publisher (FR)</label>
+                <input value={form.publisherFr} onChange={(e) => setForm({ ...form, publisherFr: e.target.value })} className={INPUT_CLASS} />
+              </div>
+            </div>
+
+            {/* Tags / URL / Citation Count */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div>
+                <label className="block text-sm text-text-secondary mb-1">Tags (comma-separated)</label>
+                <input value={form.tags} onChange={(e) => setForm({ ...form, tags: e.target.value })} className={INPUT_CLASS} placeholder="AI, Economics, Trade" />
+              </div>
+              <div>
+                <label className="block text-sm text-text-secondary mb-1">External URL</label>
+                <input value={form.url} onChange={(e) => setForm({ ...form, url: e.target.value })} className={INPUT_CLASS} placeholder="https://..." />
+              </div>
+              <div>
+                <label className="block text-sm text-text-secondary mb-1">Citation Count</label>
+                <input type="number" value={form.citationCount} onChange={(e) => setForm({ ...form, citationCount: parseInt(e.target.value) || 0 })} min={0} className={INPUT_CLASS} />
               </div>
             </div>
 
@@ -343,15 +446,10 @@ export default function AdminPublicationsPage() {
                 type="checkbox"
                 id="featured"
                 checked={form.featured}
-                onChange={(e) =>
-                  setForm({ ...form, featured: e.target.checked })
-                }
+                onChange={(e) => setForm({ ...form, featured: e.target.checked })}
                 className="w-4 h-4 rounded border-glass-border"
               />
-              <label
-                htmlFor="featured"
-                className="text-sm text-text-secondary cursor-pointer"
-              >
+              <label htmlFor="featured" className="text-sm text-text-secondary cursor-pointer">
                 Featured publication
               </label>
             </div>
@@ -371,19 +469,11 @@ export default function AdminPublicationsPage() {
                 disabled={submitting}
                 className="px-6 py-2 bg-gold text-charcoal font-medium rounded-lg hover:bg-gold-light transition-all text-sm disabled:opacity-50"
               >
-                {submitting
-                  ? "Saving..."
-                  : editingPublication
-                    ? "Update Publication"
-                    : "Create Publication"}
+                {submitting ? "Saving..." : editingPublication ? "Update Publication" : "Create Publication"}
               </button>
               <button
                 type="button"
-                onClick={() => {
-                  setShowEditor(false);
-                  setEditingPublication(null);
-                  setError(null);
-                }}
+                onClick={() => { setShowEditor(false); setEditingPublication(null); setError(null); }}
                 className="px-6 py-2 glass text-text-secondary rounded-lg hover:text-gold transition-all text-sm"
               >
                 Cancel
@@ -397,10 +487,7 @@ export default function AdminPublicationsPage() {
       {loading ? (
         <div className="space-y-4">
           {[...Array(5)].map((_, i) => (
-            <div
-              key={i}
-              className="glass rounded-xl p-5 animate-pulse h-20"
-            />
+            <div key={i} className="glass rounded-xl p-5 animate-pulse h-20" />
           ))}
         </div>
       ) : publications.length === 0 ? (
@@ -411,45 +498,33 @@ export default function AdminPublicationsPage() {
       ) : (
         <div className="space-y-3">
           {publications.map((pub) => (
-            <div
-              key={pub.id}
-              className="glass rounded-xl p-5 flex items-center justify-between gap-4"
-            >
+            <div key={pub.id} className="glass rounded-xl p-5 flex items-center justify-between gap-4">
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 mb-1">
+                  <span className="text-[9px] px-1.5 py-0.5 rounded bg-blue-500/10 text-blue-400 font-medium uppercase">
+                    {PUBLICATION_TYPES.find((t) => t.value === pub.publicationType)?.shortEn || "Report"}
+                  </span>
                   <h3 className="text-sm font-medium truncate">{pub.title}</h3>
-                  {pub.featured && (
-                    <Star className="w-3.5 h-3.5 text-gold shrink-0" />
-                  )}
+                  {pub.featured && <Star className="w-3.5 h-3.5 text-gold shrink-0" />}
                 </div>
                 <div className="flex items-center gap-3 text-text-muted text-xs">
                   <span>{pub.year}</span>
                   {pub.category && <span>{pub.category}</span>}
-                  {pub.journal && (
-                    <span className="truncate max-w-[150px]">
-                      {pub.journal}
-                    </span>
-                  )}
+                  {pub.doi && <span className="text-emerald-400">DOI</span>}
                   <span className="flex items-center gap-1">
-                    <Eye className="w-3 h-3" />
-                    {pub.views}
+                    <Eye className="w-3 h-3" />{pub.views}
                   </span>
-                  <span>{pub._count.comments} comments</span>
+                  <span className="flex items-center gap-1">
+                    <Download className="w-3 h-3" />{pub.downloadCount || 0}
+                  </span>
+                  <span>{pub._count?.comments || 0} comments</span>
                 </div>
               </div>
               <div className="flex items-center gap-2 shrink-0">
-                <button
-                  onClick={() => openEdit(pub)}
-                  className="p-2 text-text-muted hover:text-gold transition-colors"
-                  aria-label="Edit publication"
-                >
+                <button onClick={() => openEdit(pub)} className="p-2 text-text-muted hover:text-gold transition-colors" aria-label="Edit">
                   <Edit className="w-4 h-4" />
                 </button>
-                <button
-                  onClick={() => handleDelete(pub.id)}
-                  className="p-2 text-text-muted hover:text-red-400 transition-colors"
-                  aria-label="Delete publication"
-                >
+                <button onClick={() => handleDelete(pub.id)} className="p-2 text-text-muted hover:text-red-400 transition-colors" aria-label="Delete">
                   <Trash2 className="w-4 h-4" />
                 </button>
               </div>

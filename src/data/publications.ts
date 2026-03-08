@@ -15,6 +15,7 @@ export const publications: PublicationData[] = [
     pdfUrl: "/publications/Africa 10Trillion Opportunity Regional Dynamics 2010-2025.pdf",
     tags: ["Africa", "Economic Growth", "Regional Dynamics", "Trade", "Investment"],
     featured: true,
+    publicationType: "ANALYTICAL_REPORT",
   },
   {
     id: "pub-2",
@@ -30,6 +31,7 @@ export const publications: PublicationData[] = [
     pdfUrl: "/publications/Africa 10Trillion Opportunity Regional Dynamics.pdf",
     tags: ["Africa", "Economic Opportunity", "Growth", "Regional Analysis"],
     featured: false,
+    publicationType: "ANALYTICAL_REPORT",
   },
   {
     id: "pub-3",
@@ -45,6 +47,7 @@ export const publications: PublicationData[] = [
     pdfUrl: "/publications/Africa Cultural Power - A $100B Growth Frontier.pdf",
     tags: ["Africa", "Creative Industries", "Cultural Economy", "Growth"],
     featured: false,
+    publicationType: "ANALYTICAL_REPORT",
   },
   {
     id: "pub-4",
@@ -60,6 +63,7 @@ export const publications: PublicationData[] = [
     pdfUrl: "/publications/Africa Economies Heavy Reliance On Commodities - A Snapshot As At August 2025.pdf",
     tags: ["Africa", "Commodities", "Economic Diversification", "Trade"],
     featured: false,
+    publicationType: "ANALYTICAL_REPORT",
   },
   {
     id: "pub-5",
@@ -75,6 +79,7 @@ export const publications: PublicationData[] = [
     pdfUrl: "/publications/Africa Trade Finance Infrastructure Growth.pdf",
     tags: ["Trade Finance", "Africa", "Infrastructure", "AfCFTA", "Development Finance"],
     featured: true,
+    publicationType: "ANALYTICAL_REPORT",
   },
   {
     id: "pub-6",
@@ -90,6 +95,7 @@ export const publications: PublicationData[] = [
     pdfUrl: "/publications/Africa Youth Dividend Future Workforce.pdf",
     tags: ["Africa", "Youth", "Demographics", "Workforce", "Education"],
     featured: false,
+    publicationType: "ANALYTICAL_REPORT",
   },
   {
     id: "pub-7",
@@ -105,6 +111,7 @@ export const publications: PublicationData[] = [
     pdfUrl: "/publications/Africa-Digital-Future-Overview.pdf",
     tags: ["Africa", "Digital Transformation", "Technology", "Connectivity", "E-Governance"],
     featured: false,
+    publicationType: "ANALYTICAL_REPORT",
   },
   {
     id: "pub-8",
@@ -120,6 +127,7 @@ export const publications: PublicationData[] = [
     pdfUrl: "/publications/Africa's AI Leap - Finance & Sovereignty.pdf",
     tags: ["AI", "Finance", "Data Sovereignty", "Africa", "Fintech"],
     featured: true,
+    publicationType: "ANALYTICAL_REPORT",
   },
   {
     id: "pub-9",
@@ -135,6 +143,7 @@ export const publications: PublicationData[] = [
     pdfUrl: "/publications/Africa's AI Readiness & the Digital Skills Imperative.pdf",
     tags: ["AI", "Digital Skills", "Africa", "Education", "Technology Readiness"],
     featured: false,
+    publicationType: "ANALYTICAL_REPORT",
   },
   {
     id: "pub-10",
@@ -150,6 +159,7 @@ export const publications: PublicationData[] = [
     pdfUrl: "/publications/Africa's Commodity Leap - From Raw Loss to Value Power.pdf",
     tags: ["Commodities", "Value Addition", "Industrialization", "Africa", "Trade"],
     featured: false,
+    publicationType: "ANALYTICAL_REPORT",
   },
   {
     id: "pub-11",
@@ -165,6 +175,7 @@ export const publications: PublicationData[] = [
     pdfUrl: "/publications/Africa's Digital Future - Innovation Driving Jobs.pdf",
     tags: ["Digital Innovation", "Jobs", "Africa", "Startups", "Technology"],
     featured: false,
+    publicationType: "ANALYTICAL_REPORT",
   },
   {
     id: "pub-12",
@@ -180,6 +191,7 @@ export const publications: PublicationData[] = [
     pdfUrl: "/publications/Africa's Inflation–FX–Debt Stability Framework.pdf",
     tags: ["Inflation", "Foreign Exchange", "Debt", "Macroeconomics", "Africa"],
     featured: false,
+    publicationType: "ANALYTICAL_REPORT",
   },
   {
     id: "pub-13",
@@ -195,6 +207,7 @@ export const publications: PublicationData[] = [
     pdfUrl: "/publications/Africa's Missing Billions - A Data-Driven Call to End Illicit Financial Flows.pdf",
     tags: ["Illicit Financial Flows", "Africa", "Data Analysis", "Governance", "Policy"],
     featured: false,
+    publicationType: "ANALYTICAL_REPORT",
   },
   {
     id: "pub-14",
@@ -210,6 +223,7 @@ export const publications: PublicationData[] = [
     pdfUrl: "/publications/Africa's prosperity must be built by Africans.pdf",
     tags: ["Africa", "Development", "Leadership", "Self-Reliance", "Policy"],
     featured: false,
+    publicationType: "ANALYTICAL_REPORT",
   },
   {
     id: "pub-15",
@@ -225,6 +239,7 @@ export const publications: PublicationData[] = [
     pdfUrl: "/publications/Cocoa Demand Rewired - Global Grindings & Origin Rise.pdf",
     tags: ["Cocoa", "Commodities", "Agriculture", "Global Trade", "Market Analysis"],
     featured: false,
+    publicationType: "ANALYTICAL_REPORT",
   },
   {
     id: "pub-16",
@@ -240,6 +255,7 @@ export const publications: PublicationData[] = [
     pdfUrl: "/publications/Fintech and Digital Payments in Africa - From Mobile Money to Global Scale.pdf",
     tags: ["Fintech", "Digital Payments", "Mobile Money", "Africa", "Financial Inclusion"],
     featured: true,
+    publicationType: "ANALYTICAL_REPORT",
   },
   {
     id: "pub-17",
@@ -255,6 +271,7 @@ export const publications: PublicationData[] = [
     pdfUrl: "/publications/Fintech-Digital-Payments-Africa.pdf",
     tags: ["Fintech", "Digital Payments", "Africa", "Banking", "Technology"],
     featured: false,
+    publicationType: "ANALYTICAL_REPORT",
   },
   {
     id: "pub-18",
@@ -270,6 +287,7 @@ export const publications: PublicationData[] = [
     pdfUrl: "/publications/Global-Cotton-Market-Analysis.pdf",
     tags: ["Cotton", "Agriculture", "Global Trade", "Market Analysis", "Africa"],
     featured: false,
+    publicationType: "ANALYTICAL_REPORT",
   },
   {
     id: "pub-19",
@@ -285,6 +303,7 @@ export const publications: PublicationData[] = [
     pdfUrl: "/publications/Healthtech & Pharma - Africa's Health Sovereignty.pdf",
     tags: ["Healthtech", "Pharma", "Africa", "Health Sovereignty", "Innovation"],
     featured: false,
+    publicationType: "ANALYTICAL_REPORT",
   },
   {
     id: "pub-20",
@@ -300,6 +319,7 @@ export const publications: PublicationData[] = [
     pdfUrl: "/publications/Key Takeaways From DAMA_DMBOK DMF.pdf",
     tags: ["Data Governance", "DAMA-DMBOK", "Data Management", "Enterprise", "Best Practices"],
     featured: false,
+    publicationType: "ANALYTICAL_REPORT",
   },
   {
     id: "pub-21",
@@ -315,6 +335,7 @@ export const publications: PublicationData[] = [
     pdfUrl: "/publications/Mutlilateral Development Finance Accross Africa - A Quick Overview.pdf",
     tags: ["Development Finance", "Multilateral", "Africa", "Aid", "Investment"],
     featured: false,
+    publicationType: "ANALYTICAL_REPORT",
   },
   {
     id: "pub-22",
@@ -330,6 +351,7 @@ export const publications: PublicationData[] = [
     pdfUrl: "/publications/Price Responsiveness of Artificial Intelligence.pdf",
     tags: ["AI", "Economics", "Pricing", "Market Analysis", "Technology"],
     featured: false,
+    publicationType: "ANALYTICAL_REPORT",
   },
   {
     id: "pub-23",
@@ -345,6 +367,7 @@ export const publications: PublicationData[] = [
     pdfUrl: "/publications/South–South Cooperation and Africa Opportunities.pdf",
     tags: ["South-South Cooperation", "Africa", "Development", "Trade", "Partnerships"],
     featured: false,
+    publicationType: "ANALYTICAL_REPORT",
   },
   {
     id: "pub-24",
@@ -360,6 +383,7 @@ export const publications: PublicationData[] = [
     pdfUrl: "/publications/The $2 Trillion Imperative - Africa's Path to a Green Industrial Revolution.pdf",
     tags: ["Green Industry", "Africa", "Climate", "Renewable Energy", "Sustainability"],
     featured: false,
+    publicationType: "ANALYTICAL_REPORT",
   },
   {
     id: "pub-25",
@@ -375,6 +399,7 @@ export const publications: PublicationData[] = [
     pdfUrl: "/publications/The R&D Dividend – Knowledge and Growth.pdf",
     tags: ["R&D", "Innovation", "Growth", "Knowledge Economy", "Africa"],
     featured: false,
+    publicationType: "ANALYTICAL_REPORT",
   },
   {
     id: "pub-26",
@@ -390,6 +415,7 @@ export const publications: PublicationData[] = [
     pdfUrl: "/publications/Unlocking Africa's Agri-Tech Transformation.pdf",
     tags: ["Agri-Tech", "Agriculture", "Africa", "Innovation", "Food Security"],
     featured: false,
+    publicationType: "ANALYTICAL_REPORT",
   },
   {
     id: "pub-27",
@@ -405,5 +431,6 @@ export const publications: PublicationData[] = [
     pdfUrl: "/publications/Urban Futures Unlocked Financing Africa Cities.pdf",
     tags: ["Urbanization", "Cities", "Africa", "Infrastructure", "Finance"],
     featured: false,
+    publicationType: "ANALYTICAL_REPORT",
   },
 ];
