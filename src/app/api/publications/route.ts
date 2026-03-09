@@ -26,7 +26,42 @@ export async function GET(request: Request) {
       orderBy,
     });
 
-    return NextResponse.json({ publications });
+    // Merge published research activities as publication entries
+    const publishedActivities = await prisma.researchActivity.findMany({
+      where: { published: true },
+      orderBy: { date: "desc" },
+    });
+
+    const activityPubs = publishedActivities.map((a) => ({
+      id: a.id,
+      title: a.title,
+      titleFr: a.titleFr || "",
+      slug: `research-activity-${a.id}`,
+      abstract: a.description || a.title,
+      abstractFr: a.descriptionFr || a.titleFr || "",
+      authors: [] as string[],
+      journal: a.location || "",
+      year: a.date.getFullYear(),
+      category: "",
+      pdfUrl: a.paperUrl,
+      dataUrl: a.dataUrl,
+      supplementaryUrl: a.supplementaryUrl,
+      tags: [] as string[],
+      featured: false,
+      views: 0,
+      downloadCount: 0,
+      publicationType: a.type === "JOURNAL_ARTICLE" ? "JOURNAL_ARTICLE"
+        : a.type === "CONFERENCE_PAPER" ? "CONFERENCE_PAPER"
+        : a.type === "WORKING_PAPER" ? "WORKING_PAPER"
+        : a.type === "TECHNICAL_REPORT" ? "TECHNICAL_REPORT"
+        : a.type === "BOOK_CHAPTER" ? "BOOK_CHAPTER"
+        : "ANALYTICAL_REPORT",
+      accessLevel: a.accessLevel,
+      url: a.url,
+      _source: "research_activity" as const,
+    }));
+
+    return NextResponse.json({ publications: [...publications, ...activityPubs] });
   } catch (error) {
     console.error("Publications fetch error:", error);
     return NextResponse.json(

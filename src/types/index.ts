@@ -75,6 +75,13 @@ export type PublicationType =
   | "ANALYTICAL_REPORT";
 
 export type ResearchActivityType =
+  | "RESEARCH_PAPER"
+  | "JOURNAL_ARTICLE"
+  | "CONFERENCE_PAPER"
+  | "WORKING_PAPER"
+  | "TECHNICAL_REPORT"
+  | "BOOK_CHAPTER"
+  | "DATASET_RELEASE"
   | "CONFERENCE_ATTENDED"
   | "TALK_GIVEN"
   | "PEER_REVIEW"
@@ -82,6 +89,11 @@ export type ResearchActivityType =
   | "MILESTONE"
   | "WORKSHOP"
   | "AWARD"
+  | "TEACHING"
+  | "SUPERVISION"
+  | "COLLABORATION"
+  | "PATENT"
+  | "SOFTWARE_RELEASE"
   | "OTHER";
 
 export interface PublicationData {
@@ -137,4 +149,5 @@ export interface ResearchActivityData {
   dataUrl?: string;
   supplementaryUrl?: string;
   accessLevel?: "FREE" | "GATED";
+  published?: boolean;
 }

@@ -16,6 +16,8 @@ import {
   FileText,
   Database,
   Paperclip,
+  Eye,
+  EyeOff,
 } from "lucide-react";
 import FileUpload from "@/components/admin/FileUpload";
 import type { ResearchActivityType } from "@/types";
@@ -35,21 +37,38 @@ interface Activity {
   dataUrl: string | null;
   supplementaryUrl: string | null;
   accessLevel: string;
+  published: boolean;
 }
 
-const ACTIVITY_TYPES: { value: ResearchActivityType; label: string }[] = [
-  { value: "CONFERENCE_ATTENDED", label: "Conference Attended" },
-  { value: "TALK_GIVEN", label: "Talk Given" },
-  { value: "PEER_REVIEW", label: "Peer Review" },
-  { value: "GRANT_RECEIVED", label: "Grant Received" },
-  { value: "MILESTONE", label: "Milestone" },
-  { value: "WORKSHOP", label: "Workshop" },
-  { value: "AWARD", label: "Award" },
-  { value: "OTHER", label: "Other" },
+const ACTIVITY_TYPES: { value: ResearchActivityType; label: string; group: string }[] = [
+  // Publications & Outputs
+  { value: "RESEARCH_PAPER", label: "Research Paper", group: "Publications" },
+  { value: "JOURNAL_ARTICLE", label: "Journal Article", group: "Publications" },
+  { value: "CONFERENCE_PAPER", label: "Conference Paper", group: "Publications" },
+  { value: "WORKING_PAPER", label: "Working Paper", group: "Publications" },
+  { value: "TECHNICAL_REPORT", label: "Technical Report", group: "Publications" },
+  { value: "BOOK_CHAPTER", label: "Book Chapter", group: "Publications" },
+  { value: "DATASET_RELEASE", label: "Dataset Release", group: "Publications" },
+  { value: "SOFTWARE_RELEASE", label: "Software Release", group: "Publications" },
+  { value: "PATENT", label: "Patent", group: "Publications" },
+  // Events & Engagement
+  { value: "CONFERENCE_ATTENDED", label: "Conference Attended", group: "Events" },
+  { value: "TALK_GIVEN", label: "Talk / Presentation Given", group: "Events" },
+  { value: "WORKSHOP", label: "Workshop", group: "Events" },
+  // Academic & Professional
+  { value: "PEER_REVIEW", label: "Peer Review", group: "Academic" },
+  { value: "GRANT_RECEIVED", label: "Grant Received", group: "Academic" },
+  { value: "TEACHING", label: "Teaching / Lecturing", group: "Academic" },
+  { value: "SUPERVISION", label: "Thesis / Student Supervision", group: "Academic" },
+  { value: "COLLABORATION", label: "Research Collaboration", group: "Academic" },
+  // Other
+  { value: "AWARD", label: "Award / Honour", group: "Other" },
+  { value: "MILESTONE", label: "Milestone", group: "Other" },
+  { value: "OTHER", label: "Other", group: "Other" },
 ];
 
 const emptyForm = {
-  type: "MILESTONE" as ResearchActivityType,
+  type: "RESEARCH_PAPER" as ResearchActivityType,
   title: "",
   titleFr: "",
   description: "",
@@ -62,6 +81,7 @@ const emptyForm = {
   dataUrl: "",
   supplementaryUrl: "",
   accessLevel: "FREE",
+  published: false,
 };
 
 const INPUT_CLASS = "w-full px-3 py-2 bg-navy/50 border border-glass-border rounded-lg text-text-primary focus:border-gold/50 focus:outline-none text-sm";
@@ -113,6 +133,7 @@ export default function AdminResearchActivitiesPage() {
       dataUrl: activity.dataUrl || "",
       supplementaryUrl: activity.supplementaryUrl || "",
       accessLevel: activity.accessLevel || "FREE",
+      published: activity.published ?? false,
     });
     setEditingId(activity.id);
     setShowForm(true);
@@ -134,6 +155,7 @@ export default function AdminResearchActivitiesPage() {
         dataUrl: form.dataUrl || undefined,
         supplementaryUrl: form.supplementaryUrl || undefined,
         accessLevel: form.accessLevel as "FREE" | "GATED",
+        published: form.published,
       };
 
       const url = editingId
@@ -219,10 +241,14 @@ export default function AdminResearchActivitiesPage() {
                 onChange={(e) => setForm({ ...form, type: e.target.value as ResearchActivityType })}
                 className={INPUT_CLASS}
               >
-                {ACTIVITY_TYPES.map((t) => (
-                  <option key={t.value} value={t.value}>
-                    {t.label}
-                  </option>
+                {["Publications", "Events", "Academic", "Other"].map((group) => (
+                  <optgroup key={group} label={group}>
+                    {ACTIVITY_TYPES.filter((t) => t.group === group).map((t) => (
+                      <option key={t.value} value={t.value}>
+                        {t.label}
+                      </option>
+                    ))}
+                  </optgroup>
                 ))}
               </select>
             </div>
@@ -317,8 +343,8 @@ export default function AdminResearchActivitiesPage() {
             </div>
           </div>
 
-          {/* Access Level */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {/* Access Level & Publish */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
               <label className="block text-sm text-text-secondary mb-1">Access Level</label>
               <select
@@ -329,6 +355,20 @@ export default function AdminResearchActivitiesPage() {
                 <option value="FREE">Free — Open access</option>
                 <option value="GATED">Premium — Subscription required</option>
               </select>
+            </div>
+            <div className="flex items-end pb-2">
+              <div className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  id="published"
+                  checked={form.published}
+                  onChange={(e) => setForm({ ...form, published: e.target.checked })}
+                  className="w-4 h-4 rounded border-glass-border"
+                />
+                <label htmlFor="published" className="text-sm text-text-secondary cursor-pointer">
+                  Publish to Publications page
+                </label>
+              </div>
             </div>
           </div>
 
@@ -404,6 +444,15 @@ export default function AdminResearchActivitiesPage() {
                   <span className="text-[10px] px-2 py-0.5 rounded-full bg-gold/10 text-gold font-medium uppercase tracking-wider">
                     {ACTIVITY_TYPES.find((t) => t.value === activity.type)?.label || activity.type}
                   </span>
+                  {activity.published ? (
+                    <span className="text-[9px] px-1.5 py-0.5 rounded bg-blue-500/10 text-blue-400 font-medium uppercase flex items-center gap-0.5">
+                      <Eye className="w-2.5 h-2.5" />Published
+                    </span>
+                  ) : (
+                    <span className="text-[9px] px-1.5 py-0.5 rounded bg-zinc-500/10 text-zinc-400 font-medium uppercase flex items-center gap-0.5">
+                      <EyeOff className="w-2.5 h-2.5" />Draft
+                    </span>
+                  )}
                   {activity.accessLevel === "GATED" ? (
                     <span className="text-[9px] px-1.5 py-0.5 rounded bg-purple-500/10 text-purple-400 font-medium uppercase flex items-center gap-0.5">
                       <Lock className="w-2.5 h-2.5" />Premium

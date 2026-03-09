@@ -13,10 +13,23 @@ import {
   Target,
   Lightbulb,
   MoreHorizontal,
+  FileText,
+  Database,
+  GraduationCap,
+  Handshake,
+  Code,
+  ShieldCheck,
 } from "lucide-react";
 import type { ResearchActivityData, ResearchActivityType } from "@/types";
 
 const TYPE_CONFIG: Record<ResearchActivityType, { icon: typeof Calendar; color: string; label: string }> = {
+  RESEARCH_PAPER: { icon: FileText, color: "text-blue-400", label: "Research Paper" },
+  JOURNAL_ARTICLE: { icon: BookOpen, color: "text-indigo-400", label: "Journal Article" },
+  CONFERENCE_PAPER: { icon: FileText, color: "text-violet-400", label: "Conference Paper" },
+  WORKING_PAPER: { icon: FileText, color: "text-slate-400", label: "Working Paper" },
+  TECHNICAL_REPORT: { icon: FileText, color: "text-teal-400", label: "Technical Report" },
+  BOOK_CHAPTER: { icon: BookOpen, color: "text-rose-400", label: "Book Chapter" },
+  DATASET_RELEASE: { icon: Database, color: "text-emerald-400", label: "Dataset" },
   CONFERENCE_ATTENDED: { icon: Users, color: "text-blue-400", label: "Conference" },
   TALK_GIVEN: { icon: Mic, color: "text-purple-400", label: "Talk" },
   PEER_REVIEW: { icon: BookOpen, color: "text-green-400", label: "Peer Review" },
@@ -24,6 +37,11 @@ const TYPE_CONFIG: Record<ResearchActivityType, { icon: typeof Calendar; color: 
   MILESTONE: { icon: Lightbulb, color: "text-cyan-400", label: "Milestone" },
   WORKSHOP: { icon: Users, color: "text-amber-400", label: "Workshop" },
   AWARD: { icon: Award, color: "text-yellow-400", label: "Award" },
+  TEACHING: { icon: GraduationCap, color: "text-orange-400", label: "Teaching" },
+  SUPERVISION: { icon: GraduationCap, color: "text-pink-400", label: "Supervision" },
+  COLLABORATION: { icon: Handshake, color: "text-sky-400", label: "Collaboration" },
+  PATENT: { icon: ShieldCheck, color: "text-amber-300", label: "Patent" },
+  SOFTWARE_RELEASE: { icon: Code, color: "text-lime-400", label: "Software" },
   OTHER: { icon: MoreHorizontal, color: "text-text-secondary", label: "Other" },
 };
 

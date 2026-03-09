@@ -296,6 +296,13 @@ enum PublicationType {
 }
 
 enum ResearchActivityType {
+  RESEARCH_PAPER
+  JOURNAL_ARTICLE
+  CONFERENCE_PAPER
+  WORKING_PAPER
+  TECHNICAL_REPORT
+  BOOK_CHAPTER
+  DATASET_RELEASE
   CONFERENCE_ATTENDED
   TALK_GIVEN
   PEER_REVIEW
@@ -303,6 +310,11 @@ enum ResearchActivityType {
   MILESTONE
   WORKSHOP
   AWARD
+  TEACHING
+  SUPERVISION
+  COLLABORATION
+  PATENT
+  SOFTWARE_RELEASE
   OTHER
 }
 
@@ -376,6 +388,7 @@ model ResearchActivity {
   dataUrl          String?
   supplementaryUrl String?
   accessLevel      PublicationAccessLevel @default(FREE)
+  published        Boolean               @default(false)
   createdAt        DateTime              @default(now())
   updatedAt        DateTime              @updatedAt
 }

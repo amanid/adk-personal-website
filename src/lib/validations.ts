@@ -108,8 +108,11 @@ export const publicationSchema = z.object({
 
 export const researchActivitySchema = z.object({
   type: z.enum([
+    "RESEARCH_PAPER", "JOURNAL_ARTICLE", "CONFERENCE_PAPER", "WORKING_PAPER",
+    "TECHNICAL_REPORT", "BOOK_CHAPTER", "DATASET_RELEASE",
     "CONFERENCE_ATTENDED", "TALK_GIVEN", "PEER_REVIEW",
-    "GRANT_RECEIVED", "MILESTONE", "WORKSHOP", "AWARD", "OTHER",
+    "GRANT_RECEIVED", "MILESTONE", "WORKSHOP", "AWARD",
+    "TEACHING", "SUPERVISION", "COLLABORATION", "PATENT", "SOFTWARE_RELEASE", "OTHER",
   ]),
   title: z.string().min(3, "Title is required"),
   titleFr: z.string().optional(),
@@ -123,6 +126,7 @@ export const researchActivitySchema = z.object({
   dataUrl: z.string().optional(),
   supplementaryUrl: z.string().optional(),
   accessLevel: z.enum(["FREE", "GATED"]).optional(),
+  published: z.boolean().optional(),
 });
 
 export const experienceSchema = z.object({
