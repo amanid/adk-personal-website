@@ -306,6 +306,58 @@ export default function AdminPublicationsPage() {
               <textarea value={form.abstractFr} onChange={(e) => setForm({ ...form, abstractFr: e.target.value })} rows={4} className={INPUT_CLASS} />
             </div>
 
+            {/* File Uploads — PDF & Data */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 border border-gold/20 rounded-lg bg-gold/[0.02]">
+              <div>
+                <FileUpload
+                  accept=".pdf,application/pdf"
+                  onUpload={(url) => setForm({ ...form, pdfUrl: url })}
+                  currentUrl={form.pdfUrl}
+                  label="Publication PDF *"
+                />
+              </div>
+              <div>
+                <FileUpload
+                  accept=".csv,.xls,.xlsx,.json,.zip,text/csv,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/json,application/zip"
+                  onUpload={(url) => setForm({ ...form, dataUrl: url })}
+                  currentUrl={form.dataUrl}
+                  label="Data File (CSV, Excel, ZIP)"
+                />
+                <p className="text-xs text-text-muted mt-1">
+                  Optional. For data-tier subscribers.
+                </p>
+              </div>
+            </div>
+
+            {/* Access Level */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm text-text-secondary mb-1">Access Level</label>
+                <select
+                  value={form.accessLevel}
+                  onChange={(e) => setForm({ ...form, accessLevel: e.target.value })}
+                  className={INPUT_CLASS}
+                >
+                  <option value="FREE">Free — Open access</option>
+                  <option value="GATED">Premium — Subscription required</option>
+                </select>
+              </div>
+              <div className="flex items-end pb-1">
+                <div className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    id="featured"
+                    checked={form.featured}
+                    onChange={(e) => setForm({ ...form, featured: e.target.checked })}
+                    className="w-4 h-4 rounded border-glass-border"
+                  />
+                  <label htmlFor="featured" className="text-sm text-text-secondary cursor-pointer">
+                    Featured publication
+                  </label>
+                </div>
+              </div>
+            </div>
+
             {/* Authors / Journal */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
@@ -447,60 +499,6 @@ export default function AdminPublicationsPage() {
                 <input type="number" value={form.citationCount} onChange={(e) => setForm({ ...form, citationCount: parseInt(e.target.value) || 0 })} min={0} className={INPUT_CLASS} />
               </div>
             </div>
-
-            {/* Access Level & Data URL */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 border border-gold/20 rounded-lg">
-              <div>
-                <label className="block text-sm text-gold mb-1">Access Level</label>
-                <select
-                  value={form.accessLevel}
-                  onChange={(e) => setForm({ ...form, accessLevel: e.target.value })}
-                  className={INPUT_CLASS}
-                >
-                  <option value="FREE">Free — Open access</option>
-                  <option value="GATED">Premium — Subscription required</option>
-                </select>
-                <p className="text-xs text-text-muted mt-1">
-                  {form.accessLevel === "GATED"
-                    ? "Users need an active subscription to download/view this publication."
-                    : "This publication is freely accessible to all visitors."}
-                </p>
-              </div>
-              <div>
-                <label className="block text-sm text-gold mb-1">Data File</label>
-                <FileUpload
-                  accept=".csv,.xls,.xlsx,.json,.zip,text/csv,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/json,application/zip"
-                  onUpload={(url) => setForm({ ...form, dataUrl: url })}
-                  currentUrl={form.dataUrl}
-                  label=""
-                />
-                <p className="text-xs text-text-muted mt-1">
-                  Optional. Upload the underlying dataset (CSV, Excel, JSON, ZIP) for data-tier subscribers.
-                </p>
-              </div>
-            </div>
-
-            {/* Featured checkbox */}
-            <div className="flex items-center gap-2">
-              <input
-                type="checkbox"
-                id="featured"
-                checked={form.featured}
-                onChange={(e) => setForm({ ...form, featured: e.target.checked })}
-                className="w-4 h-4 rounded border-glass-border"
-              />
-              <label htmlFor="featured" className="text-sm text-text-secondary cursor-pointer">
-                Featured publication
-              </label>
-            </div>
-
-            {/* PDF Upload */}
-            <FileUpload
-              accept=".pdf,application/pdf"
-              onUpload={(url) => setForm({ ...form, pdfUrl: url })}
-              currentUrl={form.pdfUrl}
-              label="Publication PDF"
-            />
 
             {/* Action buttons */}
             <div className="flex gap-3">
