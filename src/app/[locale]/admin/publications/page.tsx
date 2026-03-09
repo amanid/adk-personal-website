@@ -467,15 +467,15 @@ export default function AdminPublicationsPage() {
                 </p>
               </div>
               <div>
-                <label className="block text-sm text-gold mb-1">Data File URL</label>
-                <input
-                  value={form.dataUrl}
-                  onChange={(e) => setForm({ ...form, dataUrl: e.target.value })}
-                  className={INPUT_CLASS}
-                  placeholder="URL to dataset (CSV, Excel, etc.)"
+                <label className="block text-sm text-gold mb-1">Data File</label>
+                <FileUpload
+                  accept=".csv,.xls,.xlsx,.json,.zip,text/csv,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/json,application/zip"
+                  onUpload={(url) => setForm({ ...form, dataUrl: url })}
+                  currentUrl={form.dataUrl}
+                  label=""
                 />
                 <p className="text-xs text-text-muted mt-1">
-                  Optional. Link to the underlying data for data-tier subscribers.
+                  Optional. Upload the underlying dataset (CSV, Excel, JSON, ZIP) for data-tier subscribers.
                 </p>
               </div>
             </div>

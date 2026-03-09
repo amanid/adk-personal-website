@@ -23,6 +23,7 @@ export default function FileUpload({
   const inputRef = useRef<HTMLInputElement>(null);
 
   const isImage = accept.includes("image");
+  const isPdf = accept.includes("pdf");
 
   const handleFile = useCallback(
     async (file: File) => {
@@ -120,7 +121,7 @@ export default function FileUpload({
               <FileText className="w-8 h-8 text-gold" />
             )}
             <span className="text-sm text-text-primary truncate flex-1">
-              {isImage ? "Image uploaded" : preview}
+              {isImage ? "Image uploaded" : isPdf ? "PDF uploaded" : preview || "File uploaded"}
             </span>
             <button
               type="button"
@@ -143,7 +144,7 @@ export default function FileUpload({
             <span className="text-sm text-text-secondary">
               Drop file here or click to browse
             </span>
-            <span className="text-xs text-text-muted">Max 10MB</span>
+            <span className="text-xs text-text-muted">Max 25MB</span>
           </div>
         )}
       </div>

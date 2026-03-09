@@ -9,8 +9,13 @@ const ALLOWED_TYPES = [
   "image/webp",
   "image/gif",
   "application/pdf",
+  "text/csv",
+  "application/vnd.ms-excel",
+  "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+  "application/zip",
+  "application/json",
 ];
-const MAX_SIZE = 10 * 1024 * 1024; // 10MB
+const MAX_SIZE = 25 * 1024 * 1024; // 25MB
 
 export async function POST(request: Request) {
   try {
@@ -28,7 +33,7 @@ export async function POST(request: Request) {
 
     if (!ALLOWED_TYPES.includes(file.type)) {
       return NextResponse.json(
-        { error: "Invalid file type. Allowed: jpg, png, webp, gif, pdf" },
+        { error: "Invalid file type. Allowed: jpg, png, webp, gif, pdf, csv, xls, xlsx, zip, json" },
         { status: 400 }
       );
     }
