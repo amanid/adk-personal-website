@@ -40,6 +40,7 @@ interface Publication {
   citationCount: number | null;
   accessLevel: string;
   dataUrl: string | null;
+  supplementaryUrl: string | null;
   _count: { comments: number };
 }
 
@@ -84,6 +85,7 @@ const emptyForm = {
   citationCount: 0,
   accessLevel: "FREE",
   dataUrl: "",
+  supplementaryUrl: "",
 };
 
 const INPUT_CLASS = "w-full px-4 py-2.5 bg-navy/50 border border-glass-border rounded-lg text-text-primary focus:border-gold/50 focus:outline-none text-sm";
@@ -155,6 +157,7 @@ export default function AdminPublicationsPage() {
       citationCount: pub.citationCount || 0,
       accessLevel: pub.accessLevel || "FREE",
       dataUrl: pub.dataUrl || "",
+      supplementaryUrl: pub.supplementaryUrl || "",
     });
     setError(null);
     setShowEditor(true);
@@ -201,6 +204,7 @@ export default function AdminPublicationsPage() {
       citationCount: form.citationCount || undefined,
       accessLevel: form.accessLevel as "FREE" | "GATED",
       dataUrl: form.dataUrl || undefined,
+      supplementaryUrl: form.supplementaryUrl || undefined,
     };
 
     try {
@@ -306,26 +310,40 @@ export default function AdminPublicationsPage() {
               <textarea value={form.abstractFr} onChange={(e) => setForm({ ...form, abstractFr: e.target.value })} rows={4} className={INPUT_CLASS} />
             </div>
 
-            {/* File Uploads — PDF & Data */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 border border-gold/20 rounded-lg bg-gold/[0.02]">
-              <div>
-                <FileUpload
-                  accept=".pdf,application/pdf"
-                  onUpload={(url) => setForm({ ...form, pdfUrl: url })}
-                  currentUrl={form.pdfUrl}
-                  label="Publication PDF *"
-                />
-              </div>
-              <div>
-                <FileUpload
-                  accept=".csv,.xls,.xlsx,.json,.zip,text/csv,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/json,application/zip"
-                  onUpload={(url) => setForm({ ...form, dataUrl: url })}
-                  currentUrl={form.dataUrl}
-                  label="Data File (CSV, Excel, ZIP)"
-                />
-                <p className="text-xs text-text-muted mt-1">
-                  Optional. For data-tier subscribers.
-                </p>
+            {/* File Uploads — PDF, Data & Supplementary */}
+            <div className="p-4 border border-gold/20 rounded-lg bg-gold/[0.02] space-y-4">
+              <h3 className="text-sm font-medium text-gold">File Attachments</h3>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                  <FileUpload
+                    accept=".pdf,application/pdf,.doc,.docx,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                    onUpload={(url) => setForm({ ...form, pdfUrl: url })}
+                    currentUrl={form.pdfUrl}
+                    label="Publication PDF / Word *"
+                  />
+                </div>
+                <div>
+                  <FileUpload
+                    accept=".csv,.xls,.xlsx,.json,.zip,.dta,.sav,.sps,.r,.rmd,.py,.ipynb,.do,text/csv,application/json,application/zip"
+                    onUpload={(url) => setForm({ ...form, dataUrl: url })}
+                    currentUrl={form.dataUrl}
+                    label="Dataset (CSV, Excel, Stata, R, ZIP)"
+                  />
+                  <p className="text-xs text-text-muted mt-1">
+                    Optional. For data-tier subscribers.
+                  </p>
+                </div>
+                <div>
+                  <FileUpload
+                    accept=".tex,.bib,.sty,.cls,.bst,.zip,.tar,.gz,.ppt,.pptx,.txt,application/zip,application/x-tex"
+                    onUpload={(url) => setForm({ ...form, supplementaryUrl: url })}
+                    currentUrl={form.supplementaryUrl}
+                    label="Supplementary (LaTeX, Slides, ZIP)"
+                  />
+                  <p className="text-xs text-text-muted mt-1">
+                    LaTeX source, BibTeX, presentations, etc.
+                  </p>
+                </div>
               </div>
             </div>
 

@@ -103,6 +103,7 @@ export const publicationSchema = z.object({
   citationCount: z.number().int().min(0).optional(),
   accessLevel: z.enum(["FREE", "GATED"]).optional(),
   dataUrl: z.string().optional(),
+  supplementaryUrl: z.string().optional(),
 });
 
 export const researchActivitySchema = z.object({
@@ -118,6 +119,10 @@ export const researchActivitySchema = z.object({
   location: z.string().optional(),
   locationFr: z.string().optional(),
   url: z.string().optional(),
+  paperUrl: z.string().optional(),
+  dataUrl: z.string().optional(),
+  supplementaryUrl: z.string().optional(),
+  accessLevel: z.enum(["FREE", "GATED"]).optional(),
 });
 
 export const experienceSchema = z.object({

@@ -119,6 +119,7 @@ export interface PublicationData {
   views?: number;
   accessLevel?: "FREE" | "GATED";
   dataUrl?: string;
+  supplementaryUrl?: string;
 }
 
 export interface ResearchActivityData {
@@ -132,4 +133,8 @@ export interface ResearchActivityData {
   location?: string;
   locationFr?: string;
   url?: string;
+  paperUrl?: string;
+  dataUrl?: string;
+  supplementaryUrl?: string;
+  accessLevel?: "FREE" | "GATED";
 }

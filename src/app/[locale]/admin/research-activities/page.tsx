@@ -11,7 +11,13 @@ import {
   MapPin,
   ExternalLink,
   FlaskConical,
+  Lock,
+  Unlock,
+  FileText,
+  Database,
+  Paperclip,
 } from "lucide-react";
+import FileUpload from "@/components/admin/FileUpload";
 import type { ResearchActivityType } from "@/types";
 
 interface Activity {
@@ -25,6 +31,10 @@ interface Activity {
   location: string | null;
   locationFr: string | null;
   url: string | null;
+  paperUrl: string | null;
+  dataUrl: string | null;
+  supplementaryUrl: string | null;
+  accessLevel: string;
 }
 
 const ACTIVITY_TYPES: { value: ResearchActivityType; label: string }[] = [
@@ -48,7 +58,13 @@ const emptyForm = {
   location: "",
   locationFr: "",
   url: "",
+  paperUrl: "",
+  dataUrl: "",
+  supplementaryUrl: "",
+  accessLevel: "FREE",
 };
+
+const INPUT_CLASS = "w-full px-3 py-2 bg-navy/50 border border-glass-border rounded-lg text-text-primary focus:border-gold/50 focus:outline-none text-sm";
 
 export default function AdminResearchActivitiesPage() {
   const [activities, setActivities] = useState<Activity[]>([]);
@@ -93,6 +109,10 @@ export default function AdminResearchActivitiesPage() {
       location: activity.location || "",
       locationFr: activity.locationFr || "",
       url: activity.url || "",
+      paperUrl: activity.paperUrl || "",
+      dataUrl: activity.dataUrl || "",
+      supplementaryUrl: activity.supplementaryUrl || "",
+      accessLevel: activity.accessLevel || "FREE",
     });
     setEditingId(activity.id);
     setShowForm(true);
@@ -110,6 +130,10 @@ export default function AdminResearchActivitiesPage() {
         location: form.location || undefined,
         locationFr: form.locationFr || undefined,
         url: form.url || undefined,
+        paperUrl: form.paperUrl || undefined,
+        dataUrl: form.dataUrl || undefined,
+        supplementaryUrl: form.supplementaryUrl || undefined,
+        accessLevel: form.accessLevel as "FREE" | "GATED",
       };
 
       const url = editingId
@@ -186,13 +210,14 @@ export default function AdminResearchActivitiesPage() {
             </button>
           </div>
 
+          {/* Type & Date */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm text-text-secondary mb-1">Type</label>
               <select
                 value={form.type}
                 onChange={(e) => setForm({ ...form, type: e.target.value as ResearchActivityType })}
-                className="w-full px-3 py-2 bg-navy/50 border border-glass-border rounded-lg text-text-primary focus:border-gold/50 focus:outline-none"
+                className={INPUT_CLASS}
               >
                 {ACTIVITY_TYPES.map((t) => (
                   <option key={t.value} value={t.value}>
@@ -207,12 +232,13 @@ export default function AdminResearchActivitiesPage() {
                 type="date"
                 value={form.date}
                 onChange={(e) => setForm({ ...form, date: e.target.value })}
-                className="w-full px-3 py-2 bg-navy/50 border border-glass-border rounded-lg text-text-primary focus:border-gold/50 focus:outline-none"
+                className={INPUT_CLASS}
                 required
               />
             </div>
           </div>
 
+          {/* Title EN/FR */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm text-text-secondary mb-1">Title (EN) *</label>
@@ -220,7 +246,7 @@ export default function AdminResearchActivitiesPage() {
                 type="text"
                 value={form.title}
                 onChange={(e) => setForm({ ...form, title: e.target.value })}
-                className="w-full px-3 py-2 bg-navy/50 border border-glass-border rounded-lg text-text-primary focus:border-gold/50 focus:outline-none"
+                className={INPUT_CLASS}
                 required
               />
             </div>
@@ -230,11 +256,12 @@ export default function AdminResearchActivitiesPage() {
                 type="text"
                 value={form.titleFr}
                 onChange={(e) => setForm({ ...form, titleFr: e.target.value })}
-                className="w-full px-3 py-2 bg-navy/50 border border-glass-border rounded-lg text-text-primary focus:border-gold/50 focus:outline-none"
+                className={INPUT_CLASS}
               />
             </div>
           </div>
 
+          {/* Description EN/FR */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm text-text-secondary mb-1">Description (EN)</label>
@@ -242,7 +269,7 @@ export default function AdminResearchActivitiesPage() {
                 value={form.description}
                 onChange={(e) => setForm({ ...form, description: e.target.value })}
                 rows={3}
-                className="w-full px-3 py-2 bg-navy/50 border border-glass-border rounded-lg text-text-primary focus:border-gold/50 focus:outline-none resize-none"
+                className={INPUT_CLASS + " resize-none"}
               />
             </div>
             <div>
@@ -251,11 +278,61 @@ export default function AdminResearchActivitiesPage() {
                 value={form.descriptionFr}
                 onChange={(e) => setForm({ ...form, descriptionFr: e.target.value })}
                 rows={3}
-                className="w-full px-3 py-2 bg-navy/50 border border-glass-border rounded-lg text-text-primary focus:border-gold/50 focus:outline-none resize-none"
+                className={INPUT_CLASS + " resize-none"}
               />
             </div>
           </div>
 
+          {/* File Uploads — Paper, Data, Supplementary */}
+          <div className="p-4 border border-gold/20 rounded-lg bg-gold/[0.02] space-y-4">
+            <h3 className="text-sm font-medium text-gold flex items-center gap-2">
+              <Paperclip className="w-4 h-4" />
+              File Attachments
+            </h3>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div>
+                <FileUpload
+                  accept=".pdf,application/pdf,.doc,.docx,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                  onUpload={(url) => setForm({ ...form, paperUrl: url })}
+                  currentUrl={form.paperUrl}
+                  label="Research Paper (PDF, Word)"
+                />
+              </div>
+              <div>
+                <FileUpload
+                  accept=".csv,.xls,.xlsx,.json,.zip,.dta,.sav,.sps,.r,.rmd,.py,.ipynb,.do,text/csv,application/json,application/zip"
+                  onUpload={(url) => setForm({ ...form, dataUrl: url })}
+                  currentUrl={form.dataUrl}
+                  label="Dataset (CSV, Excel, Stata, R, ZIP)"
+                />
+              </div>
+              <div>
+                <FileUpload
+                  accept=".tex,.bib,.sty,.cls,.bst,.zip,.tar,.gz,.ppt,.pptx,.txt,application/zip,application/x-tex"
+                  onUpload={(url) => setForm({ ...form, supplementaryUrl: url })}
+                  currentUrl={form.supplementaryUrl}
+                  label="Supplementary (LaTeX, Slides, ZIP)"
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Access Level */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm text-text-secondary mb-1">Access Level</label>
+              <select
+                value={form.accessLevel}
+                onChange={(e) => setForm({ ...form, accessLevel: e.target.value })}
+                className={INPUT_CLASS}
+              >
+                <option value="FREE">Free — Open access</option>
+                <option value="GATED">Premium — Subscription required</option>
+              </select>
+            </div>
+          </div>
+
+          {/* Location EN/FR */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm text-text-secondary mb-1">Location (EN)</label>
@@ -263,7 +340,7 @@ export default function AdminResearchActivitiesPage() {
                 type="text"
                 value={form.location}
                 onChange={(e) => setForm({ ...form, location: e.target.value })}
-                className="w-full px-3 py-2 bg-navy/50 border border-glass-border rounded-lg text-text-primary focus:border-gold/50 focus:outline-none"
+                className={INPUT_CLASS}
               />
             </div>
             <div>
@@ -272,18 +349,19 @@ export default function AdminResearchActivitiesPage() {
                 type="text"
                 value={form.locationFr}
                 onChange={(e) => setForm({ ...form, locationFr: e.target.value })}
-                className="w-full px-3 py-2 bg-navy/50 border border-glass-border rounded-lg text-text-primary focus:border-gold/50 focus:outline-none"
+                className={INPUT_CLASS}
               />
             </div>
           </div>
 
+          {/* URL */}
           <div>
-            <label className="block text-sm text-text-secondary mb-1">URL (optional)</label>
+            <label className="block text-sm text-text-secondary mb-1">External URL (optional)</label>
             <input
               type="url"
               value={form.url}
               onChange={(e) => setForm({ ...form, url: e.target.value })}
-              className="w-full px-3 py-2 bg-navy/50 border border-glass-border rounded-lg text-text-primary focus:border-gold/50 focus:outline-none"
+              className={INPUT_CLASS}
               placeholder="https://..."
             />
           </div>
@@ -326,6 +404,15 @@ export default function AdminResearchActivitiesPage() {
                   <span className="text-[10px] px-2 py-0.5 rounded-full bg-gold/10 text-gold font-medium uppercase tracking-wider">
                     {ACTIVITY_TYPES.find((t) => t.value === activity.type)?.label || activity.type}
                   </span>
+                  {activity.accessLevel === "GATED" ? (
+                    <span className="text-[9px] px-1.5 py-0.5 rounded bg-purple-500/10 text-purple-400 font-medium uppercase flex items-center gap-0.5">
+                      <Lock className="w-2.5 h-2.5" />Premium
+                    </span>
+                  ) : (
+                    <span className="text-[9px] px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-400 font-medium uppercase flex items-center gap-0.5">
+                      <Unlock className="w-2.5 h-2.5" />Free
+                    </span>
+                  )}
                   <span className="text-xs text-text-muted flex items-center gap-1">
                     <Calendar className="w-3 h-3" />
                     {new Date(activity.date).toLocaleDateString()}
@@ -344,17 +431,35 @@ export default function AdminResearchActivitiesPage() {
                 {activity.description && (
                   <p className="text-text-secondary text-sm mt-1 line-clamp-2">{activity.description}</p>
                 )}
-                {activity.url && (
-                  <a
-                    href={activity.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1 text-xs text-gold hover:text-gold-light mt-1 transition-colors"
-                  >
-                    <ExternalLink className="w-3 h-3" />
-                    Link
-                  </a>
-                )}
+                {/* File attachment indicators */}
+                <div className="flex flex-wrap gap-2 mt-2">
+                  {activity.paperUrl && (
+                    <span className="inline-flex items-center gap-1 text-xs text-blue-400 bg-blue-500/10 px-2 py-0.5 rounded">
+                      <FileText className="w-3 h-3" />Paper
+                    </span>
+                  )}
+                  {activity.dataUrl && (
+                    <span className="inline-flex items-center gap-1 text-xs text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded">
+                      <Database className="w-3 h-3" />Dataset
+                    </span>
+                  )}
+                  {activity.supplementaryUrl && (
+                    <span className="inline-flex items-center gap-1 text-xs text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded">
+                      <Paperclip className="w-3 h-3" />Supplementary
+                    </span>
+                  )}
+                  {activity.url && (
+                    <a
+                      href={activity.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1 text-xs text-gold hover:text-gold-light transition-colors"
+                    >
+                      <ExternalLink className="w-3 h-3" />
+                      Link
+                    </a>
+                  )}
+                </div>
               </div>
               <div className="flex items-center gap-2">
                 <button
