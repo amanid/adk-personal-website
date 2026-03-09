@@ -141,6 +141,8 @@ export interface ResearchActivityData {
   titleFr?: string;
   description?: string;
   descriptionFr?: string;
+  authors?: string[];
+  tags?: string[];
   date: string;
   location?: string;
   locationFr?: string;

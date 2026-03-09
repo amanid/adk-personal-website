@@ -118,6 +118,8 @@ export const researchActivitySchema = z.object({
   titleFr: z.string().optional(),
   description: z.string().optional(),
   descriptionFr: z.string().optional(),
+  authors: z.array(z.string()).optional(),
+  tags: z.array(z.string()).optional(),
   date: z.string().min(1, "Date is required"),
   location: z.string().optional(),
   locationFr: z.string().optional(),

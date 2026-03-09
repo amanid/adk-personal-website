@@ -29,6 +29,8 @@ interface Activity {
   titleFr: string | null;
   description: string | null;
   descriptionFr: string | null;
+  authors: string[];
+  tags: string[];
   date: string;
   location: string | null;
   locationFr: string | null;
@@ -73,6 +75,8 @@ const emptyForm = {
   titleFr: "",
   description: "",
   descriptionFr: "",
+  authors: "",
+  tags: "",
   date: new Date().toISOString().split("T")[0],
   location: "",
   locationFr: "",
@@ -125,6 +129,8 @@ export default function AdminResearchActivitiesPage() {
       titleFr: activity.titleFr || "",
       description: activity.description || "",
       descriptionFr: activity.descriptionFr || "",
+      authors: (activity.authors || []).join(", "),
+      tags: (activity.tags || []).join(", "),
       date: activity.date.split("T")[0],
       location: activity.location || "",
       locationFr: activity.locationFr || "",
@@ -148,6 +154,8 @@ export default function AdminResearchActivitiesPage() {
         titleFr: form.titleFr || undefined,
         description: form.description || undefined,
         descriptionFr: form.descriptionFr || undefined,
+        authors: form.authors ? form.authors.split(",").map((a) => a.trim()).filter(Boolean) : [],
+        tags: form.tags ? form.tags.split(",").map((t) => t.trim()).filter(Boolean) : [],
         location: form.location || undefined,
         locationFr: form.locationFr || undefined,
         url: form.url || undefined,
@@ -305,6 +313,30 @@ export default function AdminResearchActivitiesPage() {
                 onChange={(e) => setForm({ ...form, descriptionFr: e.target.value })}
                 rows={3}
                 className={INPUT_CLASS + " resize-none"}
+              />
+            </div>
+          </div>
+
+          {/* Authors & Tags */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm text-text-secondary mb-1">Authors (comma-separated)</label>
+              <input
+                type="text"
+                value={form.authors}
+                onChange={(e) => setForm({ ...form, authors: e.target.value })}
+                className={INPUT_CLASS}
+                placeholder="Author One, Author Two, ..."
+              />
+            </div>
+            <div>
+              <label className="block text-sm text-text-secondary mb-1">Tags (comma-separated)</label>
+              <input
+                type="text"
+                value={form.tags}
+                onChange={(e) => setForm({ ...form, tags: e.target.value })}
+                className={INPUT_CLASS}
+                placeholder="AI, Economics, Trade, ..."
               />
             </div>
           </div>
@@ -474,11 +506,23 @@ export default function AdminResearchActivitiesPage() {
                   )}
                 </div>
                 <h3 className="font-medium">{activity.title}</h3>
+                {activity.authors.length > 0 && (
+                  <p className="text-text-muted text-xs mt-0.5">{activity.authors.join(", ")}</p>
+                )}
                 {activity.titleFr && (
                   <p className="text-text-muted text-sm">{activity.titleFr}</p>
                 )}
                 {activity.description && (
                   <p className="text-text-secondary text-sm mt-1 line-clamp-2">{activity.description}</p>
+                )}
+                {activity.tags.length > 0 && (
+                  <div className="flex flex-wrap gap-1 mt-1">
+                    {activity.tags.map((tag) => (
+                      <span key={tag} className="text-[10px] px-1.5 py-0.5 rounded bg-gold/10 text-gold/80">
+                        {tag}
+                      </span>
+                    ))}
+                  </div>
                 )}
                 {/* File attachment indicators */}
                 <div className="flex flex-wrap gap-2 mt-2">

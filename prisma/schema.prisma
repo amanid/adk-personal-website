@@ -380,6 +380,8 @@ model ResearchActivity {
   titleFr          String?
   description      String?               @db.Text
   descriptionFr    String?               @db.Text
+  authors          String[]
+  tags             String[]
   date             DateTime
   location         String?
   locationFr       String?
