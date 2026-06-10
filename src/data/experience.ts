@@ -10,7 +10,7 @@ export const experiences: ExperienceItem[] = [
     startDate: "Sep 2023",
     endDate: null,
     description: [
-      "Designed and implemented end-to-end medallion architecture (Bronze/Silver/Gold) on Databricks with Delta Lake and Unity Catalog, establishing the enterprise data lakehouse foundation for all analytical and operational workloads",
+      "Architected and deployed end-to-end medallion architecture (Bronze/Silver/Gold) on Databricks with Delta Lake and Unity Catalog, establishing the enterprise data lakehouse foundation for all analytical and operational workloads",
       "Architected Master Data Management (MDM) solutions consolidating party data across four enterprise systems (CRM, Core Banking, Treasury Management, ERP), creating unified golden records for institutional counterparties",
       "Developed comprehensive data architecture blueprints including conceptual and logical data models, entity relationship diagrams, data dictionaries, and data flow documentation for mission-critical financial systems",
       "Created the enterprise data quality framework with automated metrics scripted on Databricks, monitoring completeness, consistency, timeliness, and accuracy across all data domains",
@@ -55,14 +55,14 @@ export const experiences: ExperienceItem[] = [
     startDate: "Dec 2024",
     endDate: "May 2025",
     description: [
-      "Designed and implemented an automated ETL pipeline on Databricks to process heterogeneous infrastructure datasets from six countries (.csv, .xlsx, .gpkg, .tiff), enabling scalable multi-format data ingestion",
+      "Built an automated ETL pipeline on Databricks to process heterogeneous infrastructure datasets from six countries (.csv, .xlsx, .gpkg, .tiff), enabling scalable multi-format data ingestion",
       "Developed a dynamic Data Quality (DQ) framework with rule-based checks (completeness, consistency, geographic integrity) and generated dual-format reports (.csv/.xlsx) with diagnostics and remediation guidance",
       "Integrated backend logic into the CPP toolkit frontend, enabling users to upload data, trigger preprocessing, and download reports via a seamless web interface",
       "Delivered YAML-based configuration for pipeline portability and no-code extensibility; coordinated full testing and deployment in shared compute environments",
       "Produced a video walkthrough and technical handover package for long-term sustainability and knowledge transfer",
     ],
     descriptionFr: [
-      "Conception et implémentation d'un pipeline ETL automatisé sur Databricks pour traiter des jeux de données d'infrastructure hétérogènes provenant de six pays (.csv, .xlsx, .gpkg, .tiff), permettant une ingestion de données multi-formats évolutive",
+      "Construction d'un pipeline ETL automatisé sur Databricks pour traiter des jeux de données d'infrastructure hétérogènes provenant de six pays (.csv, .xlsx, .gpkg, .tiff), permettant une ingestion de données multi-formats évolutive",
       "Développement d'un cadre dynamique de qualité des données (DQ) avec des contrôles basés sur des règles (complétude, cohérence, intégrité géographique) et génération de rapports double format (.csv/.xlsx) avec diagnostics et conseils de remédiation",
       "Intégration de la logique backend dans le frontend du toolkit CPP, permettant aux utilisateurs de télécharger des données, déclencher le prétraitement et télécharger des rapports via une interface web fluide",
       "Livraison d'une configuration basée sur YAML pour la portabilité des pipelines et l'extensibilité sans code ; coordination des tests complets et du déploiement dans des environnements de calcul partagés",
@@ -221,13 +221,13 @@ export const experiences: ExperienceItem[] = [
     startDate: "Jun 2013",
     endDate: "Oct 2015",
     description: [
-      "Designed and implemented M&E data architectures for agroforestry research projects; developed and maintained relational databases (Access, PostgreSQL) to monitor performance indicators",
+      "Built M&E data architectures for agroforestry research projects; developed and maintained relational databases (Access, PostgreSQL) to monitor performance indicators",
       "Conducted 10+ household studies (baselines, midterms, endlines) across West Africa; migrated data collection workflows from paper to digital systems using Open Data Kit",
       "Automated data analysis and reporting pipelines using R, Excel, and Access; trained research teams in Kenya and Côte d'Ivoire on data quality best practices",
       "Managed complex experimental and survey datasets; performed advanced statistical analyses using R and STATA for peer-reviewed research outputs",
     ],
     descriptionFr: [
-      "Conception et implémentation d'architectures de données S&E pour les projets de recherche en agroforesterie ; développement et maintenance de bases de données relationnelles (Access, PostgreSQL) pour le suivi des indicateurs de performance",
+      "Construction d'architectures de données S&E pour les projets de recherche en agroforesterie ; développement et maintenance de bases de données relationnelles (Access, PostgreSQL) pour le suivi des indicateurs de performance",
       "Réalisation de plus de 10 études auprès des ménages (référence, mi-parcours, fin de projet) à travers l'Afrique de l'Ouest ; migration des workflows de collecte de données du papier vers des systèmes numériques utilisant Open Data Kit",
       "Automatisation des pipelines d'analyse de données et de reporting utilisant R, Excel et Access ; formation des équipes de recherche au Kenya et en Côte d'Ivoire sur les meilleures pratiques de qualité des données",
       "Gestion de jeux de données expérimentales et d'enquêtes complexes ; réalisation d'analyses statistiques avancées utilisant R et STATA pour des publications de recherche évaluées par les pairs",

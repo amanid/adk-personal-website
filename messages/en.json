@@ -38,9 +38,9 @@
   },
   "home": {
     "who_i_am_title": "Who I Am",
-    "who_i_am_text": "With a Master's in Statistics & Econometrics from Université Toulouse I Capitole (France) and professional certificates from MIT, I bring 13+ years of expertise across 11 organizations in 6+ countries. My career spans the United Nations system (ITU, IOM, UNHCR, UNIDIR), the International Cocoa Organization, and the African Export-Import Bank — where I've built enterprise AI systems, led econometric analysis of global commodity markets, and designed data architectures at institutional scale. Today, I operate as a full-stack professional spanning the entire data-to-intelligence continuum: from rigorous statistical and econometric analysis, through data engineering and architecture, to machine learning, AI systems, and full-stack web application development. I am driven by a conviction that data and intelligence are the most powerful levers for economic transformation and institutional excellence.",
+    "who_i_am_text": "With a Master's in Statistics & Econometrics from Université Toulouse I Capitole (France) and professional certificates from MIT, I bring 13+ years of expertise across 11 organizations in 6+ countries. My career spans the United Nations system (ITU, IOM, UNHCR, UNIDIR), the International Cocoa Organization, and the African Export-Import Bank — where I've built enterprise AI systems, led econometric analysis of global commodity markets, and designed data architectures at institutional scale. What ties this work together is range: I move comfortably from rigorous statistical and econometric analysis to data engineering, machine learning, and the full-stack applications that put those models into people's hands. I'm driven by a conviction that data and intelligence are among the most powerful levers for economic transformation and institutional excellence.",
     "summary_title": "Professional Summary",
-    "summary_text": "A uniquely versatile full-stack professional combining deep expertise across the entire data value chain — from statistics and econometrics, through data engineering and science, to machine learning, AI systems, and full-stack application development. With over 13 years across 11 international organizations spanning the UN system, the International Cocoa Organization, development finance, and the private sector, I bridge the gap between rigorous quantitative analysis and production-grade technology solutions. From building enterprise AI systems, data architectures, and full-stack web platforms at Afreximbank to leading econometric analysis of global cocoa markets at ICCO, I bring a rare blend of statistical rigor, engineering depth, and strategic vision to every engagement.",
+    "summary_text": "A versatile professional who works end to end across the data value chain, I bridge rigorous quantitative analysis and production-grade technology — the distance between a sound model and a system people can actually use. Over 13+ years and 11 international organizations spanning the UN system, the International Cocoa Organization, development finance, and the private sector, that has meant building enterprise AI systems, data architectures, and web platforms at Afreximbank, and leading econometric analysis of global cocoa markets at ICCO. It is a combination I rarely see in one place: statistical rigor, engineering depth, and strategic perspective brought to each engagement.",
     "expertise_title": "Areas of Expertise",
     "expertise_stats_title": "Statistics & Econometrics",
     "expertise_stats_desc": "Statistical inference, econometric modeling (ARIMA, VAR, VECM), causal analysis, survey design, impact evaluation, and time series forecasting for policy and research.",
@@ -100,7 +100,7 @@
     "title": "About Me",
     "subtitle": "Full-Stack Senior Statistician | Data Scientist | ML & AI Professional",
     "bio_title": "Professional Biography",
-    "bio": "With over 13 years of experience across 11 international organizations in 6+ countries, I bring full-stack expertise spanning the entire data-to-intelligence pipeline — from statistical and econometric analysis, through data engineering and architecture, to machine learning, AI systems, and full-stack web application development. Trained as a Statistics & Information Systems Engineer at ENSEA Abidjan and holding a Master's in Statistics & Econometrics from Université Toulouse I Capitole, I have further sharpened my skills through professional certificates from MIT in Data Engineering, AI & Data Science, and a MicroMasters in Data, Economics & Development Policy. My career spans the United Nations system (ITU, IOM, UNHCR, UNIDIR), the International Cocoa Organization (ICCO), the African Export-Import Bank (Afreximbank), Barry-Callebaut, FHI360, ICRAF, and PAC-CI. I specialize in designing enterprise data architectures, building full-stack applications, deploying production-grade AI/ML systems, conducting rigorous econometric analysis, and driving data strategy for complex international organizations.",
+    "bio": "Over more than 13 years, I have worked across 11 international organizations in 6+ countries, covering the full span from statistical and econometric analysis to data engineering, machine learning, AI systems, and the web applications that deliver them. I trained as a Statistics & Information Systems Engineer at ENSEA Abidjan and hold a Master's in Statistics & Econometrics from Université Toulouse I Capitole, sharpened further by professional certificates from MIT in Data Engineering, AI & Data Science, and a MicroMasters in Data, Economics & Development Policy. My career spans the United Nations system (ITU, IOM, UNHCR, UNIDIR), the International Cocoa Organization (ICCO), the African Export-Import Bank (Afreximbank), Barry-Callebaut, FHI360, ICRAF, and PAC-CI. I specialize in designing enterprise data architectures, building full-stack applications, deploying production-grade AI/ML systems, conducting rigorous econometric analysis, and driving data strategy for complex international organizations.",
     "education_title": "Education",
     "certifications_title": "Certifications",
     "skills_title": "Technical Skills",
@@ -126,6 +126,54 @@
     "statistics_desc": "Rigorous statistical analysis, econometric modeling, survey design, causal inference, and impact evaluation for research and policy.",
     "fullstack": "Full-Stack Web Development",
     "fullstack_desc": "Custom web applications, dashboards, and platforms built with modern technologies — Next.js, React, TypeScript, Python, PostgreSQL, and cloud deployment.",
+    "card_features": {
+      "statistics": [
+        "Statistical Inference & Modeling",
+        "Econometric Analysis (ARIMA, VAR, VECM)",
+        "Survey Design & Sampling",
+        "Causal Inference & Impact Evaluation"
+      ],
+      "consulting": [
+        "AI Readiness Assessment",
+        "Data Strategy Roadmap",
+        "Technology Selection",
+        "Implementation Planning"
+      ],
+      "architecture": [
+        "Lakehouse Architecture",
+        "Data Pipeline Design",
+        "Cloud Migration",
+        "Data Governance"
+      ],
+      "mlops": [
+        "ML Pipeline Development",
+        "Model Deployment & MLOps",
+        "LLM & RAG Systems",
+        "AI Agents & Multi-Model Platforms"
+      ],
+      "fullstack": [
+        "Next.js & React Applications",
+        "REST APIs & Backend Services",
+        "Database Design & ORM",
+        "Cloud Deployment & CI/CD"
+      ],
+      "training": [
+        "Custom Curricula",
+        "Hands-on Workshops",
+        "Team Upskilling",
+        "Executive Briefings"
+      ]
+    },
+    "service_options": {
+      "consulting": "AI & Data Strategy",
+      "statistics": "Statistical & Econometric Analysis",
+      "ai_development": "AI & ML Development",
+      "data_engineering": "Data Engineering & Architecture",
+      "fullstack": "Full-Stack Web Development",
+      "training": "Training & Workshops",
+      "speaking": "Speaking Engagements",
+      "other": "Other"
+    },
     "view_packages": "View structured consulting packages & pricing",
     "request_title": "Request a Service",
     "request_desc": "Fill out the form below and I'll get back to you within 24 hours.",
@@ -136,6 +184,7 @@
       "service_type": "Service Type",
       "description": "Project Description",
       "budget": "Estimated Budget",
+      "budget_placeholder": "e.g., $5,000 - $10,000",
       "submit": "Submit Request",
       "success": "Your request has been submitted successfully!",
       "error": "Something went wrong. Please try again."

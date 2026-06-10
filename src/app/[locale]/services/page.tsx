@@ -10,72 +10,12 @@ import { serviceRequestSchema, ServiceRequestInput } from "@/lib/validations";
 import { useState } from "react";
 
 const serviceCards = [
-  {
-    icon: BarChart3,
-    titleKey: "statistics",
-    descKey: "statistics_desc",
-    features: [
-      "Statistical Inference & Modeling",
-      "Econometric Analysis (ARIMA, VAR, VECM)",
-      "Survey Design & Sampling",
-      "Causal Inference & Impact Evaluation",
-    ],
-  },
-  {
-    icon: Brain,
-    titleKey: "consulting",
-    descKey: "consulting_desc",
-    features: [
-      "AI Readiness Assessment",
-      "Data Strategy Roadmap",
-      "Technology Selection",
-      "Implementation Planning",
-    ],
-  },
-  {
-    icon: Database,
-    titleKey: "architecture",
-    descKey: "architecture_desc",
-    features: [
-      "Lakehouse Architecture",
-      "Data Pipeline Design",
-      "Cloud Migration",
-      "Data Governance",
-    ],
-  },
-  {
-    icon: Server,
-    titleKey: "mlops",
-    descKey: "mlops_desc",
-    features: [
-      "ML Pipeline Development",
-      "Model Deployment & MLOps",
-      "LLM & RAG Systems",
-      "AI Agents & Multi-Model Platforms",
-    ],
-  },
-  {
-    icon: Code2,
-    titleKey: "fullstack",
-    descKey: "fullstack_desc",
-    features: [
-      "Next.js & React Applications",
-      "REST APIs & Backend Services",
-      "Database Design & ORM",
-      "Cloud Deployment & CI/CD",
-    ],
-  },
-  {
-    icon: GraduationCap,
-    titleKey: "training",
-    descKey: "training_desc",
-    features: [
-      "Custom Curricula",
-      "Hands-on Workshops",
-      "Team Upskilling",
-      "Executive Briefings",
-    ],
-  },
+  { icon: BarChart3, titleKey: "statistics", descKey: "statistics_desc" },
+  { icon: Brain, titleKey: "consulting", descKey: "consulting_desc" },
+  { icon: Database, titleKey: "architecture", descKey: "architecture_desc" },
+  { icon: Server, titleKey: "mlops", descKey: "mlops_desc" },
+  { icon: Code2, titleKey: "fullstack", descKey: "fullstack_desc" },
+  { icon: GraduationCap, titleKey: "training", descKey: "training_desc" },
 ];
 
 export default function ServicesPage() {
@@ -147,15 +87,17 @@ export default function ServicesPage() {
                 {t(service.descKey)}
               </p>
               <ul className="space-y-2">
-                {service.features.map((feature) => (
-                  <li
-                    key={feature}
-                    className="flex items-center gap-2 text-text-secondary text-sm"
-                  >
-                    <CheckCircle className="w-4 h-4 text-gold shrink-0" />
-                    {feature}
-                  </li>
-                ))}
+                {(t.raw(`card_features.${service.titleKey}`) as string[]).map(
+                  (feature) => (
+                    <li
+                      key={feature}
+                      className="flex items-center gap-2 text-text-secondary text-sm"
+                    >
+                      <CheckCircle className="w-4 h-4 text-gold shrink-0" />
+                      {feature}
+                    </li>
+                  )
+                )}
               </ul>
             </motion.div>
           ))}
@@ -257,14 +199,14 @@ export default function ServicesPage() {
                   {...register("serviceType")}
                   className="w-full px-4 py-2.5 bg-navy/50 border border-glass-border rounded-lg text-text-primary focus:border-gold/50 focus:outline-none transition-colors"
                 >
-                  <option value="CONSULTING">AI & Data Strategy</option>
-                  <option value="STATISTICS">Statistical & Econometric Analysis</option>
-                  <option value="AI_DEVELOPMENT">AI & ML Development</option>
-                  <option value="DATA_ENGINEERING">Data Engineering & Architecture</option>
-                  <option value="FULLSTACK">Full-Stack Web Development</option>
-                  <option value="TRAINING">Training & Workshops</option>
-                  <option value="SPEAKING">Speaking Engagements</option>
-                  <option value="OTHER">Other</option>
+                  <option value="CONSULTING">{t("service_options.consulting")}</option>
+                  <option value="STATISTICS">{t("service_options.statistics")}</option>
+                  <option value="AI_DEVELOPMENT">{t("service_options.ai_development")}</option>
+                  <option value="DATA_ENGINEERING">{t("service_options.data_engineering")}</option>
+                  <option value="FULLSTACK">{t("service_options.fullstack")}</option>
+                  <option value="TRAINING">{t("service_options.training")}</option>
+                  <option value="SPEAKING">{t("service_options.speaking")}</option>
+                  <option value="OTHER">{t("service_options.other")}</option>
                 </select>
               </div>
             </div>
@@ -292,7 +234,7 @@ export default function ServicesPage() {
               <input
                 {...register("budget")}
                 className="w-full px-4 py-2.5 bg-navy/50 border border-glass-border rounded-lg text-text-primary focus:border-gold/50 focus:outline-none transition-colors"
-                placeholder="e.g., $5,000 - $10,000"
+                placeholder={t("form.budget_placeholder")}
               />
             </div>
 
