@@ -44,6 +44,7 @@ export default function ShareBar({ title, slug }: ShareBarProps) {
           rel="noopener noreferrer"
           className="w-8 h-8 rounded-lg glass flex items-center justify-center text-text-muted hover:text-gold transition-colors"
           title={link.label}
+          aria-label={`Share on ${link.label}`}
         >
           <link.icon className="w-3.5 h-3.5" />
         </a>
@@ -52,6 +53,7 @@ export default function ShareBar({ title, slug }: ShareBarProps) {
         onClick={handleCopy}
         className="w-8 h-8 rounded-lg glass flex items-center justify-center text-text-muted hover:text-gold transition-colors"
         title="Copy link"
+        aria-label="Copy link"
       >
         {copied ? <Check className="w-3.5 h-3.5 text-green-400" /> : <Copy className="w-3.5 h-3.5" />}
       </button>

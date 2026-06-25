@@ -130,6 +130,7 @@ export default function FileUpload({
                 clear();
               }}
               className="p-1 text-text-muted hover:text-red-400"
+              aria-label="Remove file"
             >
               <X className="w-4 h-4" />
             </button>

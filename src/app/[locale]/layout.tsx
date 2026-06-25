@@ -202,9 +202,15 @@ export default async function LocaleLayout({
         <Providers>
           <NextIntlClientProvider locale={locale} messages={messages}>
             <ScrollProgress />
+            <a
+              href="#main-content"
+              className="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-[100] focus:rounded-lg focus:bg-gold focus:px-4 focus:py-2 focus:text-charcoal focus:font-medium"
+            >
+              Skip to content
+            </a>
             <Navbar />
             <Breadcrumbs />
-            <main className="flex-1 pt-16">
+            <main id="main-content" className="flex-1 pt-16">
               <PageTransition>{children}</PageTransition>
             </main>
             <Footer />

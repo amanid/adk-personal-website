@@ -68,6 +68,7 @@ export default function CitationExport({ publication }: { publication: Publicati
               onClick={handleCopy}
               className="absolute top-2 right-2 p-1.5 rounded-md glass hover:text-gold transition-colors"
               title="Copy citation"
+              aria-label="Copy citation"
             >
               {copied ? <Check className="w-4 h-4 text-green-400" /> : <Copy className="w-4 h-4" />}
             </button>

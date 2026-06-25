@@ -16,7 +16,8 @@
     "language": "FR",
     "research": "Research",
     "consulting": "Consulting",
-    "subscribe": "Premium"
+    "subscribe": "Premium",
+    "dba": "DBA"
   },
   "hero": {
     "greeting": "Hello, I'm",
@@ -451,5 +452,24 @@
     "not_found_title": "Page Not Found",
     "not_found_desc": "The page you're looking for doesn't exist or has been moved.",
     "publications": "Publications"
+  },
+  "dba": {
+    "eyebrow": "Doctoral Research",
+    "candidate": "Candidate",
+    "supervisor": "Research Supervisor",
+    "date": "Date",
+    "central_claim": "The central claim",
+    "abstract_title": "Abstract",
+    "framework_title": "Theoretical Framework",
+    "framework_subtitle": "Four load-bearing lenses, integrated into one explanatory architecture.",
+    "design_title": "Research Design",
+    "design_subtitle": "A quasi-experimental apparatus built entirely on public data.",
+    "findings_title": "Established to Date",
+    "findings_subtitle": "What the public evidence currently supports, under a strict zero-fabrication standard.",
+    "contributions_title": "Contributions",
+    "practical_title": "The practical message",
+    "keywords_title": "Keywords",
+    "declaration_title": "Declaration",
+    "signed": "Signed"
   }
 }

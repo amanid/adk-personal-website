@@ -25,6 +25,7 @@ export default function PdfViewer({ url, title }: PdfViewerProps) {
             rel="noopener noreferrer"
             className="p-1.5 rounded-md hover:bg-gold/10 text-text-secondary hover:text-gold transition-colors"
             title="Open in new tab"
+            aria-label="Open PDF in new tab"
           >
             <ExternalLink className="w-4 h-4" />
           </a>
@@ -32,6 +33,7 @@ export default function PdfViewer({ url, title }: PdfViewerProps) {
             onClick={() => setExpanded(!expanded)}
             className="p-1.5 rounded-md hover:bg-gold/10 text-text-secondary hover:text-gold transition-colors"
             title={expanded ? "Collapse" : "Expand"}
+            aria-label={expanded ? "Collapse PDF preview" : "Expand PDF preview"}
           >
             {expanded ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
           </button>

@@ -18,6 +18,7 @@ const navItems = [
   { key: "projects", href: "/projects" },
   { key: "publications", href: "/publications" },
   { key: "research", href: "/research" },
+  { key: "dba", href: "/dba" },
   { key: "blog", href: "/blog" },
   { key: "qa", href: "/qa" },
   { key: "contact", href: "/contact" },
@@ -54,13 +55,13 @@ export default function Navbar() {
           </Link>
 
           {/* Desktop Nav */}
-          <div className="hidden lg:flex items-center space-x-1">
+          <div className="hidden xl:flex items-center space-x-1">
             {navItems.map((item) => (
               <Link
                 key={item.key}
                 href={item.href}
                 className={cn(
-                  "px-3 py-2 text-sm font-medium rounded-lg transition-all duration-300",
+                  "px-3 py-2 text-sm font-medium rounded-lg transition-all duration-300 whitespace-nowrap",
                   pathname === item.href
                     ? "text-gold bg-gold/10"
                     : "text-text-secondary hover:text-gold hover:bg-white/5"
@@ -81,7 +82,7 @@ export default function Navbar() {
           </div>
 
           {/* Right side */}
-          <div className="hidden lg:flex items-center space-x-3">
+          <div className="hidden xl:flex items-center space-x-3 shrink-0">
             <button
               onClick={switchLocale}
               className="flex items-center gap-1 px-3 py-1.5 text-sm text-text-secondary hover:text-gold rounded-lg hover:bg-white/5 transition-all"
@@ -123,7 +124,7 @@ export default function Navbar() {
           {/* Mobile menu button */}
           <button
             onClick={() => setMobileOpen(!mobileOpen)}
-            className="lg:hidden p-2 text-text-secondary hover:text-gold transition-colors"
+            className="xl:hidden p-2 text-text-secondary hover:text-gold transition-colors"
             aria-label={mobileOpen ? "Close menu" : "Open menu"}
           >
             {mobileOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
@@ -138,7 +139,7 @@ export default function Navbar() {
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: "auto" }}
             exit={{ opacity: 0, height: 0 }}
-            className="lg:hidden glass-strong border-t border-glass-border"
+            className="xl:hidden glass-strong border-t border-glass-border"
           >
             <div className="px-4 py-4 space-y-2">
               {navItems.map((item) => (

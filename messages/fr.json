@@ -16,7 +16,8 @@
     "language": "EN",
     "research": "Recherche",
     "consulting": "Conseil",
-    "subscribe": "Premium"
+    "subscribe": "Premium",
+    "dba": "DBA"
   },
   "hero": {
     "greeting": "Bonjour, je suis",
@@ -451,5 +452,24 @@
     "not_found_title": "Page Introuvable",
     "not_found_desc": "La page que vous recherchez n'existe pas ou a été déplacée.",
     "publications": "Publications"
+  },
+  "dba": {
+    "eyebrow": "Recherche doctorale",
+    "candidate": "Candidat",
+    "supervisor": "Directeur de recherche",
+    "date": "Date",
+    "central_claim": "La thèse centrale",
+    "abstract_title": "Résumé",
+    "framework_title": "Cadre théorique",
+    "framework_subtitle": "Quatre prismes porteurs, intégrés en une seule architecture explicative.",
+    "design_title": "Dispositif de recherche",
+    "design_subtitle": "Un appareil quasi-expérimental entièrement bâti sur des données publiques.",
+    "findings_title": "Établi à ce jour",
+    "findings_subtitle": "Ce que les preuves publiques étayent actuellement, sous un strict standard de zéro fabrication.",
+    "contributions_title": "Contributions",
+    "practical_title": "Le message pratique",
+    "keywords_title": "Mots-clés",
+    "declaration_title": "Déclaration",
+    "signed": "Signé"
   }
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { useTranslations, useLocale } from "next-intl";
+import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/routing";
 import { Github, Linkedin, Mail, MapPin, ArrowUp, Phone } from "lucide-react";
 import NewsletterSignup from "@/components/NewsletterSignup";

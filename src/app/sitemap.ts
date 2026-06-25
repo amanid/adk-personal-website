@@ -4,6 +4,18 @@ import { prisma } from "@/lib/prisma";
 
 const BASE_URL = "https://www.konanamanidieudonne.org";
 
+// Build hreflang alternates for a given path so search engines pair the en/fr
+// versions (with an x-default fallback) instead of treating them as separate.
+function langAlternates(path: string) {
+  return {
+    languages: {
+      en: `${BASE_URL}/en${path}`,
+      fr: `${BASE_URL}/fr${path}`,
+      "x-default": `${BASE_URL}/en${path}`,
+    },
+  };
+}
+
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const locales = ["en", "fr"];
   const pages = [
@@ -14,6 +26,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { path: "/projects", changeFrequency: "monthly" as const, priority: 0.7 },
     { path: "/publications", changeFrequency: "weekly" as const, priority: 0.8 },
     { path: "/research", changeFrequency: "weekly" as const, priority: 0.7 },
+    { path: "/dba", changeFrequency: "monthly" as const, priority: 0.8 },
     { path: "/consulting", changeFrequency: "monthly" as const, priority: 0.9 },
     { path: "/subscribe", changeFrequency: "monthly" as const, priority: 0.8 },
     { path: "/blog", changeFrequency: "weekly" as const, priority: 0.8 },
@@ -31,6 +44,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         lastModified: new Date(),
         changeFrequency: page.changeFrequency,
         priority: page.priority,
+        alternates: langAlternates(page.path),
       });
     }
   }
@@ -43,6 +57,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         lastModified: new Date(),
         changeFrequency: "monthly" as const,
         priority: 0.6,
+        alternates: langAlternates(`/publications/${pub.slug}`),
       });
     }
   }
@@ -62,6 +77,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
           lastModified: post.updatedAt,
           changeFrequency: "weekly" as const,
           priority: 0.7,
+          alternates: langAlternates(`/blog/${post.slug}`),
         });
       }
     }

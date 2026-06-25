@@ -40,7 +40,7 @@ export default function ThemeSwitcher() {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -8, scale: 0.95 }}
             transition={{ duration: 0.15 }}
-            className="absolute right-0 top-full mt-2 w-56 glass-strong rounded-xl p-2 shadow-xl z-50"
+            className="absolute right-0 top-full mt-2 w-56 max-w-[90vw] glass-strong rounded-xl p-2 shadow-xl z-50"
           >
             {themes.map((t) => (
               <button
