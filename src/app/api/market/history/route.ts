@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getCached, setCache } from "@/lib/cache";
 import { rateLimit } from "@/lib/rate-limit";
+import { getYahooFinance } from "@/lib/yahoo";
 
 const COMMODITIES = [
   { symbol: "CC=F", name: "Cocoa" },
@@ -12,7 +13,9 @@ const COMMODITIES = [
 ];
 
 const CACHE_KEY = "commodities_history_public";
+const STALE_KEY = "commodities_history_public_stale";
 const CACHE_TTL = 30 * 60 * 1000; // 30 minutes
+const STALE_TTL = 7 * 24 * 60 * 60 * 1000; // 7 days — last-known-good fallback
 
 interface HistoryPoint {
   date: string;
@@ -29,8 +32,7 @@ export async function GET(request: Request) {
       return NextResponse.json(cached);
     }
 
-    const YahooFinance = (await import("yahoo-finance2")).default;
-    const yahooFinance = new YahooFinance({ suppressNotices: ["yahooSurvey"] });
+    const yahooFinance = await getYahooFinance();
 
     const now = new Date();
     const period1 = new Date(now);
@@ -64,21 +66,40 @@ export async function GET(request: Request) {
     );
 
     const history: Record<string, HistoryPoint[]> = {};
+    const failedSymbols: string[] = [];
     results.forEach((result, i) => {
       if (result.status === "fulfilled") {
         history[COMMODITIES[i].symbol] = result.value.points;
       } else {
-        console.error(`Failed to fetch history for ${COMMODITIES[i].symbol}:`, result.reason);
+        failedSymbols.push(COMMODITIES[i].symbol);
         history[COMMODITIES[i].symbol] = [];
       }
     });
 
     const response = { history, fetchedAt: new Date().toISOString() };
-
-    // Use shorter cache if some commodities have no data, so we retry sooner
     const successCount = Object.values(history).filter((pts) => pts.length >= 2).length;
-    const ttl = successCount === COMMODITIES.length ? CACHE_TTL : 2 * 60 * 1000;
-    setCache(CACHE_KEY, response, ttl);
+
+    if (failedSymbols.length > 0) {
+      console.warn(
+        `Commodities history: ${failedSymbols.length}/${COMMODITIES.length} failed (${failedSymbols.join(
+          ", "
+        )})`
+      );
+    }
+
+    if (successCount > 0) {
+      // Use a shorter cache if some commodities have no data, so we retry sooner.
+      const ttl = successCount === COMMODITIES.length ? CACHE_TTL : 2 * 60 * 1000;
+      setCache(CACHE_KEY, response, ttl);
+      setCache(STALE_KEY, response, STALE_TTL);
+      return NextResponse.json(response);
+    }
+
+    // Everything failed — serve the last-known-good snapshot if available.
+    const stale = getCached<{ history: Record<string, HistoryPoint[]>; fetchedAt: string }>(STALE_KEY);
+    if (stale) {
+      return NextResponse.json({ ...stale, stale: true });
+    }
 
     return NextResponse.json(response);
   } catch (error) {

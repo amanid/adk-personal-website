@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getCached, setCache } from "@/lib/cache";
 import { rateLimit } from "@/lib/rate-limit";
+import { getYahooFinance } from "@/lib/yahoo";
 
 const COMMODITIES = [
   { symbol: "CC=F", name: "Cocoa", unit: "$/ton" },
@@ -12,7 +13,9 @@ const COMMODITIES = [
 ];
 
 const CACHE_KEY = "commodities_public";
+const STALE_KEY = "commodities_public_stale";
 const CACHE_TTL = 10 * 60 * 1000; // 10 minutes
+const STALE_TTL = 7 * 24 * 60 * 60 * 1000; // 7 days — last-known-good fallback
 
 interface CommodityResult {
   symbol: string;
@@ -33,8 +36,7 @@ export async function GET(request: Request) {
       return NextResponse.json(cached);
     }
 
-    const YahooFinance = (await import("yahoo-finance2")).default;
-    const yahooFinance = new YahooFinance({ suppressNotices: ["yahooSurvey"] });
+    const yahooFinance = await getYahooFinance();
 
     // Fetch all commodities in parallel with per-item timeout
     const results = await Promise.allSettled(
@@ -60,13 +62,12 @@ export async function GET(request: Request) {
       })
     );
 
+    const failedSymbols: string[] = [];
     const commodities: CommodityResult[] = results.map((result, i) => {
       if (result.status === "fulfilled" && result.value.price !== null) {
         return result.value;
       }
-      if (result.status === "rejected") {
-        console.error(`Failed to fetch ${COMMODITIES[i].symbol}:`, result.reason);
-      }
+      failedSymbols.push(COMMODITIES[i].symbol);
       return {
         ...COMMODITIES[i],
         price: null,
@@ -76,13 +77,31 @@ export async function GET(request: Request) {
     });
 
     const response = { commodities, fetchedAt: new Date().toISOString() };
+    const successCount = commodities.length - failedSymbols.length;
 
-    // Only cache if at least some commodities fetched successfully
-    const successCount = commodities.filter((c) => c.price !== null).length;
+    if (failedSymbols.length > 0) {
+      // Upstream (Yahoo) rate-limiting/blocking is expected on cloud IPs — log
+      // a single concise warning rather than one error per symbol.
+      console.warn(
+        `Commodities: ${failedSymbols.length}/${commodities.length} failed (${failedSymbols.join(
+          ", "
+        )}); serving ${successCount > 0 ? "partial" : "stale"} data`
+      );
+    }
+
     if (successCount > 0) {
-      // If some failed, use shorter cache TTL so we retry sooner
+      // If some failed, use a shorter cache TTL so we retry sooner.
       const ttl = successCount === commodities.length ? CACHE_TTL : 2 * 60 * 1000;
       setCache(CACHE_KEY, response, ttl);
+      setCache(STALE_KEY, response, STALE_TTL);
+      return NextResponse.json(response);
+    }
+
+    // Everything failed — serve the last-known-good snapshot if we have one so
+    // the ticker stays populated instead of blanking.
+    const stale = getCached<{ commodities: CommodityResult[]; fetchedAt: string }>(STALE_KEY);
+    if (stale) {
+      return NextResponse.json({ ...stale, stale: true });
     }
 
     return NextResponse.json(response);
