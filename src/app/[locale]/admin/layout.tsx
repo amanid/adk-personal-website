@@ -21,6 +21,10 @@ import {
   LineChart,
 } from "lucide-react";
 
+export const metadata = {
+  robots: { index: false, follow: false },
+};
+
 const adminLinks = [
   { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
   { href: "/admin/analytics", label: "Analytics", icon: BarChart3 },

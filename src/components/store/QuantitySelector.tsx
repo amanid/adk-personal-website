@@ -1,6 +1,7 @@
 "use client";
 
 import { Minus, Plus } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 interface QuantitySelectorProps {
   value: number;
@@ -17,6 +18,7 @@ export default function QuantitySelector({
   max = 99,
   size = "md",
 }: QuantitySelectorProps) {
+  const t = useTranslations("store");
   const btn =
     size === "sm"
       ? "w-7 h-7"
@@ -26,7 +28,7 @@ export default function QuantitySelector({
     <div className="inline-flex items-center rounded-lg border border-glass-border overflow-hidden">
       <button
         type="button"
-        aria-label="Decrease quantity"
+        aria-label={t("decreaseQuantity")}
         onClick={() => onChange(Math.max(min, value - 1))}
         disabled={value <= min}
         className={`${btn} flex items-center justify-center text-text-secondary hover:text-gold hover:bg-gold/10 disabled:opacity-40 disabled:cursor-not-allowed transition-colors`}
@@ -36,7 +38,7 @@ export default function QuantitySelector({
       <input
         type="number"
         inputMode="numeric"
-        aria-label="Quantity"
+        aria-label={t("quantity")}
         value={value}
         min={min}
         max={max}
@@ -49,7 +51,7 @@ export default function QuantitySelector({
       />
       <button
         type="button"
-        aria-label="Increase quantity"
+        aria-label={t("increaseQuantity")}
         onClick={() => onChange(Math.min(max, value + 1))}
         disabled={value >= max}
         className={`${btn} flex items-center justify-center text-text-secondary hover:text-gold hover:bg-gold/10 disabled:opacity-40 disabled:cursor-not-allowed transition-colors`}

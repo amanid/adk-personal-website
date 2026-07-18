@@ -92,12 +92,6 @@ export default function AdminSkillsPage() {
 
   // ─── Data Fetching ──────────────────────────────────────────────────────────
 
-  useEffect(() => {
-    fetchSkills();
-    fetchEducation();
-    fetchCertifications();
-  }, []);
-
   const fetchSkills = () => {
     setSkillsLoading(true);
     fetch("/api/admin/skills")
@@ -130,6 +124,15 @@ export default function AdminSkillsPage() {
       })
       .catch(() => setCertificationsLoading(false));
   };
+
+  // Load all admin data on mount (declared after the fetchers so they exist).
+  /* eslint-disable react-hooks/set-state-in-effect */
+  useEffect(() => {
+    fetchSkills();
+    fetchEducation();
+    fetchCertifications();
+  }, []);
+  /* eslint-enable react-hooks/set-state-in-effect */
 
   // ─── Skill Category Handlers ────────────────────────────────────────────────
 

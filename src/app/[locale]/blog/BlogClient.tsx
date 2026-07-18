@@ -5,7 +5,7 @@ import { motion } from "framer-motion";
 import { Link } from "@/i18n/routing";
 import { Search, Calendar, Eye, ArrowRight, Tag, Clock, ChevronLeft, ChevronRight } from "lucide-react";
 import { useState, useEffect, useMemo } from "react";
-import { formatDate } from "@/lib/utils";
+import { formatDate, safeJsonLd } from "@/lib/utils";
 
 const POSTS_PER_PAGE = 12;
 
@@ -91,7 +91,7 @@ export default function BlogClient() {
       {blogListJsonLd && (
         <script
           type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(blogListJsonLd) }}
+          dangerouslySetInnerHTML={{ __html: safeJsonLd(blogListJsonLd) }}
         />
       )}
       <div className="max-w-6xl mx-auto">

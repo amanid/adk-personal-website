@@ -41,7 +41,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Get or create Stripe customer
-    let existingSub = await prisma.subscription.findUnique({
+    const existingSub = await prisma.subscription.findUnique({
       where: { userId },
     });
 

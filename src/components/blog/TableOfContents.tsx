@@ -34,6 +34,8 @@ export default function TableOfContents({ content }: TableOfContentsProps) {
       headings.push({ id, text, level });
     }
 
+    // Derive the TOC from the post content when it changes.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setItems(headings);
   }, [content]);
 

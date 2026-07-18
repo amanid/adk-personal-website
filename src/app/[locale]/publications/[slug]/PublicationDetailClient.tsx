@@ -2,6 +2,7 @@
 
 import { useParams } from "next/navigation";
 import { useTranslations, useLocale } from "next-intl";
+import { safeJsonLd } from "@/lib/utils";
 import { motion } from "framer-motion";
 import { Link } from "@/i18n/routing";
 import {
@@ -221,7 +222,7 @@ export default function PublicationDetailClient() {
     <div className="section-padding">
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        dangerouslySetInnerHTML={{ __html: safeJsonLd(jsonLd) }}
       />
       <div className="max-w-4xl mx-auto">
         {/* Back link */}

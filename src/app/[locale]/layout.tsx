@@ -11,6 +11,7 @@ import PageViewTracker from "@/components/PageViewTracker";
 import CookieConsent from "@/components/CookieConsent";
 import GoogleAnalytics from "@/components/GoogleAnalytics";
 import Breadcrumbs from "@/components/Breadcrumbs";
+import { safeJsonLd } from "@/lib/utils";
 import "../globals.css";
 
 export const metadata = {
@@ -190,11 +191,11 @@ export default async function LocaleLayout({
         />
         <script
           type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+          dangerouslySetInnerHTML={{ __html: safeJsonLd(jsonLd) }}
         />
         <script
           type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteJsonLd) }}
+          dangerouslySetInnerHTML={{ __html: safeJsonLd(websiteJsonLd) }}
         />
       </head>
       <GoogleAnalytics />
@@ -206,7 +207,7 @@ export default async function LocaleLayout({
               href="#main-content"
               className="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-[100] focus:rounded-lg focus:bg-gold focus:px-4 focus:py-2 focus:text-charcoal focus:font-medium"
             >
-              Skip to content
+              {locale === "fr" ? "Aller au contenu" : "Skip to content"}
             </a>
             <Navbar />
             <Breadcrumbs />

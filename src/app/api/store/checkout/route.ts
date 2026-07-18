@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { checkoutSchema } from "@/lib/validations";
-import { priceCart, generateOrderNumber } from "@/lib/store";
+import { priceCart, generateOrderNumber, secureToken } from "@/lib/store";
 import { createPayPalOrder } from "@/lib/paypal";
 import { rateLimit } from "@/lib/rate-limit";
 import { checkOrigin } from "@/lib/origin-check";
@@ -66,6 +66,7 @@ export async function POST(request: Request) {
         currency: priced.currency,
         subtotalCents: priced.subtotalCents,
         totalCents: priced.totalCents,
+        receiptToken: secureToken(),
         ipAddress: ip,
         items: {
           create: priced.items.map((i) => ({

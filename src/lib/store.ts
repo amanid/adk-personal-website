@@ -92,6 +92,15 @@ export function generateOrderNumber(): string {
 }
 
 /**
+ * Cryptographically strong, URL-safe token (256 bits) for bearer capabilities
+ * such as download and receipt links. Prefer this over Prisma's `cuid()` default,
+ * which is time-ordered and only partially random.
+ */
+export function secureToken(): string {
+  return randomBytes(32).toString("base64url");
+}
+
+/**
  * Create one download grant per purchased book for a PAID order.
  * Idempotent: if grants already exist for the order, returns the existing ones.
  * Accepts a transaction client so it can run inside the capture transaction.
@@ -114,9 +123,11 @@ export async function createDownloadGrants(
     data: items.map((i) => ({
       orderId,
       bookId: i.bookId,
+      token: secureToken(),
       maxDownloads: DOWNLOAD_MAX_PER_ITEM,
       expiresAt,
     })),
+    skipDuplicates: true,
   });
 }
 

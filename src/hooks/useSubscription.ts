@@ -25,6 +25,8 @@ export function useSubscription(): SubscriptionState {
 
   useEffect(() => {
     if (!session?.user) {
+      // Resolve loading state once when there is no authenticated user.
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setState((s) => ({ ...s, isLoading: false }));
       return;
     }

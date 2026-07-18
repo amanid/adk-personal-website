@@ -1,13 +1,15 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { buildPageMetadata, normalizeLocale } from "@/lib/seo";
 import { formatPrice } from "@/lib/utils";
 import { Link } from "@/i18n/routing";
 import AddToCartButton from "@/components/store/AddToCartButton";
+import BookViewBeacon from "@/components/store/BookViewBeacon";
 import { BookOpen, Check, ChevronLeft, Calendar, Globe, Hash } from "lucide-react";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 60;
 
 async function getBook(slug: string) {
   return prisma.book.findFirst({
@@ -48,11 +50,6 @@ export default async function BookDetailPage({
   const book = await getBook(slug);
   if (!book) notFound();
 
-  // Best-effort view count (don't block render on failure).
-  prisma.book
-    .update({ where: { id: book.id }, data: { views: { increment: 1 } } })
-    .catch(() => {});
-
   const title = l === "fr" && book.titleFr ? book.titleFr : book.title;
   const subtitle = l === "fr" && book.subtitleFr ? book.subtitleFr : book.subtitle;
   const description = l === "fr" && book.descriptionFr ? book.descriptionFr : book.description;
@@ -62,6 +59,7 @@ export default async function BookDetailPage({
 
   return (
     <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+      <BookViewBeacon slug={book.slug} />
       <Link
         href="/store"
         className="inline-flex items-center gap-1 text-sm text-text-secondary hover:text-gold transition-colors mb-6"
@@ -73,10 +71,16 @@ export default async function BookDetailPage({
       <div className="grid md:grid-cols-[320px_1fr] gap-8 lg:gap-12">
         {/* Cover + purchase */}
         <div>
-          <div className="glass rounded-xl overflow-hidden aspect-[3/4] bg-navy/50">
+          <div className="relative glass rounded-xl overflow-hidden aspect-[3/4] bg-navy/50">
             {coverUrl ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img src={coverUrl} alt={`Cover of ${title}`} className="w-full h-full object-cover" />
+              <Image
+                src={coverUrl}
+                alt={l === "fr" ? `Couverture de ${title}` : `Cover of ${title}`}
+                fill
+                sizes="(max-width: 768px) 100vw, 320px"
+                className="object-cover"
+                priority
+              />
             ) : (
               <div className="w-full h-full flex items-center justify-center text-gold/30">
                 <BookOpen className="w-20 h-20" />
@@ -99,12 +103,26 @@ export default async function BookDetailPage({
               withQuantity
               buyNow
             />
-            <p className="text-xs text-text-secondary mt-4 flex items-center gap-1.5">
-              <Check className="w-3.5 h-3.5 text-green-400" />
-              {l === "fr"
-                ? "Téléchargement sécurisé après paiement PayPal"
-                : "Secure download after PayPal payment"}
-            </p>
+            <ul className="text-xs text-text-secondary mt-4 space-y-1.5">
+              <li className="flex items-start gap-1.5">
+                <Check className="w-3.5 h-3.5 text-green-400 mt-0.5 shrink-0" />
+                {l === "fr"
+                  ? "Téléchargement immédiat et sécurisé après paiement PayPal"
+                  : "Instant, secure download after PayPal payment"}
+              </li>
+              <li className="flex items-start gap-1.5">
+                <Check className="w-3.5 h-3.5 text-green-400 mt-0.5 shrink-0" />
+                {l === "fr"
+                  ? "Liens valables 7 jours, jusqu'à 5 téléchargements"
+                  : "Links valid for 7 days, up to 5 downloads"}
+              </li>
+              <li className="flex items-start gap-1.5">
+                <Check className="w-3.5 h-3.5 text-green-400 mt-0.5 shrink-0" />
+                {l === "fr"
+                  ? "Reçu envoyé par e-mail. Ventes définitives (produit numérique)."
+                  : "Receipt emailed to you. All sales final (digital product)."}
+              </li>
+            </ul>
           </div>
         </div>
 

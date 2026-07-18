@@ -6,7 +6,14 @@ export default function robots(): MetadataRoute.Robots {
       {
         userAgent: "*",
         allow: ["/", "/feed.xml", "/publications-feed.xml"],
-        disallow: ["/api/", "/admin/", "/auth/"],
+        // Locale-agnostic patterns — actual paths are /en/... and /fr/...
+        disallow: [
+          "/api/",
+          "/*/admin",
+          "/*/auth",
+          "/*/store/cart",
+          "/*/store/receipt",
+        ],
       },
     ],
     sitemap: "https://www.konanamanidieudonne.org/sitemap.xml",

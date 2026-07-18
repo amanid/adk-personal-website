@@ -17,6 +17,8 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   const [theme, setThemeState] = useState(defaultThemeId);
   const [mounted, setMounted] = useState(false);
 
+  // One-time theme hydration from localStorage on mount.
+  /* eslint-disable react-hooks/set-state-in-effect */
   useEffect(() => {
     const stored = localStorage.getItem("theme");
     if (stored) {
@@ -25,6 +27,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     }
     setMounted(true);
   }, []);
+  /* eslint-enable react-hooks/set-state-in-effect */
 
   const setTheme = (id: string) => {
     setThemeState(id);

@@ -13,6 +13,14 @@ export function formatDate(date: Date | string, locale: string = "en") {
   });
 }
 
+/**
+ * Serialize a JSON-LD object for injection into a <script> tag, escaping "<"
+ * so a "</script>" sequence in any data field can't break out of the tag.
+ */
+export function safeJsonLd(data: unknown): string {
+  return JSON.stringify(data).replace(/</g, "\\u003c");
+}
+
 /** Client-safe money formatter for integer cents, e.g. 1999 -> "$19.99". */
 export function formatPrice(cents: number, currency: string = "USD"): string {
   return new Intl.NumberFormat("en-US", { style: "currency", currency }).format(

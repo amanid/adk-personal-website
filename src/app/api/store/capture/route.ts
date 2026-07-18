@@ -54,8 +54,10 @@ export async function POST(request: Request) {
   try {
     const body = await request.json();
     const orderId = typeof body?.orderId === "string" ? body.orderId : null;
-    if (!orderId) {
-      return NextResponse.json({ error: "Missing orderId" }, { status: 400 });
+    const paypalOrderId =
+      typeof body?.paypalOrderId === "string" ? body.paypalOrderId : null;
+    if (!orderId || !paypalOrderId) {
+      return NextResponse.json({ error: "Missing order reference" }, { status: 400 });
     }
 
     const order = await prisma.order.findUnique({ where: { id: orderId } });
@@ -63,13 +65,16 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Order not found" }, { status: 404 });
     }
 
+    // The caller must prove they own this order by presenting the matching
+    // PayPal order id (high-entropy, PayPal-generated). This prevents anyone
+    // who merely guesses/enumerates our order id from retrieving the receipt.
+    if (!order.paypalOrderId || order.paypalOrderId !== paypalOrderId) {
+      return NextResponse.json({ error: "Order not found" }, { status: 404 });
+    }
+
     // Idempotent: already paid — return the existing receipt.
     if (order.status === "PAID") {
       return NextResponse.json({ receiptToken: order.receiptToken });
-    }
-
-    if (!order.paypalOrderId) {
-      return NextResponse.json({ error: "Order not ready for payment" }, { status: 400 });
     }
 
     const capture = await capturePayPalOrder(order.paypalOrderId);

@@ -97,10 +97,52 @@ export default function AdminStorePage() {
   const bulkInputRef = useRef<HTMLInputElement>(null);
   const [aiBusy, setAiBusy] = useState(false);
   const [aiError, setAiError] = useState<string | null>(null);
+  const editorPanelRef = useRef<HTMLDivElement>(null);
+  const editorTriggerRef = useRef<HTMLElement | null>(null);
 
   useEffect(() => {
     fetchBooks();
   }, []);
+
+  // Accessible modal behavior for the book editor: focus the first field on open,
+  // trap Tab within the panel, close on Escape, and restore focus on close.
+  useEffect(() => {
+    if (!showEditor) return;
+    editorTriggerRef.current = document.activeElement as HTMLElement | null;
+    const panel = editorPanelRef.current;
+    const selector =
+      'input,select,textarea,button,[href],[tabindex]:not([tabindex="-1"])';
+    const focusables = () =>
+      Array.from(panel?.querySelectorAll<HTMLElement>(selector) || []).filter(
+        (el) => !el.hasAttribute("disabled") && el.offsetParent !== null
+      );
+    focusables()[0]?.focus();
+
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        setShowEditor(false);
+        return;
+      }
+      if (e.key === "Tab") {
+        const items = focusables();
+        if (items.length === 0) return;
+        const first = items[0];
+        const last = items[items.length - 1];
+        if (e.shiftKey && document.activeElement === first) {
+          e.preventDefault();
+          last.focus();
+        } else if (!e.shiftKey && document.activeElement === last) {
+          e.preventDefault();
+          first.focus();
+        }
+      }
+    };
+    document.addEventListener("keydown", onKeyDown);
+    return () => {
+      document.removeEventListener("keydown", onKeyDown);
+      editorTriggerRef.current?.focus?.();
+    };
+  }, [showEditor]);
 
   const fetchBooks = async () => {
     try {
@@ -476,9 +518,21 @@ export default function AdminStorePage() {
 
       {/* Editor modal */}
       {showEditor && (
-        <div className="fixed inset-0 z-50 bg-black/60 flex items-start justify-center p-4 overflow-y-auto">
-          <div className="glass-strong rounded-2xl w-full max-w-3xl my-8 p-6">
-            <h2 className="text-xl font-bold mb-4">{editingId ? "Edit Book" : "New Book"}</h2>
+        <div
+          className="fixed inset-0 z-50 bg-black/60 flex items-start justify-center p-4 overflow-y-auto"
+          onClick={() => setShowEditor(false)}
+        >
+          <div
+            ref={editorPanelRef}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="book-editor-title"
+            onClick={(e) => e.stopPropagation()}
+            className="glass-strong rounded-2xl w-full max-w-3xl my-8 p-6"
+          >
+            <h2 id="book-editor-title" className="text-xl font-bold mb-4">
+              {editingId ? "Edit Book" : "New Book"}
+            </h2>
             {error && (
               <p className="text-sm text-red-400 border border-red-400/30 rounded-lg p-3 mb-4">
                 {error}

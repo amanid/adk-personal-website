@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { ShoppingCart, Check } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/routing";
 import { useCart, type CartItem } from "@/lib/cart-context";
 import QuantitySelector from "./QuantitySelector";
@@ -21,6 +22,7 @@ export default function AddToCartButton({
 }: AddToCartButtonProps) {
   const { addItem } = useCart();
   const router = useRouter();
+  const t = useTranslations("store");
   const [qty, setQty] = useState(1);
   const [added, setAdded] = useState(false);
 
@@ -39,7 +41,7 @@ export default function AddToCartButton({
     <div className={`flex flex-col gap-3 ${className}`}>
       {withQuantity && (
         <div className="flex items-center gap-3">
-          <span className="text-sm text-text-secondary">Quantity</span>
+          <span className="text-sm text-text-secondary">{t("quantity")}</span>
           <QuantitySelector value={qty} onChange={setQty} />
         </div>
       )}
@@ -50,7 +52,7 @@ export default function AddToCartButton({
           className="flex items-center gap-2 px-5 py-2.5 rounded-lg border border-gold/40 text-gold font-medium hover:bg-gold/10 transition-all"
         >
           {added ? <Check className="w-4 h-4" /> : <ShoppingCart className="w-4 h-4" />}
-          {added ? "Added" : "Add to cart"}
+          {added ? t("added") : t("addToCart")}
         </button>
         {buyNow && (
           <button
@@ -58,10 +60,14 @@ export default function AddToCartButton({
             onClick={handleBuyNow}
             className="flex items-center gap-2 px-5 py-2.5 rounded-lg bg-gold text-charcoal font-semibold hover:bg-gold-light transition-all"
           >
-            Buy now
+            {t("buyNow")}
           </button>
         )}
       </div>
+      {/* Screen-reader confirmation when an item is added. */}
+      <span aria-live="polite" className="sr-only">
+        {added ? t("addedAnnounce") : ""}
+      </span>
     </div>
   );
 }

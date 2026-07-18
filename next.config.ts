@@ -43,11 +43,19 @@ const nextConfig: NextConfig = {
     ],
   },
   async headers() {
+    const noIndex = [{ key: "X-Robots-Tag", value: "noindex, nofollow" }];
     return [
       {
         source: "/(.*)",
         headers: securityHeaders,
       },
+      // Keep private/utility routes out of search indexes (the global header
+      // above allows indexing; a noindex directive here wins where they overlap).
+      { source: "/:locale(en|fr)/admin/:path*", headers: noIndex },
+      { source: "/:locale(en|fr)/admin", headers: noIndex },
+      { source: "/:locale(en|fr)/auth/:path*", headers: noIndex },
+      { source: "/:locale(en|fr)/store/cart", headers: noIndex },
+      { source: "/:locale(en|fr)/store/receipt/:path*", headers: noIndex },
     ];
   },
 };

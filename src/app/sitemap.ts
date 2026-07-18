@@ -25,6 +25,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { path: "/services", changeFrequency: "monthly" as const, priority: 0.9 },
     { path: "/projects", changeFrequency: "monthly" as const, priority: 0.7 },
     { path: "/publications", changeFrequency: "weekly" as const, priority: 0.8 },
+    { path: "/store", changeFrequency: "weekly" as const, priority: 0.8 },
     { path: "/research", changeFrequency: "weekly" as const, priority: 0.7 },
     { path: "/dba", changeFrequency: "monthly" as const, priority: 0.8 },
     { path: "/consulting", changeFrequency: "monthly" as const, priority: 0.9 },
@@ -49,17 +50,46 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     }
   }
 
-  // Publication detail pages
+  // Publication detail pages — union DB-managed publications with the static
+  // seed set so both sources are advertised (deduped by slug).
+  const pubSlugs = new Set<string>(publications.map((p) => p.slug));
+  try {
+    const dbPubs = await prisma.publication.findMany({ select: { slug: true } });
+    for (const p of dbPubs) pubSlugs.add(p.slug);
+  } catch {
+    // Database might not be available during build
+  }
   for (const locale of locales) {
-    for (const pub of publications) {
+    for (const slug of pubSlugs) {
       entries.push({
-        url: `${BASE_URL}/${locale}/publications/${pub.slug}`,
+        url: `${BASE_URL}/${locale}/publications/${slug}`,
         lastModified: new Date(),
         changeFrequency: "monthly" as const,
         priority: 0.6,
-        alternates: langAlternates(`/publications/${pub.slug}`),
+        alternates: langAlternates(`/publications/${slug}`),
       });
     }
+  }
+
+  // Bookstore detail pages (published only)
+  try {
+    const books = await prisma.book.findMany({
+      where: { status: "PUBLISHED" },
+      select: { slug: true, updatedAt: true },
+    });
+    for (const locale of locales) {
+      for (const book of books) {
+        entries.push({
+          url: `${BASE_URL}/${locale}/store/${book.slug}`,
+          lastModified: book.updatedAt,
+          changeFrequency: "weekly" as const,
+          priority: 0.7,
+          alternates: langAlternates(`/store/${book.slug}`),
+        });
+      }
+    }
+  } catch {
+    // Database might not be available during build
   }
 
   // Blog posts from database

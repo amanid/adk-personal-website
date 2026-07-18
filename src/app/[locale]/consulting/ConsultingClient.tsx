@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useTranslations, useLocale } from "next-intl";
+import { safeJsonLd } from "@/lib/utils";
 import { motion } from "framer-motion";
 import { Link } from "@/i18n/routing";
 import {
@@ -488,7 +489,7 @@ function FAQSection({ locale }: { locale: string }) {
     <>
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }}
+        dangerouslySetInnerHTML={{ __html: safeJsonLd(faqJsonLd) }}
       />
       <h2 className="text-2xl font-bold font-[family-name:var(--font-display)] text-center mb-8">
         {locale === "fr" ? "Questions Fréquentes" : "Frequently Asked Questions"}

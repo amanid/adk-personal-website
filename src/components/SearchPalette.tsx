@@ -48,6 +48,8 @@ export default function SearchPalette() {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, []);
 
+  // Reset the palette state each time it is opened.
+  /* eslint-disable react-hooks/set-state-in-effect */
   useEffect(() => {
     if (open) {
       setQuery("");
@@ -55,6 +57,7 @@ export default function SearchPalette() {
       setTimeout(() => inputRef.current?.focus(), 50);
     }
   }, [open]);
+  /* eslint-enable react-hooks/set-state-in-effect */
 
   const results = useCallback((): SearchResult[] => {
     if (!query.trim()) return PAGES;

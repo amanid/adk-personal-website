@@ -2,6 +2,7 @@
 
 import { usePathname } from "next/navigation";
 import { useLocale } from "next-intl";
+import { safeJsonLd } from "@/lib/utils";
 import { Link } from "@/i18n/routing";
 import { ChevronRight, Home } from "lucide-react";
 
@@ -71,7 +72,7 @@ export default function Breadcrumbs() {
     <>
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        dangerouslySetInnerHTML={{ __html: safeJsonLd(jsonLd) }}
       />
       <nav aria-label="Breadcrumb" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
         <ol className="flex items-center gap-1 text-xs text-text-muted">

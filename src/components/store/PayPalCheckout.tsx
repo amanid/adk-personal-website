@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/routing";
 import { useCart } from "@/lib/cart-context";
 
@@ -62,6 +63,7 @@ export default function PayPalCheckout({
 }: PayPalCheckoutProps) {
   const { items, clear } = useCart();
   const router = useRouter();
+  const t = useTranslations("store");
   const containerRef = useRef<HTMLDivElement>(null);
   const [error, setError] = useState<string | null>(null);
   const [ready, setReady] = useState(false);
@@ -90,7 +92,7 @@ export default function PayPalCheckout({
             createOrder: async () => {
               setError(null);
               if (onValidate && !onValidate()) {
-                throw new Error("Please complete the required fields");
+                throw new Error(t("completeFields"));
               }
               const res = await fetch("/api/store/checkout", {
                 method: "POST",
@@ -109,15 +111,18 @@ export default function PayPalCheckout({
               orderIdRef.current = data.orderId as string;
               return data.paypalOrderId as string;
             },
-            onApprove: async () => {
+            onApprove: async (approval) => {
               const res = await fetch("/api/store/capture", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ orderId: orderIdRef.current }),
+                body: JSON.stringify({
+                  orderId: orderIdRef.current,
+                  paypalOrderId: approval.orderID,
+                }),
               });
               const data = await res.json();
               if (!res.ok) {
-                setError(data.error || "Payment could not be verified");
+                setError(data.error || t("paymentUnverified"));
                 return;
               }
               clear();
@@ -125,7 +130,7 @@ export default function PayPalCheckout({
             },
             onError: (err) => {
               console.error("PayPal error:", err);
-              setError("Something went wrong with PayPal. Please try again.");
+              setError(t("paypalError"));
             },
             onCancel: () => setError(null),
           })
@@ -133,7 +138,7 @@ export default function PayPalCheckout({
           .then(() => !cancelled && setReady(true))
           .catch(() => {});
       })
-      .catch(() => setError("Unable to load PayPal. Please refresh and try again."));
+      .catch(() => setError(t("paypalLoadError")));
 
     return () => {
       cancelled = true;
@@ -144,7 +149,7 @@ export default function PayPalCheckout({
   if (!clientId) {
     return (
       <p className="text-sm text-amber-400 border border-amber-400/30 rounded-lg p-3">
-        Payments are not configured yet. Set NEXT_PUBLIC_PAYPAL_CLIENT_ID to enable checkout.
+        {t("paypalUnavailable")}
       </p>
     );
   }
@@ -157,9 +162,7 @@ export default function PayPalCheckout({
         aria-busy={!ready}
       />
       {!ready && !error && (
-        <p className="text-sm text-text-secondary text-center py-2">
-          Loading secure PayPal checkout…
-        </p>
+        <p className="text-sm text-text-secondary text-center py-2">{t("loadingCheckout")}</p>
       )}
       {error && (
         <p className="text-sm text-red-400 border border-red-400/30 rounded-lg p-3 mt-2">{error}</p>

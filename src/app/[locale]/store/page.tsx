@@ -27,7 +27,9 @@ export async function generateMetadata({
   });
 }
 
-export const dynamic = "force-dynamic";
+// Catalog is effectively static content; revalidate periodically instead of
+// re-querying on every request.
+export const revalidate = 60;
 
 export default async function StorePage({
   params,

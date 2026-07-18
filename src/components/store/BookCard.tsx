@@ -1,7 +1,9 @@
 "use client";
 
+import Image from "next/image";
 import { Link } from "@/i18n/routing";
 import { BookOpen } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { formatPrice } from "@/lib/utils";
 import AddToCartButton from "./AddToCartButton";
 
@@ -18,17 +20,18 @@ export interface StoreBook {
 }
 
 export default function BookCard({ book }: { book: StoreBook }) {
+  const t = useTranslations("store");
   return (
     <div className="group glass rounded-xl overflow-hidden flex flex-col hover:border-gold/40 transition-all">
       <Link href={`/store/${book.slug}`} className="block">
         <div className="relative aspect-[3/4] bg-navy/50 overflow-hidden">
           {book.coverUrl ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
+            <Image
               src={book.coverUrl}
-              alt={`Cover of ${book.title}`}
-              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-              loading="lazy"
+              alt={t("coverAlt", { title: book.title })}
+              fill
+              sizes="(max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
+              className="object-cover group-hover:scale-105 transition-transform duration-500"
             />
           ) : (
             <div className="w-full h-full flex items-center justify-center text-gold/30">
@@ -39,9 +42,9 @@ export default function BookCard({ book }: { book: StoreBook }) {
       </Link>
       <div className="p-4 flex flex-col flex-1">
         <Link href={`/store/${book.slug}`}>
-          <h3 className="font-semibold text-base leading-snug line-clamp-2 hover:text-gold transition-colors">
+          <h2 className="font-semibold text-base leading-snug line-clamp-2 hover:text-gold transition-colors">
             {book.title}
-          </h3>
+          </h2>
         </Link>
         <p className="text-xs text-text-secondary mt-1">{book.publicationYear}</p>
         {book.firstInsight && (

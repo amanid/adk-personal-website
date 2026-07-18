@@ -16,9 +16,26 @@ export async function GET(
       return NextResponse.json({ error: "Not found" }, { status: 404 });
     }
 
-    return new NextResponse(upload.data, {
+    // Only raster images may render inline. Anything else (SVG, HTML, PDF, …)
+    // is forced to download so it cannot execute script on our own origin.
+    const inlineTypes = new Set([
+      "image/jpeg",
+      "image/png",
+      "image/webp",
+      "image/gif",
+      "image/avif",
+    ]);
+    const isInlineImage = inlineTypes.has(upload.mimeType);
+    const contentType = isInlineImage ? upload.mimeType : "application/octet-stream";
+    const disposition = isInlineImage
+      ? "inline"
+      : `attachment; filename="${upload.filename.replace(/[^\w.\-]/g, "_")}"`;
+
+    return new NextResponse(new Uint8Array(upload.data), {
       headers: {
-        "Content-Type": upload.mimeType,
+        "Content-Type": contentType,
+        "Content-Disposition": disposition,
+        "X-Content-Type-Options": "nosniff",
         "Cache-Control": "public, max-age=31536000, immutable",
       },
     });

@@ -561,6 +561,7 @@ model DownloadGrant {
   createdAt     DateTime @default(now())
   order         Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
 
+  @@unique([orderId, bookId])
   @@index([token])
   @@index([orderId])
 }
