@@ -1,4 +1,5 @@
 import { NextIntlClientProvider, hasLocale } from "next-intl";
+import { Inter, Playfair_Display } from "next/font/google";
 import { notFound } from "next/navigation";
 import { routing } from "@/i18n/routing";
 import Providers from "@/components/Providers";
@@ -13,6 +14,21 @@ import GoogleAnalytics from "@/components/GoogleAnalytics";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import { safeJsonLd } from "@/lib/utils";
 import "../globals.css";
+
+// Self-hosted, preloaded fonts (replaces the render-blocking CSS @import).
+// Exposed as CSS variables that globals.css maps onto --font-sans/--font-display.
+const inter = Inter({
+  subsets: ["latin"],
+  weight: ["300", "400", "500", "600", "700"],
+  variable: "--font-inter",
+  display: "swap",
+});
+const playfair = Playfair_Display({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+  variable: "--font-playfair",
+  display: "swap",
+});
 
 export const metadata = {
   metadataBase: new URL("https://www.konanamanidieudonne.org"),
@@ -174,7 +190,11 @@ export default async function LocaleLayout({
   };
 
   return (
-    <html lang={locale} className="dark" data-theme="midnight-gold">
+    <html
+      lang={locale}
+      className={`dark ${inter.variable} ${playfair.variable}`}
+      data-theme="midnight-gold"
+    >
       <head>
         <link rel="manifest" href="/manifest.json" />
         <meta name="theme-color" content="#c9a84c" />

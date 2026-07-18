@@ -4,7 +4,7 @@ import { useTranslations, useLocale } from "next-intl";
 import { motion } from "framer-motion";
 import { Link } from "@/i18n/routing";
 import { Search, Calendar, Eye, ArrowRight, Tag, Clock, ChevronLeft, ChevronRight } from "lucide-react";
-import { useState, useEffect, useMemo } from "react";
+import { useState, useMemo } from "react";
 import { formatDate, safeJsonLd } from "@/lib/utils";
 
 const POSTS_PER_PAGE = 12;
@@ -24,13 +24,14 @@ interface BlogPost {
   author: { name: string | null };
 }
 
-export default function BlogClient() {
+export default function BlogClient({ initialPosts }: { initialPosts: BlogPost[] }) {
   const t = useTranslations("blog");
   const locale = useLocale();
-  const [posts, setPosts] = useState<BlogPost[]>([]);
+  // Posts are server-rendered; kept in state only for future client refresh needs.
+  const [posts] = useState<BlogPost[]>(initialPosts);
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState("all");
-  const [loading, setLoading] = useState(true);
+  const loading = false;
   const [page, setPage] = useState(1);
 
   const estimateReadingTime = (excerpt: string | null) => {
@@ -38,16 +39,6 @@ export default function BlogClient() {
     const words = excerpt.split(/\s+/).filter(Boolean).length;
     return Math.max(1, Math.ceil((words * 5) / 200));
   };
-
-  useEffect(() => {
-    fetch("/api/blog")
-      .then((res) => res.json())
-      .then((data) => {
-        setPosts(data.posts || []);
-        setLoading(false);
-      })
-      .catch(() => setLoading(false));
-  }, []);
 
   const filteredPosts = posts.filter((post) => {
     const title = locale === "fr" && post.titleFr ? post.titleFr : post.title;

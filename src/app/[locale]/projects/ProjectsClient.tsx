@@ -3,7 +3,7 @@
 import { useTranslations, useLocale } from "next-intl";
 import { motion } from "framer-motion";
 import { ExternalLink, Github, Star } from "lucide-react";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { projects as staticProjects } from "@/data/projects";
 
 const categories = ["All", "AI/ML", "Data Engineering", "Analytics", "Data Governance"];
@@ -22,20 +22,16 @@ interface ProjectEntry {
   featured: boolean;
 }
 
-export default function ProjectsClient() {
+export default function ProjectsClient({
+  initialProjects,
+}: {
+  initialProjects: ProjectEntry[];
+}) {
   const t = useTranslations("projects");
   const locale = useLocale();
   const [activeCategory, setActiveCategory] = useState("All");
-  const [projects, setProjects] = useState<ProjectEntry[]>(staticProjects);
-
-  useEffect(() => {
-    fetch("/api/projects")
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.projects?.length > 0) setProjects(data.projects);
-      })
-      .catch(() => {});
-  }, []);
+  // Server provides DB projects; fall back to the static seed if empty.
+  const projects: ProjectEntry[] = initialProjects.length ? initialProjects : staticProjects;
 
   const filteredProjects =
     activeCategory === "All"

@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import { buildPageMetadata, normalizeLocale } from "@/lib/seo";
-import PublicationsClient from "./PublicationsClient";
+import { prisma } from "@/lib/prisma";
+import PublicationsClient, { type DbPublicationRow } from "./PublicationsClient";
 
 export async function generateMetadata({
   params,
@@ -24,6 +25,38 @@ export async function generateMetadata({
   });
 }
 
-export default function PublicationsPage() {
-  return <PublicationsClient />;
+export const revalidate = 300;
+
+export default async function PublicationsPage() {
+  let dbPublications: DbPublicationRow[] = [];
+  try {
+    dbPublications = await prisma.publication.findMany({
+      orderBy: { year: "desc" },
+      select: {
+        id: true,
+        title: true,
+        titleFr: true,
+        slug: true,
+        abstract: true,
+        abstractFr: true,
+        authors: true,
+        journal: true,
+        year: true,
+        category: true,
+        pdfUrl: true,
+        tags: true,
+        featured: true,
+        views: true,
+        downloadCount: true,
+        publicationType: true,
+        doi: true,
+        conferenceName: true,
+        bookTitle: true,
+        institution: true,
+      },
+    });
+  } catch {
+    // DB unavailable — the client falls back to the static seed set.
+  }
+  return <PublicationsClient initialDbPublications={dbPublications} />;
 }

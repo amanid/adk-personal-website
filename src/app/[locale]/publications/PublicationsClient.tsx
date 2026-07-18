@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo } from "react";
 import { useTranslations, useLocale } from "next-intl";
 import { motion } from "framer-motion";
 import { Link } from "@/i18n/routing";
@@ -62,7 +62,34 @@ const categories = [
 type SortOption = "year_desc" | "year_asc" | "views" | "downloads";
 type ViewMode = "list" | "grid";
 
-export default function PublicationsClient() {
+export interface DbPublicationRow {
+  id: string;
+  title: string;
+  titleFr: string | null;
+  slug: string;
+  abstract: string;
+  abstractFr: string | null;
+  authors: string[];
+  journal: string | null;
+  year: number;
+  category: string | null;
+  pdfUrl: string | null;
+  tags: string[];
+  featured: boolean;
+  views: number;
+  downloadCount: number;
+  publicationType: string;
+  doi: string | null;
+  conferenceName: string | null;
+  bookTitle: string | null;
+  institution: string | null;
+}
+
+export default function PublicationsClient({
+  initialDbPublications = [],
+}: {
+  initialDbPublications?: DbPublicationRow[];
+}) {
   const t = useTranslations("publications");
   const locale = useLocale();
   const [search, setSearch] = useState("");
@@ -71,47 +98,40 @@ export default function PublicationsClient() {
   const [selectedType, setSelectedType] = useState<string>("All");
   const [sortBy, setSortBy] = useState<SortOption>("year_desc");
   const [viewMode, setViewMode] = useState<ViewMode>("list");
-  const [allPublications, setAllPublications] = useState<Publication[]>(
-    staticPublications.map((p) => ({ ...p, publicationType: p.publicationType as PublicationType }))
-  );
 
-  useEffect(() => {
-    fetch("/api/publications")
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.publications && Array.isArray(data.publications)) {
-          const dbPubs: Publication[] = data.publications.map((p: Record<string, unknown>) => ({
-            id: p.id as string,
-            title: p.title as string,
-            titleFr: (p.titleFr as string) || (p.title as string),
-            slug: p.slug as string,
-            abstract: p.abstract as string,
-            abstractFr: (p.abstractFr as string) || (p.abstract as string),
-            authors: (p.authors as string[]) || [],
-            journal: (p.journal as string) || "",
-            year: p.year as number,
-            category: (p.category as string) || "",
-            pdfUrl: p.pdfUrl as string | undefined,
-            tags: (p.tags as string[]) || [],
-            featured: (p.featured as boolean) || false,
-            views: (p.views as number) || 0,
-            downloadCount: (p.downloadCount as number) || 0,
-            publicationType: (p.publicationType as PublicationType) || "ANALYTICAL_REPORT",
-            doi: p.doi as string | undefined,
-            conferenceName: p.conferenceName as string | undefined,
-            bookTitle: p.bookTitle as string | undefined,
-            institution: p.institution as string | undefined,
-          }));
-
-          const staticSlugs = new Set(staticPublications.map((p) => p.slug));
-          const newFromDb = dbPubs.filter((p) => !staticSlugs.has(p.slug));
-          if (newFromDb.length > 0) {
-            setAllPublications((prev) => [...prev, ...newFromDb]);
-          }
-        }
-      })
-      .catch(() => {});
-  }, []);
+  // Merge the static seed set with DB publications (server-provided) once, so the
+  // full list is present in the server-rendered HTML.
+  const [allPublications] = useState<Publication[]>(() => {
+    const base = staticPublications.map((p) => ({
+      ...p,
+      publicationType: p.publicationType as PublicationType,
+    }));
+    const staticSlugs = new Set(staticPublications.map((p) => p.slug));
+    const dbMapped: Publication[] = initialDbPublications.map((p) => ({
+      id: p.id,
+      title: p.title,
+      titleFr: p.titleFr || p.title,
+      slug: p.slug,
+      abstract: p.abstract,
+      abstractFr: p.abstractFr || p.abstract,
+      authors: p.authors || [],
+      journal: p.journal || "",
+      year: p.year,
+      category: p.category || "",
+      pdfUrl: p.pdfUrl || undefined,
+      tags: p.tags || [],
+      featured: p.featured || false,
+      views: p.views || 0,
+      downloadCount: p.downloadCount || 0,
+      publicationType: (p.publicationType as PublicationType) || "ANALYTICAL_REPORT",
+      doi: p.doi || undefined,
+      conferenceName: p.conferenceName || undefined,
+      bookTitle: p.bookTitle || undefined,
+      institution: p.institution || undefined,
+    }));
+    const newFromDb = dbMapped.filter((p) => !staticSlugs.has(p.slug));
+    return [...base, ...newFromDb];
+  });
 
   const years = useMemo(
     () => [...new Set(allPublications.map((p) => p.year))].sort((a, b) => b - a),
