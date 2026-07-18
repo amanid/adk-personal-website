@@ -206,3 +206,51 @@ export const subscriptionRequestSchema = z.object({
 });
 
 export type SubscriptionRequestInput = z.infer<typeof subscriptionRequestSchema>;
+
+// --------------------------------------------------------------------------
+// Bookstore
+// --------------------------------------------------------------------------
+
+export const bookSchema = z.object({
+  title: z.string().min(2, "Title is required").max(300),
+  titleFr: z.string().max(300).optional().or(z.literal("")),
+  subtitle: z.string().max(300).optional().or(z.literal("")),
+  subtitleFr: z.string().max(300).optional().or(z.literal("")),
+  description: z.string().min(10, "Description must be at least 10 characters").max(20000),
+  descriptionFr: z.string().max(20000).optional().or(z.literal("")),
+  keyInsights: z.array(z.string().max(500)).max(20).optional(),
+  keyInsightsFr: z.array(z.string().max(500)).max(20).optional(),
+  author: z.string().max(200).optional(),
+  publicationYear: z.number().int().min(1900).max(2100),
+  isbn: z.string().max(32).optional().or(z.literal("")),
+  language: z.string().max(60).optional().or(z.literal("")),
+  pageCount: z.number().int().min(0).max(100000).optional(),
+  category: z.string().max(120).optional().or(z.literal("")),
+  tags: z.array(z.string().max(60)).max(30).optional(),
+  priceCents: z.number().int().min(0, "Price cannot be negative").max(100000000),
+  currency: z.string().length(3).optional(),
+  coverImageId: z.string().max(200).optional().or(z.literal("")),
+  fileId: z.string().max(200).optional().or(z.literal("")),
+  fileName: z.string().max(300).optional().or(z.literal("")),
+  fileMimeType: z.string().max(200).optional().or(z.literal("")),
+  status: z.enum(["DRAFT", "PUBLISHED", "ARCHIVED"]).optional(),
+  featured: z.boolean().optional(),
+  sortOrder: z.number().int().optional(),
+});
+
+export const checkoutSchema = z.object({
+  email: z.string().email("A valid email is required").max(320),
+  name: z.string().max(200).optional().or(z.literal("")),
+  items: z
+    .array(
+      z.object({
+        bookId: z.string().min(1),
+        quantity: z.number().int().min(1).max(99),
+      })
+    )
+    .min(1, "Your cart is empty")
+    .max(50),
+});
+
+export type BookInput = z.infer<typeof bookSchema>;
+export type CheckoutInput = z.infer<typeof checkoutSchema>;

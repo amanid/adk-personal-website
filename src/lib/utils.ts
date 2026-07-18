@@ -13,6 +13,13 @@ export function formatDate(date: Date | string, locale: string = "en") {
   });
 }
 
+/** Client-safe money formatter for integer cents, e.g. 1999 -> "$19.99". */
+export function formatPrice(cents: number, currency: string = "USD"): string {
+  return new Intl.NumberFormat("en-US", { style: "currency", currency }).format(
+    cents / 100
+  );
+}
+
 export function slugify(text: string): string {
   return text
     .toLowerCase()

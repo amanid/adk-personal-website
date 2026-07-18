@@ -112,6 +112,133 @@ function buildNotificationEmail({ title, excerpt, url, type, unsubscribeUrl }: E
 </html>`;
 }
 
+interface ReceiptItem {
+  title: string;
+  quantity: number;
+  unitPriceCents: number;
+  lineTotalCents: number;
+}
+
+interface ReceiptDownload {
+  title: string;
+  url: string;
+}
+
+interface OrderReceiptParams {
+  to: string;
+  name?: string | null;
+  orderNumber: string;
+  paidAt: Date;
+  currency: string;
+  totalCents: number;
+  items: ReceiptItem[];
+  downloads: ReceiptDownload[];
+  receiptUrl: string;
+}
+
+function fmtMoney(cents: number, currency: string): string {
+  return new Intl.NumberFormat("en-US", { style: "currency", currency }).format(cents / 100);
+}
+
+/** Send an order receipt with secure download links to the buyer. */
+export async function sendOrderReceiptEmail(params: OrderReceiptParams): Promise<void> {
+  const html = buildOrderReceiptEmail(params);
+  await sendEmail(params.to, `Your receipt & downloads — Order ${params.orderNumber}`, html);
+}
+
+function buildOrderReceiptEmail({
+  name,
+  orderNumber,
+  paidAt,
+  currency,
+  totalCents,
+  items,
+  downloads,
+  receiptUrl,
+}: OrderReceiptParams): string {
+  const rows = items
+    .map(
+      (i) => `
+      <tr>
+        <td style="padding:8px 0;font-size:14px;color:#f1f5f9;border-bottom:1px solid rgba(255,255,255,0.08);">${i.title}</td>
+        <td style="padding:8px 0;font-size:14px;color:#8892a4;text-align:center;border-bottom:1px solid rgba(255,255,255,0.08);">${i.quantity}</td>
+        <td style="padding:8px 0;font-size:14px;color:#f1f5f9;text-align:right;border-bottom:1px solid rgba(255,255,255,0.08);">${fmtMoney(i.lineTotalCents, currency)}</td>
+      </tr>`
+    )
+    .join("");
+
+  const downloadButtons = downloads
+    .map(
+      (d) => `
+      <tr>
+        <td style="padding:6px 0;">
+          <a href="${d.url}" style="display:inline-block;padding:10px 20px;background-color:#d4a843;color:#0a0f1e;text-decoration:none;border-radius:8px;font-weight:600;font-size:14px;">⬇ Download “${d.title}”</a>
+        </td>
+      </tr>`
+    )
+    .join("");
+
+  return `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body style="margin:0;padding:0;background-color:#0a0f1e;font-family:Arial,Helvetica,sans-serif;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#0a0f1e;">
+    <tr>
+      <td align="center" style="padding:40px 20px;">
+        <table role="presentation" width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;">
+          <tr>
+            <td style="text-align:center;padding-bottom:24px;">
+              <h1 style="margin:0;font-size:24px;color:#d4a843;font-weight:bold;">KONAN Amani Dieudonn&eacute;</h1>
+              <p style="margin:4px 0 0;font-size:13px;color:#8892a4;">Bookstore &middot; Payment Receipt</p>
+            </td>
+          </tr>
+          <tr>
+            <td style="background-color:#111827;border:1px solid rgba(212,168,67,0.2);border-radius:12px;padding:32px;">
+              <p style="margin:0 0 4px;font-size:12px;color:#d4a843;text-transform:uppercase;letter-spacing:1px;font-weight:600;">Thank you${name ? `, ${name}` : ""}!</p>
+              <h2 style="margin:0 0 4px;font-size:20px;color:#f1f5f9;">Payment confirmed</h2>
+              <p style="margin:0 0 20px;font-size:13px;color:#8892a4;">Order <strong style="color:#f1f5f9;">${orderNumber}</strong> &middot; ${paidAt.toUTCString()}</p>
+
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:16px;">
+                <tr>
+                  <th style="text-align:left;font-size:11px;color:#8892a4;text-transform:uppercase;letter-spacing:1px;padding-bottom:6px;">Item</th>
+                  <th style="text-align:center;font-size:11px;color:#8892a4;text-transform:uppercase;letter-spacing:1px;padding-bottom:6px;">Qty</th>
+                  <th style="text-align:right;font-size:11px;color:#8892a4;text-transform:uppercase;letter-spacing:1px;padding-bottom:6px;">Amount</th>
+                </tr>
+                ${rows}
+                <tr>
+                  <td style="padding-top:12px;font-size:15px;color:#f1f5f9;font-weight:700;">Total paid</td>
+                  <td></td>
+                  <td style="padding-top:12px;font-size:15px;color:#d4a843;font-weight:700;text-align:right;">${fmtMoney(totalCents, currency)}</td>
+                </tr>
+              </table>
+
+              <p style="margin:20px 0 12px;font-size:14px;color:#f1f5f9;font-weight:600;">Your secure downloads</p>
+              <p style="margin:0 0 12px;font-size:12px;color:#8892a4;line-height:1.6;">These links are private to you and expire after ${7} days. Please save your files after downloading.</p>
+              <table role="presentation" cellpadding="0" cellspacing="0">${downloadButtons}</table>
+
+              <p style="margin:24px 0 0;font-size:13px;color:#8892a4;line-height:1.6;">
+                You can also view and re-download from your receipt page:<br>
+                <a href="${receiptUrl}" style="color:#d4a843;text-decoration:underline;">${receiptUrl}</a>
+              </p>
+            </td>
+          </tr>
+          <tr>
+            <td style="text-align:center;padding-top:24px;">
+              <p style="margin:0;font-size:12px;color:#4b5563;">This receipt confirms your payment via PayPal. Keep it for your records.</p>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>`;
+}
+
 export function buildConfirmationEmail(confirmUrl: string): string {
   return `
 <!DOCTYPE html>

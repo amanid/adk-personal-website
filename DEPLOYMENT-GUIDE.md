@@ -835,4 +835,75 @@ Next.js Server (Node.js)
 
 ---
 
+## Bookstore (PayPal) Setup
+
+The `/store` bookstore sells downloadable books with server-verified PayPal payments.
+Downloads unlock **only** after a payment is confirmed server-side.
+
+### 1. Create a PayPal REST app
+1. Go to <https://developer.paypal.com/dashboard/applications> and sign in with the
+   business account that should receive funds (`amani_dieudonne@yahoo.fr`).
+2. Create an app under **Apps & Credentials**. Start in **Sandbox** for testing, then
+   switch to **Live**.
+3. Copy the **Client ID** and **Secret**.
+
+### 2. Configure the webhook
+1. In the app, add a webhook pointing to
+   `https://www.konanamanidieudonne.org/api/store/paypal/webhook`.
+2. Subscribe to at least: `PAYMENT.CAPTURE.COMPLETED`, `PAYMENT.CAPTURE.DENIED`,
+   `PAYMENT.CAPTURE.REFUNDED`, `PAYMENT.CAPTURE.REVERSED`.
+3. Copy the generated **Webhook ID**.
+
+### 3. Environment variables (Render → Environment)
+| Variable | Value |
+|----------|-------|
+| `PAYPAL_ENV` | `sandbox` while testing, `live` in production |
+| `PAYPAL_CLIENT_ID` | REST app Client ID (server-side) |
+| `PAYPAL_CLIENT_SECRET` | REST app Secret (server-side, keep private) |
+| `PAYPAL_WEBHOOK_ID` | Webhook ID from step 2 |
+| `NEXT_PUBLIC_PAYPAL_CLIENT_ID` | Same Client ID (used by the browser SDK) |
+
+Ensure `NEXT_PUBLIC_APP_URL` and SMTP variables are set — receipts and secure download
+links are emailed to buyers.
+
+### 4. Database migration
+Apply the bookstore tables (Book, BookAsset, Order, OrderItem, DownloadGrant):
+```
+npx prisma migrate deploy   # in the Render Shell
+```
+
+### 5. Add books & test
+1. As an admin, open **Admin → Bookstore → New Book**: add cover, book file (PDF/EPUB),
+   key insights, price (USD), and set status **Published**.
+2. Visit `/store`, add to cart, and check out with a PayPal **sandbox buyer** account.
+3. Confirm: the receipt page shows secure downloads, the receipt email arrives, and
+   downloads are blocked before payment / after expiry / past the download limit.
+
+Notes:
+- Book files are stored in PostgreSQL (`BookAsset`) per the current design.
+- Download links expire after 7 days and allow up to 5 downloads per item.
+- The Content-Security-Policy in `next.config.ts` already allows the PayPal SDK domains.
+
+### Auto-fill & AI drafting from uploaded files
+When an admin uploads a book file (PDF/EPUB), the platform parses it to auto-fill the
+book fields:
+- **Metadata** (title, author, year, page count, language, ISBN, description) — from the
+  PDF info dictionary / EPUB Dublin Core.
+- **Cover image** — extracted automatically for EPUBs (upload manually for PDFs).
+- **AI drafting** — if `OPENAI_API_KEY` is set, a marketing **description** and **key
+  insights** are drafted from the book's text. Use the **"Draft with AI"** button in the
+  editor to (re)generate on demand, or **Bulk import** to auto-draft many at once.
+
+Config:
+| Variable | Value |
+|----------|-------|
+| `OPENAI_API_KEY` | Your OpenAI key (already read from `.env`). Required for AI drafting. |
+| `OPENAI_MODEL` | Optional; defaults to `gpt-4o-mini`. |
+
+AI drafting is fully optional and best-effort — if the key is missing/invalid or the call
+fails, uploads still succeed and you simply edit the fields manually. Each drafted book
+costs a small OpenAI usage fee (a few tenths of a cent with `gpt-4o-mini`).
+
+---
+
 *This guide covers the complete deployment lifecycle for the ADK Personal Website on Render.com. For additional support, consult the [Render documentation](https://render.com/docs) or the [Next.js deployment guide](https://nextjs.org/docs/app/building-your-application/deploying).*

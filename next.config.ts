@@ -18,12 +18,12 @@ const securityHeaders = [
     key: "Content-Security-Policy",
     value: [
       "default-src 'self'",
-      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com https://www.google-analytics.com https://pagead2.googlesyndication.com",
+      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com https://www.google-analytics.com https://pagead2.googlesyndication.com https://www.paypal.com https://www.paypalobjects.com",
       "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
       "font-src 'self' https://fonts.gstatic.com data:",
       "img-src 'self' https: data: blob:",
-      "connect-src 'self' https: https://www.google-analytics.com",
-      "frame-src 'self' https://googleads.g.doubleclick.net",
+      "connect-src 'self' https: https://www.google-analytics.com https://www.paypal.com https://api-m.paypal.com https://api-m.sandbox.paypal.com",
+      "frame-src 'self' https://googleads.g.doubleclick.net https://www.paypal.com https://www.sandbox.paypal.com",
       "frame-ancestors 'self'",
       "base-uri 'self'",
       "form-action 'self'",
@@ -32,6 +32,8 @@ const securityHeaders = [
 ];
 
 const nextConfig: NextConfig = {
+  // Keep these server-only parsers out of the bundle (pdfjs/zip internals).
+  serverExternalPackages: ["unpdf", "pdf-lib", "jszip"],
   images: {
     remotePatterns: [
       { protocol: "https", hostname: "lh3.googleusercontent.com" },

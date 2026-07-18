@@ -16,6 +16,9 @@ import {
   BarChart3,
   DollarSign,
   FlaskConical,
+  ShoppingBag,
+  Receipt,
+  LineChart,
 } from "lucide-react";
 
 const adminLinks = [
@@ -24,6 +27,9 @@ const adminLinks = [
   { href: "/admin/finance", label: "Finance", icon: DollarSign },
   { href: "/admin/blog", label: "Blog", icon: FileText },
   { href: "/admin/publications", label: "Publications", icon: BookOpen },
+  { href: "/admin/store", label: "Bookstore", icon: ShoppingBag },
+  { href: "/admin/store/orders", label: "Orders", icon: Receipt },
+  { href: "/admin/store/analytics", label: "Store Analytics", icon: LineChart },
   { href: "/admin/research-activities", label: "Research Activities", icon: FlaskConical },
   { href: "/admin/experience", label: "Experience", icon: Building2 },
   { href: "/admin/projects", label: "Projects", icon: FolderOpen },

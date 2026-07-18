@@ -9,6 +9,7 @@ import { useSession, signOut } from "next-auth/react";
 import { cn } from "@/lib/utils";
 import ThemeSwitcher from "@/components/ThemeSwitcher";
 import SearchPalette from "@/components/SearchPalette";
+import CartButton from "@/components/store/CartButton";
 
 const navItems = [
   { key: "home", href: "/" },
@@ -17,6 +18,7 @@ const navItems = [
   { key: "services", href: "/services" },
   { key: "projects", href: "/projects" },
   { key: "publications", href: "/publications" },
+  { key: "store", href: "/store" },
   { key: "research", href: "/research" },
   { key: "dba", href: "/dba" },
   { key: "blog", href: "/blog" },
@@ -94,6 +96,8 @@ export default function Navbar() {
 
             <SearchPalette />
 
+            <CartButton />
+
             <ThemeSwitcher />
 
             {session ? (
@@ -121,14 +125,17 @@ export default function Navbar() {
             )}
           </div>
 
-          {/* Mobile menu button */}
-          <button
-            onClick={() => setMobileOpen(!mobileOpen)}
-            className="xl:hidden p-2 text-text-secondary hover:text-gold transition-colors"
-            aria-label={mobileOpen ? "Close menu" : "Open menu"}
-          >
-            {mobileOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-          </button>
+          {/* Mobile actions */}
+          <div className="xl:hidden flex items-center gap-1">
+            <CartButton compact />
+            <button
+              onClick={() => setMobileOpen(!mobileOpen)}
+              className="p-2 text-text-secondary hover:text-gold transition-colors"
+              aria-label={mobileOpen ? "Close menu" : "Open menu"}
+            >
+              {mobileOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+            </button>
+          </div>
         </div>
       </div>
 
