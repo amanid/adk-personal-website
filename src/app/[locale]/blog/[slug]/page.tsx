@@ -79,10 +79,70 @@ export async function generateMetadata({
   return meta;
 }
 
-export default function BlogPostPage({
+export const revalidate = 120;
+
+export default async function BlogPostPage({
   params,
 }: {
   params: Promise<{ locale: string; slug: string }>;
 }) {
-  return <BlogDetailClient params={params} />;
+  const { slug } = await params;
+
+  let initialPost: React.ComponentProps<typeof BlogDetailClient>["initialPost"] = null;
+  let initialRelated: React.ComponentProps<typeof BlogDetailClient>["initialRelated"] = [];
+
+  try {
+    const post = await prisma.blogPost.findFirst({
+      where: { slug, published: true },
+      select: {
+        id: true,
+        title: true,
+        titleFr: true,
+        slug: true,
+        content: true,
+        contentFr: true,
+        excerpt: true,
+        category: true,
+        tags: true,
+        views: true,
+        createdAt: true,
+        author: { select: { name: true } },
+        comments: {
+          orderBy: { createdAt: "desc" },
+          select: {
+            id: true,
+            content: true,
+            createdAt: true,
+            author: { select: { name: true } },
+          },
+        },
+      },
+    });
+
+    if (post) {
+      initialPost = {
+        ...post,
+        createdAt: post.createdAt.toISOString(),
+        comments: post.comments.map((c) => ({
+          ...c,
+          createdAt: c.createdAt.toISOString(),
+        })),
+      };
+      if (post.category) {
+        const related = await prisma.blogPost.findMany({
+          where: { published: true, category: post.category, slug: { not: slug } },
+          orderBy: { createdAt: "desc" },
+          take: 3,
+          select: { slug: true, title: true, titleFr: true },
+        });
+        initialRelated = related;
+      }
+    }
+  } catch {
+    // DB unavailable — client shows the not-found state.
+  }
+
+  return (
+    <BlogDetailClient params={params} initialPost={initialPost} initialRelated={initialRelated} />
+  );
 }

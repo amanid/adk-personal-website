@@ -4,7 +4,7 @@ import { useTranslations, useLocale } from "next-intl";
 import { motion } from "framer-motion";
 import { Link } from "@/i18n/routing";
 import { Calendar, Eye, ArrowLeft, User, Send, Clock, Share2, Check, List } from "lucide-react";
-import { useState, useEffect, use, useMemo } from "react";
+import { useState, use, useMemo } from "react";
 import { formatDate } from "@/lib/utils";
 import { useSession } from "next-auth/react";
 import BlogJsonLd from "@/components/blog/BlogJsonLd";
@@ -33,42 +33,32 @@ interface BlogPostFull {
   }[];
 }
 
+export interface RelatedPost {
+  slug: string;
+  title: string;
+  titleFr: string | null;
+}
+
 export default function BlogDetailClient({
   params,
+  initialPost = null,
+  initialRelated = [],
 }: {
   params: Promise<{ slug: string }>;
+  initialPost?: BlogPostFull | null;
+  initialRelated?: RelatedPost[];
 }) {
   const { slug } = use(params);
   const t = useTranslations("blog");
   const locale = useLocale();
   const { data: session } = useSession();
-  const [post, setPost] = useState<BlogPostFull | null>(null);
+  // Post is server-rendered; kept in state so comments can be appended.
+  const [post, setPost] = useState<BlogPostFull | null>(initialPost);
   const [comment, setComment] = useState("");
-  const [loading, setLoading] = useState(true);
+  const loading = false;
   const [copied, setCopied] = useState(false);
-  const [relatedPosts, setRelatedPosts] = useState<{ slug: string; title: string; titleFr: string | null }[]>([]);
+  const [relatedPosts] = useState<RelatedPost[]>(initialRelated);
   const [showToc, setShowToc] = useState(false);
-
-  useEffect(() => {
-    fetch(`/api/blog/${slug}`)
-      .then((res) => res.json())
-      .then((data) => {
-        setPost(data.post);
-        setLoading(false);
-        if (data.post?.category) {
-          fetch(`/api/blog?category=${data.post.category}&limit=4`)
-            .then((r) => r.json())
-            .then((d) => {
-              const related = (d.posts || [])
-                .filter((p: { slug: string }) => p.slug !== slug)
-                .slice(0, 3);
-              setRelatedPosts(related);
-            })
-            .catch(() => {});
-        }
-      })
-      .catch(() => setLoading(false));
-  }, [slug]);
 
   const submitComment = async () => {
     if (!comment.trim() || !post) return;
