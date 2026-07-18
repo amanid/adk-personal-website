@@ -4,7 +4,6 @@ import { useTranslations, useLocale } from "next-intl";
 import { motion } from "framer-motion";
 import { GraduationCap, Award, Globe, BookOpen } from "lucide-react";
 import Image from "next/image";
-import { useState, useEffect } from "react";
 import {
   skillCategories as staticSkillCategories,
   education as staticEducation,
@@ -18,14 +17,14 @@ interface SkillEntry {
   level: number;
 }
 
-interface SkillCategoryEntry {
+export interface SkillCategoryEntry {
   id?: string;
   name: string;
   nameFr: string;
   skills: SkillEntry[];
 }
 
-interface EducationEntry {
+export interface EducationEntry {
   id?: string;
   degree: string;
   degreeFr: string | null;
@@ -34,38 +33,37 @@ interface EducationEntry {
   location: string;
 }
 
-interface CertificationEntry {
+export interface CertificationEntry {
   id?: string;
   name: string;
   issuer: string;
   year: string;
 }
 
-export default function AboutClient() {
+interface AboutClientProps {
+  initialSkillCategories?: SkillCategoryEntry[];
+  initialEducation?: EducationEntry[];
+  initialCertifications?: CertificationEntry[];
+  initialProfilePhoto?: string;
+}
+
+export default function AboutClient({
+  initialSkillCategories,
+  initialEducation,
+  initialCertifications,
+  initialProfilePhoto,
+}: AboutClientProps) {
   const t = useTranslations("about");
   const locale = useLocale();
-  const [skillCategories, setSkillCategories] = useState<SkillCategoryEntry[]>(staticSkillCategories);
-  const [education, setEducation] = useState<EducationEntry[]>(staticEducation);
-  const [certifications, setCertifications] = useState<CertificationEntry[]>(staticCertifications);
   const cacheBust = "v2";
-  const [profilePhoto, setProfilePhoto] = useState(`/images/profile.jpg?${cacheBust}`);
-
-  useEffect(() => {
-    Promise.all([
-      fetch("/api/skills").then((r) => r.json()).catch(() => null),
-      fetch("/api/education").then((r) => r.json()).catch(() => null),
-      fetch("/api/certifications").then((r) => r.json()).catch(() => null),
-      fetch("/api/settings").then((r) => r.json()).catch(() => null),
-    ]).then(([skillsData, eduData, certData, settingsData]) => {
-      if (skillsData?.categories?.length > 0) setSkillCategories(skillsData.categories);
-      if (eduData?.education?.length > 0) setEducation(eduData.education);
-      if (certData?.certifications?.length > 0) setCertifications(certData.certifications);
-      if (settingsData?.settings?.profilePhoto) {
-        const url = settingsData.settings.profilePhoto;
-        setProfilePhoto(url.includes("?") ? url : `${url}?${cacheBust}`);
-      }
-    });
-  }, []);
+  const skillCategories = initialSkillCategories?.length
+    ? initialSkillCategories
+    : staticSkillCategories;
+  const education = initialEducation?.length ? initialEducation : staticEducation;
+  const certifications = initialCertifications?.length
+    ? initialCertifications
+    : staticCertifications;
+  const profilePhoto = initialProfilePhoto || `/images/profile.jpg?${cacheBust}`;
 
   return (
     <div className="section-padding">

@@ -3,10 +3,10 @@
 import { useTranslations, useLocale } from "next-intl";
 import { motion } from "framer-motion";
 import { MapPin, Calendar, ChevronDown, ChevronUp } from "lucide-react";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { experiences as staticExperiences } from "@/data/experience";
 
-interface ExperienceEntry {
+export interface ExperienceEntry {
   id: string;
   role: string;
   roleFr: string;
@@ -18,23 +18,17 @@ interface ExperienceEntry {
   descriptionFr: string[];
 }
 
-export default function ExperienceClient() {
+export default function ExperienceClient({
+  initialExperiences,
+}: {
+  initialExperiences: ExperienceEntry[];
+}) {
   const t = useTranslations("experience");
   const locale = useLocale();
-  const [experiences, setExperiences] = useState<ExperienceEntry[]>(staticExperiences);
-  const [expandedId, setExpandedId] = useState<string | null>(staticExperiences[0].id);
-
-  useEffect(() => {
-    fetch("/api/experience")
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.experiences?.length > 0) {
-          setExperiences(data.experiences);
-          setExpandedId(data.experiences[0].id);
-        }
-      })
-      .catch(() => {});
-  }, []);
+  const experiences: ExperienceEntry[] = initialExperiences.length
+    ? initialExperiences
+    : staticExperiences;
+  const [expandedId, setExpandedId] = useState<string | null>(experiences[0]?.id ?? null);
 
   return (
     <div className="section-padding">

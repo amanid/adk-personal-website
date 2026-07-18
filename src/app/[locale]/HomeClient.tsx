@@ -23,7 +23,6 @@ import {
   Download,
   Code2,
 } from "lucide-react";
-import { useState, useEffect } from "react";
 import HeroSection from "@/components/home/HeroSection";
 import StatsCounter from "@/components/home/StatsCounter";
 import MarketTicker from "@/components/home/MarketTicker";
@@ -128,35 +127,29 @@ interface SectionVisibility {
   [key: string]: boolean;
 }
 
-export default function HomeClient() {
+interface HomeClientProps {
+  initialProjects?: ProjectEntry[];
+  initialExperiences?: ExperienceEntry[];
+  initialPublications?: PublicationEntry[];
+  initialVisibility?: SectionVisibility;
+  initialCvUrl?: string;
+}
+
+export default function HomeClient({
+  initialProjects,
+  initialExperiences,
+  initialPublications,
+  initialVisibility,
+  initialCvUrl,
+}: HomeClientProps) {
   const t = useTranslations();
   const locale = useLocale();
-  const [projects, setProjects] = useState<ProjectEntry[]>(staticProjects);
-  const [experiences, setExperiences] = useState<ExperienceEntry[]>(staticExperiences);
-  const [publications, setPublications] = useState<PublicationEntry[]>(staticPublications);
-  const [vis, setVis] = useState<SectionVisibility>({});
-  const [cvUrl, setCvUrl] = useState<string>("");
-
-  useEffect(() => {
-    Promise.all([
-      fetch("/api/projects").then((r) => r.json()).catch(() => null),
-      fetch("/api/experience").then((r) => r.json()).catch(() => null),
-      fetch("/api/publications").then((r) => r.json()).catch(() => null),
-      fetch("/api/settings").then((r) => r.json()).catch(() => null),
-    ]).then(([projData, expData, pubData, settingsData]) => {
-      if (projData?.projects?.length > 0) setProjects(projData.projects);
-      if (expData?.experiences?.length > 0) setExperiences(expData.experiences);
-      if (pubData?.publications?.length > 0) setPublications(pubData.publications);
-      if (settingsData?.settings) {
-        if (settingsData.settings.sectionVisibility) {
-          setVis(settingsData.settings.sectionVisibility);
-        }
-        if (settingsData.settings.cvFileUrl) {
-          setCvUrl(settingsData.settings.cvFileUrl);
-        }
-      }
-    });
-  }, []);
+  // Server-provided data (in the first-byte HTML); fall back to static seeds.
+  const projects = initialProjects?.length ? initialProjects : staticProjects;
+  const experiences = initialExperiences?.length ? initialExperiences : staticExperiences;
+  const publications = initialPublications?.length ? initialPublications : staticPublications;
+  const vis: SectionVisibility = initialVisibility ?? {};
+  const cvUrl = initialCvUrl ?? "";
 
   const featuredProjects = projects.filter((p) => p.featured).slice(0, 4);
   const featuredPublications = publications.filter((p) => p.featured).slice(0, 3);
