@@ -64,7 +64,8 @@ export async function GET(
       "_"
     );
 
-    return new NextResponse(new Uint8Array(asset.data), {
+    // Stream the Buffer straight through (no extra Uint8Array copy).
+    return new NextResponse(asset.data, {
       headers: {
         "Content-Type": asset.mimeType || book.fileMimeType || "application/octet-stream",
         "Content-Disposition": `attachment; filename="${safeName}"`,

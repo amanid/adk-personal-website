@@ -4,7 +4,10 @@ import { prisma } from "@/lib/prisma";
 import { randomUUID } from "crypto";
 import { parseBookFile, extractBookText } from "@/lib/book-parser";
 import { enrichBookMetadata } from "@/lib/ai-enrich";
+import { processCoverImage, renderPdfCover, MAX_PDF_PROCESS_BYTES } from "@/lib/cover-image";
 import { sanitizeInput } from "@/lib/sanitize";
+
+const DEFAULT_PRICE_CENTS = 5000; // $50
 
 const ALLOWED_TYPES = ["application/pdf", "application/epub+zip"];
 const ALLOWED_EXTENSIONS = ["pdf", "epub"];
@@ -86,31 +89,39 @@ export async function POST(request: Request) {
 
         const meta = await parseBookFile(buffer, file.name, file.type);
 
-        // AI enrichment: draft description + key insights (best-effort).
-        try {
-          const sampleText = await extractBookText(buffer, file.name, file.type);
-          const ai = await enrichBookMetadata({
-            title: meta.title,
-            author: meta.author,
-            existingDescription: meta.description,
-            sampleText,
-          });
-          if (ai?.description) meta.description = ai.description;
-          if (ai?.keyInsights.length) meta.keyInsights = ai.keyInsights;
-        } catch (err) {
-          console.error(`AI enrichment (bulk) failed for ${file.name}:`, err);
+        // AI enrichment (skip very large files to protect memory).
+        if (file.size <= MAX_PDF_PROCESS_BYTES) {
+          try {
+            const sampleText = await extractBookText(buffer, file.name, file.type);
+            const ai = await enrichBookMetadata({
+              title: meta.title,
+              author: meta.author,
+              existingDescription: meta.description,
+              sampleText,
+            });
+            if (ai?.description) meta.description = ai.description;
+            if (ai?.keyInsights.length) meta.keyInsights = ai.keyInsights;
+          } catch (err) {
+            console.error(`AI enrichment (bulk) failed for ${file.name}:`, err);
+          }
         }
 
+        // Cover: EPUB embedded cover, else PDF first page — always downscaled.
         let coverImageId: string | null = null;
-        if (meta.cover) {
-          const cover = await prisma.upload.create({
+        const cover = meta.cover
+          ? await processCoverImage(meta.cover.data)
+          : ext === "pdf" || file.type === "application/pdf"
+            ? await renderPdfCover(buffer)
+            : null;
+        if (cover) {
+          const created = await prisma.upload.create({
             data: {
-              filename: `${randomUUID()}-cover`,
-              mimeType: meta.cover.mimeType,
-              data: Buffer.from(meta.cover.data),
+              filename: `${randomUUID()}-cover.jpg`,
+              mimeType: cover.mimeType,
+              data: Buffer.from(cover.data),
             },
           });
-          coverImageId = cover.id;
+          coverImageId = created.id;
         }
 
         const title = sanitizeInput(meta.title || file.name.replace(/\.[^.]+$/, ""));
@@ -131,7 +142,7 @@ export async function POST(request: Request) {
             language: meta.language ? sanitizeInput(meta.language) : undefined,
             pageCount: meta.pageCount ?? null,
             tags: [],
-            priceCents: 0,
+            priceCents: DEFAULT_PRICE_CENTS,
             currency: "USD",
             coverImageId,
             fileId: asset.id,

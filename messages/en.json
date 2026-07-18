@@ -23,8 +23,8 @@
   "hero": {
     "greeting": "Hello, I'm",
     "name": "KONAN Amani Dieudonné",
-    "roles": "Full-Stack Senior Statistician | Data Scientist | ML & AI Architect | Data Engineer | Full-Stack Developer | Strategic Advisor",
-    "description": "Full-Stack Senior Statistician, Data Scientist, Machine Learning & AI Professional with 13+ years of experience across the United Nations system, international development finance, and global organizations. MIT-certified in Data Engineering and AI, with advanced degrees in Statistics & Econometrics. Expert in the full data-to-intelligence pipeline: from statistical modeling and data engineering to AI/ML systems, full-stack development, and strategic advisory. Currently completing a Doctor of Business Administration (DBA) in Artificial Intelligence focused on AI adoption in international development.",
+    "roles": "Global Statistician | Data Scientist | ML & AI Architect | Data Engineer | Full-Stack Developer | Strategic Advisor",
+    "description": "Global Statistician, Data Scientist, Machine Learning & AI Professional with 13+ years of experience across the United Nations system, international development finance, and global organizations. MIT-certified in Data Engineering and AI, with advanced degrees in Statistics & Econometrics. Expert in the full data-to-intelligence pipeline: from statistical modeling and data engineering to AI/ML systems, full-stack development, and strategic advisory. Currently completing a Doctor of Business Administration (DBA) in Artificial Intelligence focused on AI adoption in international development.",
     "cta_services": "Explore Services",
     "cta_contact": "Get in Touch",
     "download_cv": "Download CV",
@@ -100,7 +100,7 @@
   },
   "about": {
     "title": "About Me",
-    "subtitle": "Full-Stack Senior Statistician | Data Scientist | ML & AI Professional | DBA Candidate (AI)",
+    "subtitle": "Global Statistician | Data Scientist | ML & AI Professional | DBA Candidate (AI)",
     "bio_title": "Professional Biography",
     "bio": "Over more than 13 years, I have worked across 11 international organizations in 6+ countries, covering the full span from statistical and econometric analysis to data engineering, machine learning, AI systems, and the web applications that deliver them. I trained as a Statistics & Information Systems Engineer at ENSEA Abidjan and hold a Master's in Statistics & Econometrics from Université Toulouse I Capitole, sharpened further by professional certificates from MIT in Data Engineering, AI & Data Science, and a MicroMasters in Data, Economics & Development Policy. My career spans the United Nations system (ITU, IOM, UNHCR, UNIDIR), the International Cocoa Organization (ICCO), the African Export-Import Bank (Afreximbank), Barry-Callebaut, FHI360, ICRAF, and PAC-CI. I specialize in designing enterprise data architectures, building full-stack applications, deploying production-grade AI/ML systems, conducting rigorous econometric analysis, and driving data strategy for complex international organizations. I am currently completing a Doctor of Business Administration (DBA) in Artificial Intelligence at the IIBM Institute of Business Management; my thesis, Renting Intelligence, applies quasi-experimental methods to how AI sourcing choices shape performance in international development.",
     "education_title": "Education",
@@ -342,7 +342,7 @@
     "forgot_password": "Forgot password?"
   },
   "footer": {
-    "description": "Full-Stack Senior Statistician, Data Scientist, ML & AI Professional with 13+ years of international experience across 11 organizations.",
+    "description": "Global Statistician, Data Scientist, ML & AI Professional with 13+ years of international experience across 11 organizations.",
     "quick_links": "Quick Links",
     "connect": "Connect",
     "rights": "All rights reserved."

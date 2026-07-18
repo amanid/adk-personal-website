@@ -33,11 +33,11 @@ const playfair = Playfair_Display({
 export const metadata = {
   metadataBase: new URL("https://www.konanamanidieudonne.org"),
   title: {
-    default: "KONAN Amani Dieudonné | Full-Stack Senior Statistician, Data, ML & AI Professional",
+    default: "KONAN Amani Dieudonné | Global Statistician, Data, ML & AI Professional",
     template: "%s | KONAN Amani Dieudonné",
   },
   description:
-    "MIT-certified Full-Stack Senior Statistician, Data Scientist, Machine Learning & AI Professional with 13+ years of experience across the UN system, development finance, and international organizations. Expert in Statistics, Econometrics, Data Science, AI/ML Engineering, Data Architecture, Full-Stack Development, and Strategic Advisory.",
+    "MIT-certified Global Statistician, Data Scientist, Machine Learning & AI Professional with 13+ years of experience across the UN system, development finance, and international organizations. Expert in Statistics, Econometrics, Data Science, AI/ML Engineering, Data Architecture, Full-Stack Development, and Strategic Advisory.",
   keywords: [
     "Full-Stack Statistician",
     "Senior Data Scientist",
@@ -78,23 +78,23 @@ export const metadata = {
     locale: "en_US",
     url: "https://www.konanamanidieudonne.org",
     siteName: "KONAN Amani Dieudonné",
-    title: "KONAN Amani Dieudonné | Full-Stack Senior Statistician, Data, ML & AI Professional",
+    title: "KONAN Amani Dieudonné | Global Statistician, Data, ML & AI Professional",
     description:
-      "MIT-certified Full-Stack Senior Statistician, Data Scientist, ML & AI Professional with 13+ years of experience across the UN system, development finance, and global organizations.",
+      "MIT-certified Global Statistician, Data Scientist, ML & AI Professional with 13+ years of experience across the UN system, development finance, and global organizations.",
     images: [
       {
         url: "/images/profile.jpg",
         width: 800,
         height: 800,
-        alt: "KONAN Amani Dieudonné - Full-Stack Senior Statistician, Data, ML & AI Professional",
+        alt: "KONAN Amani Dieudonné - Global Statistician, Data, ML & AI Professional",
       },
     ],
   },
   twitter: {
     card: "summary",
-    title: "KONAN Amani Dieudonné | Full-Stack Senior Statistician, Data, ML & AI Professional",
+    title: "KONAN Amani Dieudonné | Global Statistician, Data, ML & AI Professional",
     description:
-      "Full-Stack Senior Statistician, Data Scientist, ML & AI Professional with 13+ years of international experience.",
+      "Global Statistician, Data Scientist, ML & AI Professional with 13+ years of international experience.",
     images: ["/images/profile.jpg"],
   },
 };
@@ -119,7 +119,7 @@ export default async function LocaleLayout({
     name: "KONAN Amani Dieudonné",
     url: "https://www.konanamanidieudonne.org",
     image: "https://www.konanamanidieudonne.org/images/profile.jpg",
-    jobTitle: "Full-Stack Senior Statistician, Data, ML & AI Professional",
+    jobTitle: "Global Statistician, Data, ML & AI Professional",
     worksFor: {
       "@type": "Organization",
       name: "African Export-Import Bank (Afreximbank)",

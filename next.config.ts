@@ -32,8 +32,9 @@ const securityHeaders = [
 ];
 
 const nextConfig: NextConfig = {
-  // Keep these server-only parsers out of the bundle (pdfjs/zip internals).
-  serverExternalPackages: ["unpdf", "pdf-lib", "jszip"],
+  // Keep these server-only parsers/image libs out of the bundle
+  // (pdfjs/zip internals + native sharp/canvas binaries).
+  serverExternalPackages: ["unpdf", "pdf-lib", "jszip", "sharp", "@napi-rs/canvas"],
   images: {
     remotePatterns: [
       { protocol: "https", hostname: "lh3.googleusercontent.com" },

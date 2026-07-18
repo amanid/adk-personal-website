@@ -31,7 +31,9 @@ export async function GET(
       ? "inline"
       : `attachment; filename="${upload.filename.replace(/[^\w.\-]/g, "_")}"`;
 
-    return new NextResponse(new Uint8Array(upload.data), {
+    // Pass the Buffer straight through (no extra Uint8Array copy) to avoid
+    // doubling memory per request.
+    return new NextResponse(upload.data, {
       headers: {
         "Content-Type": contentType,
         "Content-Disposition": disposition,

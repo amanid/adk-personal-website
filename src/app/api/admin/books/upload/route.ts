@@ -4,6 +4,12 @@ import { prisma } from "@/lib/prisma";
 import { randomUUID } from "crypto";
 import { parseBookFile, extractBookText } from "@/lib/book-parser";
 import { enrichBookMetadata } from "@/lib/ai-enrich";
+import {
+  processCoverImage,
+  renderPdfCover,
+  MAX_PDF_PROCESS_BYTES,
+  type ProcessedImage,
+} from "@/lib/cover-image";
 
 // The downloadable book file. Restricted to document formats.
 const ALLOWED_TYPES = ["application/pdf", "application/epub+zip"];
@@ -52,35 +58,46 @@ export async function POST(request: Request) {
     let coverImageId: string | null = null;
     try {
       const parsed = await parseBookFile(buffer, file.name, file.type);
+
+      // Cover: use the EPUB's embedded cover, else rasterize the PDF's first page.
+      // Always downscale to a small JPEG so serving it can't blow up memory.
+      let cover: ProcessedImage | null = null;
       if (parsed.cover) {
-        const cover = await prisma.upload.create({
+        cover = await processCoverImage(parsed.cover.data);
+      } else if (ext === "pdf" || file.type === "application/pdf") {
+        cover = await renderPdfCover(buffer);
+      }
+      if (cover) {
+        const created = await prisma.upload.create({
           data: {
-            filename: `${randomUUID()}-cover`,
-            mimeType: parsed.cover.mimeType,
-            data: Buffer.from(parsed.cover.data),
+            filename: `${randomUUID()}-cover.jpg`,
+            mimeType: cover.mimeType,
+            data: Buffer.from(cover.data),
           },
         });
-        coverImageId = cover.id;
+        coverImageId = created.id;
       }
 
-      // AI enrichment: draft a marketing description + key insights (best-effort).
-      try {
-        const sampleText = await extractBookText(buffer, file.name, file.type);
-        const ai = await enrichBookMetadata({
-          title: parsed.title,
-          author: parsed.author,
-          existingDescription: parsed.description,
-          sampleText,
-        });
-        if (ai?.description) parsed.description = ai.description;
-        if (ai?.keyInsights.length) parsed.keyInsights = ai.keyInsights;
-      } catch (err) {
-        console.error("AI enrichment (upload) failed:", err);
+      // AI enrichment (skip very large files to protect memory).
+      if (file.size <= MAX_PDF_PROCESS_BYTES) {
+        try {
+          const sampleText = await extractBookText(buffer, file.name, file.type);
+          const ai = await enrichBookMetadata({
+            title: parsed.title,
+            author: parsed.author,
+            existingDescription: parsed.description,
+            sampleText,
+          });
+          if (ai?.description) parsed.description = ai.description;
+          if (ai?.keyInsights.length) parsed.keyInsights = ai.keyInsights;
+        } catch (err) {
+          console.error("AI enrichment (upload) failed:", err);
+        }
       }
 
       // Don't ship the raw cover buffer back to the client.
-      const { cover, ...rest } = parsed;
-      void cover;
+      const { cover: _rawCover, ...rest } = parsed;
+      void _rawCover;
       metadata = rest;
     } catch (err) {
       console.error("Book metadata parse failed:", err);

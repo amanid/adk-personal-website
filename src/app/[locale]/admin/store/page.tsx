@@ -74,7 +74,7 @@ const emptyForm = {
   pageCount: 0,
   category: "",
   tags: "",
-  priceDollars: "",
+  priceDollars: "50.00",
   status: "DRAFT",
   featured: false,
   sortOrder: 0,

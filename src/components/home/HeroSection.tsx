@@ -32,7 +32,7 @@ export default function HeroSection({ showCvDownload = false, cvUrl }: HeroSecti
   }, []);
 
   const roles = [
-    "Full-Stack Senior Statistician",
+    "Global Statistician",
     "Data Science & Analytics Leader",
     "Machine Learning & AI Architect",
     "Data Engineering & Architecture Expert",
