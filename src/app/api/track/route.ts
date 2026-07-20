@@ -27,11 +27,14 @@ function parseUserAgent(ua: string) {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { path, referrer } = body;
+    const { path, referrer, visitorId } = body;
 
     if (!path || typeof path !== "string") {
       return NextResponse.json({ ok: true });
     }
+
+    const sessionId =
+      typeof visitorId === "string" && visitorId ? visitorId.slice(0, 64) : null;
 
     const userAgent = request.headers.get("user-agent") || "";
     const { device, browser, os } = parseUserAgent(userAgent);
@@ -53,6 +56,7 @@ export async function POST(request: NextRequest) {
         device,
         browser,
         os,
+        sessionId,
       },
     });
 

@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { getCached, setCache } from "@/lib/cache";
 import { rateLimit } from "@/lib/rate-limit";
-import { getYahooFinance } from "@/lib/yahoo";
+import { fetchChartQuote } from "@/lib/yahoo-chart";
 
 const COMMODITIES = [
   { symbol: "CC=F", name: "Cocoa", unit: "$/ton" },
@@ -36,28 +36,20 @@ export async function GET(request: Request) {
       return NextResponse.json(cached);
     }
 
-    const yahooFinance = await getYahooFinance();
-
-    // Fetch all commodities in parallel with per-item timeout
+    // Fetch all commodities in parallel via Yahoo's crumb-free chart endpoint.
     const results = await Promise.allSettled(
       COMMODITIES.map(async (commodity) => {
-        const quote = (await Promise.race([
-          yahooFinance.quote(commodity.symbol),
-          new Promise((_, reject) =>
-            setTimeout(() => reject(new Error("Timeout")), 12000)
-          ),
-        ])) as {
-          regularMarketPrice?: number;
-          regularMarketChange?: number;
-          regularMarketChangePercent?: number;
-        };
+        const quote = await fetchChartQuote(commodity.symbol, 10000);
+        if (!quote || quote.price === null) {
+          throw new Error(`No quote for ${commodity.symbol}`);
+        }
         return {
           symbol: commodity.symbol,
           name: commodity.name,
           unit: commodity.unit,
-          price: quote.regularMarketPrice ?? null,
-          change: quote.regularMarketChange ?? null,
-          changePercent: quote.regularMarketChangePercent ?? null,
+          price: quote.price,
+          change: quote.change,
+          changePercent: quote.changePercent,
         };
       })
     );

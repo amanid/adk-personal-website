@@ -28,6 +28,7 @@ export const metadata = {
 const adminLinks = [
   { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
   { href: "/admin/analytics", label: "Analytics", icon: BarChart3 },
+  { href: "/admin/visitors", label: "Visitors", icon: Users },
   { href: "/admin/finance", label: "Finance", icon: DollarSign },
   { href: "/admin/blog", label: "Blog", icon: FileText },
   { href: "/admin/publications", label: "Publications", icon: BookOpen },
