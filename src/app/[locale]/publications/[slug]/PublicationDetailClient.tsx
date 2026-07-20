@@ -74,7 +74,7 @@ interface DbPublication {
   citationCount?: number;
 }
 
-interface RelatedPub {
+export interface RelatedPub {
   slug: string;
   title: string;
   titleFr?: string;
@@ -85,7 +85,11 @@ interface RelatedPub {
   tags?: string[];
 }
 
-export default function PublicationDetailClient() {
+export default function PublicationDetailClient({
+  initialRelated = [],
+}: {
+  initialRelated?: RelatedPub[];
+}) {
   const params = useParams();
   const t = useTranslations("publications");
   const locale = useLocale();
@@ -95,7 +99,8 @@ export default function PublicationDetailClient() {
   const [dbPub, setDbPub] = useState<DbPublication | null>(null);
   const [comments, setComments] = useState<Comment[]>([]);
   const [loading, setLoading] = useState(true);
-  const [related, setRelated] = useState<RelatedPub[]>([]);
+  // Related is computed server-side (avoids refetching the whole corpus here).
+  const [related] = useState<RelatedPub[]>(initialRelated);
   const [showPdf, setShowPdf] = useState(false);
 
   const slug = params.slug as string;
@@ -115,29 +120,7 @@ export default function PublicationDetailClient() {
         setLoading(false);
       })
       .catch(() => setLoading(false));
-
-    // Fetch related publications
-    fetch("/api/publications")
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.publications) {
-          const currentCategory = staticPub?.category;
-          const currentTags = new Set(staticPub?.tags || []);
-          const others = (data.publications as RelatedPub[])
-            .filter((p) => p.slug !== slug)
-            .map((p) => ({
-              ...p,
-              score:
-                (p.category === currentCategory ? 3 : 0) +
-                (p.tags || []).filter((t: string) => currentTags.has(t)).length,
-            }))
-            .sort((a, b) => b.score - a.score)
-            .slice(0, 4);
-          setRelated(others);
-        }
-      })
-      .catch(() => {});
-  }, [slug, staticPub?.category, staticPub?.tags]);
+  }, [slug]);
 
   const pub = staticPub || dbPub;
 

@@ -21,7 +21,7 @@ import {
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { questionSchema, QuestionInput } from "@/lib/validations";
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useSession } from "next-auth/react";
 import { formatDate } from "@/lib/utils";
 
@@ -44,19 +44,25 @@ interface QuestionData {
   _count?: { answers: number };
 }
 
-export default function QAClient() {
+export default function QAClient({
+  initialQuestions = [],
+  initialTotalPages = 1,
+}: {
+  initialQuestions?: QuestionData[];
+  initialTotalPages?: number;
+}) {
   const t = useTranslations("qa");
   const locale = useLocale();
   const { data: session } = useSession();
-  const [questions, setQuestions] = useState<QuestionData[]>([]);
+  const [questions, setQuestions] = useState<QuestionData[]>(initialQuestions);
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [showForm, setShowForm] = useState(false);
   const [submitted, setSubmitted] = useState(false);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [sort, setSort] = useState<"recent" | "popular" | "unanswered">("recent");
   const [page, setPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
+  const [totalPages, setTotalPages] = useState(initialTotalPages);
 
   const {
     register,
@@ -87,7 +93,13 @@ export default function QAClient() {
     }
   }, [sort, page, searchQuery]);
 
+  // The first page is server-rendered; only refetch when the query changes.
+  const isFirstLoad = useRef(true);
   useEffect(() => {
+    if (isFirstLoad.current) {
+      isFirstLoad.current = false;
+      return;
+    }
     fetchQuestions();
   }, [fetchQuestions]);
 

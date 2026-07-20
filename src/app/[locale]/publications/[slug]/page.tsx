@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { buildPageMetadata, normalizeLocale, type AppLocale } from "@/lib/seo";
 import { publications } from "@/data/publications";
 import { prisma } from "@/lib/prisma";
-import PublicationDetailClient from "./PublicationDetailClient";
+import PublicationDetailClient, { type RelatedPub } from "./PublicationDetailClient";
 
 function clip(text: string, max = 160): string {
   const clean = text.replace(/\s+/g, " ").trim();
@@ -72,6 +72,63 @@ export async function generateMetadata({
   });
 }
 
-export default function PublicationDetailPage() {
-  return <PublicationDetailClient />;
+export const revalidate = 300;
+
+export default async function PublicationDetailPage({
+  params,
+}: {
+  params: Promise<{ locale: string; slug: string }>;
+}) {
+  const { slug } = await params;
+
+  // Compute "related" on the server (was a whole-corpus fetch on the client).
+  let initialRelated: RelatedPub[] = [];
+  try {
+    const staticPub = publications.find((p) => p.slug === slug);
+    let category: string | null = staticPub?.category ?? null;
+    let tags: string[] = staticPub?.tags ?? [];
+    if (!staticPub) {
+      const cur = await prisma.publication.findUnique({
+        where: { slug },
+        select: { category: true, tags: true },
+      });
+      category = cur?.category ?? null;
+      tags = cur?.tags ?? [];
+    }
+    const tagSet = new Set(tags);
+
+    const candidates = await prisma.publication.findMany({
+      where: { slug: { not: slug } },
+      select: {
+        slug: true,
+        title: true,
+        titleFr: true,
+        year: true,
+        publicationType: true,
+        authors: true,
+        category: true,
+        tags: true,
+      },
+    });
+
+    const scored = candidates.map((p) => ({
+      pub: {
+        slug: p.slug,
+        title: p.title,
+        titleFr: p.titleFr ?? undefined,
+        year: p.year,
+        publicationType: p.publicationType,
+        authors: p.authors,
+        category: p.category ?? undefined,
+        tags: p.tags,
+      },
+      score: (p.category === category ? 3 : 0) + p.tags.filter((tg) => tagSet.has(tg)).length,
+    }));
+    scored.sort((a, b) => b.score - a.score);
+    initialRelated = scored.slice(0, 4).map((s) => s.pub);
+  } catch {
+    // DB unavailable — related simply stays empty.
+  }
+
+  return <PublicationDetailClient initialRelated={initialRelated} />;
 }
