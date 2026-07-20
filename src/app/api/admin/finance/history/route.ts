@@ -1,6 +1,17 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { getCached, setCache } from "@/lib/cache";
+import { fetchChartSeries } from "@/lib/yahoo-chart";
+
+/** Smallest Yahoo range string that covers the requested number of days. */
+function rangeForDays(days: number): string {
+  if (days <= 5) return "5d";
+  if (days <= 30) return "1mo";
+  if (days <= 90) return "3mo";
+  if (days <= 180) return "6mo";
+  if (days <= 365) return "1y";
+  return "2y";
+}
 
 const COMMODITIES = [
   { symbol: "CC=F", name: "Cocoa" },
@@ -35,36 +46,19 @@ export async function GET(request: NextRequest) {
       return NextResponse.json(cached);
     }
 
-    const YahooFinance = (await import("yahoo-finance2")).default;
-    const yahooFinance = new YahooFinance({ suppressNotices: ["yahooSurvey"] });
-
-    const now = new Date();
-    const period1 = new Date(now);
-    period1.setDate(period1.getDate() - days);
-    const period1Str = period1.toISOString().split("T")[0];
-    const period2Str = now.toISOString().split("T")[0];
+    const range = rangeForDays(days);
+    const cutoff = new Date(Date.now() - days * 24 * 60 * 60 * 1000)
+      .toISOString()
+      .split("T")[0];
 
     const results = await Promise.allSettled(
       COMMODITIES.map(async (commodity) => {
-        const chart = (await Promise.race([
-          yahooFinance.chart(commodity.symbol, {
-            period1: period1Str,
-            period2: period2Str,
-            interval: "1d",
-          }),
-          new Promise((_, reject) =>
-            setTimeout(() => reject(new Error("Timeout")), 8000)
-          ),
-        ])) as { quotes?: Array<{ date: Date; close?: number | null }> };
-
-        const quotes = chart.quotes || [];
-        const points: HistoryPoint[] = quotes
-          .filter((q) => q.close != null)
-          .map((q) => ({
-            date: new Date(q.date).toISOString().split("T")[0],
-            close: q.close as number,
-          }));
-
+        const series = await fetchChartSeries(commodity.symbol, range, 10000);
+        if (!series || series.length === 0) {
+          throw new Error(`No history for ${commodity.symbol}`);
+        }
+        // Trim to the requested window (Yahoo ranges are coarser than N days).
+        const points: HistoryPoint[] = series.filter((p) => p.date >= cutoff);
         return { symbol: commodity.symbol, points };
       })
     );

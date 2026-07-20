@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { getCached, setCache } from "@/lib/cache";
 import { rateLimit } from "@/lib/rate-limit";
-import { getYahooFinance } from "@/lib/yahoo";
+import { fetchChartSeries } from "@/lib/yahoo-chart";
 
 const COMMODITIES = [
   { symbol: "CC=F", name: "Cocoa" },
@@ -32,36 +32,14 @@ export async function GET(request: Request) {
       return NextResponse.json(cached);
     }
 
-    const yahooFinance = await getYahooFinance();
-
-    const now = new Date();
-    const period1 = new Date(now);
-    period1.setDate(period1.getDate() - 30);
-    const period1Str = period1.toISOString().split("T")[0];
-    const period2Str = now.toISOString().split("T")[0];
-
+    // Fetch each series via Yahoo's crumb-free chart endpoint (no 429 handshake).
     const results = await Promise.allSettled(
       COMMODITIES.map(async (commodity) => {
-        const chart = (await Promise.race([
-          yahooFinance.chart(commodity.symbol, {
-            period1: period1Str,
-            period2: period2Str,
-            interval: "1d",
-          }),
-          new Promise((_, reject) =>
-            setTimeout(() => reject(new Error("Timeout")), 12000)
-          ),
-        ])) as { quotes?: Array<{ date: Date; close?: number | null }> };
-
-        const quotes = chart.quotes || [];
-        const points: HistoryPoint[] = quotes
-          .filter((q) => q.close != null)
-          .map((q) => ({
-            date: new Date(q.date).toISOString().split("T")[0],
-            close: q.close as number,
-          }));
-
-        return { symbol: commodity.symbol, points };
+        const points = await fetchChartSeries(commodity.symbol, "1mo", 10000);
+        if (!points || points.length === 0) {
+          throw new Error(`No history for ${commodity.symbol}`);
+        }
+        return { symbol: commodity.symbol, points: points as HistoryPoint[] };
       })
     );
 
