@@ -106,7 +106,22 @@ export async function POST(request: Request) {
       })),
       provider,
       receiptUrl: `${appUrl}/${locale}/store/receipt/${order.receiptToken}`,
-    }).catch((err) => console.error("Invoice email failed:", err));
+    })
+      .then(() =>
+        prisma.order.update({
+          where: { id: order.id },
+          data: { invoiceEmailedAt: new Date(), lastEmailError: null },
+        })
+      )
+      .catch((err) => {
+        console.error("Invoice email failed:", err);
+        return prisma.order
+          .update({
+            where: { id: order.id },
+            data: { lastEmailError: String(err?.message || err).slice(0, 500) },
+          })
+          .catch(() => {});
+      });
 
     return NextResponse.json({ receiptToken: order.receiptToken });
   } catch (error) {

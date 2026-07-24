@@ -19,6 +19,8 @@ import {
   Package,
   Search,
   Mail,
+  MailWarning,
+  MailCheck,
   Calendar,
   Download,
   Hash,
@@ -48,6 +50,9 @@ interface Order {
   paypalOrderId: string | null;
   paypalCaptureId: string | null;
   paidAt: string | null;
+  invoiceEmailedAt: string | null;
+  receiptEmailedAt: string | null;
+  lastEmailError: string | null;
   createdAt: string;
   items: OrderItem[];
   _count: { downloads: number };
@@ -178,6 +183,11 @@ export default function AdminOrdersPage() {
     return c;
   }, [orders]);
 
+  const emailFailedCount = useMemo(
+    () => orders.filter((o) => o.lastEmailError).length,
+    [orders]
+  );
+
   const summary = useMemo(() => {
     const paid = orders.filter((o) => o.status === "PAID");
     const byCurrency = new Map<string, number>();
@@ -264,6 +274,18 @@ export default function AdminOrdersPage() {
         </div>
       )}
 
+      {/* Email failure banner */}
+      {emailFailedCount > 0 && (
+        <div className="flex items-start gap-2 mb-4 rounded-xl border border-red-400/30 bg-red-400/10 px-4 py-2.5 text-sm text-red-300">
+          <MailWarning className="w-4 h-4 shrink-0 mt-0.5" />
+          <span>
+            {emailFailedCount} order{emailFailedCount === 1 ? "" : "s"} had an email delivery
+            failure. Buyers may not have received their invoice or download links — check your
+            SMTP settings, then use the buyer email to follow up.
+          </span>
+        </div>
+      )}
+
       {/* Filters + search */}
       <div className="flex flex-wrap items-center gap-2 mb-4">
         <div className="flex flex-wrap gap-1.5">
@@ -337,6 +359,12 @@ export default function AdminOrdersPage() {
                       <span className="font-semibold text-sm">{o.orderNumber}</span>
                       <StatusPill status={o.status} />
                       <MethodChip method={o.paymentMethod} />
+                      {o.lastEmailError && (
+                        <span className="inline-flex items-center gap-1 text-[11px] font-medium px-2 py-0.5 rounded-full bg-red-500/15 text-red-400">
+                          <MailWarning className="w-3 h-3" />
+                          Email failed
+                        </span>
+                      )}
                     </div>
                     <p className="text-xs text-text-secondary mt-1 truncate">
                       {o.name ? `${o.name} · ` : ""}
@@ -418,6 +446,20 @@ export default function AdminOrdersPage() {
                       )}
                       <InfoField icon={Download} label="Downloads issued">
                         {o._count.downloads}
+                      </InfoField>
+                      <InfoField
+                        icon={o.lastEmailError ? MailWarning : MailCheck}
+                        label="Email"
+                      >
+                        {o.lastEmailError ? (
+                          <span className="text-red-400">Failed — {o.lastEmailError}</span>
+                        ) : o.receiptEmailedAt ? (
+                          `Confirmation sent ${fmtDate(o.receiptEmailedAt)}`
+                        ) : o.invoiceEmailedAt ? (
+                          `Invoice sent ${fmtDate(o.invoiceEmailedAt)}`
+                        ) : (
+                          "—"
+                        )}
                       </InfoField>
                       {o.paypalCaptureId && (
                         <InfoField icon={CreditCard} label="PayPal capture">

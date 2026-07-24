@@ -11,9 +11,21 @@ const transporter = nodemailer.createTransport({
     user: process.env.SMTP_USER,
     pass: process.env.SMTP_PASSWORD,
   },
+  // Fail fast instead of hanging a request when SMTP is unreachable/misconfigured.
+  connectionTimeout: 15000,
+  greetingTimeout: 10000,
+  socketTimeout: 20000,
 });
 
+/** True when SMTP appears configured (host + credentials present). */
+export function isEmailConfigured(): boolean {
+  return Boolean(process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASSWORD);
+}
+
 export async function sendEmail(to: string, subject: string, html: string) {
+  if (!isEmailConfigured()) {
+    throw new Error("Email is not configured (SMTP_HOST / SMTP_USER / SMTP_PASSWORD)");
+  }
   await transporter.sendMail({
     from: process.env.EMAIL_FROM || "noreply@konanamanidieudonne.org",
     to,

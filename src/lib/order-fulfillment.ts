@@ -69,8 +69,18 @@ export async function fulfilPaidOrder(
 
   try {
     await sendOrderReceipt(orderId, opts.locale ?? "en");
+    await prisma.order.update({
+      where: { id: orderId },
+      data: { receiptEmailedAt: new Date(), lastEmailError: null },
+    });
   } catch (err) {
     console.error("Receipt email failed:", err);
+    await prisma.order
+      .update({
+        where: { id: orderId },
+        data: { lastEmailError: String((err as Error)?.message || err).slice(0, 500) },
+      })
+      .catch(() => {});
   }
   return true;
 }

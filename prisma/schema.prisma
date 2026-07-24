@@ -534,6 +534,9 @@ model Order {
   paypalCaptureId  String?
   paidAt           DateTime?
   receiptToken     String          @unique @default(cuid())
+  invoiceEmailedAt DateTime?
+  receiptEmailedAt DateTime?
+  lastEmailError   String?
   ipAddress        String?
   createdAt        DateTime        @default(now())
   updatedAt        DateTime        @updatedAt
