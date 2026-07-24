@@ -4,10 +4,10 @@ import { getTranslations } from "next-intl/server";
 import { prisma } from "@/lib/prisma";
 import { normalizeLocale } from "@/lib/seo";
 import { formatPrice } from "@/lib/utils";
-import { mobileMoneyLabel, MOBILE_MONEY_NUMBER, whatsappLink } from "@/lib/mobile-money";
+import { mobileMoneyLabel, MOBILE_MONEY_NUMBER } from "@/lib/mobile-money";
 import { Link } from "@/i18n/routing";
 import PrintReceiptButton from "@/components/store/PrintReceiptButton";
-import { Download, CheckCircle2, Clock, AlertCircle, MessageCircle } from "lucide-react";
+import { Download, CheckCircle2, Clock, AlertCircle } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 
@@ -106,21 +106,7 @@ export default async function ReceiptPage({
                 <div className="font-bold text-lg">{MOBILE_MONEY_NUMBER}</div>
               </div>
             </div>
-            <p className="text-xs text-text-secondary mb-3">{t("invoiceThenWhatsapp")}</p>
-            <a
-              href={whatsappLink(
-                `Hello, here is my proof of payment for order ${order.orderNumber} (${formatPrice(
-                  order.totalCents,
-                  order.currency
-                )}).`
-              )}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-green-500 text-white font-semibold hover:bg-green-500/90 transition-all"
-            >
-              <MessageCircle className="w-4 h-4" />
-              {t("mmSendWhatsapp")}
-            </a>
+            <p className="text-xs text-text-secondary">{t("invoiceThenWhatsapp")}</p>
           </div>
         )}
 
