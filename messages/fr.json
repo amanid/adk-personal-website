@@ -537,6 +537,7 @@
     "manualConfirm": "Confirmation manuelle",
     "encryptedNote": "Les informations de carte et PayPal sont gérées en toute sécurité par PayPal — nous n.y avons jamais accès.",
     "orderItemsCount": "{count, plural, one {# article} other {# articles}}",
-    "backToStore": "Continuer les achats"
+    "backToStore": "Continuer les achats",
+    "mmReferenceRequired": "Veuillez saisir la référence de la transaction de votre paiement mobile money."
   }
 }

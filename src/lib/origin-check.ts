@@ -20,12 +20,18 @@ export function checkOrigin(request: Request): NextResponse | null {
 
   // Compare parsed origins for exact equality — never a prefix match, which
   // would accept e.g. https://konanamanidieudonne.org.attacker.com.
-  let sourceOrigin: string;
+  let sourceUrl: URL;
   try {
-    sourceOrigin = new URL(source).origin;
+    sourceUrl = new URL(source);
   } catch {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
+  const sourceOrigin = sourceUrl.origin;
+
+  // Same-origin requests are always allowed (this is the canonical CSRF check
+  // and works on any deployment domain — custom domain, *.onrender.com, etc.).
+  const host = request.headers.get("host");
+  if (host && sourceUrl.host === host) return null;
 
   const allowedSet = new Set(
     allowedOrigins.flatMap((allowed) => {

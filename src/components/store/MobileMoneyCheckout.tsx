@@ -44,7 +44,7 @@ export default function MobileMoneyCheckout({
     setError(null);
     if (onValidate && !onValidate()) return;
     if (reference.trim().length < 3) {
-      setError(t("mmError"));
+      setError(t("mmReferenceRequired"));
       return;
     }
     setPlacing(true);
@@ -60,9 +60,9 @@ export default function MobileMoneyCheckout({
           items: items.map((i) => ({ bookId: i.bookId, quantity: i.quantity })),
         }),
       });
-      const data = await res.json();
-      if (!res.ok) {
-        setError(data.error || t("mmError"));
+      const data = await res.json().catch(() => null);
+      if (!res.ok || !data?.receiptToken) {
+        setError(data?.error || t("mmError"));
         return;
       }
       clear();
