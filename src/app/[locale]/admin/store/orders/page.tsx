@@ -25,6 +25,7 @@ import {
 } from "lucide-react";
 import StatCard from "@/components/admin/charts/StatCard";
 import { formatPrice } from "@/lib/utils";
+import { formatMoney } from "@/lib/currency";
 import { mobileMoneyLabel } from "@/lib/mobile-money";
 
 interface OrderItem {
@@ -179,8 +180,12 @@ export default function AdminOrdersPage() {
 
   const summary = useMemo(() => {
     const paid = orders.filter((o) => o.status === "PAID");
+    const byCurrency = new Map<string, number>();
+    for (const o of paid) byCurrency.set(o.currency, (byCurrency.get(o.currency) || 0) + o.totalCents);
     return {
-      revenue: paid.reduce((s, o) => s + o.totalCents, 0),
+      revenueByCurrency: [...byCurrency.entries()]
+        .map(([currency, cents]) => ({ currency, cents }))
+        .sort((a, b) => b.cents - a.cents),
       paidCount: paid.length,
       pending: orders.filter((o) => o.status === "PENDING").length,
       total: orders.length,
@@ -226,7 +231,26 @@ export default function AdminOrdersPage() {
 
       {/* Summary tiles */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-        <StatCard label="Revenue (paid)" value={formatPrice(summary.revenue)} icon={DollarSign} color="text-green-400" />
+        <div className="glass rounded-xl p-5">
+          <DollarSign className="w-5 h-5 text-green-400 mb-2" />
+          {summary.revenueByCurrency.length === 0 ? (
+            <p className="text-2xl font-bold">—</p>
+          ) : (
+            <div className="space-y-0.5">
+              {summary.revenueByCurrency.slice(0, 3).map((r) => (
+                <p key={r.currency} className="text-lg font-bold leading-tight">
+                  {formatMoney(r.cents, r.currency)}
+                </p>
+              ))}
+              {summary.revenueByCurrency.length > 3 && (
+                <p className="text-xs text-text-secondary">
+                  +{summary.revenueByCurrency.length - 3} more
+                </p>
+              )}
+            </div>
+          )}
+          <p className="text-text-secondary text-sm mt-1">Revenue (paid)</p>
+        </div>
         <StatCard label="Paid orders" value={summary.paidCount} icon={ShoppingBag} color="text-gold" />
         <StatCard label="Pending" value={summary.pending} icon={Clock} color="text-amber-400" />
         <StatCard label="Total orders" value={summary.total} icon={Package} color="text-blue-400" />

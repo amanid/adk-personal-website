@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
+import { minorToMajor } from "@/lib/currency";
 
 export async function GET(request: NextRequest) {
   try {
@@ -13,18 +14,19 @@ export async function GET(request: NextRequest) {
     const startDate = new Date(Date.now() - days * 24 * 60 * 60 * 1000);
 
     const [
-      paidAgg,
+      revenueGroups,
       paidCount,
       pendingCount,
       failedCount,
       refundedCount,
       paidItems,
-      revenueByDayRaw,
       downloadsAgg,
     ] = await Promise.all([
-      prisma.order.aggregate({
+      prisma.order.groupBy({
+        by: ["currency"],
         where: { status: "PAID" },
         _sum: { totalCents: true },
+        _count: { _all: true },
       }),
       prisma.order.count({ where: { status: "PAID" } }),
       prisma.order.count({ where: { status: "PENDING" } }),
@@ -32,31 +34,50 @@ export async function GET(request: NextRequest) {
       prisma.order.count({ where: { status: "REFUNDED" } }),
       prisma.orderItem.findMany({
         where: { order: { status: "PAID" } },
-        select: { bookId: true, titleSnapshot: true, quantity: true, unitPriceCents: true },
+        select: {
+          bookId: true,
+          titleSnapshot: true,
+          quantity: true,
+          unitPriceCents: true,
+          order: { select: { currency: true } },
+        },
       }),
-      prisma.$queryRawUnsafe<Array<{ date: string; cents: bigint }>>(
-        `SELECT DATE("paidAt") as date, SUM("totalCents")::bigint as cents
-         FROM "Order"
-         WHERE status = 'PAID' AND "paidAt" >= $1
-         GROUP BY DATE("paidAt")
-         ORDER BY date ASC`,
-        startDate
-      ),
       prisma.downloadGrant.aggregate({ _sum: { downloadCount: true } }),
     ]);
 
-    // Top books by units sold (and revenue) from paid items.
-    const byBook = new Map<string, { title: string; units: number; revenueCents: number }>();
+    // Revenue grouped by currency (never summed across currencies).
+    const revenueByCurrency = revenueGroups
+      .map((g) => {
+        const cents = g._sum.totalCents || 0;
+        const orders = g._count._all;
+        return {
+          currency: g.currency,
+          cents,
+          orders,
+          avgCents: orders > 0 ? Math.round(cents / orders) : 0,
+        };
+      })
+      .sort((a, b) => b.cents - a.cents);
+
+    const primaryCurrency = revenueByCurrency[0]?.currency || "USD";
+
+    // Units + per-book revenue (each book carries its order's currency).
+    const byBook = new Map<
+      string,
+      { title: string; units: number; cents: number; currency: string }
+    >();
     let unitsSold = 0;
     for (const it of paidItems) {
       unitsSold += it.quantity;
+      const cur = it.order.currency;
       const prev = byBook.get(it.bookId) || {
         title: it.titleSnapshot,
         units: 0,
-        revenueCents: 0,
+        cents: 0,
+        currency: cur,
       };
       prev.units += it.quantity;
-      prev.revenueCents += it.unitPriceCents * it.quantity;
+      prev.cents += it.unitPriceCents * it.quantity;
       byBook.set(it.bookId, prev);
     }
 
@@ -65,25 +86,35 @@ export async function GET(request: NextRequest) {
       .slice(0, 10)
       .map((b) => ({ name: b.title, value: b.units }));
 
+    // Revenue bar chart is single-currency (the primary one) so the axis is meaningful.
     const topBooksByRevenue = [...byBook.values()]
-      .sort((a, b) => b.revenueCents - a.revenueCents)
+      .filter((b) => b.currency === primaryCurrency)
+      .sort((a, b) => b.cents - a.cents)
       .slice(0, 10)
-      .map((b) => ({ name: b.title, value: Math.round(b.revenueCents / 100) }));
+      .map((b) => ({ name: b.title, value: Math.round(minorToMajor(b.cents, b.currency)) }));
 
+    // Daily revenue for the primary currency only.
+    const revenueByDayRaw = await prisma.$queryRawUnsafe<Array<{ date: string; cents: bigint }>>(
+      `SELECT DATE("paidAt") as date, SUM("totalCents")::bigint as cents
+       FROM "Order"
+       WHERE status = 'PAID' AND "currency" = $2 AND "paidAt" >= $1
+       GROUP BY DATE("paidAt")
+       ORDER BY date ASC`,
+      startDate,
+      primaryCurrency
+    );
     const revenueByDay = revenueByDayRaw.map((r) => ({
       date: r.date,
-      revenueCents: Number(r.cents),
+      views: Math.round(minorToMajor(Number(r.cents), primaryCurrency)),
     }));
 
-    const totalRevenueCents = paidAgg._sum.totalCents || 0;
-
     return NextResponse.json({
+      revenueByCurrency,
+      primaryCurrency,
       summary: {
-        totalRevenueCents,
         paidOrders: paidCount,
         unitsSold,
         totalDownloads: downloadsAgg._sum.downloadCount || 0,
-        avgOrderValueCents: paidCount > 0 ? Math.round(totalRevenueCents / paidCount) : 0,
       },
       ordersByStatus: [
         { name: "Paid", value: paidCount },

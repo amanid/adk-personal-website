@@ -377,8 +377,17 @@ export default function AdminStorePage() {
     }
   };
 
-  const totalRevenue = books.reduce((s, b) => s + b.stats.revenueCents, 0);
   const totalUnits = books.reduce((s, b) => s + b.stats.unitsSold, 0);
+  const revenueByCurrency = (() => {
+    const m = new Map<string, number>();
+    for (const b of books) {
+      if (b.stats.revenueCents > 0)
+        m.set(b.currency, (m.get(b.currency) || 0) + b.stats.revenueCents);
+    }
+    return [...m.entries()]
+      .map(([currency, cents]) => formatPrice(cents, currency))
+      .join(" · ");
+  })();
 
   if (loading) {
     return <div className="text-text-secondary">Loading…</div>;
@@ -393,7 +402,8 @@ export default function AdminStorePage() {
             Bookstore
           </h1>
           <p className="text-text-secondary text-sm mt-1">
-            {books.length} books · {totalUnits} sold · {formatPrice(totalRevenue)} revenue
+            {books.length} books · {totalUnits} sold
+            {revenueByCurrency ? ` · ${revenueByCurrency} revenue` : ""}
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -491,7 +501,7 @@ export default function AdminStorePage() {
                     <ShoppingBag className="w-3 h-3" /> {b.stats.unitsSold} sold
                   </span>
                   <span className="flex items-center gap-1">
-                    <DollarSign className="w-3 h-3" /> {formatPrice(b.stats.revenueCents)}
+                    <DollarSign className="w-3 h-3" /> {formatPrice(b.stats.revenueCents, b.currency)}
                   </span>
                   <span className="flex items-center gap-1">
                     <Download className="w-3 h-3" /> {b.stats.downloads} downloads
