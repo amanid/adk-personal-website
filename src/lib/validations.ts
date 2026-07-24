@@ -238,19 +238,33 @@ export const bookSchema = z.object({
   sortOrder: z.number().int().optional(),
 });
 
+const cartItemsSchema = z
+  .array(
+    z.object({
+      bookId: z.string().min(1),
+      quantity: z.number().int().min(1).max(99),
+    })
+  )
+  .min(1, "Your cart is empty")
+  .max(50);
+
 export const checkoutSchema = z.object({
   email: z.string().email("A valid email is required").max(320),
   name: z.string().max(200).optional().or(z.literal("")),
-  items: z
-    .array(
-      z.object({
-        bookId: z.string().min(1),
-        quantity: z.number().int().min(1).max(99),
-      })
-    )
-    .min(1, "Your cart is empty")
-    .max(50),
+  items: cartItemsSchema,
+});
+
+export const mobileOrderSchema = z.object({
+  email: z.string().email("A valid email is required").max(320),
+  name: z.string().max(200).optional().or(z.literal("")),
+  provider: z.enum(["WAVE", "DJAMO", "ORANGE_MONEY"]),
+  reference: z
+    .string()
+    .min(3, "Enter the mobile money transaction reference")
+    .max(120),
+  items: cartItemsSchema,
 });
 
 export type BookInput = z.infer<typeof bookSchema>;
 export type CheckoutInput = z.infer<typeof checkoutSchema>;
+export type MobileOrderInput = z.infer<typeof mobileOrderSchema>;

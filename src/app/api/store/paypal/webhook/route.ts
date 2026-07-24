@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { verifyPayPalWebhook, moneyToCents } from "@/lib/paypal";
-import { createDownloadGrants } from "@/lib/store";
-import { sendOrderReceiptEmail } from "@/lib/email";
+import { fulfilPaidOrder } from "@/lib/order-fulfillment";
 
 export const runtime = "nodejs";
 
@@ -14,54 +13,6 @@ interface PayPalWebhookEvent {
     status?: string;
     amount?: { value: string; currency_code: string };
   };
-}
-
-async function markPaidAndNotify(orderId: string) {
-  const order = await prisma.order.findUnique({
-    where: { id: orderId },
-    include: { items: true },
-  });
-  if (!order || order.status === "PAID") return;
-
-  await prisma.$transaction(async (tx) => {
-    await tx.order.update({
-      where: { id: order.id },
-      data: { status: "PAID", paidAt: order.paidAt ?? new Date() },
-    });
-    await createDownloadGrants(tx, order.id);
-  });
-
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
-  const withDownloads = await prisma.order.findUnique({
-    where: { id: order.id },
-    include: { items: true, downloads: true },
-  });
-  if (!withDownloads) return;
-
-  const titles = new Map(withDownloads.items.map((i) => [i.bookId, i.titleSnapshot]));
-  try {
-    await sendOrderReceiptEmail({
-      to: withDownloads.email,
-      name: withDownloads.name,
-      orderNumber: withDownloads.orderNumber,
-      paidAt: withDownloads.paidAt ?? new Date(),
-      currency: withDownloads.currency,
-      totalCents: withDownloads.totalCents,
-      items: withDownloads.items.map((i) => ({
-        title: i.titleSnapshot,
-        quantity: i.quantity,
-        unitPriceCents: i.unitPriceCents,
-        lineTotalCents: i.unitPriceCents * i.quantity,
-      })),
-      downloads: withDownloads.downloads.map((d) => ({
-        title: titles.get(d.bookId) || "Your book",
-        url: `${appUrl}/api/store/download/${d.token}`,
-      })),
-      receiptUrl: `${appUrl}/en/store/receipt/${withDownloads.receiptToken}`,
-    });
-  } catch (err) {
-    console.error("Webhook receipt email failed:", err);
-  }
 }
 
 export async function POST(request: NextRequest) {
@@ -103,13 +54,7 @@ export async function POST(request: NextRequest) {
           moneyToCents(amt.value) === order.totalCents &&
           amt.currency_code === order.currency
         ) {
-          if (event.resource?.id) {
-            await prisma.order.update({
-              where: { id: order.id },
-              data: { paypalCaptureId: event.resource.id },
-            });
-          }
-          await markPaidAndNotify(order.id);
+          await fulfilPaidOrder(order.id, { paypalCaptureId: event.resource?.id });
         }
         break;
       }

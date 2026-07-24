@@ -8,7 +8,8 @@ import { useCart } from "@/lib/cart-context";
 import { formatPrice } from "@/lib/utils";
 import QuantitySelector from "@/components/store/QuantitySelector";
 import PayPalCheckout from "@/components/store/PayPalCheckout";
-import { Trash2, ShoppingCart, BookOpen, Lock, ShieldCheck, RefreshCw, Mail } from "lucide-react";
+import MobileMoneyCheckout from "@/components/store/MobileMoneyCheckout";
+import { Trash2, ShoppingCart, BookOpen, Lock, ShieldCheck, RefreshCw, Mail, CreditCard, Smartphone, Check } from "lucide-react";
 
 export default function CartPage() {
   const { items, subtotalCents, setQuantity, removeItem, hydrated } = useCart();
@@ -16,6 +17,7 @@ export default function CartPage() {
   const [email, setEmail] = useState("");
   const [name, setName] = useState("");
   const [touched, setTouched] = useState(false);
+  const [method, setMethod] = useState<"paypal" | "mobile">("paypal");
 
   const emailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 
@@ -151,17 +153,102 @@ export default function CartPage() {
               </div>
             </div>
 
+            {/* Payment method — selectable cards */}
             <div className="mt-6">
-              <PayPalCheckout
-                email={email}
-                name={name}
-                disabled={!emailValid}
-                onValidate={() => {
-                  setTouched(true);
-                  return emailValid;
-                }}
-              />
+              <div className="flex items-center gap-2 mb-3">
+                <Lock className="w-4 h-4 text-gold" />
+                <p className="text-sm font-medium">{t("secureCheckout")}</p>
+              </div>
+              <p className="text-xs text-text-secondary mb-2">{t("payMethod")}</p>
+              <div className="space-y-2">
+                {(
+                  [
+                    {
+                      id: "paypal" as const,
+                      icon: CreditCard,
+                      label: t("payPaypal"),
+                      desc: t("payPaypalDesc"),
+                      badge: t("instant"),
+                    },
+                    {
+                      id: "mobile" as const,
+                      icon: Smartphone,
+                      label: t("payMobileMoney"),
+                      desc: t("payMobileMoneyDesc"),
+                      badge: t("manualConfirm"),
+                    },
+                  ]
+                ).map((opt) => {
+                  const active = method === opt.id;
+                  return (
+                    <button
+                      key={opt.id}
+                      type="button"
+                      onClick={() => setMethod(opt.id)}
+                      aria-pressed={active}
+                      className={`w-full flex items-start gap-3 p-3 rounded-xl border text-left transition-all ${
+                        active
+                          ? "border-gold/60 bg-gold/10 ring-1 ring-gold/40"
+                          : "border-glass-border hover:border-gold/40"
+                      }`}
+                    >
+                      <span
+                        className={`mt-0.5 w-9 h-9 rounded-lg flex items-center justify-center shrink-0 ${
+                          active ? "bg-gold/20 text-gold" : "bg-navy/60 text-text-secondary"
+                        }`}
+                      >
+                        <opt.icon className="w-4 h-4" />
+                      </span>
+                      <span className="flex-1 min-w-0">
+                        <span className="flex items-center gap-2">
+                          <span className="font-medium text-sm">{opt.label}</span>
+                          <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-navy/60 text-text-secondary">
+                            {opt.badge}
+                          </span>
+                        </span>
+                        <span className="block text-xs text-text-secondary mt-0.5">{opt.desc}</span>
+                      </span>
+                      <span
+                        className={`mt-1 w-4 h-4 rounded-full border shrink-0 flex items-center justify-center ${
+                          active ? "border-gold bg-gold" : "border-glass-border"
+                        }`}
+                      >
+                        {active && <Check className="w-3 h-3 text-charcoal" />}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
             </div>
+
+            <div className="mt-4">
+              {method === "paypal" ? (
+                <PayPalCheckout
+                  email={email}
+                  name={name}
+                  disabled={!emailValid}
+                  onValidate={() => {
+                    setTouched(true);
+                    return emailValid;
+                  }}
+                />
+              ) : (
+                <MobileMoneyCheckout
+                  email={email}
+                  name={name}
+                  amountCents={subtotalCents}
+                  onValidate={() => {
+                    setTouched(true);
+                    return emailValid;
+                  }}
+                />
+              )}
+            </div>
+
+            <p className="text-[11px] text-text-secondary mt-3 flex items-start gap-1.5">
+              <Lock className="w-3 h-3 mt-0.5 shrink-0" />
+              {t("encryptedNote")}
+            </p>
 
             {/* Trust & policy */}
             <div className="mt-6 pt-4 border-t border-glass-border space-y-2 text-xs text-text-secondary">

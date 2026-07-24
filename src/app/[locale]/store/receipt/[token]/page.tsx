@@ -1,8 +1,10 @@
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
+import { getTranslations } from "next-intl/server";
 import { prisma } from "@/lib/prisma";
 import { normalizeLocale } from "@/lib/seo";
 import { formatPrice } from "@/lib/utils";
+import { mobileMoneyLabel } from "@/lib/mobile-money";
 import { Link } from "@/i18n/routing";
 import PrintReceiptButton from "@/components/store/PrintReceiptButton";
 import { Download, CheckCircle2, Clock, AlertCircle } from "lucide-react";
@@ -30,7 +32,9 @@ export default async function ReceiptPage({
 
   if (!order) notFound();
 
+  const t = await getTranslations({ locale: l, namespace: "store" });
   const isPaid = order.status === "PAID";
+  const isMobileMoney = order.paymentMethod !== "PAYPAL";
   const titles = new Map(order.items.map((i) => [i.bookId, i.titleSnapshot]));
   // Server Component: reading the current time at request render is intentional.
   // eslint-disable-next-line react-hooks/purity
@@ -57,12 +61,18 @@ export default async function ReceiptPage({
             <Clock className="w-8 h-8 text-amber-400 shrink-0" />
             <div>
               <h1 className="text-2xl font-bold">
-                {l === "fr" ? "Paiement en attente" : "Payment pending"}
+                {isMobileMoney
+                  ? t("mmPendingTitle")
+                  : l === "fr"
+                    ? "Paiement en attente"
+                    : "Payment pending"}
               </h1>
               <p className="text-text-secondary text-sm">
-                {l === "fr"
-                  ? "Ce paiement n'a pas encore été confirmé."
-                  : "This payment has not been confirmed yet."}
+                {isMobileMoney
+                  ? t("mmPendingText")
+                  : l === "fr"
+                    ? "Ce paiement n'a pas encore été confirmé."
+                    : "This payment has not been confirmed yet."}
               </p>
             </div>
           </div>
@@ -100,6 +110,18 @@ export default async function ReceiptPage({
             <div>
               <span className="text-text-secondary block">PayPal ID</span>
               <span className="font-medium break-all">{order.paypalCaptureId}</span>
+            </div>
+          )}
+          {isMobileMoney && (
+            <div>
+              <span className="text-text-secondary block">{t("paidVia")}</span>
+              <span className="font-medium">{mobileMoneyLabel(order.paymentMethod)}</span>
+            </div>
+          )}
+          {isMobileMoney && order.paymentReference && (
+            <div>
+              <span className="text-text-secondary block">{t("reference")}</span>
+              <span className="font-medium break-all">{order.paymentReference}</span>
             </div>
           )}
         </div>

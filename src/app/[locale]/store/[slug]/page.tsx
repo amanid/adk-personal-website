@@ -107,8 +107,8 @@ export default async function BookDetailPage({
               <li className="flex items-start gap-1.5">
                 <Check className="w-3.5 h-3.5 text-green-400 mt-0.5 shrink-0" />
                 {l === "fr"
-                  ? "Téléchargement immédiat et sécurisé après paiement PayPal"
-                  : "Instant, secure download after PayPal payment"}
+                  ? "Téléchargement sécurisé après paiement (PayPal ou Mobile Money)"
+                  : "Secure download after payment (PayPal or Mobile Money)"}
               </li>
               <li className="flex items-start gap-1.5">
                 <Check className="w-3.5 h-3.5 text-green-400 mt-0.5 shrink-0" />

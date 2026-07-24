@@ -1,8 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { capturePayPalOrder } from "@/lib/paypal";
-import { createDownloadGrants } from "@/lib/store";
-import { sendOrderReceiptEmail } from "@/lib/email";
+import { fulfilPaidOrder } from "@/lib/order-fulfillment";
 import { rateLimit } from "@/lib/rate-limit";
 import { checkOrigin } from "@/lib/origin-check";
 
@@ -11,37 +10,6 @@ export const runtime = "nodejs";
 function localeFromReferer(request: Request): "en" | "fr" {
   const referer = request.headers.get("referer") || "";
   return referer.includes("/fr/") || referer.endsWith("/fr") ? "fr" : "en";
-}
-
-async function sendReceipt(orderId: string, locale: "en" | "fr") {
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
-  const order = await prisma.order.findUnique({
-    where: { id: orderId },
-    include: { items: true, downloads: true },
-  });
-  if (!order || order.status !== "PAID") return;
-
-  const bookTitles = new Map(order.items.map((i) => [i.bookId, i.titleSnapshot]));
-
-  await sendOrderReceiptEmail({
-    to: order.email,
-    name: order.name,
-    orderNumber: order.orderNumber,
-    paidAt: order.paidAt ?? new Date(),
-    currency: order.currency,
-    totalCents: order.totalCents,
-    items: order.items.map((i) => ({
-      title: i.titleSnapshot,
-      quantity: i.quantity,
-      unitPriceCents: i.unitPriceCents,
-      lineTotalCents: i.unitPriceCents * i.quantity,
-    })),
-    downloads: order.downloads.map((d) => ({
-      title: bookTitles.get(d.bookId) || "Your book",
-      url: `${appUrl}/api/store/download/${d.token}`,
-    })),
-    receiptUrl: `${appUrl}/${locale}/store/receipt/${order.receiptToken}`,
-  });
 }
 
 export async function POST(request: Request) {
@@ -96,25 +64,11 @@ export async function POST(request: Request) {
       );
     }
 
-    // Mark paid + create download grants atomically.
-    await prisma.$transaction(async (tx) => {
-      await tx.order.update({
-        where: { id: order.id },
-        data: {
-          status: "PAID",
-          paidAt: new Date(),
-          paypalCaptureId: capture.captureId,
-        },
-      });
-      await createDownloadGrants(tx, order.id);
+    // Mark paid, create download grants, and email the receipt (shared path).
+    await fulfilPaidOrder(order.id, {
+      paypalCaptureId: capture.captureId,
+      locale: localeFromReferer(request),
     });
-
-    // Send the receipt email (best-effort — never block the buyer's downloads).
-    try {
-      await sendReceipt(order.id, localeFromReferer(request));
-    } catch (err) {
-      console.error("Receipt email failed:", err);
-    }
 
     return NextResponse.json({ receiptToken: order.receiptToken });
   } catch (error) {

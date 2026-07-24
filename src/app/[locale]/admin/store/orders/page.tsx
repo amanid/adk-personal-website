@@ -1,8 +1,9 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { Receipt, ChevronDown, ChevronRight } from "lucide-react";
+import { useState, useEffect, useCallback } from "react";
+import { Receipt, ChevronDown, ChevronRight, Check, X, Smartphone } from "lucide-react";
 import { formatPrice } from "@/lib/utils";
+import { mobileMoneyLabel } from "@/lib/mobile-money";
 
 interface OrderItem {
   id: string;
@@ -17,6 +18,8 @@ interface Order {
   email: string;
   name: string | null;
   status: string;
+  paymentMethod: string;
+  paymentReference: string | null;
   currency: string;
   totalCents: number;
   paypalOrderId: string | null;
@@ -42,19 +45,48 @@ export default function AdminOrdersPage() {
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState("ALL");
   const [expanded, setExpanded] = useState<string | null>(null);
+  const [busyId, setBusyId] = useState<string | null>(null);
+
+  const fetchOrders = useCallback(async () => {
+    const q = filter === "ALL" ? "" : `?status=${filter}`;
+    try {
+      const r = await fetch(`/api/admin/orders${q}`);
+      const d = r.ok ? await r.json() : { orders: [] };
+      setOrders(d.orders || []);
+    } catch {
+      setOrders([]);
+    } finally {
+      setLoading(false);
+    }
+  }, [filter]);
 
   useEffect(() => {
-    let active = true;
-    const q = filter === "ALL" ? "" : `?status=${filter}`;
-    fetch(`/api/admin/orders${q}`)
-      .then((r) => (r.ok ? r.json() : { orders: [] }))
-      .then((d) => active && setOrders(d.orders || []))
-      .catch(() => active && setOrders([]))
-      .finally(() => active && setLoading(false));
-    return () => {
-      active = false;
-    };
-  }, [filter]);
+    fetchOrders();
+  }, [fetchOrders]);
+
+  const updateStatus = async (orderId: string, action: "mark-paid" | "cancel") => {
+    if (action === "mark-paid" && !confirm("Confirm this payment and unlock the buyer's downloads?"))
+      return;
+    if (action === "cancel" && !confirm("Cancel this order?")) return;
+    setBusyId(orderId);
+    try {
+      const res = await fetch(`/api/admin/orders/${orderId}/status`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action }),
+      });
+      if (!res.ok) {
+        const d = await res.json().catch(() => ({}));
+        alert(d.error || "Action failed");
+        return;
+      }
+      await fetchOrders();
+    } catch {
+      alert("Action failed");
+    } finally {
+      setBusyId(null);
+    }
+  };
 
   const paidRevenue = orders
     .filter((o) => o.status === "PAID")
@@ -136,6 +168,21 @@ export default function AdminOrdersPage() {
                       <div>
                         Customer: <span className="text-text-primary">{o.name || "—"}</span>
                       </div>
+                      <div className="flex items-center gap-1">
+                        Payment:{" "}
+                        <span className="text-text-primary inline-flex items-center gap-1">
+                          {o.paymentMethod !== "PAYPAL" && <Smartphone className="w-3 h-3" />}
+                          {o.paymentMethod === "PAYPAL"
+                            ? "PayPal"
+                            : mobileMoneyLabel(o.paymentMethod)}
+                        </span>
+                      </div>
+                      {o.paymentReference && (
+                        <div className="break-all">
+                          Reference:{" "}
+                          <span className="text-text-primary">{o.paymentReference}</span>
+                        </div>
+                      )}
                       <div>
                         Downloads issued:{" "}
                         <span className="text-text-primary">{o._count.downloads}</span>
@@ -155,6 +202,28 @@ export default function AdminOrdersPage() {
                         </div>
                       )}
                     </div>
+
+                    {/* Manual confirmation actions for pending orders */}
+                    {o.status === "PENDING" && (
+                      <div className="flex flex-wrap gap-2 pb-3">
+                        <button
+                          onClick={() => updateStatus(o.id, "mark-paid")}
+                          disabled={busyId === o.id}
+                          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-green-500/15 text-green-400 text-xs font-medium hover:bg-green-500/25 transition-all disabled:opacity-50"
+                        >
+                          <Check className="w-3.5 h-3.5" />
+                          Mark as paid
+                        </button>
+                        <button
+                          onClick={() => updateStatus(o.id, "cancel")}
+                          disabled={busyId === o.id}
+                          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-glass-border text-text-secondary text-xs hover:text-red-400 hover:border-red-400/40 transition-all disabled:opacity-50"
+                        >
+                          <X className="w-3.5 h-3.5" />
+                          Cancel
+                        </button>
+                      </div>
+                    )}
                     <table className="w-full">
                       <tbody>
                         {o.items.map((i) => (
