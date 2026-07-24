@@ -6,13 +6,14 @@ import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/routing";
 import { useCart } from "@/lib/cart-context";
 import { formatPrice } from "@/lib/utils";
+import { isPaypalCurrency } from "@/lib/currency";
 import QuantitySelector from "@/components/store/QuantitySelector";
 import PayPalCheckout from "@/components/store/PayPalCheckout";
 import MobileMoneyCheckout from "@/components/store/MobileMoneyCheckout";
 import { Trash2, ShoppingCart, BookOpen, Lock, ShieldCheck, RefreshCw, Mail, CreditCard, Smartphone, Check } from "lucide-react";
 
 export default function CartPage() {
-  const { items, subtotalCents, setQuantity, removeItem, hydrated } = useCart();
+  const { items, subtotalCents, currency, setQuantity, removeItem, hydrated } = useCart();
   const t = useTranslations("store");
   const [email, setEmail] = useState("");
   const [name, setName] = useState("");
@@ -20,6 +21,7 @@ export default function CartPage() {
   const [method, setMethod] = useState<"paypal" | "mobile">("mobile");
 
   const emailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  const paypalAvailable = isPaypalCurrency(currency);
 
   if (!hydrated) {
     return (
@@ -55,14 +57,21 @@ export default function CartPage() {
       desc: t("payMobileMoneyDesc"),
       badge: t("manualConfirm"),
     },
-    {
-      id: "paypal" as const,
-      icon: CreditCard,
-      label: t("payPaypal"),
-      desc: t("payPaypalDesc"),
-      badge: t("instant"),
-    },
+    ...(paypalAvailable
+      ? [
+          {
+            id: "paypal" as const,
+            icon: CreditCard,
+            label: t("payPaypal"),
+            desc: t("payPaypalDesc"),
+            badge: t("instant"),
+          },
+        ]
+      : []),
   ];
+
+  // PayPal can't settle this currency — force mobile money.
+  const activeMethod = method === "paypal" && !paypalAvailable ? "mobile" : method;
 
   const inputClass =
     "w-full px-3 py-2 rounded-lg bg-navy/50 border border-glass-border focus:border-gold/50 outline-none text-sm";
@@ -97,7 +106,7 @@ export default function CartPage() {
                   >
                     {item.title}
                   </Link>
-                  <p className="text-sm text-gold mt-1">{formatPrice(item.priceCents)}</p>
+                  <p className="text-sm text-gold mt-1">{formatPrice(item.priceCents, item.currency)}</p>
                   <div className="flex items-center gap-4 mt-3">
                     <QuantitySelector
                       value={item.quantity}
@@ -114,7 +123,7 @@ export default function CartPage() {
                   </div>
                 </div>
                 <div className="text-right font-semibold">
-                  {formatPrice(item.priceCents * item.quantity)}
+                  {formatPrice(item.priceCents * item.quantity, item.currency)}
                 </div>
               </div>
             ))}
@@ -172,7 +181,7 @@ export default function CartPage() {
             <p className="text-xs text-text-secondary mb-2">{t("payMethod")}</p>
             <div className="grid sm:grid-cols-2 gap-2">
               {paymentOptions.map((opt) => {
-                const active = method === opt.id;
+                const active = activeMethod === opt.id;
                 return (
                   <button
                     key={opt.id}
@@ -212,10 +221,11 @@ export default function CartPage() {
             </div>
 
             <div className="mt-5">
-              {method === "paypal" ? (
+              {activeMethod === "paypal" ? (
                 <PayPalCheckout
                   email={email}
                   name={name}
+                  currency={currency}
                   disabled={!emailValid}
                   onValidate={() => {
                     setTouched(true);
@@ -227,6 +237,7 @@ export default function CartPage() {
                   email={email}
                   name={name}
                   amountCents={subtotalCents}
+                  currency={currency}
                   onValidate={() => {
                     setTouched(true);
                     return emailValid;
@@ -253,17 +264,17 @@ export default function CartPage() {
                     {item.title}
                     <span className="text-text-muted"> ×{item.quantity}</span>
                   </span>
-                  <span className="shrink-0">{formatPrice(item.priceCents * item.quantity)}</span>
+                  <span className="shrink-0">{formatPrice(item.priceCents * item.quantity, item.currency)}</span>
                 </div>
               ))}
             </div>
             <div className="flex justify-between text-sm mt-4 pt-3 border-t border-glass-border">
               <span className="text-text-secondary">{t("subtotal")}</span>
-              <span>{formatPrice(subtotalCents)}</span>
+              <span>{formatPrice(subtotalCents, currency)}</span>
             </div>
             <div className="flex justify-between font-bold text-lg pt-2 mt-1">
               <span>{t("total")}</span>
-              <span className="text-gold">{formatPrice(subtotalCents)}</span>
+              <span className="text-gold">{formatPrice(subtotalCents, currency)}</span>
             </div>
           </div>
 

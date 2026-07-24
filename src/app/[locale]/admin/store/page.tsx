@@ -17,6 +17,7 @@ import {
 import FileUpload from "@/components/admin/FileUpload";
 import BookFileUpload, { type BookUploadResult } from "@/components/admin/BookFileUpload";
 import { formatPrice } from "@/lib/utils";
+import { majorToMinor, minorToMajor, SUPPORTED_CURRENCIES } from "@/lib/currency";
 
 interface BookStats {
   views: number;
@@ -75,6 +76,7 @@ const emptyForm = {
   category: "",
   tags: "",
   priceDollars: "50.00",
+  currency: "USD",
   status: "DRAFT",
   featured: false,
   sortOrder: 0,
@@ -184,7 +186,8 @@ export default function AdminStorePage() {
       pageCount: b.pageCount || 0,
       category: b.category || "",
       tags: b.tags.join(", "),
-      priceDollars: (b.priceCents / 100).toFixed(2),
+      priceDollars: String(minorToMajor(b.priceCents, b.currency || "USD")),
+      currency: b.currency || "USD",
       status: b.status,
       featured: b.featured,
       sortOrder: b.sortOrder,
@@ -203,7 +206,7 @@ export default function AdminStorePage() {
     setSubmitting(true);
     setError(null);
 
-    const priceCents = Math.round(parseFloat(form.priceDollars || "0") * 100);
+    const priceCents = majorToMinor(parseFloat(form.priceDollars || "0"), form.currency);
     if (Number.isNaN(priceCents) || priceCents < 0) {
       setError("Please enter a valid price.");
       setSubmitting(false);
@@ -227,7 +230,7 @@ export default function AdminStorePage() {
       category: form.category || undefined,
       tags: form.tags.split(",").map((t) => t.trim()).filter(Boolean),
       priceCents,
-      currency: "USD",
+      currency: form.currency,
       coverImageId: form.coverImageId || undefined,
       fileId: form.fileId || undefined,
       fileName: form.fileName || undefined,
@@ -659,16 +662,30 @@ export default function AdminStorePage() {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm text-text-secondary mb-1">Price (USD) *</label>
+                  <label className="block text-sm text-text-secondary mb-1">Price *</label>
                   <input
                     type="text"
                     inputMode="decimal"
                     className={INPUT_CLASS}
                     value={form.priceDollars}
                     onChange={(e) => setForm({ ...form, priceDollars: e.target.value })}
-                    placeholder="19.99"
+                    placeholder="50"
                     required
                   />
+                </div>
+                <div>
+                  <label className="block text-sm text-text-secondary mb-1">Currency *</label>
+                  <select
+                    className={INPUT_CLASS}
+                    value={form.currency}
+                    onChange={(e) => setForm({ ...form, currency: e.target.value })}
+                  >
+                    {SUPPORTED_CURRENCIES.map((c) => (
+                      <option key={c.code} value={c.code}>
+                        {c.label}
+                      </option>
+                    ))}
+                  </select>
                 </div>
                 <div>
                   <label className="block text-sm text-text-secondary mb-1">Language</label>

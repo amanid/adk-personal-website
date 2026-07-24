@@ -538,6 +538,12 @@
     "encryptedNote": "Les informations de carte et PayPal sont gérées en toute sécurité par PayPal — nous n.y avons jamais accès.",
     "orderItemsCount": "{count, plural, one {# article} other {# articles}}",
     "backToStore": "Continuer les achats",
-    "mmReferenceRequired": "Veuillez saisir la référence de la transaction de votre paiement mobile money."
+    "mmReferenceRequired": "Veuillez saisir la référence de la transaction de votre paiement mobile money.",
+    "mmFlowNote": "Après validation, nous vous envoyons une facture par e-mail. Payez au numéro ci-dessus, puis envoyez votre preuve de paiement sur WhatsApp — nous la confirmons et vous envoyons vos liens de téléchargement.",
+    "mmSendWhatsapp": "Envoyer la preuve sur WhatsApp",
+    "mmReferenceOptional": "Référence de la transaction (facultatif)",
+    "mmPlaceOrderBtn": "Valider et recevoir la facture",
+    "invoicePayInstruction": "Pour finaliser votre commande, payez le total ci-dessous par mobile money, puis envoyez votre preuve de paiement sur WhatsApp.",
+    "invoiceThenWhatsapp": "Après le paiement, envoyez votre preuve de paiement (capture d écran) sur WhatsApp pour que nous puissions la confirmer."
   }
 }

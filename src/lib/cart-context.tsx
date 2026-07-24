@@ -15,6 +15,7 @@ export interface CartItem {
   slug: string;
   title: string;
   priceCents: number;
+  currency: string;
   coverUrl?: string | null;
   quantity: number;
 }
@@ -23,6 +24,7 @@ interface CartContextValue {
   items: CartItem[];
   count: number;
   subtotalCents: number;
+  currency: string;
   addItem: (item: Omit<CartItem, "quantity">, quantity?: number) => void;
   setQuantity: (bookId: string, quantity: number) => void;
   removeItem: (bookId: string) => void;
@@ -66,6 +68,11 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   const addItem = useCallback((item: Omit<CartItem, "quantity">, quantity = 1) => {
     setItems((prev) => {
+      // A cart holds a single currency; adding a book in a different currency
+      // starts a fresh cart in that currency (keeps the total coherent).
+      if (prev.length > 0 && prev[0].currency !== item.currency) {
+        return [{ ...item, quantity: Math.min(99, Math.max(1, quantity)) }];
+      }
       const existing = prev.find((i) => i.bookId === item.bookId);
       if (existing) {
         return prev.map((i) =>
@@ -96,7 +103,8 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const value = useMemo<CartContextValue>(() => {
     const count = items.reduce((sum, i) => sum + i.quantity, 0);
     const subtotalCents = items.reduce((sum, i) => sum + i.priceCents * i.quantity, 0);
-    return { items, count, subtotalCents, addItem, setQuantity, removeItem, clear, hydrated };
+    const currency = items[0]?.currency ?? "USD";
+    return { items, count, subtotalCents, currency, addItem, setQuantity, removeItem, clear, hydrated };
   }, [items, addItem, setQuantity, removeItem, clear, hydrated]);
 
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>;

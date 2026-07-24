@@ -8,6 +8,17 @@
 export const MOBILE_MONEY_NUMBER =
   process.env.NEXT_PUBLIC_MOBILE_MONEY_NUMBER || "+225 07 47 88 22 35";
 
+// WhatsApp number buyers send proof of payment to (digits only for wa.me links).
+export const WHATSAPP_NUMBER = (
+  process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || "2250747882235"
+).replace(/\D/g, "");
+
+/** Build a wa.me link, optionally pre-filling a message. */
+export function whatsappLink(text?: string): string {
+  const base = `https://wa.me/${WHATSAPP_NUMBER}`;
+  return text ? `${base}?text=${encodeURIComponent(text)}` : base;
+}
+
 export const MOBILE_MONEY_PROVIDERS = [
   { id: "WAVE", label: "Wave", color: "#1DC8FF" },
   { id: "DJAMO", label: "Djamo", color: "#6C4BF4" },

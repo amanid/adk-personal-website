@@ -4,10 +4,10 @@ import { getTranslations } from "next-intl/server";
 import { prisma } from "@/lib/prisma";
 import { normalizeLocale } from "@/lib/seo";
 import { formatPrice } from "@/lib/utils";
-import { mobileMoneyLabel } from "@/lib/mobile-money";
+import { mobileMoneyLabel, MOBILE_MONEY_NUMBER, whatsappLink } from "@/lib/mobile-money";
 import { Link } from "@/i18n/routing";
 import PrintReceiptButton from "@/components/store/PrintReceiptButton";
-import { Download, CheckCircle2, Clock, AlertCircle } from "lucide-react";
+import { Download, CheckCircle2, Clock, AlertCircle, MessageCircle } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 
@@ -85,6 +85,42 @@ export default async function ReceiptPage({
               </h1>
               <p className="text-text-secondary text-sm">Status: {order.status}</p>
             </div>
+          </div>
+        )}
+
+        {/* Payment instructions for pending mobile-money orders */}
+        {order.status === "PENDING" && isMobileMoney && (
+          <div className="rounded-xl border border-gold/25 bg-gold/5 p-5 mb-6">
+            <p className="text-sm text-text-secondary mb-3">{t("invoicePayInstruction")}</p>
+            <div className="grid sm:grid-cols-2 gap-3 mb-4">
+              <div className="rounded-lg bg-navy/50 border border-glass-border p-3">
+                <div className="text-[11px] text-text-secondary">{t("mmAmount")}</div>
+                <div className="font-bold text-gold text-lg">
+                  {formatPrice(order.totalCents, order.currency)}
+                </div>
+              </div>
+              <div className="rounded-lg bg-navy/50 border border-glass-border p-3">
+                <div className="text-[11px] text-text-secondary">
+                  {t("mmNumber")} · {mobileMoneyLabel(order.paymentMethod)}
+                </div>
+                <div className="font-bold text-lg">{MOBILE_MONEY_NUMBER}</div>
+              </div>
+            </div>
+            <p className="text-xs text-text-secondary mb-3">{t("invoiceThenWhatsapp")}</p>
+            <a
+              href={whatsappLink(
+                `Hello, here is my proof of payment for order ${order.orderNumber} (${formatPrice(
+                  order.totalCents,
+                  order.currency
+                )}).`
+              )}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-green-500 text-white font-semibold hover:bg-green-500/90 transition-all"
+            >
+              <MessageCircle className="w-4 h-4" />
+              {t("mmSendWhatsapp")}
+            </a>
           </div>
         )}
 

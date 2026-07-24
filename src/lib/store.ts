@@ -53,17 +53,24 @@ export async function priceCart(items: CartInput[]): Promise<PricedCart> {
   const ids = [...merged.keys()];
   const books = await prisma.book.findMany({
     where: { id: { in: ids }, status: "PUBLISHED" },
-    select: { id: true, title: true, priceCents: true, fileId: true },
+    select: { id: true, title: true, priceCents: true, fileId: true, currency: true },
   });
 
   const byId = new Map(books.map((b) => [b.id, b]));
 
   const priced: PricedItem[] = [];
+  let currency: string | null = null;
   for (const [bookId, quantity] of merged) {
     const book = byId.get(bookId);
     if (!book) throw new Error("One or more books are unavailable");
     if (!book.fileId) throw new Error(`"${book.title}" is not available for download yet`);
     if (book.priceCents < 0) throw new Error("Invalid price");
+
+    // All items in an order must share one currency (single, coherent total).
+    if (currency === null) currency = book.currency;
+    else if (currency !== book.currency) {
+      throw new Error("Your cart mixes currencies. Please order books of one currency at a time.");
+    }
 
     priced.push({
       bookId: book.id,
@@ -80,7 +87,7 @@ export async function priceCart(items: CartInput[]): Promise<PricedCart> {
     items: priced,
     subtotalCents,
     totalCents: subtotalCents, // no tax/shipping for digital goods
-    currency: STORE_CURRENCY,
+    currency: currency ?? STORE_CURRENCY,
   };
 }
 

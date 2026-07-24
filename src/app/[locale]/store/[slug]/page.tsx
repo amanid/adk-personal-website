@@ -98,6 +98,7 @@ export default async function BookDetailPage({
                 slug: book.slug,
                 title,
                 priceCents: book.priceCents,
+                currency: book.currency,
                 coverUrl,
               }}
               withQuantity

@@ -2,9 +2,15 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { mobileOrderSchema } from "@/lib/validations";
 import { priceCart, generateOrderNumber, secureToken } from "@/lib/store";
+import { sendOrderInvoiceEmail } from "@/lib/email";
 import { sanitizeInput } from "@/lib/sanitize";
 import { rateLimit } from "@/lib/rate-limit";
 import { checkOrigin } from "@/lib/origin-check";
+
+function localeFromReferer(request: Request): "en" | "fr" {
+  const referer = request.headers.get("referer") || "";
+  return referer.includes("/fr/") || referer.endsWith("/fr") ? "fr" : "en";
+}
 
 export const runtime = "nodejs";
 
@@ -66,7 +72,7 @@ export async function POST(request: Request) {
         userId: existingUser?.id ?? null,
         status: "PENDING",
         paymentMethod: provider,
-        paymentReference: sanitizeInput(reference),
+        paymentReference: reference ? sanitizeInput(reference) : null,
         currency: priced.currency,
         subtotalCents: priced.subtotalCents,
         totalCents: priced.totalCents,
@@ -82,6 +88,25 @@ export async function POST(request: Request) {
         },
       },
     });
+
+    // Email the invoice with payment + WhatsApp instructions (best-effort).
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+    const locale = localeFromReferer(request);
+    sendOrderInvoiceEmail({
+      to: order.email,
+      name: order.name,
+      orderNumber: order.orderNumber,
+      currency: priced.currency,
+      totalCents: priced.totalCents,
+      items: priced.items.map((i) => ({
+        title: i.title,
+        quantity: i.quantity,
+        unitPriceCents: i.unitPriceCents,
+        lineTotalCents: i.lineTotalCents,
+      })),
+      provider,
+      receiptUrl: `${appUrl}/${locale}/store/receipt/${order.receiptToken}`,
+    }).catch((err) => console.error("Invoice email failed:", err));
 
     return NextResponse.json({ receiptToken: order.receiptToken });
   } catch (error) {

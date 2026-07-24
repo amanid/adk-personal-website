@@ -62,6 +62,7 @@ export default function BookCard({ book }: { book: StoreBook }) {
               slug: book.slug,
               title: book.title,
               priceCents: book.priceCents,
+              currency: book.currency,
               coverUrl: book.coverUrl,
             }}
           />

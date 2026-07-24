@@ -1,5 +1,6 @@
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
+import { formatMoney } from "./currency";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -21,11 +22,13 @@ export function safeJsonLd(data: unknown): string {
   return JSON.stringify(data).replace(/</g, "\\u003c");
 }
 
-/** Client-safe money formatter for integer cents, e.g. 1999 -> "$19.99". */
-export function formatPrice(cents: number, currency: string = "USD"): string {
-  return new Intl.NumberFormat("en-US", { style: "currency", currency }).format(
-    cents / 100
-  );
+/**
+ * Client-safe money formatter for integer minor units. Currency-aware: uses the
+ * right number of decimals per currency (e.g. XOF has none). e.g. 1999,"USD" ->
+ * "$19.99"; 30000,"XOF" -> "CFA 30,000".
+ */
+export function formatPrice(minor: number, currency: string = "USD"): string {
+  return formatMoney(minor, currency);
 }
 
 export function slugify(text: string): string {
