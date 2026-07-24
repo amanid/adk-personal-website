@@ -79,11 +79,11 @@ export function majorToMinor(major: number, currency: string): number {
 
 /** Format stored minor units as localized currency (e.g. 5000,"USD" → "$50.00"). */
 export function formatMoney(minor: number, currency: string = "USD"): string {
+  const code = currency && /^[A-Za-z]{3}$/.test(currency) ? currency.toUpperCase() : "USD";
+  const amount = Number.isFinite(minor) ? minorToMajor(minor, code) : 0;
   try {
-    return new Intl.NumberFormat("en-US", { style: "currency", currency }).format(
-      minorToMajor(minor, currency)
-    );
+    return new Intl.NumberFormat("en-US", { style: "currency", currency: code }).format(amount);
   } catch {
-    return `${minorToMajor(minor, currency)} ${currency}`;
+    return `${amount} ${code}`;
   }
 }

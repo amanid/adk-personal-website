@@ -46,8 +46,29 @@ export function CartProvider({ children }: { children: ReactNode }) {
     try {
       const raw = localStorage.getItem(STORAGE_KEY);
       if (raw) {
-        const parsed = JSON.parse(raw) as CartItem[];
-        if (Array.isArray(parsed)) setItems(parsed);
+        const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed)) {
+          // Sanitize: tolerate carts saved before fields like `currency` existed,
+          // and drop malformed entries so nothing downstream can throw.
+          const clean: CartItem[] = parsed
+            .filter(
+              (i): i is Record<string, unknown> =>
+                !!i && typeof i === "object" && typeof i.bookId === "string"
+            )
+            .map((i) => ({
+              bookId: String(i.bookId),
+              slug: typeof i.slug === "string" ? i.slug : "",
+              title: typeof i.title === "string" ? i.title : "",
+              priceCents: Number.isFinite(i.priceCents as number) ? (i.priceCents as number) : 0,
+              currency: typeof i.currency === "string" && i.currency ? (i.currency as string) : "USD",
+              coverUrl: typeof i.coverUrl === "string" ? (i.coverUrl as string) : null,
+              quantity:
+                Number.isFinite(i.quantity as number) && (i.quantity as number) > 0
+                  ? Math.min(99, Math.floor(i.quantity as number))
+                  : 1,
+            }));
+          setItems(clean);
+        }
       }
     } catch {
       // ignore corrupt storage
