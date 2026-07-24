@@ -2,15 +2,11 @@
 
 import { useState } from "react";
 import { useTranslations } from "next-intl";
-import { Smartphone, Copy, Check, MessageCircle } from "lucide-react";
+import { Smartphone, Copy, Check } from "lucide-react";
 import { useRouter } from "@/i18n/routing";
 import { useCart } from "@/lib/cart-context";
 import { formatPrice } from "@/lib/utils";
-import {
-  MOBILE_MONEY_NUMBER,
-  MOBILE_MONEY_PROVIDERS,
-  whatsappLink,
-} from "@/lib/mobile-money";
+import { MOBILE_MONEY_NUMBER, MOBILE_MONEY_PROVIDERS } from "@/lib/mobile-money";
 
 interface MobileMoneyCheckoutProps {
   email: string;
@@ -163,17 +159,6 @@ export default function MobileMoneyCheckout({
       >
         {placing ? t("mmPlacing") : t("mmPlaceOrderBtn")}
       </button>
-
-      {/* WhatsApp shortcut */}
-      <a
-        href={whatsappLink()}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="w-full inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-lg border border-green-500/40 text-green-400 font-medium hover:bg-green-500/10 transition-all"
-      >
-        <MessageCircle className="w-4 h-4" />
-        {t("mmSendWhatsapp")}
-      </a>
 
       {error && (
         <p className="text-sm text-red-400 border border-red-400/30 rounded-lg p-3">{error}</p>
