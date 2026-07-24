@@ -1,7 +1,7 @@
 import nodemailer from "nodemailer";
 import { prisma } from "./prisma";
 import { formatMoney } from "./currency";
-import { MOBILE_MONEY_NUMBER, whatsappLink, mobileMoneyLabel } from "./mobile-money";
+import { MOBILE_MONEY_NUMBER, mobileMoneyLabel } from "./mobile-money";
 
 const transporter = nodemailer.createTransport({
   host: process.env.SMTP_HOST,
@@ -165,7 +165,7 @@ interface OrderInvoiceParams {
   receiptUrl: string;
 }
 
-/** Send an invoice requesting payment (mobile money) with WhatsApp instructions. */
+/** Send an invoice requesting payment (mobile money) with settlement instructions. */
 export async function sendOrderInvoiceEmail(params: OrderInvoiceParams): Promise<void> {
   const html = buildOrderInvoiceEmail(params);
   await sendEmail(params.to, `Invoice — please complete payment · Order ${params.orderNumber}`, html);
@@ -192,7 +192,6 @@ function buildOrderInvoiceEmail({
     )
     .join("");
 
-  const wa = whatsappLink(`Hello, here is my proof of payment for order ${orderNumber} (${total}).`);
   const providerLabel = mobileMoneyLabel(provider);
 
   return `
@@ -210,7 +209,7 @@ function buildOrderInvoiceEmail({
         <tr><td style="background-color:#111827;border:1px solid rgba(212,168,67,0.2);border-radius:12px;padding:32px;">
           <p style="margin:0 0 4px;font-size:12px;color:#d4a843;text-transform:uppercase;letter-spacing:1px;font-weight:600;">Payment required</p>
           <h2 style="margin:0 0 4px;font-size:20px;color:#f1f5f9;">Order ${orderNumber}</h2>
-          <p style="margin:0 0 20px;font-size:14px;color:#8892a4;line-height:1.6;">Hello${name ? ` ${name}` : ""}, thank you for your order. To complete it, please pay the total below via mobile money, then send your proof of payment on WhatsApp so we can confirm it.</p>
+          <p style="margin:0 0 20px;font-size:14px;color:#8892a4;line-height:1.6;">Hello${name ? ` ${name}` : ""}, thank you for your order. To complete it, please pay the total below via mobile money, then send us your proof of payment so we can confirm it.</p>
 
           <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:16px;">
             <tr>
@@ -228,10 +227,9 @@ function buildOrderInvoiceEmail({
 
           <div style="background-color:#0a0f1e;border:1px solid rgba(212,168,67,0.2);border-radius:10px;padding:16px;margin:8px 0 20px;">
             <p style="margin:0 0 8px;font-size:13px;color:#8892a4;">Pay <strong style="color:#f1f5f9;">${total}</strong> via <strong style="color:#f1f5f9;">${providerLabel}</strong> (or Wave / Djamo / Orange Money) to:</p>
-            <p style="margin:0;font-size:20px;color:#d4a843;font-weight:700;letter-spacing:0.5px;">${MOBILE_MONEY_NUMBER}</p>
+            <p style="margin:0 0 8px;font-size:20px;color:#d4a843;font-weight:700;letter-spacing:0.5px;">${MOBILE_MONEY_NUMBER}</p>
+            <p style="margin:0;font-size:12px;color:#8892a4;">After paying, send your proof of payment (a screenshot) to this number so we can confirm it.</p>
           </div>
-
-          <a href="${wa}" style="display:inline-block;padding:12px 24px;background-color:#25D366;color:#0a0f1e;text-decoration:none;border-radius:8px;font-weight:700;font-size:14px;">Send proof of payment on WhatsApp</a>
 
           <p style="margin:20px 0 0;font-size:13px;color:#8892a4;line-height:1.6;">Once we confirm your payment, we'll email your secure download links. You can also track this order here:<br>
             <a href="${receiptUrl}" style="color:#d4a843;text-decoration:underline;">${receiptUrl}</a>

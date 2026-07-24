@@ -106,7 +106,7 @@ export default async function ReceiptPage({
                 <div className="font-bold text-lg">{MOBILE_MONEY_NUMBER}</div>
               </div>
             </div>
-            <p className="text-xs text-text-secondary">{t("invoiceThenWhatsapp")}</p>
+            <p className="text-xs text-text-secondary">{t("invoiceThenProof")}</p>
           </div>
         )}
 

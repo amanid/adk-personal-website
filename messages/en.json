@@ -539,11 +539,10 @@
     "orderItemsCount": "{count, plural, one {# item} other {# items}}",
     "backToStore": "Continue shopping",
     "mmReferenceRequired": "Please enter the transaction reference from your mobile money payment.",
-    "mmFlowNote": "After you place the order, we email you an invoice. Pay to the number above, then send your proof of payment on WhatsApp — we confirm it and email your download links.",
-    "mmSendWhatsapp": "Send proof on WhatsApp",
+    "mmFlowNote": "After you place the order, we email you an invoice. Pay to the number above, then send us your proof of payment — we confirm it and email your download links.",
     "mmReferenceOptional": "Transaction reference (optional)",
     "mmPlaceOrderBtn": "Place order & get invoice",
-    "invoicePayInstruction": "To complete your order, pay the total below via mobile money, then send your proof of payment on WhatsApp.",
-    "invoiceThenWhatsapp": "After paying, send your proof of payment (screenshot) on WhatsApp so we can confirm it."
+    "invoicePayInstruction": "To complete your order, pay the total below via mobile money, then send us your proof of payment so we can confirm it.",
+    "invoiceThenProof": "After paying, send us your proof of payment (a screenshot) to the number above so we can confirm it."
   }
 }

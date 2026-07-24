@@ -89,7 +89,7 @@ export async function POST(request: Request) {
       },
     });
 
-    // Email the invoice with payment + WhatsApp instructions (best-effort).
+    // Email the invoice with payment instructions (best-effort).
     const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
     const locale = localeFromReferer(request);
     sendOrderInvoiceEmail({

@@ -258,7 +258,7 @@ export const mobileOrderSchema = z.object({
   email: z.string().email("A valid email is required").max(320),
   name: z.string().max(200).optional().or(z.literal("")),
   provider: z.enum(["WAVE", "DJAMO", "ORANGE_MONEY"]),
-  // Optional — the buyer sends proof of payment via WhatsApp after the invoice.
+  // Optional — the buyer sends proof of payment to the merchant after the invoice.
   reference: z.string().max(120).optional().or(z.literal("")),
   items: cartItemsSchema,
 });
