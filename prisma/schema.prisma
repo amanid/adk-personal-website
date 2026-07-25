@@ -472,6 +472,7 @@ enum PaymentMethod {
   WAVE
   DJAMO
   ORANGE_MONEY
+  FREE
 }
 
 model Book {

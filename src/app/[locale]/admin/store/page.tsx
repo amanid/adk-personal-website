@@ -491,7 +491,12 @@ export default function AdminStorePage() {
                   )}
                 </div>
                 <p className="text-xs text-text-secondary mt-0.5">
-                  {b.publicationYear} · {formatPrice(b.priceCents, b.currency)}
+                  {b.publicationYear} ·{" "}
+                  {b.priceCents === 0 ? (
+                    <span className="text-green-400 font-medium">Free</span>
+                  ) : (
+                    formatPrice(b.priceCents, b.currency)
+                  )}
                 </p>
                 <div className="flex flex-wrap gap-x-4 gap-y-1 mt-2 text-xs text-text-secondary">
                   <span className="flex items-center gap-1">
@@ -682,6 +687,7 @@ export default function AdminStorePage() {
                     placeholder="50"
                     required
                   />
+                  <p className="text-[11px] text-text-secondary mt-1">Set to 0 to make this book free.</p>
                 </div>
                 <div>
                   <label className="block text-sm text-text-secondary mb-1">Currency *</label>

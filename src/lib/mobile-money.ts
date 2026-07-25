@@ -21,3 +21,15 @@ export const MOBILE_MONEY_PROVIDER_IDS = MOBILE_MONEY_PROVIDERS.map((p) => p.id)
 export function mobileMoneyLabel(id: string): string {
   return MOBILE_MONEY_PROVIDERS.find((p) => p.id === id)?.label || id;
 }
+
+/** True for the mobile-money providers (excludes PayPal and Free). */
+export function isMobileMoneyMethod(method: string): boolean {
+  return MOBILE_MONEY_PROVIDER_IDS.includes(method as MobileMoneyProviderId);
+}
+
+/** Human label for any PaymentMethod value. */
+export function paymentMethodLabel(method: string): string {
+  if (method === "PAYPAL") return "PayPal";
+  if (method === "FREE") return "Free";
+  return mobileMoneyLabel(method);
+}

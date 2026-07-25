@@ -543,6 +543,12 @@
     "mmReferenceOptional": "Référence de la transaction (facultatif)",
     "mmPlaceOrderBtn": "Valider et recevoir la facture",
     "invoicePayInstruction": "Pour finaliser votre commande, payez le total ci-dessous par mobile money, puis envoyez-nous votre preuve de paiement pour que nous puissions la confirmer.",
-    "invoiceThenProof": "Après le paiement, envoyez-nous votre preuve de paiement (une capture d écran) au numéro ci-dessus pour que nous puissions la confirmer."
+    "invoiceThenProof": "Après le paiement, envoyez-nous votre preuve de paiement (une capture d écran) au numéro ci-dessus pour que nous puissions la confirmer.",
+    "free": "Gratuit",
+    "freeTitle": "Obtenez-le gratuitement",
+    "freeDesc": "Aucun paiement requis — saisissez votre e-mail et téléchargez immédiatement.",
+    "getForFree": "Obtenir gratuitement",
+    "freeProcessing": "Traitement…",
+    "freeError": "Impossible de finaliser votre commande gratuite. Veuillez réessayer."
   }
 }

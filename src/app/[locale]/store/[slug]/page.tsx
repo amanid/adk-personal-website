@@ -90,7 +90,11 @@ export default async function BookDetailPage({
 
           <div className="glass rounded-xl p-5 mt-4">
             <div className="text-2xl font-bold text-gold mb-4">
-              {formatPrice(book.priceCents, book.currency)}
+              {book.priceCents === 0
+                ? l === "fr"
+                  ? "Gratuit"
+                  : "Free"
+                : formatPrice(book.priceCents, book.currency)}
             </div>
             <AddToCartButton
               book={{

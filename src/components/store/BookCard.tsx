@@ -52,7 +52,7 @@ export default function BookCard({ book }: { book: StoreBook }) {
         )}
         <div className="mt-4 flex items-center justify-between gap-2">
           <span className="text-lg font-bold text-gold">
-            {formatPrice(book.priceCents, book.currency)}
+            {book.priceCents === 0 ? t("free") : formatPrice(book.priceCents, book.currency)}
           </span>
         </div>
         <div className="mt-3">

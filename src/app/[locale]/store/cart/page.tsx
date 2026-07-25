@@ -3,25 +3,58 @@
 import { useState } from "react";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
-import { Link } from "@/i18n/routing";
+import { Link, useRouter } from "@/i18n/routing";
 import { useCart } from "@/lib/cart-context";
 import { formatPrice } from "@/lib/utils";
 import { isPaypalCurrency } from "@/lib/currency";
 import QuantitySelector from "@/components/store/QuantitySelector";
 import PayPalCheckout from "@/components/store/PayPalCheckout";
 import MobileMoneyCheckout from "@/components/store/MobileMoneyCheckout";
-import { Trash2, ShoppingCart, BookOpen, Lock, ShieldCheck, RefreshCw, Mail, CreditCard, Smartphone, Check } from "lucide-react";
+import { Trash2, ShoppingCart, BookOpen, Lock, ShieldCheck, RefreshCw, Mail, CreditCard, Smartphone, Check, Gift, Download } from "lucide-react";
 
 export default function CartPage() {
-  const { items, subtotalCents, currency, setQuantity, removeItem, hydrated } = useCart();
+  const { items, subtotalCents, currency, setQuantity, removeItem, clear, hydrated } = useCart();
   const t = useTranslations("store");
+  const router = useRouter();
   const [email, setEmail] = useState("");
   const [name, setName] = useState("");
   const [touched, setTouched] = useState(false);
   const [method, setMethod] = useState<"paypal" | "mobile">("mobile");
+  const [freePlacing, setFreePlacing] = useState(false);
+  const [freeError, setFreeError] = useState<string | null>(null);
 
   const emailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
   const paypalAvailable = isPaypalCurrency(currency);
+  const isFree = subtotalCents === 0;
+
+  const placeFreeOrder = async () => {
+    setTouched(true);
+    if (!emailValid) return;
+    setFreeError(null);
+    setFreePlacing(true);
+    try {
+      const res = await fetch("/api/store/free-order", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email,
+          name,
+          items: items.map((i) => ({ bookId: i.bookId, quantity: i.quantity })),
+        }),
+      });
+      const data = await res.json().catch(() => null);
+      if (!res.ok || !data?.receiptToken) {
+        setFreeError(data?.error || t("freeError"));
+        return;
+      }
+      clear();
+      router.push(`/store/receipt/${data.receiptToken}`);
+    } catch {
+      setFreeError(t("freeError"));
+    } finally {
+      setFreePlacing(false);
+    }
+  };
 
   if (!hydrated) {
     return (
@@ -106,7 +139,7 @@ export default function CartPage() {
                   >
                     {item.title}
                   </Link>
-                  <p className="text-sm text-gold mt-1">{formatPrice(item.priceCents, item.currency)}</p>
+                  <p className="text-sm text-gold mt-1">{item.priceCents === 0 ? t("free") : formatPrice(item.priceCents, item.currency)}</p>
                   <div className="flex items-center gap-4 mt-3">
                     <QuantitySelector
                       value={item.quantity}
@@ -123,7 +156,7 @@ export default function CartPage() {
                   </div>
                 </div>
                 <div className="text-right font-semibold">
-                  {formatPrice(item.priceCents * item.quantity, item.currency)}
+                  {item.priceCents === 0 ? t("free") : formatPrice(item.priceCents * item.quantity, item.currency)}
                 </div>
               </div>
             ))}
@@ -172,7 +205,34 @@ export default function CartPage() {
             <p className="text-xs text-text-secondary mt-2">{t("emailHint")}</p>
           </div>
 
-          {/* Payment */}
+          {/* Free order — no payment needed */}
+          {isFree ? (
+            <div className="glass rounded-xl p-6">
+              <div className="flex items-center gap-2 mb-2">
+                <Gift className="w-5 h-5 text-gold" />
+                <h2 className="text-lg font-semibold">{t("freeTitle")}</h2>
+              </div>
+              <p className="text-sm text-text-secondary mb-4">{t("freeDesc")}</p>
+              <button
+                type="button"
+                onClick={placeFreeOrder}
+                disabled={freePlacing || !emailValid}
+                className="w-full inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-lg bg-gold text-charcoal font-semibold hover:bg-gold-light transition-all disabled:opacity-50"
+              >
+                <Download className="w-4 h-4" />
+                {freePlacing ? t("freeProcessing") : t("getForFree")}
+              </button>
+              {touched && !emailValid && (
+                <p className="text-xs text-red-400 mt-2">{t("emailInvalid")}</p>
+              )}
+              {freeError && (
+                <p className="text-sm text-red-400 border border-red-400/30 rounded-lg p-3 mt-3">
+                  {freeError}
+                </p>
+              )}
+            </div>
+          ) : (
+          /* Payment */
           <div className="glass rounded-xl p-6">
             <div className="flex items-center gap-2 mb-4">
               <Lock className="w-4 h-4 text-gold" />
@@ -251,6 +311,7 @@ export default function CartPage() {
               {t("encryptedNote")}
             </p>
           </div>
+          )}
         </div>
 
         {/* ── Right: sticky summary + trust ── */}
@@ -264,17 +325,17 @@ export default function CartPage() {
                     {item.title}
                     <span className="text-text-muted"> ×{item.quantity}</span>
                   </span>
-                  <span className="shrink-0">{formatPrice(item.priceCents * item.quantity, item.currency)}</span>
+                  <span className="shrink-0">{item.priceCents === 0 ? t("free") : formatPrice(item.priceCents * item.quantity, item.currency)}</span>
                 </div>
               ))}
             </div>
             <div className="flex justify-between text-sm mt-4 pt-3 border-t border-glass-border">
               <span className="text-text-secondary">{t("subtotal")}</span>
-              <span>{formatPrice(subtotalCents, currency)}</span>
+              <span>{isFree ? t("free") : formatPrice(subtotalCents, currency)}</span>
             </div>
             <div className="flex justify-between font-bold text-lg pt-2 mt-1">
               <span>{t("total")}</span>
-              <span className="text-gold">{formatPrice(subtotalCents, currency)}</span>
+              <span className="text-gold">{isFree ? t("free") : formatPrice(subtotalCents, currency)}</span>
             </div>
           </div>
 

@@ -543,6 +543,12 @@
     "mmReferenceOptional": "Transaction reference (optional)",
     "mmPlaceOrderBtn": "Place order & get invoice",
     "invoicePayInstruction": "To complete your order, pay the total below via mobile money, then send us your proof of payment so we can confirm it.",
-    "invoiceThenProof": "After paying, send us your proof of payment (a screenshot) to the number above so we can confirm it."
+    "invoiceThenProof": "After paying, send us your proof of payment (a screenshot) to the number above so we can confirm it.",
+    "free": "Free",
+    "freeTitle": "Get it free",
+    "freeDesc": "No payment needed — enter your email and download instantly.",
+    "getForFree": "Get for free",
+    "freeProcessing": "Processing…",
+    "freeError": "Could not complete your free order. Please try again."
   }
 }

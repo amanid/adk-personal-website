@@ -24,11 +24,12 @@ import {
   Calendar,
   Download,
   Hash,
+  Gift,
 } from "lucide-react";
 import StatCard from "@/components/admin/charts/StatCard";
 import { formatPrice } from "@/lib/utils";
 import { formatMoney } from "@/lib/currency";
-import { mobileMoneyLabel } from "@/lib/mobile-money";
+import { paymentMethodLabel } from "@/lib/mobile-money";
 
 interface OrderItem {
   id: string;
@@ -96,12 +97,11 @@ function StatusPill({ status }: { status: string }) {
 }
 
 function MethodChip({ method }: { method: string }) {
-  const isPaypal = method === "PAYPAL";
-  const Icon = isPaypal ? CreditCard : Smartphone;
+  const Icon = method === "PAYPAL" ? CreditCard : method === "FREE" ? Gift : Smartphone;
   return (
     <span className="inline-flex items-center gap-1 text-[11px] text-text-secondary">
       <Icon className="w-3 h-3" />
-      {isPaypal ? "PayPal" : mobileMoneyLabel(method)}
+      {paymentMethodLabel(method)}
     </span>
   );
 }
@@ -395,7 +395,7 @@ export default function AdminOrdersPage() {
                         <span className="text-xs text-amber-300 flex-1 min-w-[160px]">
                           Confirm the payment{" "}
                           {o.paymentMethod !== "PAYPAL"
-                            ? `(${mobileMoneyLabel(o.paymentMethod)}${
+                            ? `(${paymentMethodLabel(o.paymentMethod)}${
                                 o.paymentReference ? ` · ${o.paymentReference}` : ""
                               })`
                             : ""}{" "}
@@ -430,10 +430,16 @@ export default function AdminOrdersPage() {
                         {o.email}
                       </InfoField>
                       <InfoField
-                        icon={o.paymentMethod === "PAYPAL" ? CreditCard : Smartphone}
+                        icon={
+                          o.paymentMethod === "PAYPAL"
+                            ? CreditCard
+                            : o.paymentMethod === "FREE"
+                              ? Gift
+                              : Smartphone
+                        }
                         label="Payment"
                       >
-                        {o.paymentMethod === "PAYPAL" ? "PayPal" : mobileMoneyLabel(o.paymentMethod)}
+                        {paymentMethodLabel(o.paymentMethod)}
                         {o.paymentReference ? ` · ${o.paymentReference}` : ""}
                       </InfoField>
                       <InfoField icon={Calendar} label="Placed">

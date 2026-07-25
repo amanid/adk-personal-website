@@ -254,6 +254,12 @@ export const checkoutSchema = z.object({
   items: cartItemsSchema,
 });
 
+export const freeOrderSchema = z.object({
+  email: z.string().email("A valid email is required").max(320),
+  name: z.string().max(200).optional().or(z.literal("")),
+  items: cartItemsSchema,
+});
+
 export const mobileOrderSchema = z.object({
   email: z.string().email("A valid email is required").max(320),
   name: z.string().max(200).optional().or(z.literal("")),
@@ -266,3 +272,4 @@ export const mobileOrderSchema = z.object({
 export type BookInput = z.infer<typeof bookSchema>;
 export type CheckoutInput = z.infer<typeof checkoutSchema>;
 export type MobileOrderInput = z.infer<typeof mobileOrderSchema>;
+export type FreeOrderInput = z.infer<typeof freeOrderSchema>;

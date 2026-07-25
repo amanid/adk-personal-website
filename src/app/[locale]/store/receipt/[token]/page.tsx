@@ -4,7 +4,7 @@ import { getTranslations } from "next-intl/server";
 import { prisma } from "@/lib/prisma";
 import { normalizeLocale } from "@/lib/seo";
 import { formatPrice } from "@/lib/utils";
-import { mobileMoneyLabel, MOBILE_MONEY_NUMBER } from "@/lib/mobile-money";
+import { mobileMoneyLabel, MOBILE_MONEY_NUMBER, isMobileMoneyMethod } from "@/lib/mobile-money";
 import { Link } from "@/i18n/routing";
 import PrintReceiptButton from "@/components/store/PrintReceiptButton";
 import { Download, CheckCircle2, Clock, AlertCircle } from "lucide-react";
@@ -34,7 +34,7 @@ export default async function ReceiptPage({
 
   const t = await getTranslations({ locale: l, namespace: "store" });
   const isPaid = order.status === "PAID";
-  const isMobileMoney = order.paymentMethod !== "PAYPAL";
+  const isMobileMoney = isMobileMoneyMethod(order.paymentMethod);
   const titles = new Map(order.items.map((i) => [i.bookId, i.titleSnapshot]));
   // Server Component: reading the current time at request render is intentional.
   // eslint-disable-next-line react-hooks/purity
