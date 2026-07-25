@@ -75,6 +75,7 @@ const emptyForm = {
   pageCount: 0,
   category: "",
   tags: "",
+  free: false,
   priceDollars: "50.00",
   currency: "USD",
   status: "DRAFT",
@@ -186,6 +187,7 @@ export default function AdminStorePage() {
       pageCount: b.pageCount || 0,
       category: b.category || "",
       tags: b.tags.join(", "),
+      free: b.priceCents === 0,
       priceDollars: String(minorToMajor(b.priceCents, b.currency || "USD")),
       currency: b.currency || "USD",
       status: b.status,
@@ -206,7 +208,9 @@ export default function AdminStorePage() {
     setSubmitting(true);
     setError(null);
 
-    const priceCents = majorToMinor(parseFloat(form.priceDollars || "0"), form.currency);
+    const priceCents = form.free
+      ? 0
+      : majorToMinor(parseFloat(form.priceDollars || "0"), form.currency);
     if (Number.isNaN(priceCents) || priceCents < 0) {
       setError("Please enter a valid price.");
       setSubmitting(false);
@@ -681,13 +685,22 @@ export default function AdminStorePage() {
                   <input
                     type="text"
                     inputMode="decimal"
-                    className={INPUT_CLASS}
-                    value={form.priceDollars}
+                    className={`${INPUT_CLASS} ${form.free ? "opacity-50" : ""}`}
+                    value={form.free ? "0" : form.priceDollars}
                     onChange={(e) => setForm({ ...form, priceDollars: e.target.value })}
                     placeholder="50"
-                    required
+                    disabled={form.free}
+                    required={!form.free}
                   />
-                  <p className="text-[11px] text-text-secondary mt-1">Set to 0 to make this book free.</p>
+                  <label className="flex items-center gap-2 text-sm text-text-secondary mt-2 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={form.free}
+                      onChange={(e) => setForm({ ...form, free: e.target.checked })}
+                      className="accent-gold"
+                    />
+                    Make this book free (no payment required)
+                  </label>
                 </div>
                 <div>
                   <label className="block text-sm text-text-secondary mb-1">Currency *</label>
