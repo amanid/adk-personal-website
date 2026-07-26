@@ -82,7 +82,7 @@ export async function PUT(
 }
 
 export async function DELETE(
-  _request: Request,
+  request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
   if (!(await requireAdmin())) {
@@ -90,20 +90,71 @@ export async function DELETE(
   }
   try {
     const { id } = await params;
+    const force = new URL(request.url).searchParams.get("force") === "true";
 
-    // Block deletion if the book has been purchased (preserve order integrity).
+    const book = await prisma.book.findUnique({
+      where: { id },
+      select: { id: true, fileId: true, coverImageId: true },
+    });
+    if (!book) return NextResponse.json({ error: "Not found" }, { status: 404 });
+
     const sold = await prisma.orderItem.count({ where: { bookId: id } });
-    if (sold > 0) {
+
+    // A book with order history can't be simply deleted — that would break the
+    // buyers' receipts and download links. Default: refuse and suggest Archive.
+    // With ?force=true the admin explicitly removes it and its order lines/grants.
+    if (sold > 0 && !force) {
       return NextResponse.json(
-        { error: "This book has sales and cannot be deleted. Archive it instead." },
+        {
+          error: `This book appears in ${sold} order${sold === 1 ? "" : "s"}. Archive it to remove it from the store while keeping order history, or delete anyway to also remove those order lines.`,
+          ordersCount: sold,
+          canForce: true,
+        },
         { status: 409 }
       );
     }
 
-    await prisma.book.delete({ where: { id } });
+    await prisma.$transaction([
+      ...(sold > 0
+        ? [
+            prisma.downloadGrant.deleteMany({ where: { bookId: id } }),
+            prisma.orderItem.deleteMany({ where: { bookId: id } }),
+          ]
+        : []),
+      prisma.book.delete({ where: { id } }),
+    ]);
+
+    // Free the stored file + cover (orphaned once the book is gone).
+    if (book.fileId) await prisma.bookAsset.deleteMany({ where: { id: book.fileId } });
+    if (book.coverImageId)
+      await prisma.upload.deleteMany({ where: { id: book.coverImageId } });
+
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error("Book delete error:", error);
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+  }
+}
+
+/** Lightweight status update (archive / restore) without re-validating the whole book. */
+export async function PATCH(
+  request: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  if (!(await requireAdmin())) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+  try {
+    const { id } = await params;
+    const body = await request.json();
+    const status = body?.status;
+    if (!["DRAFT", "PUBLISHED", "ARCHIVED"].includes(status)) {
+      return NextResponse.json({ error: "Invalid status" }, { status: 400 });
+    }
+    const book = await prisma.book.update({ where: { id }, data: { status } });
+    return NextResponse.json({ book });
+  } catch (error) {
+    console.error("Book status update error:", error);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }

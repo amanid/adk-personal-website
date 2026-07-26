@@ -13,6 +13,8 @@ import {
   ShoppingBag,
   UploadCloud,
   Sparkles,
+  Archive,
+  ArchiveRestore,
 } from "lucide-react";
 import FileUpload from "@/components/admin/FileUpload";
 import BookFileUpload, { type BookUploadResult } from "@/components/admin/BookFileUpload";
@@ -369,15 +371,43 @@ export default function AdminStorePage() {
   const handleDelete = async (b: Book) => {
     if (!confirm(`Delete "${b.title}"? This cannot be undone.`)) return;
     try {
-      const res = await fetch(`/api/admin/books/${b.id}`, { method: "DELETE" });
+      let res = await fetch(`/api/admin/books/${b.id}`, { method: "DELETE" });
+      if (res.status === 409) {
+        // Book has order history — offer to archive, or force-delete.
+        const data = await res.json().catch(() => ({}));
+        const forceIt = confirm(
+          `${data.error || "This book has orders."}\n\n` +
+            `OK = delete anyway (also removes those order lines & download links).\n` +
+            `Cancel = keep it (tip: use Archive to hide it from the store).`
+        );
+        if (!forceIt) return;
+        res = await fetch(`/api/admin/books/${b.id}?force=true`, { method: "DELETE" });
+      }
       if (!res.ok) {
-        const data = await res.json();
+        const data = await res.json().catch(() => ({}));
         alert(data.error || "Delete failed");
         return;
       }
       fetchBooks();
     } catch {
       alert("Delete failed");
+    }
+  };
+
+  const setBookStatus = async (b: Book, status: "PUBLISHED" | "ARCHIVED") => {
+    try {
+      const res = await fetch(`/api/admin/books/${b.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status }),
+      });
+      if (!res.ok) {
+        alert("Could not update the book status");
+        return;
+      }
+      fetchBooks();
+    } catch {
+      alert("Could not update the book status");
     }
   };
 
@@ -525,6 +555,25 @@ export default function AdminStorePage() {
                 >
                   <Edit className="w-4 h-4" />
                 </button>
+                {b.status === "ARCHIVED" ? (
+                  <button
+                    onClick={() => setBookStatus(b, "PUBLISHED")}
+                    className="p-2 text-text-secondary hover:text-green-400 transition-colors"
+                    aria-label="Restore (publish)"
+                    title="Restore & publish"
+                  >
+                    <ArchiveRestore className="w-4 h-4" />
+                  </button>
+                ) : (
+                  <button
+                    onClick={() => setBookStatus(b, "ARCHIVED")}
+                    className="p-2 text-text-secondary hover:text-amber-400 transition-colors"
+                    aria-label="Archive"
+                    title="Archive (hide from store)"
+                  >
+                    <Archive className="w-4 h-4" />
+                  </button>
+                )}
                 <button
                   onClick={() => handleDelete(b)}
                   className="p-2 text-text-secondary hover:text-red-400 transition-colors"
