@@ -7,7 +7,9 @@ import { formatPrice } from "@/lib/utils";
 import { Link } from "@/i18n/routing";
 import AddToCartButton from "@/components/store/AddToCartButton";
 import BookViewBeacon from "@/components/store/BookViewBeacon";
+import BookCard, { type StoreBook } from "@/components/store/BookCard";
 import { BookOpen, Check, ChevronLeft, Calendar, Globe, Hash } from "lucide-react";
+import type { Book } from "@prisma/client";
 
 export const revalidate = 60;
 
@@ -15,6 +17,33 @@ async function getBook(slug: string) {
   return prisma.book.findFirst({
     where: { slug, status: "PUBLISHED" },
   });
+}
+
+/** Other published books that share this book's category or tags (newest first). */
+async function getRelatedBooks(book: Book) {
+  const orConds = [
+    book.category ? { category: book.category } : null,
+    book.tags.length ? { tags: { hasSome: book.tags } } : null,
+  ].filter(Boolean) as NonNullable<object>[];
+
+  const order = [{ featured: "desc" as const }, { createdAt: "desc" as const }];
+
+  let related: Book[] = [];
+  if (orConds.length) {
+    related = await prisma.book.findMany({
+      where: { status: "PUBLISHED", id: { not: book.id }, OR: orConds },
+      orderBy: order,
+      take: 4,
+    });
+  }
+  if (related.length === 0) {
+    related = await prisma.book.findMany({
+      where: { status: "PUBLISHED", id: { not: book.id } },
+      orderBy: order,
+      take: 4,
+    });
+  }
+  return related;
 }
 
 export async function generateMetadata({
@@ -56,6 +85,23 @@ export default async function BookDetailPage({
   const insights =
     (l === "fr" && book.keyInsightsFr.length ? book.keyInsightsFr : book.keyInsights) || [];
   const coverUrl = book.coverImageId ? `/api/uploads/${book.coverImageId}` : null;
+
+  const related = await getRelatedBooks(book);
+  const relatedBooks: StoreBook[] = related.map((b) => ({
+    id: b.id,
+    slug: b.slug,
+    title: l === "fr" && b.titleFr ? b.titleFr : b.title,
+    subtitle: l === "fr" && b.subtitleFr ? b.subtitleFr : b.subtitle,
+    publicationYear: b.publicationYear,
+    priceCents: b.priceCents,
+    currency: b.currency,
+    coverUrl: b.coverImageId ? `/api/uploads/${b.coverImageId}` : null,
+    firstInsight:
+      (l === "fr" ? b.keyInsightsFr[0] : b.keyInsights[0]) || b.keyInsights[0] || null,
+    category: b.category,
+    tags: b.tags,
+    featured: b.featured,
+  }));
 
   return (
     <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
@@ -200,6 +246,19 @@ export default async function BookDetailPage({
           )}
         </div>
       </div>
+
+      {relatedBooks.length > 0 && (
+        <section className="mt-16">
+          <h2 className="text-2xl font-bold font-[family-name:var(--font-display)] mb-6">
+            {l === "fr" ? "À découvrir aussi" : "You might also like"}
+          </h2>
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+            {relatedBooks.map((b) => (
+              <BookCard key={b.id} book={b} />
+            ))}
+          </div>
+        </section>
+      )}
     </div>
   );
 }

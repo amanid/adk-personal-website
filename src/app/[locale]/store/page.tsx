@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import { prisma } from "@/lib/prisma";
 import { buildPageMetadata, normalizeLocale } from "@/lib/seo";
-import BookCard, { type StoreBook } from "@/components/store/BookCard";
+import { type StoreBook } from "@/components/store/BookCard";
+import StoreBrowser from "@/components/store/StoreBrowser";
 import { BookOpen } from "lucide-react";
 
 export async function generateMetadata({
@@ -55,6 +56,9 @@ export default async function StorePage({
     coverUrl: b.coverImageId ? `/api/uploads/${b.coverImageId}` : null,
     firstInsight:
       (l === "fr" ? b.keyInsightsFr[0] : b.keyInsights[0]) || b.keyInsights[0] || null,
+    category: b.category,
+    tags: b.tags,
+    featured: b.featured,
   }));
 
   return (
@@ -76,11 +80,7 @@ export default async function StorePage({
           <p>{l === "fr" ? "Aucun ouvrage disponible pour le moment." : "No books available yet. Check back soon."}</p>
         </div>
       ) : (
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-          {storeBooks.map((book) => (
-            <BookCard key={book.id} book={book} />
-          ))}
-        </div>
+        <StoreBrowser books={storeBooks} />
       )}
     </div>
   );

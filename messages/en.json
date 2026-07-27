@@ -560,6 +560,17 @@
     "discount": "Discount",
     "addedToCart": "Added to your cart",
     "viewCartCheckout": "View cart & checkout",
-    "cartCurrencySwitched": "Started a new cart in {currency} — a single order can't mix currencies."
+    "cartCurrencySwitched": "Started a new cart in {currency} — a single order can't mix currencies.",
+    "featured": "Featured",
+    "searchPlaceholder": "Search books, topics, tags…",
+    "sortLabel": "Sort by",
+    "sortFeatured": "Featured",
+    "sortPriceLow": "Price: low to high",
+    "sortPriceHigh": "Price: high to low",
+    "sortTitle": "Title (A–Z)",
+    "filterAll": "All",
+    "clearFilters": "Clear filters",
+    "resultsCount": "{count, plural, =0 {No books} one {# book} other {# books}}",
+    "noResults": "No books match your search. Try clearing the filters."
   }
 }

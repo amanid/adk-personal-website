@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { Link } from "@/i18n/routing";
-import { BookOpen } from "lucide-react";
+import { BookOpen, Star } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { formatPrice } from "@/lib/utils";
 import AddToCartButton from "./AddToCartButton";
@@ -17,6 +17,9 @@ export interface StoreBook {
   currency: string;
   coverUrl?: string | null;
   firstInsight?: string | null;
+  category?: string | null;
+  tags?: string[];
+  featured?: boolean;
 }
 
 export default function BookCard({ book }: { book: StoreBook }) {
@@ -37,6 +40,17 @@ export default function BookCard({ book }: { book: StoreBook }) {
             <div className="w-full h-full flex items-center justify-center text-gold/30">
               <BookOpen className="w-16 h-16" />
             </div>
+          )}
+          {book.featured && (
+            <span className="absolute top-2 left-2 inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-gold text-charcoal text-[10px] font-bold shadow">
+              <Star className="w-3 h-3 fill-charcoal" />
+              {t("featured")}
+            </span>
+          )}
+          {book.priceCents === 0 && (
+            <span className="absolute top-2 right-2 px-2 py-0.5 rounded-full bg-green-500 text-white text-[10px] font-bold shadow">
+              {t("free")}
+            </span>
           )}
         </div>
       </Link>

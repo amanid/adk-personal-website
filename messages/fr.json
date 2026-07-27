@@ -560,6 +560,17 @@
     "discount": "Réduction",
     "addedToCart": "Ajouté à votre panier",
     "viewCartCheckout": "Voir le panier et payer",
-    "cartCurrencySwitched": "Nouveau panier en {currency} — une commande ne peut pas mélanger les devises."
+    "cartCurrencySwitched": "Nouveau panier en {currency} — une commande ne peut pas mélanger les devises.",
+    "featured": "À la une",
+    "searchPlaceholder": "Rechercher des livres, thèmes, mots-clés…",
+    "sortLabel": "Trier par",
+    "sortFeatured": "À la une",
+    "sortPriceLow": "Prix : croissant",
+    "sortPriceHigh": "Prix : décroissant",
+    "sortTitle": "Titre (A–Z)",
+    "filterAll": "Tous",
+    "clearFilters": "Effacer les filtres",
+    "resultsCount": "{count, plural, =0 {Aucun livre} one {# livre} other {# livres}}",
+    "noResults": "Aucun livre ne correspond à votre recherche. Essayez d'effacer les filtres."
   }
 }
