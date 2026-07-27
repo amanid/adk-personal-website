@@ -580,6 +580,7 @@
     "lookupSentTitle": "Check your inbox",
     "lookupSentDesc": "If any orders are linked to that email, we've just sent you the links. They can take a minute to arrive.",
     "lookupTryAnother": "Use a different email",
-    "lookupPrivacy": "For your security, order links are sent only by email — never shown on screen."
+    "lookupPrivacy": "For your security, order links are sent only by email — never shown on screen.",
+    "mmCopyNumber": "Copy number"
   }
 }

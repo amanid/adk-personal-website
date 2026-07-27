@@ -121,7 +121,7 @@ export default function MobileMoneyCheckout({
               type="button"
               onClick={copyNumber}
               className="text-text-muted hover:text-gold"
-              aria-label="Copy number"
+              aria-label={t("mmCopyNumber")}
             >
               {copied ? (
                 <Check className="w-3.5 h-3.5 text-green-400" />

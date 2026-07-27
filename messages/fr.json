@@ -580,6 +580,7 @@
     "lookupSentTitle": "Consultez votre boîte de réception",
     "lookupSentDesc": "Si des commandes sont liées à cet e-mail, nous venons de vous envoyer les liens. Ils peuvent mettre une minute à arriver.",
     "lookupTryAnother": "Utiliser un autre e-mail",
-    "lookupPrivacy": "Pour votre sécurité, les liens de commande sont envoyés uniquement par e-mail — jamais affichés à l'écran."
+    "lookupPrivacy": "Pour votre sécurité, les liens de commande sont envoyés uniquement par e-mail — jamais affichés à l'écran.",
+    "mmCopyNumber": "Copier le numéro"
   }
 }
