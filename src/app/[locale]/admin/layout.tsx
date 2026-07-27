@@ -19,6 +19,7 @@ import {
   ShoppingBag,
   Receipt,
   LineChart,
+  Ticket,
 } from "lucide-react";
 
 export const metadata = {
@@ -34,6 +35,7 @@ const adminLinks = [
   { href: "/admin/publications", label: "Publications", icon: BookOpen },
   { href: "/admin/store", label: "Bookstore", icon: ShoppingBag },
   { href: "/admin/store/orders", label: "Orders", icon: Receipt },
+  { href: "/admin/store/coupons", label: "Coupons", icon: Ticket },
   { href: "/admin/store/analytics", label: "Store Analytics", icon: LineChart },
   { href: "/admin/research-activities", label: "Research Activities", icon: FlaskConical },
   { href: "/admin/experience", label: "Experience", icon: Building2 },

@@ -26,6 +26,9 @@ export async function sendOrderReceipt(
     orderNumber: order.orderNumber,
     paidAt: order.paidAt ?? new Date(),
     currency: order.currency,
+    subtotalCents: order.subtotalCents,
+    discountCents: order.discountCents,
+    couponCode: order.couponCode,
     totalCents: order.totalCents,
     items: order.items.map((i) => ({
       title: i.titleSnapshot,
@@ -64,6 +67,13 @@ export async function fulfilPaidOrder(
         },
       });
       await createDownloadGrants(tx, orderId);
+      // Count the redemption exactly once, when the order first becomes PAID.
+      if (order.couponId) {
+        await tx.coupon.update({
+          where: { id: order.couponId },
+          data: { timesRedeemed: { increment: 1 } },
+        });
+      }
     });
   }
 

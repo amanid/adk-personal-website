@@ -475,6 +475,30 @@ enum PaymentMethod {
   FREE
 }
 
+enum DiscountType {
+  PERCENT
+  FIXED
+}
+
+model Coupon {
+  id               String       @id @default(cuid())
+  code             String       @unique
+  type             DiscountType
+  percentOff       Int? // for PERCENT (1-100)
+  amountOffCents   Int? // for FIXED (minor units of `currency`)
+  currency         String? // required for FIXED — restricts the coupon to this currency
+  minSubtotalCents Int          @default(0)
+  maxRedemptions   Int? // null = unlimited
+  timesRedeemed    Int          @default(0)
+  active           Boolean      @default(true)
+  expiresAt        DateTime?
+  createdAt        DateTime     @default(now())
+  updatedAt        DateTime     @updatedAt
+  orders           Order[]
+
+  @@index([code])
+}
+
 model Book {
   id              String      @id @default(cuid())
   title           String
@@ -530,6 +554,9 @@ model Order {
   paymentReference String?
   currency         String          @default("USD")
   subtotalCents    Int
+  discountCents    Int             @default(0)
+  couponId         String?
+  couponCode       String?
   totalCents       Int
   paypalOrderId    String?         @unique
   paypalCaptureId  String?
@@ -542,6 +569,7 @@ model Order {
   createdAt        DateTime        @default(now())
   updatedAt        DateTime        @updatedAt
   user             User?           @relation(fields: [userId], references: [id])
+  coupon           Coupon?         @relation(fields: [couponId], references: [id])
   items            OrderItem[]
   downloads        DownloadGrant[]
 

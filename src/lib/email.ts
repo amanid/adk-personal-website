@@ -144,6 +144,9 @@ interface OrderReceiptParams {
   orderNumber: string;
   paidAt: Date;
   currency: string;
+  subtotalCents?: number;
+  discountCents?: number;
+  couponCode?: string | null;
   totalCents: number;
   items: ReceiptItem[];
   downloads: ReceiptDownload[];
@@ -154,11 +157,36 @@ function fmtMoney(minor: number, currency: string): string {
   return formatMoney(minor, currency);
 }
 
+/** Subtotal + discount rows for an order table, or "" when there's no discount. */
+function discountRows(
+  currency: string,
+  subtotalCents: number | undefined,
+  discountCents: number | undefined,
+  couponCode: string | null | undefined
+): string {
+  if (!discountCents || discountCents <= 0 || subtotalCents == null) return "";
+  const label = couponCode ? `Discount (${couponCode})` : "Discount";
+  return `
+    <tr>
+      <td style="padding:8px 0 2px;font-size:14px;color:#8892a4;">Subtotal</td>
+      <td></td>
+      <td style="padding:8px 0 2px;font-size:14px;color:#f1f5f9;text-align:right;">${fmtMoney(subtotalCents, currency)}</td>
+    </tr>
+    <tr>
+      <td style="padding:2px 0;font-size:14px;color:#4ade80;">${label}</td>
+      <td></td>
+      <td style="padding:2px 0;font-size:14px;color:#4ade80;text-align:right;">&minus;${fmtMoney(discountCents, currency)}</td>
+    </tr>`;
+}
+
 interface OrderInvoiceParams {
   to: string;
   name?: string | null;
   orderNumber: string;
   currency: string;
+  subtotalCents?: number;
+  discountCents?: number;
+  couponCode?: string | null;
   totalCents: number;
   items: ReceiptItem[];
   provider: string; // PaymentMethod enum value (WAVE/DJAMO/ORANGE_MONEY)
@@ -175,12 +203,16 @@ function buildOrderInvoiceEmail({
   name,
   orderNumber,
   currency,
+  subtotalCents,
+  discountCents,
+  couponCode,
   totalCents,
   items,
   provider,
   receiptUrl,
 }: OrderInvoiceParams): string {
   const total = fmtMoney(totalCents, currency);
+  const discount = discountRows(currency, subtotalCents, discountCents, couponCode);
   const rows = items
     .map(
       (i) => `
@@ -218,6 +250,7 @@ function buildOrderInvoiceEmail({
               <th style="text-align:right;font-size:11px;color:#8892a4;text-transform:uppercase;letter-spacing:1px;padding-bottom:6px;">Amount</th>
             </tr>
             ${rows}
+            ${discount}
             <tr>
               <td style="padding-top:12px;font-size:15px;color:#f1f5f9;font-weight:700;">Total due</td>
               <td></td>
@@ -254,11 +287,15 @@ function buildOrderReceiptEmail({
   orderNumber,
   paidAt,
   currency,
+  subtotalCents,
+  discountCents,
+  couponCode,
   totalCents,
   items,
   downloads,
   receiptUrl,
 }: OrderReceiptParams): string {
+  const discount = discountRows(currency, subtotalCents, discountCents, couponCode);
   const rows = items
     .map(
       (i) => `
@@ -312,6 +349,7 @@ function buildOrderReceiptEmail({
                   <th style="text-align:right;font-size:11px;color:#8892a4;text-transform:uppercase;letter-spacing:1px;padding-bottom:6px;">Amount</th>
                 </tr>
                 ${rows}
+                ${discount}
                 <tr>
                   <td style="padding-top:12px;font-size:15px;color:#f1f5f9;font-weight:700;">Total paid</td>
                   <td></td>

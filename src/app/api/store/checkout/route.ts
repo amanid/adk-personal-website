@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { checkoutSchema } from "@/lib/validations";
-import { priceCart, generateOrderNumber, secureToken } from "@/lib/store";
+import { priceOrder, generateOrderNumber, secureToken } from "@/lib/store";
 import { createPayPalOrder } from "@/lib/paypal";
 import { rateLimit } from "@/lib/rate-limit";
 import { checkOrigin } from "@/lib/origin-check";
@@ -26,14 +26,23 @@ export async function POST(request: Request) {
     }
 
     const { email, name, items } = validation.data;
+    const couponCode = typeof body?.couponCode === "string" ? body.couponCode : null;
 
-    // Recompute prices server-side from the database — never trust the client.
+    // Recompute prices + coupon server-side from the database — never trust the client.
     let priced;
     try {
-      priced = await priceCart(items);
+      priced = await priceOrder(items, couponCode);
     } catch (e) {
       return NextResponse.json(
         { error: e instanceof Error ? e.message : "Unable to price cart" },
+        { status: 400 }
+      );
+    }
+
+    // A fully-discounted (free) order can't go through PayPal.
+    if (priced.totalCents <= 0) {
+      return NextResponse.json(
+        { error: "This order is free — use the free checkout." },
         { status: 400 }
       );
     }
@@ -65,6 +74,9 @@ export async function POST(request: Request) {
         status: "PENDING",
         currency: priced.currency,
         subtotalCents: priced.subtotalCents,
+        discountCents: priced.discountCents,
+        couponId: priced.couponId,
+        couponCode: priced.couponCode,
         totalCents: priced.totalCents,
         receiptToken: secureToken(),
         ipAddress: ip,

@@ -549,6 +549,14 @@
     "freeDesc": "Aucun paiement requis — saisissez votre e-mail et téléchargez immédiatement.",
     "getForFree": "Obtenir gratuitement",
     "freeProcessing": "Traitement…",
-    "freeError": "Impossible de finaliser votre commande gratuite. Veuillez réessayer."
+    "freeError": "Impossible de finaliser votre commande gratuite. Veuillez réessayer.",
+    "couponLabel": "Code de réduction",
+    "couponPlaceholder": "Saisir le code",
+    "couponApply": "Appliquer",
+    "couponApplying": "Application…",
+    "couponApplied": "appliqué",
+    "couponRemove": "Retirer le code",
+    "couponInvalid": "Ce code n'est pas valide.",
+    "discount": "Réduction"
   }
 }

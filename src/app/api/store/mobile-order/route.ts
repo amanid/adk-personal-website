@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { mobileOrderSchema } from "@/lib/validations";
-import { priceCart, generateOrderNumber, secureToken } from "@/lib/store";
+import { priceOrder, generateOrderNumber, secureToken } from "@/lib/store";
 import { sendOrderInvoiceEmail } from "@/lib/email";
 import { sanitizeInput } from "@/lib/sanitize";
 import { rateLimit } from "@/lib/rate-limit";
@@ -37,14 +37,22 @@ export async function POST(request: Request) {
     }
 
     const { email, name, provider, reference, items } = validation.data;
+    const couponCode = typeof body?.couponCode === "string" ? body.couponCode : null;
 
-    // Recompute prices server-side — client amounts are never trusted.
+    // Recompute prices + coupon server-side — client amounts are never trusted.
     let priced;
     try {
-      priced = await priceCart(items);
+      priced = await priceOrder(items, couponCode);
     } catch (e) {
       return NextResponse.json(
         { error: e instanceof Error ? e.message : "Unable to price cart" },
+        { status: 400 }
+      );
+    }
+
+    if (priced.totalCents <= 0) {
+      return NextResponse.json(
+        { error: "This order is free — use the free checkout." },
         { status: 400 }
       );
     }
@@ -75,6 +83,9 @@ export async function POST(request: Request) {
         paymentReference: reference ? sanitizeInput(reference) : null,
         currency: priced.currency,
         subtotalCents: priced.subtotalCents,
+        discountCents: priced.discountCents,
+        couponId: priced.couponId,
+        couponCode: priced.couponCode,
         totalCents: priced.totalCents,
         receiptToken: secureToken(),
         ipAddress: ip,
@@ -97,6 +108,9 @@ export async function POST(request: Request) {
       name: order.name,
       orderNumber: order.orderNumber,
       currency: priced.currency,
+      subtotalCents: priced.subtotalCents,
+      discountCents: priced.discountCents,
+      couponCode: priced.couponCode,
       totalCents: priced.totalCents,
       items: priced.items.map((i) => ({
         title: i.title,

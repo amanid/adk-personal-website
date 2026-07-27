@@ -549,6 +549,14 @@
     "freeDesc": "No payment needed — enter your email and download instantly.",
     "getForFree": "Get for free",
     "freeProcessing": "Processing…",
-    "freeError": "Could not complete your free order. Please try again."
+    "freeError": "Could not complete your free order. Please try again.",
+    "couponLabel": "Discount code",
+    "couponPlaceholder": "Enter code",
+    "couponApply": "Apply",
+    "couponApplying": "Applying…",
+    "couponApplied": "applied",
+    "couponRemove": "Remove code",
+    "couponInvalid": "This code isn't valid.",
+    "discount": "Discount"
   }
 }

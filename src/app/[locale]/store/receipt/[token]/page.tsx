@@ -167,6 +167,27 @@ export default async function ReceiptPage({
                 </td>
               </tr>
             ))}
+            {order.discountCents > 0 && (
+              <>
+                <tr>
+                  <td className="pt-3 text-text-secondary" colSpan={2}>
+                    {l === "fr" ? "Sous-total" : "Subtotal"}
+                  </td>
+                  <td className="pt-3 text-right">
+                    {formatPrice(order.subtotalCents, order.currency)}
+                  </td>
+                </tr>
+                <tr>
+                  <td className="py-1 text-green-500" colSpan={2}>
+                    {l === "fr" ? "Réduction" : "Discount"}
+                    {order.couponCode ? ` (${order.couponCode})` : ""}
+                  </td>
+                  <td className="py-1 text-right text-green-500">
+                    −{formatPrice(order.discountCents, order.currency)}
+                  </td>
+                </tr>
+              </>
+            )}
             <tr>
               <td className="pt-3 font-bold" colSpan={2}>
                 {l === "fr" ? "Total payé" : "Total paid"}

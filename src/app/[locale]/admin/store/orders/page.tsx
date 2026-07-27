@@ -47,6 +47,9 @@ interface Order {
   paymentMethod: string;
   paymentReference: string | null;
   currency: string;
+  subtotalCents: number;
+  discountCents: number;
+  couponCode: string | null;
   totalCents: number;
   paypalOrderId: string | null;
   paypalCaptureId: string | null;
@@ -496,6 +499,26 @@ export default function AdminOrdersPage() {
                               </td>
                             </tr>
                           ))}
+                          {o.discountCents > 0 && (
+                            <>
+                              <tr className="border-t border-glass-border">
+                                <td className="px-3 py-2 text-text-secondary" colSpan={2}>
+                                  Subtotal
+                                </td>
+                                <td className="px-3 py-2 text-right">
+                                  {formatPrice(o.subtotalCents, o.currency)}
+                                </td>
+                              </tr>
+                              <tr>
+                                <td className="px-3 py-1 text-green-400" colSpan={2}>
+                                  Discount{o.couponCode ? ` (${o.couponCode})` : ""}
+                                </td>
+                                <td className="px-3 py-1 text-right text-green-400">
+                                  −{formatPrice(o.discountCents, o.currency)}
+                                </td>
+                              </tr>
+                            </>
+                          )}
                           <tr className="border-t border-glass-border">
                             <td className="px-3 py-2 font-semibold" colSpan={2}>
                               Total

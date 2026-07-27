@@ -8,6 +8,7 @@
 import { randomBytes } from "crypto";
 import type { Prisma, PrismaClient } from "@prisma/client";
 import { prisma } from "./prisma";
+import { applyCoupon } from "./coupon";
 
 export const STORE_CURRENCY = "USD";
 export const DOWNLOAD_EXPIRY_DAYS = 7;
@@ -32,6 +33,48 @@ export interface PricedCart {
 export interface CartInput {
   bookId: string;
   quantity: number;
+}
+
+export interface PricedOrder {
+  items: PricedItem[];
+  subtotalCents: number;
+  discountCents: number;
+  totalCents: number;
+  currency: string;
+  couponId: string | null;
+  couponCode: string | null;
+}
+
+/**
+ * Price a cart and optionally apply a coupon — the single source of truth used
+ * by every checkout route. Throws (with a buyer-safe message) on an invalid
+ * cart or coupon.
+ */
+export async function priceOrder(
+  items: CartInput[],
+  couponCode?: string | null
+): Promise<PricedOrder> {
+  const priced = await priceCart(items);
+  let discountCents = 0;
+  let couponId: string | null = null;
+  let appliedCode: string | null = null;
+
+  if (couponCode && couponCode.trim()) {
+    const applied = await applyCoupon(couponCode, priced.subtotalCents, priced.currency);
+    discountCents = applied.discountCents;
+    couponId = applied.couponId;
+    appliedCode = applied.code;
+  }
+
+  return {
+    items: priced.items,
+    subtotalCents: priced.subtotalCents,
+    discountCents,
+    totalCents: Math.max(0, priced.subtotalCents - discountCents),
+    currency: priced.currency,
+    couponId,
+    couponCode: appliedCode,
+  };
 }
 
 /**

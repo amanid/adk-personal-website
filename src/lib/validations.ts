@@ -269,7 +269,33 @@ export const mobileOrderSchema = z.object({
   items: cartItemsSchema,
 });
 
+export const couponSchema = z
+  .object({
+    code: z.string().min(2, "Code must be at least 2 characters").max(40),
+    type: z.enum(["PERCENT", "FIXED"]),
+    percentOff: z.number().int().min(1).max(100).optional(),
+    amountOff: z.number().min(0).optional(), // major units (converted to cents by currency)
+    currency: z.string().length(3).optional().or(z.literal("")),
+    minSubtotal: z.number().min(0).optional(), // major units
+    maxRedemptions: z.number().int().min(1).nullable().optional(),
+    active: z.boolean().optional(),
+    expiresAt: z.string().nullable().optional(),
+  })
+  .refine((d) => d.type !== "PERCENT" || (d.percentOff != null && d.percentOff >= 1), {
+    message: "Percentage coupons need a percent (1-100)",
+    path: ["percentOff"],
+  })
+  .refine((d) => d.type !== "FIXED" || (d.amountOff != null && d.amountOff > 0), {
+    message: "Fixed coupons need an amount",
+    path: ["amountOff"],
+  })
+  .refine((d) => d.type !== "FIXED" || (!!d.currency && d.currency.length === 3), {
+    message: "Fixed coupons need a currency",
+    path: ["currency"],
+  });
+
 export type BookInput = z.infer<typeof bookSchema>;
 export type CheckoutInput = z.infer<typeof checkoutSchema>;
 export type MobileOrderInput = z.infer<typeof mobileOrderSchema>;
 export type FreeOrderInput = z.infer<typeof freeOrderSchema>;
+export type CouponInput = z.infer<typeof couponSchema>;

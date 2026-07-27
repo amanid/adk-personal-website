@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
 import { Link, useRouter } from "@/i18n/routing";
@@ -10,7 +10,7 @@ import { isPaypalCurrency } from "@/lib/currency";
 import QuantitySelector from "@/components/store/QuantitySelector";
 import PayPalCheckout from "@/components/store/PayPalCheckout";
 import MobileMoneyCheckout from "@/components/store/MobileMoneyCheckout";
-import { Trash2, ShoppingCart, BookOpen, Lock, ShieldCheck, RefreshCw, Mail, CreditCard, Smartphone, Check, Gift, Download } from "lucide-react";
+import { Trash2, ShoppingCart, BookOpen, Lock, ShieldCheck, RefreshCw, Mail, CreditCard, Smartphone, Check, Gift, Download, Tag, X } from "lucide-react";
 
 export default function CartPage() {
   const { items, subtotalCents, currency, setQuantity, removeItem, clear, hydrated } = useCart();
@@ -23,9 +23,69 @@ export default function CartPage() {
   const [freePlacing, setFreePlacing] = useState(false);
   const [freeError, setFreeError] = useState<string | null>(null);
 
+  // Coupon state
+  const [couponInput, setCouponInput] = useState("");
+  const [appliedCode, setAppliedCode] = useState<string | null>(null);
+  const [discountCents, setDiscountCents] = useState(0);
+  const [couponLoading, setCouponLoading] = useState(false);
+  const [couponError, setCouponError] = useState<string | null>(null);
+
   const emailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
   const paypalAvailable = isPaypalCurrency(currency);
-  const isFree = subtotalCents === 0;
+  // Effective total after any coupon; a coupon may bring a paid cart down to free.
+  const totalCents = Math.max(0, subtotalCents - discountCents);
+  const isFree = totalCents === 0;
+
+  const applyCouponCode = async () => {
+    const code = couponInput.trim();
+    if (!code) return;
+    setCouponError(null);
+    setCouponLoading(true);
+    try {
+      const res = await fetch("/api/store/validate-coupon", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          code,
+          items: items.map((i) => ({ bookId: i.bookId, quantity: i.quantity })),
+        }),
+      });
+      const data = await res.json().catch(() => null);
+      if (!res.ok || !data?.valid) {
+        setAppliedCode(null);
+        setDiscountCents(0);
+        setCouponError(data?.error || t("couponInvalid"));
+        return;
+      }
+      setAppliedCode(data.code);
+      setDiscountCents(data.discountCents);
+      setCouponInput(data.code);
+    } catch {
+      setCouponError(t("couponInvalid"));
+    } finally {
+      setCouponLoading(false);
+    }
+  };
+
+  const removeCoupon = () => {
+    setAppliedCode(null);
+    setDiscountCents(0);
+    setCouponInput("");
+    setCouponError(null);
+  };
+
+  // A stale coupon (from before a cart edit) would show a wrong discount; drop it
+  // whenever the cart contents change. The server is authoritative at checkout.
+  const cartSig = items.map((i) => `${i.bookId}:${i.quantity}`).join(",");
+  useEffect(() => {
+    setAppliedCode((code) => {
+      if (code) {
+        setDiscountCents(0);
+        setCouponError(null);
+      }
+      return null;
+    });
+  }, [cartSig]);
 
   const placeFreeOrder = async () => {
     setTouched(true);
@@ -39,6 +99,7 @@ export default function CartPage() {
         body: JSON.stringify({
           email,
           name,
+          couponCode: appliedCode || undefined,
           items: items.map((i) => ({ bookId: i.bookId, quantity: i.quantity })),
         }),
       });
@@ -286,6 +347,7 @@ export default function CartPage() {
                   email={email}
                   name={name}
                   currency={currency}
+                  couponCode={appliedCode}
                   disabled={!emailValid}
                   onValidate={() => {
                     setTouched(true);
@@ -296,8 +358,9 @@ export default function CartPage() {
                 <MobileMoneyCheckout
                   email={email}
                   name={name}
-                  amountCents={subtotalCents}
+                  amountCents={totalCents}
                   currency={currency}
+                  couponCode={appliedCode}
                   onValidate={() => {
                     setTouched(true);
                     return emailValid;
@@ -329,13 +392,72 @@ export default function CartPage() {
                 </div>
               ))}
             </div>
+            {/* Coupon — only meaningful for a paid cart */}
+            {subtotalCents > 0 && (
+              <div className="mt-4 pt-3 border-t border-glass-border">
+                {appliedCode ? (
+                  <div className="flex items-center justify-between gap-2 rounded-lg bg-green-500/10 border border-green-500/30 px-3 py-2">
+                    <span className="flex items-center gap-1.5 text-sm text-green-400 min-w-0">
+                      <Tag className="w-3.5 h-3.5 shrink-0" />
+                      <span className="font-medium truncate">{appliedCode}</span>
+                      <span className="text-text-secondary">{t("couponApplied")}</span>
+                    </span>
+                    <button
+                      type="button"
+                      onClick={removeCoupon}
+                      className="text-text-muted hover:text-red-400 shrink-0"
+                      aria-label={t("couponRemove")}
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  </div>
+                ) : (
+                  <>
+                    <label htmlFor="coupon" className="block text-xs text-text-secondary mb-1">
+                      {t("couponLabel")}
+                    </label>
+                    <div className="flex gap-2">
+                      <input
+                        id="coupon"
+                        value={couponInput}
+                        onChange={(e) => setCouponInput(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") {
+                            e.preventDefault();
+                            applyCouponCode();
+                          }
+                        }}
+                        placeholder={t("couponPlaceholder")}
+                        className="flex-1 min-w-0 px-3 py-2 rounded-lg bg-navy/50 border border-glass-border focus:border-gold/50 outline-none text-sm uppercase"
+                      />
+                      <button
+                        type="button"
+                        onClick={applyCouponCode}
+                        disabled={couponLoading || !couponInput.trim()}
+                        className="px-3 py-2 rounded-lg border border-gold/50 text-gold text-sm font-medium hover:bg-gold/10 transition-all disabled:opacity-50 shrink-0"
+                      >
+                        {couponLoading ? t("couponApplying") : t("couponApply")}
+                      </button>
+                    </div>
+                  </>
+                )}
+                {couponError && <p className="text-xs text-red-400 mt-2">{couponError}</p>}
+              </div>
+            )}
+
             <div className="flex justify-between text-sm mt-4 pt-3 border-t border-glass-border">
               <span className="text-text-secondary">{t("subtotal")}</span>
-              <span>{isFree ? t("free") : formatPrice(subtotalCents, currency)}</span>
+              <span>{subtotalCents === 0 ? t("free") : formatPrice(subtotalCents, currency)}</span>
             </div>
+            {discountCents > 0 && (
+              <div className="flex justify-between text-sm mt-1 text-green-400">
+                <span>{t("discount")}</span>
+                <span>−{formatPrice(discountCents, currency)}</span>
+              </div>
+            )}
             <div className="flex justify-between font-bold text-lg pt-2 mt-1">
               <span>{t("total")}</span>
-              <span className="text-gold">{isFree ? t("free") : formatPrice(subtotalCents, currency)}</span>
+              <span className="text-gold">{isFree ? t("free") : formatPrice(totalCents, currency)}</span>
             </div>
           </div>
 

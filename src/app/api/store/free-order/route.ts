@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { freeOrderSchema } from "@/lib/validations";
-import { priceCart, generateOrderNumber, secureToken } from "@/lib/store";
+import { priceOrder, generateOrderNumber, secureToken } from "@/lib/store";
 import { fulfilPaidOrder } from "@/lib/order-fulfillment";
 import { rateLimit } from "@/lib/rate-limit";
 import { checkOrigin } from "@/lib/origin-check";
@@ -36,10 +36,11 @@ export async function POST(request: Request) {
     }
 
     const { email, name, items } = validation.data;
+    const couponCode = typeof body?.couponCode === "string" ? body.couponCode : null;
 
     let priced;
     try {
-      priced = await priceCart(items);
+      priced = await priceOrder(items, couponCode);
     } catch (e) {
       return NextResponse.json(
         { error: e instanceof Error ? e.message : "Unable to price cart" },
@@ -47,7 +48,7 @@ export async function POST(request: Request) {
       );
     }
 
-    // Only genuinely-free carts may use this path.
+    // Only genuinely-free carts (naturally or via a coupon) may use this path.
     if (priced.totalCents !== 0) {
       return NextResponse.json(
         { error: "This order requires payment." },
@@ -79,7 +80,10 @@ export async function POST(request: Request) {
         status: "PENDING",
         paymentMethod: "FREE",
         currency: priced.currency,
-        subtotalCents: 0,
+        subtotalCents: priced.subtotalCents,
+        discountCents: priced.discountCents,
+        couponId: priced.couponId,
+        couponCode: priced.couponCode,
         totalCents: 0,
         receiptToken: secureToken(),
         ipAddress: ip,

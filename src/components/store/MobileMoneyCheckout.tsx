@@ -13,6 +13,7 @@ interface MobileMoneyCheckoutProps {
   name: string;
   amountCents: number;
   currency: string;
+  couponCode?: string | null;
   onValidate?: () => boolean;
 }
 
@@ -21,6 +22,7 @@ export default function MobileMoneyCheckout({
   name,
   amountCents,
   currency,
+  couponCode,
   onValidate,
 }: MobileMoneyCheckoutProps) {
   const t = useTranslations("store");
@@ -55,6 +57,7 @@ export default function MobileMoneyCheckout({
           name,
           provider,
           reference,
+          couponCode: couponCode || undefined,
           items: items.map((i) => ({ bookId: i.bookId, quantity: i.quantity })),
         }),
       });
