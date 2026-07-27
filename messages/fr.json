@@ -557,6 +557,9 @@
     "couponApplied": "appliqué",
     "couponRemove": "Retirer le code",
     "couponInvalid": "Ce code n'est pas valide.",
-    "discount": "Réduction"
+    "discount": "Réduction",
+    "addedToCart": "Ajouté à votre panier",
+    "viewCartCheckout": "Voir le panier et payer",
+    "cartCurrencySwitched": "Nouveau panier en {currency} — une commande ne peut pas mélanger les devises."
   }
 }

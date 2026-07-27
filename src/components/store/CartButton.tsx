@@ -2,17 +2,20 @@
 
 import { ShoppingCart } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { Link } from "@/i18n/routing";
 import { useCart } from "@/lib/cart-context";
+import { useStoreUI } from "./StoreUI";
 
 export default function CartButton({ compact = false }: { compact?: boolean }) {
   const { count, hydrated } = useCart();
+  const { openCart } = useStoreUI();
   const t = useTranslations("store");
 
   return (
-    <Link
-      href="/store/cart"
+    <button
+      type="button"
+      onClick={openCart}
       aria-label={t("cartAria", { count: hydrated ? count : 0 })}
+      aria-haspopup="dialog"
       className="relative flex items-center gap-1 px-3 py-1.5 text-sm text-text-secondary hover:text-gold rounded-lg hover:bg-white/5 transition-all"
     >
       <ShoppingCart className="w-4 h-4" />
@@ -22,6 +25,6 @@ export default function CartButton({ compact = false }: { compact?: boolean }) {
           {count > 99 ? "99+" : count}
         </span>
       )}
-    </Link>
+    </button>
   );
 }

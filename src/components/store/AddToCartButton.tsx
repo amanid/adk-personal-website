@@ -5,6 +5,7 @@ import { ShoppingCart, Check } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/routing";
 import { useCart, type CartItem } from "@/lib/cart-context";
+import { useStoreUI } from "./StoreUI";
 import QuantitySelector from "./QuantitySelector";
 
 interface AddToCartButtonProps {
@@ -20,16 +21,27 @@ export default function AddToCartButton({
   buyNow = false,
   className = "",
 }: AddToCartButtonProps) {
-  const { addItem } = useCart();
+  const { addItem, items, currency } = useCart();
+  const { openCart, toast } = useStoreUI();
   const router = useRouter();
   const t = useTranslations("store");
   const [qty, setQty] = useState(1);
   const [added, setAdded] = useState(false);
 
+  // Adding a book in a different currency starts a fresh cart (a single order
+  // can't mix currencies). Warn instead of silently discarding the old cart.
+  const wouldSwitchCurrency = items.length > 0 && currency !== book.currency;
+
   const handleAdd = () => {
     addItem(book, qty);
     setAdded(true);
     setTimeout(() => setAdded(false), 1500);
+    if (wouldSwitchCurrency) {
+      toast(t("cartCurrencySwitched", { currency: book.currency }), "info");
+    } else {
+      toast(t("addedToCart"));
+    }
+    openCart();
   };
 
   const handleBuyNow = () => {

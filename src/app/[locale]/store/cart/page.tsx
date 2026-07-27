@@ -20,8 +20,31 @@ export default function CartPage() {
   const [name, setName] = useState("");
   const [touched, setTouched] = useState(false);
   const [method, setMethod] = useState<"paypal" | "mobile">("mobile");
+  const [methodTouched, setMethodTouched] = useState(false);
   const [freePlacing, setFreePlacing] = useState(false);
   const [freeError, setFreeError] = useState<string | null>(null);
+
+  // Remember buyer details across visits so returning buyers don't retype.
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem("adk_bookstore_buyer");
+      if (raw) {
+        const b = JSON.parse(raw);
+        if (typeof b?.email === "string") setEmail(b.email);
+        if (typeof b?.name === "string") setName(b.name);
+      }
+    } catch {
+      // ignore
+    }
+  }, []);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem("adk_bookstore_buyer", JSON.stringify({ email, name }));
+    } catch {
+      // ignore
+    }
+  }, [email, name]);
 
   // Coupon state
   const [couponInput, setCouponInput] = useState("");
@@ -35,6 +58,12 @@ export default function CartPage() {
   // Effective total after any coupon; a coupon may bring a paid cart down to free.
   const totalCents = Math.max(0, subtotalCents - discountCents);
   const isFree = totalCents === 0;
+
+  // Default to the instant method (PayPal) when the cart's currency supports it,
+  // unless the buyer has explicitly picked a method.
+  useEffect(() => {
+    if (!methodTouched) setMethod(paypalAvailable ? "paypal" : "mobile");
+  }, [paypalAvailable, methodTouched]);
 
   const applyCouponCode = async () => {
     const code = couponInput.trim();
@@ -307,7 +336,10 @@ export default function CartPage() {
                   <button
                     key={opt.id}
                     type="button"
-                    onClick={() => setMethod(opt.id)}
+                    onClick={() => {
+                      setMethod(opt.id);
+                      setMethodTouched(true);
+                    }}
                     aria-pressed={active}
                     className={`h-full flex items-start gap-3 p-3 rounded-xl border text-left transition-all ${
                       active

@@ -557,6 +557,9 @@
     "couponApplied": "applied",
     "couponRemove": "Remove code",
     "couponInvalid": "This code isn't valid.",
-    "discount": "Discount"
+    "discount": "Discount",
+    "addedToCart": "Added to your cart",
+    "viewCartCheckout": "View cart & checkout",
+    "cartCurrencySwitched": "Started a new cart in {currency} — a single order can't mix currencies."
   }
 }
