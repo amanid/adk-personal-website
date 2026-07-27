@@ -3,7 +3,8 @@ import { prisma } from "@/lib/prisma";
 import { buildPageMetadata, normalizeLocale } from "@/lib/seo";
 import { type StoreBook } from "@/components/store/BookCard";
 import StoreBrowser from "@/components/store/StoreBrowser";
-import { BookOpen } from "lucide-react";
+import { Link } from "@/i18n/routing";
+import { BookOpen, Search } from "lucide-react";
 
 export async function generateMetadata({
   params,
@@ -72,6 +73,13 @@ export default async function StorePage({
             ? "Parcourez les ouvrages, choisissez vos quantités et téléchargez en toute sécurité après paiement."
             : "Browse the books, choose your quantities, and download securely after payment."}
         </p>
+        <Link
+          href="/store/orders"
+          className="inline-flex items-center gap-1.5 mt-4 text-sm text-text-secondary hover:text-gold transition-colors"
+        >
+          <Search className="w-4 h-4" />
+          {l === "fr" ? "Retrouver mes commandes" : "Find my orders"}
+        </Link>
       </header>
 
       {storeBooks.length === 0 ? (

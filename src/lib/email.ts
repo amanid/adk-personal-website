@@ -416,3 +416,57 @@ export function buildConfirmationEmail(confirmUrl: string): string {
 </body>
 </html>`;
 }
+
+interface OrderLookupItem {
+  orderNumber: string;
+  status: string;
+  createdAt: Date;
+  currency: string;
+  totalCents: number;
+  receiptUrl: string;
+}
+
+/** Email a buyer the links to their own orders (self-serve recovery). */
+export async function sendOrderLookupEmail(
+  to: string,
+  orders: OrderLookupItem[]
+): Promise<void> {
+  const rows = orders
+    .map(
+      (o) => `
+      <tr>
+        <td style="padding:12px 0;border-bottom:1px solid rgba(255,255,255,0.08);">
+          <div style="font-size:14px;color:#f1f5f9;font-weight:600;">Order ${o.orderNumber}</div>
+          <div style="font-size:12px;color:#8892a4;margin-top:2px;">${o.createdAt.toUTCString()} &middot; ${o.status} &middot; ${fmtMoney(o.totalCents, o.currency)}</div>
+          <a href="${o.receiptUrl}" style="display:inline-block;margin-top:8px;font-size:13px;color:#d4a843;text-decoration:underline;">View receipt &amp; downloads</a>
+        </td>
+      </tr>`
+    )
+    .join("");
+
+  const html = `
+<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"></head>
+<body style="margin:0;padding:0;background-color:#0a0f1e;font-family:Arial,Helvetica,sans-serif;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#0a0f1e;">
+    <tr><td align="center" style="padding:40px 20px;">
+      <table role="presentation" width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;">
+        <tr><td style="text-align:center;padding-bottom:24px;">
+          <h1 style="margin:0;font-size:24px;color:#d4a843;font-weight:bold;">KONAN Amani Dieudonn&eacute;</h1>
+          <p style="margin:4px 0 0;font-size:13px;color:#8892a4;">Bookstore &middot; Your orders</p>
+        </td></tr>
+        <tr><td style="background-color:#111827;border:1px solid rgba(212,168,67,0.2);border-radius:12px;padding:32px;">
+          <h2 style="margin:0 0 8px;font-size:20px;color:#f1f5f9;">Your orders</h2>
+          <p style="margin:0 0 16px;font-size:14px;color:#8892a4;line-height:1.6;">Here are the orders linked to this email address. Use the links below to view each receipt and re-download your books.</p>
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0">${rows}</table>
+          <p style="margin:20px 0 0;font-size:12px;color:#4b5563;">If you didn&rsquo;t request this, you can safely ignore this email — these links only work for your own orders.</p>
+        </td></tr>
+      </table>
+    </td></tr>
+  </table>
+</body>
+</html>`;
+
+  await sendEmail(to, "Your bookstore orders & downloads", html);
+}

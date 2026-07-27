@@ -179,6 +179,13 @@ function CartDrawer({ open, onClose }: { open: boolean; onClose: () => void }) {
                 >
                   {t("backToStore")}
                 </button>
+                <Link
+                  href="/store/orders"
+                  onClick={onClose}
+                  className="mt-4 text-sm text-text-secondary hover:text-gold transition-colors"
+                >
+                  {t("findMyOrders")}
+                </Link>
               </div>
             ) : (
               <>

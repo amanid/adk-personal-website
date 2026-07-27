@@ -571,6 +571,15 @@
     "filterAll": "All",
     "clearFilters": "Clear filters",
     "resultsCount": "{count, plural, =0 {No books} one {# book} other {# books}}",
-    "noResults": "No books match your search. Try clearing the filters."
+    "noResults": "No books match your search. Try clearing the filters.",
+    "findMyOrders": "Find my orders",
+    "lookupTitle": "Find my orders",
+    "lookupDesc": "Enter your email and we'll send you links to your receipts and downloads.",
+    "lookupSubmit": "Email me my orders",
+    "lookupSending": "Sending…",
+    "lookupSentTitle": "Check your inbox",
+    "lookupSentDesc": "If any orders are linked to that email, we've just sent you the links. They can take a minute to arrive.",
+    "lookupTryAnother": "Use a different email",
+    "lookupPrivacy": "For your security, order links are sent only by email — never shown on screen."
   }
 }

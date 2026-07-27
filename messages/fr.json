@@ -571,6 +571,15 @@
     "filterAll": "Tous",
     "clearFilters": "Effacer les filtres",
     "resultsCount": "{count, plural, =0 {Aucun livre} one {# livre} other {# livres}}",
-    "noResults": "Aucun livre ne correspond à votre recherche. Essayez d'effacer les filtres."
+    "noResults": "Aucun livre ne correspond à votre recherche. Essayez d'effacer les filtres.",
+    "findMyOrders": "Retrouver mes commandes",
+    "lookupTitle": "Retrouver mes commandes",
+    "lookupDesc": "Saisissez votre e-mail et nous vous enverrons les liens vers vos reçus et téléchargements.",
+    "lookupSubmit": "M'envoyer mes commandes",
+    "lookupSending": "Envoi…",
+    "lookupSentTitle": "Consultez votre boîte de réception",
+    "lookupSentDesc": "Si des commandes sont liées à cet e-mail, nous venons de vous envoyer les liens. Ils peuvent mettre une minute à arriver.",
+    "lookupTryAnother": "Utiliser un autre e-mail",
+    "lookupPrivacy": "Pour votre sécurité, les liens de commande sont envoyés uniquement par e-mail — jamais affichés à l'écran."
   }
 }
