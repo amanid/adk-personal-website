@@ -15,6 +15,10 @@ import {
   Sparkles,
   Archive,
   ArchiveRestore,
+  AlertTriangle,
+  X,
+  CheckSquare,
+  Square,
 } from "lucide-react";
 import FileUpload from "@/components/admin/FileUpload";
 import BookFileUpload, { type BookUploadResult } from "@/components/admin/BookFileUpload";
@@ -102,6 +106,16 @@ export default function AdminStorePage() {
   const bulkInputRef = useRef<HTMLInputElement>(null);
   const [aiBusy, setAiBusy] = useState(false);
   const [aiError, setAiError] = useState<string | null>(null);
+  const [selected, setSelected] = useState<Set<string>>(new Set());
+  const [confirmDialog, setConfirmDialog] = useState<null | {
+    title: string;
+    message: string;
+    confirmLabel: string;
+    requireText?: string;
+    onConfirm: () => void | Promise<void>;
+  }>(null);
+  const [confirmText, setConfirmText] = useState("");
+  const [confirmBusy, setConfirmBusy] = useState(false);
   const editorPanelRef = useRef<HTMLDivElement>(null);
   const editorTriggerRef = useRef<HTMLElement | null>(null);
 
@@ -289,6 +303,8 @@ export default function AdminStorePage() {
           next.language = m.language;
         if (!prev.keyInsights.trim() && m.keyInsights?.length)
           next.keyInsights = m.keyInsights.join("\n");
+        if (!prev.category.trim() && m.category) next.category = m.category;
+        if (!prev.tags.trim() && m.tags?.length) next.tags = m.tags.join(", ");
       }
       if (result.coverImageId && !prev.coverImageId) {
         next.coverImageId = result.coverImageId;
@@ -332,6 +348,9 @@ export default function AdminStorePage() {
         keyInsights: (data.keyInsights || []).length
           ? data.keyInsights.join("\n")
           : prev.keyInsights,
+        category: !prev.category.trim() && data.category ? data.category : prev.category,
+        tags:
+          !prev.tags.trim() && (data.tags || []).length ? data.tags.join(", ") : prev.tags,
       }));
     } catch {
       setAiError("AI drafting failed");
@@ -391,6 +410,90 @@ export default function AdminStorePage() {
       fetchBooks();
     } catch {
       alert("Delete failed");
+    }
+  };
+
+  const toggleSelect = (id: string) =>
+    setSelected((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+
+  const allSelected = books.length > 0 && selected.size === books.length;
+  const toggleSelectAll = () =>
+    setSelected(allSelected ? new Set() : new Set(books.map((b) => b.id)));
+
+  // Delete via the bulk endpoint; a 409 (sold books) escalates to a second,
+  // explicit force confirmation instead of silently failing.
+  const runBulkDelete = async (
+    payload: { ids?: string[]; all?: boolean },
+    force = false
+  ): Promise<void> => {
+    const res = await fetch("/api/admin/books/bulk", {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ ...payload, force }),
+    });
+    if (res.status === 409) {
+      const data = await res.json().catch(() => ({}));
+      setConfirmDialog({
+        title: "Some books have orders",
+        message: `${data.error || "Some selected books appear in orders."}\n\nDelete them anyway? This also removes those order lines and buyers' download links.`,
+        confirmLabel: "Delete anyway",
+        requireText: "DELETE",
+        onConfirm: () => runBulkDelete(payload, true),
+      });
+      return;
+    }
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({}));
+      alert(data.error || "Delete failed");
+      return;
+    }
+    setSelected(new Set());
+    fetchBooks();
+  };
+
+  const confirmDeleteSelected = () => {
+    if (selected.size === 0) return;
+    const n = selected.size;
+    setConfirmDialog({
+      title: `Delete ${n} selected book${n === 1 ? "" : "s"}`,
+      message: `Permanently delete the ${n} selected book${
+        n === 1 ? "" : "s"
+      }, including their files and covers? This cannot be undone.`,
+      confirmLabel: "Delete",
+      onConfirm: () => runBulkDelete({ ids: [...selected] }),
+    });
+  };
+
+  const confirmDeleteAll = () => {
+    if (books.length === 0) return;
+    setConfirmDialog({
+      title: "Delete ALL books",
+      message: `This permanently deletes all ${books.length} book${
+        books.length === 1 ? "" : "s"
+      }, along with their files and covers. This cannot be undone. Type DELETE to confirm.`,
+      confirmLabel: "Delete everything",
+      requireText: "DELETE",
+      onConfirm: () => runBulkDelete({ all: true }),
+    });
+  };
+
+  const runConfirm = async () => {
+    if (!confirmDialog) return;
+    const dialog = confirmDialog;
+    setConfirmBusy(true);
+    // Close the current dialog first so onConfirm can open a follow-up
+    // (e.g. the force-delete escalation) without it being wiped.
+    setConfirmDialog(null);
+    setConfirmText("");
+    try {
+      await dialog.onConfirm();
+    } finally {
+      setConfirmBusy(false);
     }
   };
 
@@ -488,9 +591,62 @@ export default function AdminStorePage() {
           No books yet. Create your first one.
         </div>
       ) : (
-        <div className="space-y-3">
+        <>
+          {/* Selection / bulk-delete toolbar */}
+          <div className="flex items-center flex-wrap gap-3 mb-3 text-sm">
+            <button
+              onClick={toggleSelectAll}
+              className="flex items-center gap-2 text-text-secondary hover:text-gold transition-colors"
+            >
+              {allSelected ? (
+                <CheckSquare className="w-4 h-4 text-gold" />
+              ) : (
+                <Square className="w-4 h-4" />
+              )}
+              {allSelected ? "Deselect all" : "Select all"}
+            </button>
+            {selected.size > 0 && (
+              <>
+                <span className="text-text-muted">·</span>
+                <span className="text-text-secondary">{selected.size} selected</span>
+                <button
+                  onClick={confirmDeleteSelected}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-red-500/15 text-red-400 hover:bg-red-500/25 transition-all font-medium"
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                  Delete selected
+                </button>
+              </>
+            )}
+            <div className="flex-1" />
+            <button
+              onClick={confirmDeleteAll}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-red-500/40 text-red-400 hover:bg-red-500/10 transition-all font-medium"
+            >
+              <AlertTriangle className="w-3.5 h-3.5" />
+              Delete all
+            </button>
+          </div>
+          <div className="space-y-3">
           {books.map((b) => (
-            <div key={b.id} className="glass rounded-xl p-4 flex gap-4 items-center">
+            <div
+              key={b.id}
+              className={`glass rounded-xl p-4 flex gap-4 items-center transition-colors ${
+                selected.has(b.id) ? "ring-1 ring-gold/50 bg-gold/5" : ""
+              }`}
+            >
+              <button
+                onClick={() => toggleSelect(b.id)}
+                className="shrink-0 text-text-secondary hover:text-gold transition-colors"
+                aria-label={selected.has(b.id) ? "Deselect book" : "Select book"}
+                aria-pressed={selected.has(b.id)}
+              >
+                {selected.has(b.id) ? (
+                  <CheckSquare className="w-5 h-5 text-gold" />
+                ) : (
+                  <Square className="w-5 h-5" />
+                )}
+              </button>
               <div className="w-12 h-16 shrink-0 rounded bg-navy/50 overflow-hidden flex items-center justify-center">
                 {b.coverImageId ? (
                   // eslint-disable-next-line @next/next/no-img-element
@@ -584,6 +740,75 @@ export default function AdminStorePage() {
               </div>
             </div>
           ))}
+          </div>
+        </>
+      )}
+
+      {/* Confirmation modal (bulk delete) */}
+      {confirmDialog && (
+        <div
+          className="fixed inset-0 z-[60] bg-black/60 flex items-center justify-center p-4"
+          onClick={() => !confirmBusy && setConfirmDialog(null)}
+        >
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="confirm-title"
+            onClick={(e) => e.stopPropagation()}
+            className="glass-strong rounded-2xl w-full max-w-md p-6"
+          >
+            <div className="flex items-start gap-3 mb-4">
+              <span className="w-10 h-10 rounded-lg bg-red-500/15 text-red-400 flex items-center justify-center shrink-0">
+                <AlertTriangle className="w-5 h-5" />
+              </span>
+              <div className="min-w-0">
+                <h2 id="confirm-title" className="text-lg font-semibold">
+                  {confirmDialog.title}
+                </h2>
+                <p className="text-sm text-text-secondary mt-1 whitespace-pre-line">
+                  {confirmDialog.message}
+                </p>
+              </div>
+              <button
+                onClick={() => !confirmBusy && setConfirmDialog(null)}
+                className="ml-auto p-1 text-text-secondary hover:text-text-primary"
+                aria-label="Cancel"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {confirmDialog.requireText && (
+              <input
+                autoFocus
+                value={confirmText}
+                onChange={(e) => setConfirmText(e.target.value)}
+                placeholder={`Type ${confirmDialog.requireText} to confirm`}
+                className={`${INPUT_CLASS} mb-4`}
+              />
+            )}
+
+            <div className="flex gap-3 justify-end">
+              <button
+                onClick={() => setConfirmDialog(null)}
+                disabled={confirmBusy}
+                className="px-4 py-2 rounded-lg border border-glass-border text-text-secondary hover:text-text-primary transition-all disabled:opacity-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={runConfirm}
+                disabled={
+                  confirmBusy ||
+                  (!!confirmDialog.requireText && confirmText.trim() !== confirmDialog.requireText)
+                }
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-red-500 text-white font-semibold hover:bg-red-600 transition-all disabled:opacity-50"
+              >
+                <Trash2 className="w-4 h-4" />
+                {confirmBusy ? "Deleting…" : confirmDialog.confirmLabel}
+              </button>
+            </div>
+          </div>
         </div>
       )}
 

@@ -9,6 +9,8 @@
 export interface BookEnrichment {
   description: string;
   keyInsights: string[];
+  category?: string;
+  tags?: string[];
 }
 
 interface EnrichInput {
@@ -32,26 +34,34 @@ export async function enrichBookMetadata(
   if (!apiKey) return null;
 
   const model = process.env.OPENAI_MODEL || "gpt-4o-mini";
-  const sample = input.sampleText.trim().slice(0, 12000);
+  const sample = input.sampleText.trim().slice(0, 18000);
   if (!sample && !input.existingDescription) return null;
 
   const system =
-    "You are a professional non-fiction book marketer. From the provided book " +
-    "excerpt and metadata, write compelling, accurate copy for an online store. " +
-    "Do not invent facts, prices, or claims not supported by the text. Respond " +
-    "ONLY with JSON.";
+    "You are an editor writing the catalog listing for a serious non-fiction " +
+    "book. Using ONLY the provided excerpt and metadata, describe what the book " +
+    "is actually about — its subject, the argument or story it develops, and what " +
+    "a reader will take away. Be specific and grounded in the text; never invent " +
+    "facts, endorsements, sales claims, or details not supported by the excerpt. " +
+    "If the excerpt is too thin to tell, write a careful, non-committal description " +
+    "rather than fabricating. Respond ONLY with JSON.";
 
   const user = [
     input.title ? `Title: ${input.title}` : "",
     input.author ? `Author: ${input.author}` : "",
-    input.existingDescription ? `Existing description: ${input.existingDescription}` : "",
+    input.existingDescription ? `Publisher description: ${input.existingDescription}` : "",
     "",
-    "Book excerpt (may be truncated):",
+    "Book excerpt (sampled from across the book, may be truncated):",
     sample || "(no excerpt available)",
     "",
     "Return JSON with exactly this shape:",
-    `{"description": "<2-4 sentence marketing description, plain text>", "keyInsights": ["<insight 1>", "<insight 2>", "..."]}`,
-    "Provide 3 to 6 concise key insights (each a single sentence, no leading bullet characters).",
+    `{"description": "<content description>", "keyInsights": ["<insight>", "..."], "category": "<one short category>", "tags": ["<tag>", "..."]}`,
+    "",
+    "Rules:",
+    "- description: 2 short paragraphs (about 4-7 sentences total) describing the book's actual content and themes and who it is for. Plain text, no markdown, no line breaks — use a single space between paragraphs.",
+    "- keyInsights: 4 to 7 concise, specific takeaways, each a single sentence, no leading bullet characters.",
+    "- category: one broad subject label (e.g. \"Economics\", \"Leadership\", \"Memoir\", \"Public Policy\"). Omit if unclear.",
+    "- tags: 3 to 6 short lowercase topic keywords. Omit if unclear.",
   ]
     .filter(Boolean)
     .join("\n");
@@ -94,6 +104,8 @@ export async function enrichBookMetadata(
     const parsed = JSON.parse(content) as {
       description?: unknown;
       keyInsights?: unknown;
+      category?: unknown;
+      tags?: unknown;
     };
 
     const description =
@@ -105,9 +117,20 @@ export async function enrichBookMetadata(
           .filter(Boolean)
           .slice(0, 8)
       : [];
+    const category =
+      typeof parsed.category === "string" && parsed.category.trim()
+        ? parsed.category.trim().slice(0, 60)
+        : undefined;
+    const tags = Array.isArray(parsed.tags)
+      ? parsed.tags
+          .filter((t): t is string => typeof t === "string")
+          .map((t) => t.replace(/^[-*•#\s]+/, "").trim().toLowerCase())
+          .filter(Boolean)
+          .slice(0, 6)
+      : undefined;
 
     if (!description && keyInsights.length === 0) return null;
-    return { description, keyInsights };
+    return { description, keyInsights, category, tags };
   } catch (err) {
     console.error("OpenAI enrichment error:", err);
     return null;

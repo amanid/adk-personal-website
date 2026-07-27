@@ -260,20 +260,53 @@ async function extractEpubText(buffer: Buffer, maxChars: number): Promise<string
 }
 
 /**
- * Extract a plain-text sample from a book file (reading order, capped length)
- * for downstream AI summarization. Returns "" if nothing could be extracted.
+ * Build a representative sample from a book's full text for AI summarization.
+ *
+ * Naively slicing the first N characters mostly captures front-matter — the
+ * title page, copyright, dedication and table of contents — which produces a
+ * generic, content-free description. Instead we skip the likely front-matter
+ * and blend a window from the start of the real content with a window from the
+ * middle, so the model actually sees what the book is about.
+ */
+function buildContentSample(full: string, maxChars: number): string {
+  const cleaned = full.replace(/[ \t ]+/g, " ").replace(/\n{3,}/g, "\n\n").trim();
+  if (cleaned.length <= maxChars) return cleaned;
+
+  // Skip the first slice (title page / copyright / TOC), capped so short books
+  // don't lose everything.
+  const skip = Math.min(2500, Math.floor(cleaned.length * 0.04));
+  const body = cleaned.slice(skip);
+
+  const half = Math.floor(maxChars / 2);
+  const start = body.slice(0, half);
+
+  // A window from ~40% in, to capture core content rather than only the opening.
+  const mid = Math.floor(body.length * 0.4);
+  const middle = body.slice(mid, mid + (maxChars - half));
+
+  return `${start}\n\n[…]\n\n${middle}`.slice(0, maxChars);
+}
+
+/**
+ * Extract a plain-text content sample from a book file for downstream AI
+ * summarization. Pulls a generous amount of raw text, then samples across the
+ * document (see buildContentSample). Returns "" if nothing could be extracted.
  */
 export async function extractBookText(
   buffer: Buffer,
   filename: string,
   mimeType: string,
-  maxChars = 16000
+  maxChars = 20000
 ): Promise<string> {
   try {
     const type = fileType(filename, mimeType);
-    if (type === "pdf") return await extractPdfText(buffer, maxChars);
-    if (type === "epub") return await extractEpubText(buffer, maxChars);
-    return "";
+    // Read well beyond the sample size so we have real content to sample from.
+    const rawCap = Math.max(maxChars * 4, 80000);
+    let raw = "";
+    if (type === "pdf") raw = await extractPdfText(buffer, rawCap);
+    else if (type === "epub") raw = await extractEpubText(buffer, rawCap);
+    else return "";
+    return buildContentSample(raw, maxChars);
   } catch (err) {
     console.error("Book text extraction failed:", err);
     return "";

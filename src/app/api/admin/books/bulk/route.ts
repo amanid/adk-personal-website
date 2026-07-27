@@ -88,6 +88,8 @@ export async function POST(request: Request) {
         });
 
         const meta = await parseBookFile(buffer, file.name, file.type);
+        let aiCategory: string | null = null;
+        let aiTags: string[] = [];
 
         // AI enrichment (skip very large files to protect memory).
         if (file.size <= MAX_PDF_PROCESS_BYTES) {
@@ -101,6 +103,8 @@ export async function POST(request: Request) {
             });
             if (ai?.description) meta.description = ai.description;
             if (ai?.keyInsights.length) meta.keyInsights = ai.keyInsights;
+            if (ai?.category) aiCategory = ai.category;
+            if (ai?.tags?.length) aiTags = ai.tags;
           } catch (err) {
             console.error(`AI enrichment (bulk) failed for ${file.name}:`, err);
           }
@@ -141,7 +145,8 @@ export async function POST(request: Request) {
             isbn: meta.isbn || null,
             language: meta.language ? sanitizeInput(meta.language) : undefined,
             pageCount: meta.pageCount ?? null,
-            tags: [],
+            category: aiCategory ? sanitizeInput(aiCategory) : null,
+            tags: aiTags.map(sanitizeInput),
             priceCents: DEFAULT_PRICE_CENTS,
             currency: "USD",
             coverImageId,
@@ -162,6 +167,73 @@ export async function POST(request: Request) {
     return NextResponse.json({ created, failed });
   } catch (error) {
     console.error("Bulk book import error:", error);
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+  }
+}
+
+/**
+ * Bulk-delete books. Body: { ids?: string[], all?: boolean, force?: boolean }.
+ * Books that appear in orders can't be removed without force (that would break
+ * buyers' receipts/downloads); without force we refuse and report the count so
+ * the admin can confirm. With force we also remove those order lines + grants.
+ */
+export async function DELETE(request: Request) {
+  try {
+    const session = await auth();
+    if (!session || (session.user as { role?: string })?.role !== "ADMIN") {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const body = await request.json().catch(() => ({}));
+    const all = body?.all === true;
+    const force = body?.force === true;
+    const ids = Array.isArray(body?.ids)
+      ? body.ids.filter((x: unknown): x is string => typeof x === "string")
+      : [];
+
+    if (!all && ids.length === 0) {
+      return NextResponse.json({ error: "No books selected" }, { status: 400 });
+    }
+
+    const books = await prisma.book.findMany({
+      where: all ? {} : { id: { in: ids } },
+      select: { id: true, fileId: true, coverImageId: true },
+    });
+    if (books.length === 0) {
+      return NextResponse.json({ deleted: 0 });
+    }
+
+    const bookIds = books.map((b) => b.id);
+    const sold = await prisma.orderItem.count({ where: { bookId: { in: bookIds } } });
+
+    if (sold > 0 && !force) {
+      return NextResponse.json(
+        {
+          error: `${sold} of the selected book${sold === 1 ? "" : "s"} appear${
+            sold === 1 ? "s" : ""
+          } in orders. Archive them to keep order history, or delete anyway to also remove those order lines and download links.`,
+          ordersCount: sold,
+          canForce: true,
+        },
+        { status: 409 }
+      );
+    }
+
+    await prisma.$transaction([
+      prisma.downloadGrant.deleteMany({ where: { bookId: { in: bookIds } } }),
+      prisma.orderItem.deleteMany({ where: { bookId: { in: bookIds } } }),
+      prisma.book.deleteMany({ where: { id: { in: bookIds } } }),
+    ]);
+
+    // Free orphaned files + covers.
+    const assetIds = books.map((b) => b.fileId).filter((x): x is string => !!x);
+    const coverIds = books.map((b) => b.coverImageId).filter((x): x is string => !!x);
+    if (assetIds.length) await prisma.bookAsset.deleteMany({ where: { id: { in: assetIds } } });
+    if (coverIds.length) await prisma.upload.deleteMany({ where: { id: { in: coverIds } } });
+
+    return NextResponse.json({ deleted: bookIds.length });
+  } catch (error) {
+    console.error("Bulk book delete error:", error);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }

@@ -13,6 +13,8 @@ export interface ParsedBookMeta {
   isbn?: string;
   description?: string;
   keyInsights?: string[];
+  category?: string;
+  tags?: string[];
 }
 
 export interface BookUploadResult {

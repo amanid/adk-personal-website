@@ -54,10 +54,12 @@ export async function POST(request: Request) {
     });
 
     // Best-effort metadata extraction so the editor can auto-fill fields.
-    let metadata = null;
+    let metadata: Record<string, unknown> | null = null;
     let coverImageId: string | null = null;
     try {
       const parsed = await parseBookFile(buffer, file.name, file.type);
+      let aiCategory: string | undefined;
+      let aiTags: string[] | undefined;
 
       // Cover: use the EPUB's embedded cover, else rasterize the PDF's first page.
       // Always downscale to a small JPEG so serving it can't blow up memory.
@@ -90,6 +92,8 @@ export async function POST(request: Request) {
           });
           if (ai?.description) parsed.description = ai.description;
           if (ai?.keyInsights.length) parsed.keyInsights = ai.keyInsights;
+          if (ai?.category) aiCategory = ai.category;
+          if (ai?.tags?.length) aiTags = ai.tags;
         } catch (err) {
           console.error("AI enrichment (upload) failed:", err);
         }
@@ -98,7 +102,7 @@ export async function POST(request: Request) {
       // Don't ship the raw cover buffer back to the client.
       const { cover: _rawCover, ...rest } = parsed;
       void _rawCover;
-      metadata = rest;
+      metadata = { ...rest, category: aiCategory, tags: aiTags };
     } catch (err) {
       console.error("Book metadata parse failed:", err);
     }
