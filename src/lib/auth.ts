@@ -30,6 +30,11 @@ function clearLoginFailures(key: string): void {
   loginAttempts.delete(key);
 }
 
+// A fixed bcrypt hash used to equalize response time when the account doesn't
+// exist (or has no password), so an attacker can't distinguish "no such user"
+// from "wrong password" by timing. The plaintext is irrelevant — it never matches.
+const DUMMY_HASH = "$2a$10$CwTycUXWue0Thq9StjUM0uJ8Dvywht0z0v8m7Qw8N7Q2vN7Q2vN7";
+
 export const { handlers, signIn, signOut, auth } = NextAuth({
   providers: [
     Google({
@@ -54,17 +59,15 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           where: { email: credentials.email as string },
         });
 
-        if (!user || !user.hashedPassword) {
-          recordLoginFailure(key);
-          return null;
-        }
-
+        // Always run a bcrypt comparison (against a dummy hash when the user or
+        // password is absent) so success and failure take the same time — this
+        // denies a timing oracle for account enumeration.
         const isValid = await bcrypt.compare(
           credentials.password as string,
-          user.hashedPassword
+          user?.hashedPassword || DUMMY_HASH
         );
 
-        if (!isValid) {
+        if (!user || !user.hashedPassword || !isValid) {
           recordLoginFailure(key);
           return null;
         }

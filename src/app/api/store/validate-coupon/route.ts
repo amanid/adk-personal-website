@@ -10,7 +10,9 @@ export const runtime = "nodejs";
 export async function POST(request: Request) {
   const origin = checkOrigin(request);
   if (origin) return origin;
-  const limited = rateLimit(request, { limit: 30, windowSeconds: 60 });
+  // Kept deliberately low: this endpoint reveals whether a code is valid, so a
+  // tight limit blunts brute-force enumeration of coupon codes.
+  const limited = rateLimit(request, { limit: 12, windowSeconds: 60 });
   if (limited) return limited;
 
   try {
