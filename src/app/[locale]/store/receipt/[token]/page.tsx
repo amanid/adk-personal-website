@@ -301,10 +301,16 @@ export default async function ReceiptPage({
                 );
               })}
             </div>
+            {/* Only claim the email was sent if it actually was — a receipt that
+                promises a copy that never arrived sends buyers hunting for it. */}
             <p className="text-xs text-text-secondary mt-3">
               {l === "fr"
-                ? "Ces liens sont privés et expirent après 7 jours. Une copie vous a été envoyée par email."
-                : "These links are private and expire after 7 days. A copy has also been emailed to you."}
+                ? order.receiptEmailedAt
+                  ? "Ces liens sont privés et expirent après 7 jours. Une copie vous a été envoyée par email."
+                  : "Ces liens sont privés et expirent après 7 jours. Enregistrez cette page ou téléchargez vos fichiers dès maintenant."
+                : order.receiptEmailedAt
+                  ? "These links are private and expire after 7 days. A copy has also been emailed to you."
+                  : "These links are private and expire after 7 days. Save this page or download your files now."}
             </p>
           </div>
         )}
