@@ -1,5 +1,7 @@
-import { readFile } from "node:fs/promises";
+import { mkdir, readFile, writeFile } from "node:fs/promises";
+import os from "node:os";
 import path from "node:path";
+import crypto from "node:crypto";
 import type { NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { publications } from "@/data/publications";
@@ -8,6 +10,16 @@ import { renderPdfCover } from "@/lib/cover-image";
 
 // Prisma, fs and the PDF rasteriser are all Node-only.
 export const runtime = "nodejs";
+
+/**
+ * Rasterising is far more expensive than serving a card without artwork, and a
+ * crawler hitting a cold cache should never risk the instance. Anything above
+ * this falls back to the branded lettermark card instead.
+ */
+const MAX_OG_PDF_BYTES = 6 * 1024 * 1024;
+
+/** Lower than the admin-upload default: less canvas memory per render. */
+const OG_RASTER_SCALE = 1.0;
 
 interface ResolvedPublication {
   title: string;
@@ -99,24 +111,58 @@ async function loadPdf(pdfUrl: string | null): Promise<Buffer | null> {
   }
 }
 
-// Rasterising a PDF page is expensive; memoise per slug for the process
-// lifetime. Bounded so a large catalogue can't grow the heap without limit.
-const COVER_CACHE_MAX = 40;
+/**
+ * Rendered covers are cached on disk as well as in memory.
+ *
+ * The in-memory map keeps the hot path allocation-free but is bounded, and a
+ * restart (or an eviction) would otherwise mean rasterising all over again. The
+ * disk copy is small, survives both, and turns a repeat crawl into a file read.
+ * Render's filesystem is ephemeral, which is fine — this is a cache, and a cold
+ * one costs one render.
+ */
+const COVER_CACHE_MAX = 24;
 const coverCache = new Map<string, string | null>();
 
-async function publicationCover(slug: string, pdfUrl: string | null): Promise<string | null> {
-  if (coverCache.has(slug)) return coverCache.get(slug) ?? null;
+function diskCachePath(slug: string): string {
+  const key = crypto.createHash("sha256").update(slug).digest("hex").slice(0, 32);
+  return path.join(os.tmpdir(), "adk-og-covers", `${key}.jpg`);
+}
 
-  const pdf = await loadPdf(pdfUrl);
-  const cover = pdf ? await renderPdfCover(pdf) : null;
-  const uri = cover ? `data:${cover.mimeType};base64,${cover.data.toString("base64")}` : null;
-
+function remember(slug: string, uri: string | null): string | null {
   if (coverCache.size >= COVER_CACHE_MAX) {
     const oldest = coverCache.keys().next().value;
     if (oldest !== undefined) coverCache.delete(oldest);
   }
   coverCache.set(slug, uri);
   return uri;
+}
+
+async function publicationCover(slug: string, pdfUrl: string | null): Promise<string | null> {
+  if (coverCache.has(slug)) return coverCache.get(slug) ?? null;
+
+  const cacheFile = diskCachePath(slug);
+  try {
+    const cached = await readFile(cacheFile);
+    return remember(slug, `data:image/jpeg;base64,${cached.toString("base64")}`);
+  } catch {
+    // Not cached yet — fall through and render it.
+  }
+
+  const pdf = await loadPdf(pdfUrl);
+  if (!pdf || pdf.length > MAX_OG_PDF_BYTES) return remember(slug, null);
+
+  const cover = await renderPdfCover(pdf, { scale: OG_RASTER_SCALE });
+  if (!cover) return remember(slug, null);
+
+  // Best-effort persist; a failure here only costs a future re-render.
+  try {
+    await mkdir(path.dirname(cacheFile), { recursive: true });
+    await writeFile(cacheFile, cover.data);
+  } catch {
+    // ignore
+  }
+
+  return remember(slug, `data:${cover.mimeType};base64,${cover.data.toString("base64")}`);
 }
 
 export async function GET(

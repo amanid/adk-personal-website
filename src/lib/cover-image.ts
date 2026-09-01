@@ -42,15 +42,43 @@ export async function processCoverImage(
   }
 }
 
-/** Render a PDF's first page to a small JPEG cover. Returns null on any failure. */
-export async function renderPdfCover(pdf: Buffer): Promise<ProcessedImage | null> {
+/**
+ * Rasterising a page pulls the whole document into the heap and spins up a
+ * native canvas. Two of those at once is enough to push a small instance over
+ * its memory limit, so every render goes through this queue and runs alone.
+ * The cost is latency on a cold cache, which is far cheaper than an OOM restart.
+ */
+let renderChain: Promise<unknown> = Promise.resolve();
+
+function queueExclusive<T>(task: () => Promise<T>): Promise<T> {
+  const run = renderChain.then(task, task);
+  // Keep the chain alive regardless of individual outcomes.
+  renderChain = run.then(
+    () => undefined,
+    () => undefined
+  );
+  return run;
+}
+
+/**
+ * Render a PDF's first page to a small JPEG cover. Returns null on any failure.
+ *
+ * `scale` trades resolution for peak memory; the default is fine for an admin
+ * upload, while callers on the public path should pass something lower.
+ */
+export async function renderPdfCover(
+  pdf: Buffer,
+  { scale = 1.5 }: { scale?: number } = {}
+): Promise<ProcessedImage | null> {
   if (pdf.length > MAX_PDF_PROCESS_BYTES) return null;
   ensurePdfRuntimePolyfills();
   try {
-    const raster = await renderPageAsImage(new Uint8Array(pdf), 1, {
-      scale: 1.5,
-      canvasImport: () => import("@napi-rs/canvas"),
-    });
+    const raster = await queueExclusive(() =>
+      renderPageAsImage(new Uint8Array(pdf), 1, {
+        scale,
+        canvasImport: () => import("@napi-rs/canvas"),
+      })
+    );
     return await processCoverImage(Buffer.from(raster));
   } catch (err) {
     console.error("PDF cover render failed:", err);
