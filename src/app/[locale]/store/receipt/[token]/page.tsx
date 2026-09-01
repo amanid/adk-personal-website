@@ -5,9 +5,10 @@ import { prisma } from "@/lib/prisma";
 import { normalizeLocale } from "@/lib/seo";
 import { formatPrice } from "@/lib/utils";
 import { mobileMoneyLabel, MOBILE_MONEY_NUMBER, isMobileMoneyMethod } from "@/lib/mobile-money";
+import { PAYPAL_ME_HANDLE, PAYPAL_RECEIVE_EMAIL, paypalMeLink } from "@/lib/paypal-direct";
 import { Link } from "@/i18n/routing";
 import PrintReceiptButton from "@/components/store/PrintReceiptButton";
-import { Download, CheckCircle2, Clock, AlertCircle } from "lucide-react";
+import { Download, CheckCircle2, Clock, AlertCircle, ExternalLink } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 
@@ -35,6 +36,13 @@ export default async function ReceiptPage({
   const t = await getTranslations({ locale: l, namespace: "store" });
   const isPaid = order.status === "PAID";
   const isMobileMoney = isMobileMoneyMethod(order.paymentMethod);
+  // A PayPal order with no PayPal order id was never taken through Orders v2 —
+  // it is a direct transfer the buyer still has to make, so the receipt has to
+  // show them how. Without this a pending PayPal order is a dead end.
+  const isPaypalDirect = order.paymentMethod === "PAYPAL" && !order.paypalOrderId;
+  const paypalPayUrl = isPaypalDirect ? paypalMeLink(order.totalCents, order.currency) : null;
+  const paypalAccount =
+    PAYPAL_RECEIVE_EMAIL || (PAYPAL_ME_HANDLE ? `paypal.me/${PAYPAL_ME_HANDLE}` : "");
   const titles = new Map(order.items.map((i) => [i.bookId, i.titleSnapshot]));
   // Server Component: reading the current time at request render is intentional.
   // eslint-disable-next-line react-hooks/purity
@@ -63,16 +71,20 @@ export default async function ReceiptPage({
               <h1 className="text-2xl font-bold">
                 {isMobileMoney
                   ? t("mmPendingTitle")
-                  : l === "fr"
-                    ? "Paiement en attente"
-                    : "Payment pending"}
+                  : isPaypalDirect
+                    ? t("ppdPendingTitle")
+                    : l === "fr"
+                      ? "Paiement en attente"
+                      : "Payment pending"}
               </h1>
               <p className="text-text-secondary text-sm">
                 {isMobileMoney
                   ? t("mmPendingText")
-                  : l === "fr"
-                    ? "Ce paiement n'a pas encore été confirmé."
-                    : "This payment has not been confirmed yet."}
+                  : isPaypalDirect
+                    ? t("ppdPendingText")
+                    : l === "fr"
+                      ? "Ce paiement n'a pas encore été confirmé."
+                      : "This payment has not been confirmed yet."}
               </p>
             </div>
           </div>
@@ -107,6 +119,45 @@ export default async function ReceiptPage({
               </div>
             </div>
             <p className="text-xs text-text-secondary">{t("invoiceThenProof")}</p>
+          </div>
+        )}
+
+        {/* Payment instructions for a pending direct-PayPal order */}
+        {order.status === "PENDING" && isPaypalDirect && (
+          <div className="rounded-xl border border-gold/25 bg-gold/5 p-5 mb-6">
+            <div className="grid sm:grid-cols-3 gap-3 mb-4">
+              <div className="rounded-lg bg-navy/50 border border-glass-border p-3">
+                <div className="text-[11px] text-text-secondary">{t("ppdAmount")}</div>
+                <div className="font-bold text-gold text-lg">
+                  {formatPrice(order.totalCents, order.currency)}
+                </div>
+              </div>
+              <div className="rounded-lg bg-navy/50 border border-glass-border p-3 min-w-0">
+                <div className="text-[11px] text-text-secondary">{t("ppdAccount")}</div>
+                <div className="font-semibold truncate">{paypalAccount}</div>
+              </div>
+              <div className="rounded-lg bg-navy/50 border border-glass-border p-3">
+                <div className="text-[11px] text-text-secondary">{t("ppdOrderNumber")}</div>
+                <div className="font-semibold">{order.orderNumber}</div>
+              </div>
+            </div>
+
+            {paypalPayUrl && (
+              <a
+                href={paypalPayUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-full inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-lg bg-[#0070ba] text-white font-semibold hover:bg-[#005ea6] transition-all mb-3 print:hidden"
+              >
+                {t("ppdPayButton", {
+                  amount: formatPrice(order.totalCents, order.currency),
+                })}
+                <ExternalLink className="w-4 h-4" />
+              </a>
+            )}
+
+            <p className="text-xs text-text-secondary mb-1.5">{t("ppdGoodsServices")}</p>
+            <p className="text-xs text-text-secondary">{t("ppdQuoteOrder")}</p>
           </div>
         )}
 

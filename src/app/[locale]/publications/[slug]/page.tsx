@@ -1,5 +1,12 @@
 import type { Metadata } from "next";
-import { buildPageMetadata, normalizeLocale, type AppLocale } from "@/lib/seo";
+import {
+  buildPageMetadata,
+  normalizeLocale,
+  BASE_URL,
+  OG_IMAGE_HEIGHT,
+  OG_IMAGE_WIDTH,
+  type AppLocale,
+} from "@/lib/seo";
 import { publications } from "@/data/publications";
 import { prisma } from "@/lib/prisma";
 import PublicationDetailClient, { type RelatedPub } from "./PublicationDetailClient";
@@ -69,6 +76,14 @@ export async function generateMetadata({
     ogTitle: clip(pub.title, 90),
     ogSubtitle: l === "fr" ? "Publication" : "Publication",
     ogType: "publication",
+    // The card renders the PDF's first page as the cover, so a shared link
+    // shows the document itself rather than the generic branded card.
+    image: {
+      url: `${BASE_URL}/api/og/publication/${encodeURIComponent(slug)}?locale=${l}`,
+      width: OG_IMAGE_WIDTH,
+      height: OG_IMAGE_HEIGHT,
+      alt: pub.title,
+    },
   });
 }
 

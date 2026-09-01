@@ -25,6 +25,7 @@ import {
   Download,
   Hash,
   Gift,
+  Send,
 } from "lucide-react";
 import StatCard from "@/components/admin/charts/StatCard";
 import { formatPrice } from "@/lib/utils";
@@ -156,7 +157,10 @@ export default function AdminOrdersPage() {
     fetchOrders();
   }, [fetchOrders]);
 
-  const updateStatus = async (orderId: string, action: "mark-paid" | "cancel") => {
+  const updateStatus = async (
+    orderId: string,
+    action: "mark-paid" | "cancel" | "resend-receipt"
+  ) => {
     if (action === "mark-paid" && !confirm("Confirm this payment and unlock the buyer's downloads?"))
       return;
     if (action === "cancel" && !confirm("Cancel this order?")) return;
@@ -167,11 +171,12 @@ export default function AdminOrdersPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ action }),
       });
+      const data = await res.json().catch(() => ({}));
       if (!res.ok) {
-        const d = await res.json().catch(() => ({}));
-        alert(d.error || "Action failed");
+        alert(data.error || "Action failed");
         return;
       }
+      if (data.message) alert(data.message);
       await fetchOrders();
     } catch {
       alert("Action failed");
@@ -468,6 +473,16 @@ export default function AdminOrdersPage() {
                           `Invoice sent ${fmtDate(o.invoiceEmailedAt)}`
                         ) : (
                           "—"
+                        )}
+                        {o.status === "PAID" && (
+                          <button
+                            onClick={() => updateStatus(o.id, "resend-receipt")}
+                            disabled={busyId === o.id}
+                            className="mt-1.5 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md border border-gold/40 text-gold text-[11px] font-medium hover:bg-gold/10 transition-all disabled:opacity-50"
+                          >
+                            <Send className="w-3 h-3" />
+                            {busyId === o.id ? "Sending…" : "Re-send receipt"}
+                          </button>
                         )}
                       </InfoField>
                       {o.paypalCaptureId && (

@@ -10,6 +10,8 @@ import { isPaypalCurrency } from "@/lib/currency";
 import QuantitySelector from "@/components/store/QuantitySelector";
 import PayPalCheckout from "@/components/store/PayPalCheckout";
 import MobileMoneyCheckout from "@/components/store/MobileMoneyCheckout";
+import PayPalDirectCheckout from "@/components/store/PayPalDirectCheckout";
+import { isPaypalApiConfigured, isPaypalDirectConfigured } from "@/lib/paypal-direct";
 import { Trash2, ShoppingCart, BookOpen, Lock, ShieldCheck, RefreshCw, Mail, CreditCard, Smartphone, Check, Gift, Download, Tag, X } from "lucide-react";
 
 export default function CartPage() {
@@ -54,7 +56,19 @@ export default function CartPage() {
   const [couponError, setCouponError] = useState<string | null>(null);
 
   const emailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-  const paypalAvailable = isPaypalCurrency(currency);
+  // Two ways to take PayPal, both of which need a currency PayPal can settle
+  // (XOF, for one, it cannot):
+  //   - the automatic Orders v2 flow, which unlocks downloads instantly but
+  //     needs REST credentials and a Business account;
+  //   - "PayPal to PayPal", a direct transfer confirmed by an admin, which
+  //     needs neither.
+  // Prefer the automatic flow when it is configured; otherwise fall back to the
+  // direct transfer. Offering neither is better than offering an option that
+  // can only fail once the buyer picks it.
+  const paypalCurrencyOk = isPaypalCurrency(currency);
+  const paypalApi = paypalCurrencyOk && isPaypalApiConfigured();
+  const paypalDirect = paypalCurrencyOk && !paypalApi && isPaypalDirectConfigured();
+  const paypalAvailable = paypalApi || paypalDirect;
   // Effective total after any coupon; a coupon may bring a paid cart down to free.
   const totalCents = Math.max(0, subtotalCents - discountCents);
   const isFree = totalCents === 0;
@@ -186,8 +200,8 @@ export default function CartPage() {
             id: "paypal" as const,
             icon: CreditCard,
             label: t("payPaypal"),
-            desc: t("payPaypalDesc"),
-            badge: t("instant"),
+            desc: paypalApi ? t("payPaypalDesc") : t("payPaypalDirectDesc"),
+            badge: paypalApi ? t("instant") : t("manualConfirm"),
           },
         ]
       : []),
@@ -374,13 +388,25 @@ export default function CartPage() {
             </div>
 
             <div className="mt-5">
-              {activeMethod === "paypal" ? (
+              {activeMethod === "paypal" && paypalApi ? (
                 <PayPalCheckout
                   email={email}
                   name={name}
                   currency={currency}
                   couponCode={appliedCode}
                   disabled={!emailValid}
+                  onValidate={() => {
+                    setTouched(true);
+                    return emailValid;
+                  }}
+                />
+              ) : activeMethod === "paypal" ? (
+                <PayPalDirectCheckout
+                  email={email}
+                  name={name}
+                  amountCents={totalCents}
+                  currency={currency}
+                  couponCode={appliedCode}
                   onValidate={() => {
                     setTouched(true);
                     return emailValid;

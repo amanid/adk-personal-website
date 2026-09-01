@@ -260,14 +260,20 @@ export const freeOrderSchema = z.object({
   items: cartItemsSchema,
 });
 
-export const mobileOrderSchema = z.object({
+/**
+ * Manually-settled orders: the buyer pays the merchant directly and an admin
+ * confirms it. Covers mobile money and the "PayPal to PayPal" direct transfer,
+ * which needs no REST credentials.
+ */
+export const manualOrderSchema = z.object({
   email: z.string().email("A valid email is required").max(320),
   name: z.string().max(200).optional().or(z.literal("")),
-  provider: z.enum(["WAVE", "DJAMO", "ORANGE_MONEY"]),
+  provider: z.enum(["WAVE", "DJAMO", "ORANGE_MONEY", "PAYPAL"]),
   // Optional — the buyer sends proof of payment to the merchant after the invoice.
   reference: z.string().max(120).optional().or(z.literal("")),
   items: cartItemsSchema,
 });
+
 
 export const couponSchema = z
   .object({
@@ -296,6 +302,6 @@ export const couponSchema = z
 
 export type BookInput = z.infer<typeof bookSchema>;
 export type CheckoutInput = z.infer<typeof checkoutSchema>;
-export type MobileOrderInput = z.infer<typeof mobileOrderSchema>;
+export type ManualOrderInput = z.infer<typeof manualOrderSchema>;
 export type FreeOrderInput = z.infer<typeof freeOrderSchema>;
 export type CouponInput = z.infer<typeof couponSchema>;

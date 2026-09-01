@@ -77,20 +77,34 @@ export async function fulfilPaidOrder(
     });
   }
 
+  await deliverReceipt(orderId, opts.locale ?? "en");
+  return true;
+}
+
+/**
+ * Send the receipt and record the outcome on the order. Never throws: a mail
+ * failure must not roll back a payment that already succeeded, so the error is
+ * stored on the order for the admin to see and retry.
+ *
+ * Returns null on success, or the error message on failure.
+ */
+export async function deliverReceipt(
+  orderId: string,
+  locale: "en" | "fr" = "en"
+): Promise<string | null> {
   try {
-    await sendOrderReceipt(orderId, opts.locale ?? "en");
+    await sendOrderReceipt(orderId, locale);
     await prisma.order.update({
       where: { id: orderId },
       data: { receiptEmailedAt: new Date(), lastEmailError: null },
     });
+    return null;
   } catch (err) {
+    const message = String((err as Error)?.message || err).slice(0, 500);
     console.error("Receipt email failed:", err);
     await prisma.order
-      .update({
-        where: { id: orderId },
-        data: { lastEmailError: String((err as Error)?.message || err).slice(0, 500) },
-      })
+      .update({ where: { id: orderId }, data: { lastEmailError: message } })
       .catch(() => {});
+    return message;
   }
-  return true;
 }

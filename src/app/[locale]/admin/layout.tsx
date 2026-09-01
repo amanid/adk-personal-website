@@ -45,6 +45,7 @@ const adminLinks = [
   { href: "/admin/qa", label: "Q&A", icon: MessageSquare },
   { href: "/admin/users", label: "Users", icon: Users },
   { href: "/admin/messages", label: "Messages", icon: Mail },
+  { href: "/admin/email", label: "Email", icon: Mail },
   { href: "/admin/settings", label: "Site Settings", icon: Settings },
 ];
 

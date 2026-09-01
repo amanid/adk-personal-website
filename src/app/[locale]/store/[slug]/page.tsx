@@ -2,8 +2,16 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
-import { buildPageMetadata, normalizeLocale } from "@/lib/seo";
+import {
+  buildPageMetadata,
+  bookOgImageUrl,
+  normalizeLocale,
+  OG_IMAGE_HEIGHT,
+  OG_IMAGE_WIDTH,
+} from "@/lib/seo";
 import { formatPrice } from "@/lib/utils";
+import { isPaypalCurrency } from "@/lib/currency";
+import { isPaypalApiConfigured, isPaypalDirectConfigured } from "@/lib/paypal-direct";
 import { Link } from "@/i18n/routing";
 import AddToCartButton from "@/components/store/AddToCartButton";
 import BookViewBeacon from "@/components/store/BookViewBeacon";
@@ -66,6 +74,14 @@ export async function generateMetadata({
     ogTitle: title,
     ogSubtitle: `${book.author} · ${book.publicationYear}`,
     ogType: "book",
+    // Share the actual cover, composited onto a 1.91:1 branded card, so a link
+    // posted to LinkedIn/Facebook shows the book rather than the generic card.
+    image: {
+      url: bookOgImageUrl(slug, l),
+      width: OG_IMAGE_WIDTH,
+      height: OG_IMAGE_HEIGHT,
+      alt: l === "fr" ? `Couverture de ${title}` : `Cover of ${title}`,
+    },
   });
 }
 
@@ -85,6 +101,19 @@ export default async function BookDetailPage({
   const insights =
     (l === "fr" && book.keyInsightsFr.length ? book.keyInsightsFr : book.keyInsights) || [];
   const coverUrl = book.coverImageId ? `/api/uploads/${book.coverImageId}` : null;
+
+  // Only promise the payment methods this book's currency can actually use:
+  // PayPal cannot settle XOF, so an XOF title is mobile money only.
+  const paypalAvailable =
+    isPaypalCurrency(book.currency) &&
+    (isPaypalApiConfigured() || isPaypalDirectConfigured());
+  const paymentNote = paypalAvailable
+    ? l === "fr"
+      ? "Téléchargement sécurisé après paiement (PayPal ou Mobile Money)"
+      : "Secure download after payment (PayPal or Mobile Money)"
+    : l === "fr"
+      ? "Téléchargement sécurisé après paiement (Mobile Money : Wave, Djamo, Orange Money)"
+      : "Secure download after payment (Mobile Money: Wave, Djamo, Orange Money)";
 
   const related = await getRelatedBooks(book);
   const relatedBooks: StoreBook[] = related.map((b) => ({
@@ -157,9 +186,7 @@ export default async function BookDetailPage({
             <ul className="text-xs text-text-secondary mt-4 space-y-1.5">
               <li className="flex items-start gap-1.5">
                 <Check className="w-3.5 h-3.5 text-green-400 mt-0.5 shrink-0" />
-                {l === "fr"
-                  ? "Téléchargement sécurisé après paiement (PayPal ou Mobile Money)"
-                  : "Secure download after payment (PayPal or Mobile Money)"}
+                {paymentNote}
               </li>
               <li className="flex items-start gap-1.5">
                 <Check className="w-3.5 h-3.5 text-green-400 mt-0.5 shrink-0" />

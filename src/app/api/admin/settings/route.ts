@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
+import { SMTP_SETTING_PREFIX } from "@/lib/email-config";
 
 export async function GET() {
   try {
@@ -13,6 +14,9 @@ export async function GET() {
 
     const settings: Record<string, string> = {};
     for (const record of records) {
+      // SMTP credentials are owned by /api/admin/email, which never returns the
+      // (encrypted) password. Keep them out of the generic settings payload.
+      if (record.key.startsWith(SMTP_SETTING_PREFIX)) continue;
       settings[record.key] = record.value;
     }
 
@@ -35,7 +39,11 @@ export async function PUT(request: Request) {
 
     const body = await request.json();
 
-    const entries = Object.entries(body) as [string, string][];
+    const entries = (Object.entries(body) as [string, string][]).filter(
+      // Writing these through the generic endpoint would store the password in
+      // plaintext; they must go through /api/admin/email.
+      ([key]) => !key.startsWith(SMTP_SETTING_PREFIX)
+    );
 
     await Promise.all(
       entries.map(([key, value]) =>

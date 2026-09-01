@@ -40,10 +40,15 @@
   --color-gold-light: #2d5a8e;
   --color-gold-dark: #14273d;
   --color-glass: rgba(0, 0, 0, 0.03);
-  --color-glass-border: rgba(0, 0, 0, 0.08);
+  --color-glass-border: rgba(0, 0, 0, 0.12);
+  /* Light-theme text ramp, verified against all three light surfaces
+     (--color-charcoal / --color-navy / --color-navy-light). Muted was #94a3b8,
+     which failed WCAG AA badly (2.45:1 on the page, 2.08:1 on cards) and made
+     small print such as timestamps unreadable. Secondary is darkened alongside
+     it so the primary > secondary > muted hierarchy still reads. */
   --color-text-primary: #0f172a;
-  --color-text-secondary: #475569;
-  --color-text-muted: #94a3b8;
+  --color-text-secondary: #334155;
+  --color-text-muted: #4d5a6a;
 }
 
 /* Theme: Ocean Blue */
@@ -88,7 +93,9 @@
   --color-glass-border: rgba(255, 255, 255, 0.08);
   --color-text-primary: #fdf2f8;
   --color-text-secondary: #f9a8d4;
-  --color-text-muted: #f472b6;
+  /* Was #f472b6 — the same value as --color-gold, which made muted text read as
+     an accent. Desaturated so the hierarchy primary > secondary > muted holds. */
+  --color-text-muted: #c99bb5;
 }
 
 /* Theme: Sunset Warm */
@@ -103,7 +110,9 @@
   --color-glass-border: rgba(255, 255, 255, 0.08);
   --color-text-primary: #fffbeb;
   --color-text-secondary: #fde68a;
-  --color-text-muted: #fbbf24;
+  /* Was #fbbf24 — identical to --color-gold-light, so muted text competed with
+     accents. Desaturated to a warm neutral. */
+  --color-text-muted: #cbb894;
 }
 
 * {

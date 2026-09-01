@@ -220,8 +220,12 @@ export default async function LocaleLayout({
       </head>
       <GoogleAnalytics />
       <body className="min-h-screen flex flex-col bg-charcoal text-text-primary antialiased">
-        <Providers>
-          <NextIntlClientProvider locale={locale} messages={messages}>
+        {/* NextIntlClientProvider must sit OUTSIDE Providers: Providers mounts
+            StoreUIProvider, whose CartDrawer and ToastStack call useTranslations.
+            With the nesting reversed those two render without intl context and
+            throw, which fails the render of every page on the site. */}
+        <NextIntlClientProvider locale={locale} messages={messages}>
+          <Providers>
             <ScrollProgress />
             <a
               href="#main-content"
@@ -238,8 +242,8 @@ export default async function LocaleLayout({
             <BackToTop />
             <PageViewTracker />
             <CookieConsent />
-          </NextIntlClientProvider>
-        </Providers>
+          </Providers>
+        </NextIntlClientProvider>
       </body>
     </html>
   );

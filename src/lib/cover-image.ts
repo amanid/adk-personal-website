@@ -11,6 +11,7 @@
  */
 import sharp from "sharp";
 import { renderPageAsImage } from "unpdf";
+import { ensurePdfRuntimePolyfills } from "./pdf-runtime";
 
 const MAX_COVER_WIDTH = 640; // plenty for a store cover; keeps files ~20-80KB
 const JPEG_QUALITY = 82;
@@ -44,6 +45,7 @@ export async function processCoverImage(
 /** Render a PDF's first page to a small JPEG cover. Returns null on any failure. */
 export async function renderPdfCover(pdf: Buffer): Promise<ProcessedImage | null> {
   if (pdf.length > MAX_PDF_PROCESS_BYTES) return null;
+  ensurePdfRuntimePolyfills();
   try {
     const raster = await renderPageAsImage(new Uint8Array(pdf), 1, {
       scale: 1.5,

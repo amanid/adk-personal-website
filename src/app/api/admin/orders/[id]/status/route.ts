@@ -1,14 +1,17 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
-import { fulfilPaidOrder } from "@/lib/order-fulfillment";
+import { deliverReceipt, fulfilPaidOrder } from "@/lib/order-fulfillment";
 
 export const runtime = "nodejs";
 
 /**
  * Admin action on an order. "mark-paid" confirms a manual (mobile-money)
  * payment — it marks the order PAID, creates the secure download grants and
- * emails the receipt. "cancel" / "fail" just update the status.
+ * emails the receipt. "resend-receipt" re-sends the receipt for an order that is
+ * already PAID — the recovery path when the first attempt failed (bad SMTP
+ * settings, a typo'd address that has since been corrected). "cancel" / "fail"
+ * just update the status.
  */
 export async function POST(
   request: Request,
@@ -35,6 +38,18 @@ export async function POST(
       }
       await fulfilPaidOrder(id);
       return NextResponse.json({ status: "PAID" });
+    }
+
+    if (action === "resend-receipt") {
+      if (order.status !== "PAID") {
+        return NextResponse.json(
+          { error: "Only a paid order has a receipt to send." },
+          { status: 400 }
+        );
+      }
+      const error = await deliverReceipt(id);
+      if (error) return NextResponse.json({ error }, { status: 502 });
+      return NextResponse.json({ status: order.status, message: `Receipt re-sent to ${order.email}.` });
     }
 
     if (action === "cancel" || action === "fail") {

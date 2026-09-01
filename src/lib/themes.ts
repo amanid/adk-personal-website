@@ -1,3 +1,10 @@
+/**
+ * Theme catalogue for the switcher.
+ *
+ * NOTE: the values in `colors` mirror the `[data-theme="..."]` blocks in
+ * globals.css, which are what actually render — the switcher only sets the
+ * `data-theme` attribute. Keep the two in sync when changing a palette.
+ */
 export interface ThemeColors {
   charcoal: string;
   navy: string;
@@ -39,7 +46,7 @@ export const themes: ThemeDefinition[] = [
       glassBorder: "rgba(255, 255, 255, 0.08)",
       textPrimary: "#eef2f7",
       textSecondary: "#8b9bb4",
-      textMuted: "#5a6a82",
+      textMuted: "#7d8ca6",
       glassStrongBg: "rgba(15, 22, 41, 0.85)",
       isDark: true,
     },
@@ -57,10 +64,10 @@ export const themes: ThemeDefinition[] = [
       goldLight: "#2d5a8e",
       goldDark: "#14273d",
       glass: "rgba(0, 0, 0, 0.03)",
-      glassBorder: "rgba(0, 0, 0, 0.08)",
+      glassBorder: "rgba(0, 0, 0, 0.12)",
       textPrimary: "#0f172a",
-      textSecondary: "#475569",
-      textMuted: "#94a3b8",
+      textSecondary: "#334155",
+      textMuted: "#4d5a6a",
       glassStrongBg: "rgba(248, 250, 252, 0.92)",
       isDark: false,
     },
@@ -123,7 +130,7 @@ export const themes: ThemeDefinition[] = [
       glassBorder: "rgba(255, 255, 255, 0.08)",
       textPrimary: "#fdf2f8",
       textSecondary: "#f9a8d4",
-      textMuted: "#f472b6",
+      textMuted: "#c99bb5",
       glassStrongBg: "rgba(45, 16, 36, 0.85)",
       isDark: true,
     },
@@ -144,7 +151,7 @@ export const themes: ThemeDefinition[] = [
       glassBorder: "rgba(255, 255, 255, 0.08)",
       textPrimary: "#fffbeb",
       textSecondary: "#fde68a",
-      textMuted: "#fbbf24",
+      textMuted: "#cbb894",
       glassStrongBg: "rgba(45, 31, 14, 0.85)",
       isDark: true,
     },

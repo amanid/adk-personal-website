@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { mobileOrderSchema } from "@/lib/validations";
+import { manualOrderSchema } from "@/lib/validations";
 import { priceOrder, generateOrderNumber, secureToken } from "@/lib/store";
 import { sendOrderInvoiceEmail } from "@/lib/email";
 import { sanitizeInput } from "@/lib/sanitize";
@@ -15,9 +15,16 @@ function localeFromReferer(request: Request): "en" | "fr" {
 export const runtime = "nodejs";
 
 /**
- * Create a mobile-money order (Wave / Djamo / Orange Money). The buyer pays the
- * merchant's number directly and submits the transaction reference; the order
- * stays PENDING until an admin confirms the payment. No download is unlocked here.
+ * Create a manually-settled order.
+ *
+ * Covers mobile money (Wave / Djamo / Orange Money) and "PayPal to PayPal" — a
+ * direct transfer to the merchant's PayPal account, which needs no REST
+ * credentials and no Business account. In both cases the buyer pays the
+ * merchant directly and may submit a transaction reference; the order stays
+ * PENDING until an admin confirms the payment, so no download is unlocked here.
+ *
+ * The automatic PayPal flow lives in /api/store/checkout + /api/store/capture
+ * and is used instead whenever REST credentials are configured.
  */
 export async function POST(request: Request) {
   const origin = checkOrigin(request);
@@ -28,7 +35,7 @@ export async function POST(request: Request) {
 
   try {
     const body = await request.json();
-    const validation = mobileOrderSchema.safeParse(body);
+    const validation = manualOrderSchema.safeParse(body);
     if (!validation.success) {
       return NextResponse.json(
         { error: "Invalid input", details: validation.error.flatten() },
