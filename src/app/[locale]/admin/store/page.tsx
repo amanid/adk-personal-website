@@ -23,6 +23,7 @@ import {
 import FileUpload from "@/components/admin/FileUpload";
 import BookFileUpload, { type BookUploadResult } from "@/components/admin/BookFileUpload";
 import { formatPrice } from "@/lib/utils";
+import { readJson } from "@/lib/api-response";
 import { majorToMinor, minorToMajor, SUPPORTED_CURRENCIES } from "@/lib/currency";
 
 interface BookStats {
@@ -269,10 +270,7 @@ export default function AdminStorePage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
-      if (!res.ok) {
-        const data = await res.json();
-        throw new Error(data.error || "Save failed");
-      }
+      await readJson(res, "Save failed");
       setShowEditor(false);
       fetchBooks();
     } catch (err) {
@@ -311,6 +309,59 @@ export default function AdminStorePage() {
       }
       return next;
     });
+
+    // AI drafting is a SEPARATE request on purpose. Doing it inside the upload
+    // used to push that one request past the proxy's origin timeout on a big
+    // PDF, and the browser got an HTML error page instead of JSON.
+    if (result.aiPending) {
+      void autoDraftWithAI(result);
+    }
+  };
+
+  /**
+   * Fill the description / insights / category / tags from AI right after an
+   * upload — but only where the admin has not already typed something, and
+   * never blocking the editor if it fails.
+   */
+  const autoDraftWithAI = async (result: BookUploadResult) => {
+    setAiBusy(true);
+    setAiError(null);
+    try {
+      const res = await fetch("/api/admin/books/enrich", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          fileId: result.fileId,
+          title: result.metadata?.title,
+          author: result.metadata?.author,
+        }),
+      });
+      const data = await readJson<{
+        description?: string;
+        keyInsights?: string[];
+        category?: string;
+        tags?: string[];
+      }>(res, "AI drafting failed");
+
+      setForm((prev) => ({
+        ...prev,
+        description: !prev.description.trim() && data.description ? data.description : prev.description,
+        keyInsights:
+          !prev.keyInsights.trim() && data.keyInsights?.length
+            ? data.keyInsights.join("\n")
+            : prev.keyInsights,
+        category: !prev.category.trim() && data.category ? data.category : prev.category,
+        tags: !prev.tags.trim() && data.tags?.length ? data.tags.join(", ") : prev.tags,
+      }));
+    } catch (err) {
+      // The file is already saved; a failed draft is not a failed upload.
+      setAiError(
+        `${err instanceof Error ? err.message : "AI drafting failed"} — the file uploaded fine; ` +
+          `write the description yourself or press "Draft with AI".`
+      );
+    } finally {
+      setAiBusy(false);
+    }
   };
 
   const handleDraftWithAI = async () => {
@@ -337,23 +388,24 @@ export default function AdminStorePage() {
           description: form.description,
         }),
       });
-      const data = await res.json();
-      if (!res.ok) {
-        setAiError(data.error || "AI drafting failed");
-        return;
-      }
+      const data = await readJson<{
+        description?: string;
+        keyInsights?: string[];
+        category?: string;
+        tags?: string[];
+      }>(res, "AI drafting failed");
       setForm((prev) => ({
         ...prev,
         description: data.description || prev.description,
-        keyInsights: (data.keyInsights || []).length
+        keyInsights: data.keyInsights?.length
           ? data.keyInsights.join("\n")
           : prev.keyInsights,
         category: !prev.category.trim() && data.category ? data.category : prev.category,
         tags:
-          !prev.tags.trim() && (data.tags || []).length ? data.tags.join(", ") : prev.tags,
+          !prev.tags.trim() && data.tags?.length ? data.tags.join(", ") : prev.tags,
       }));
-    } catch {
-      setAiError("AI drafting failed");
+    } catch (err) {
+      setAiError(err instanceof Error ? err.message : "AI drafting failed");
     } finally {
       setAiBusy(false);
     }
@@ -367,21 +419,20 @@ export default function AdminStorePage() {
       const fd = new FormData();
       Array.from(fileList).forEach((f) => fd.append("files", f));
       const res = await fetch("/api/admin/books/bulk", { method: "POST", body: fd });
-      const data = await res.json();
-      if (!res.ok) {
-        setBulkResult(data.error || "Import failed");
-      } else {
-        const okCount = data.created?.length || 0;
-        const failCount = data.failed?.length || 0;
-        setBulkResult(
-          `Imported ${okCount} book${okCount === 1 ? "" : "s"} as drafts` +
-            (failCount ? ` · ${failCount} failed` : "") +
-            ". Set prices and publish them below."
-        );
-        fetchBooks();
-      }
-    } catch {
-      setBulkResult("Import failed");
+      const data = await readJson<{ created?: unknown[]; failed?: unknown[] }>(
+        res,
+        "Import failed"
+      );
+      const okCount = data.created?.length || 0;
+      const failCount = data.failed?.length || 0;
+      setBulkResult(
+        `Imported ${okCount} book${okCount === 1 ? "" : "s"} as drafts` +
+          (failCount ? ` · ${failCount} failed` : "") +
+          ". Set prices and publish them below."
+      );
+      fetchBooks();
+    } catch (err) {
+      setBulkResult(err instanceof Error ? err.message : "Import failed");
     } finally {
       setBulkBusy(false);
     }

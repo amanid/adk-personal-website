@@ -9,9 +9,10 @@
  * All fields are best-effort; anything not found is simply omitted.
  */
 import { PDFDocument } from "pdf-lib";
-import { extractText, getDocumentProxy } from "unpdf";
+import { getDocumentProxy } from "unpdf";
 import JSZip from "jszip";
 import * as cheerio from "cheerio";
+import { ensurePdfRuntimePolyfills, queuePdfWork } from "./pdf-runtime";
 
 export interface ParsedCover {
   mimeType: string;
@@ -202,11 +203,54 @@ export async function parseBookFile(
   return { title: titleFromFilename(filename), cover: null };
 }
 
+/**
+ * Pull text out of a PDF without ever holding the whole document's text layer.
+ *
+ * The obvious `extractText(pdf, { mergePages: true })` reads EVERY page into the
+ * heap and only then truncates — on a small instance a few-hundred-page book is
+ * enough to OOM the process (which the platform turns into an HTML 502, not a
+ * JSON error). Instead we walk a bounded set of pages, release each one as we
+ * go, and stop as soon as we have enough characters.
+ *
+ * Long books are sampled at an even stride rather than read front-to-back, so
+ * the text still spans the whole work — buildContentSample() wants a window
+ * from the middle, not just the front matter.
+ */
+const MAX_TEXT_PAGES = 40;
+
 async function extractPdfText(buffer: Buffer, maxChars: number): Promise<string> {
+  ensurePdfRuntimePolyfills();
+  return queuePdfWork(() => readPdfText(buffer, maxChars));
+}
+
+async function readPdfText(buffer: Buffer, maxChars: number): Promise<string> {
   const pdf = await getDocumentProxy(new Uint8Array(buffer));
-  const { text } = await extractText(pdf, { mergePages: true });
-  const merged = Array.isArray(text) ? text.join("\n") : text;
-  return (merged || "").slice(0, maxChars);
+  try {
+    const total = pdf.numPages;
+    const stride = Math.max(1, Math.ceil(total / MAX_TEXT_PAGES));
+
+    let text = "";
+    for (let n = 1; n <= total && text.length < maxChars; n += stride) {
+      const page = await pdf.getPage(n);
+      try {
+        const content = await page.getTextContent();
+        const pageText = content.items
+          .map((item) => (typeof (item as { str?: unknown }).str === "string"
+            ? (item as { str: string }).str
+            : ""))
+          .join(" ")
+          .replace(/\s+/g, " ")
+          .trim();
+        if (pageText) text += pageText + "\n\n";
+      } finally {
+        // Drop the page's operator list / text layer before moving on.
+        page.cleanup();
+      }
+    }
+    return text.slice(0, maxChars);
+  } finally {
+    await pdf.destroy();
+  }
 }
 
 async function extractEpubText(buffer: Buffer, maxChars: number): Promise<string> {

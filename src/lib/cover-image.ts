@@ -11,7 +11,7 @@
  */
 import sharp from "sharp";
 import { renderPageAsImage } from "unpdf";
-import { ensurePdfRuntimePolyfills } from "./pdf-runtime";
+import { ensurePdfRuntimePolyfills, queuePdfWork } from "./pdf-runtime";
 
 const MAX_COVER_WIDTH = 640; // plenty for a store cover; keeps files ~20-80KB
 const JPEG_QUALITY = 82;
@@ -43,24 +43,6 @@ export async function processCoverImage(
 }
 
 /**
- * Rasterising a page pulls the whole document into the heap and spins up a
- * native canvas. Two of those at once is enough to push a small instance over
- * its memory limit, so every render goes through this queue and runs alone.
- * The cost is latency on a cold cache, which is far cheaper than an OOM restart.
- */
-let renderChain: Promise<unknown> = Promise.resolve();
-
-function queueExclusive<T>(task: () => Promise<T>): Promise<T> {
-  const run = renderChain.then(task, task);
-  // Keep the chain alive regardless of individual outcomes.
-  renderChain = run.then(
-    () => undefined,
-    () => undefined
-  );
-  return run;
-}
-
-/**
  * Render a PDF's first page to a small JPEG cover. Returns null on any failure.
  *
  * `scale` trades resolution for peak memory; the default is fine for an admin
@@ -73,7 +55,7 @@ export async function renderPdfCover(
   if (pdf.length > MAX_PDF_PROCESS_BYTES) return null;
   ensurePdfRuntimePolyfills();
   try {
-    const raster = await queueExclusive(() =>
+    const raster = await queuePdfWork(() =>
       renderPageAsImage(new Uint8Array(pdf), 1, {
         scale,
         canvasImport: () => import("@napi-rs/canvas"),

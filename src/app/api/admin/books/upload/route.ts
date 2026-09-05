@@ -2,12 +2,11 @@ import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { randomUUID } from "crypto";
-import { parseBookFile, extractBookText } from "@/lib/book-parser";
-import { enrichBookMetadata } from "@/lib/ai-enrich";
+import { parseBookFile } from "@/lib/book-parser";
+import { isAiEnrichConfigured } from "@/lib/ai-enrich";
 import {
   processCoverImage,
   renderPdfCover,
-  MAX_PDF_PROCESS_BYTES,
   type ProcessedImage,
 } from "@/lib/cover-image";
 
@@ -15,9 +14,18 @@ import {
 const ALLOWED_TYPES = ["application/pdf", "application/epub+zip"];
 const ALLOWED_EXTENSIONS = ["pdf", "epub"];
 
-const MAX_SIZE = 100 * 1024 * 1024; // 100MB
+// Cloudflare sits in front of this app and caps request bodies; the origin
+// instance is far tighter still, since the bytes are held in memory and then
+// re-encoded for the Postgres wire protocol. Reject oversized files up front
+// with a readable message rather than letting the proxy return an HTML page.
+const MAX_SIZE = 50 * 1024 * 1024; // 50MB
 
 export const runtime = "nodejs";
+
+// Parsing + rasterising a cover has to finish well inside the proxy's 100s
+// origin timeout; a timeout there is returned as HTML, not JSON. AI drafting is
+// deliberately NOT done here — the client calls /api/admin/books/enrich next.
+export const maxDuration = 60;
 
 export async function POST(request: Request) {
   try {
@@ -38,7 +46,10 @@ export async function POST(request: Request) {
     }
 
     if (file.size > MAX_SIZE) {
-      return NextResponse.json({ error: "File too large. Maximum size: 100MB" }, { status: 400 });
+      return NextResponse.json(
+        { error: "File too large. Maximum size: 50MB" },
+        { status: 413 }
+      );
     }
 
     const filename = `${randomUUID()}.${ext || "bin"}`;
@@ -58,8 +69,6 @@ export async function POST(request: Request) {
     let coverImageId: string | null = null;
     try {
       const parsed = await parseBookFile(buffer, file.name, file.type);
-      let aiCategory: string | undefined;
-      let aiTags: string[] | undefined;
 
       // Cover: use the EPUB's embedded cover, else rasterize the PDF's first page.
       // Always downscale to a small JPEG so serving it can't blow up memory.
@@ -80,29 +89,10 @@ export async function POST(request: Request) {
         coverImageId = created.id;
       }
 
-      // AI enrichment (skip very large files to protect memory).
-      if (file.size <= MAX_PDF_PROCESS_BYTES) {
-        try {
-          const sampleText = await extractBookText(buffer, file.name, file.type);
-          const ai = await enrichBookMetadata({
-            title: parsed.title,
-            author: parsed.author,
-            existingDescription: parsed.description,
-            sampleText,
-          });
-          if (ai?.description) parsed.description = ai.description;
-          if (ai?.keyInsights.length) parsed.keyInsights = ai.keyInsights;
-          if (ai?.category) aiCategory = ai.category;
-          if (ai?.tags?.length) aiTags = ai.tags;
-        } catch (err) {
-          console.error("AI enrichment (upload) failed:", err);
-        }
-      }
-
       // Don't ship the raw cover buffer back to the client.
       const { cover: _rawCover, ...rest } = parsed;
       void _rawCover;
-      metadata = { ...rest, category: aiCategory, tags: aiTags };
+      metadata = { ...rest };
     } catch (err) {
       console.error("Book metadata parse failed:", err);
     }
@@ -114,6 +104,9 @@ export async function POST(request: Request) {
       size: asset.size,
       coverImageId,
       metadata,
+      // Tells the editor to follow up with an AI drafting request. Doing it in
+      // a second call keeps each request short enough to survive the proxy.
+      aiPending: isAiEnrichConfigured(),
     });
   } catch (error) {
     console.error("Book upload error:", error);

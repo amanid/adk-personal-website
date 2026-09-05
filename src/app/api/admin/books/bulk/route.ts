@@ -11,10 +11,20 @@ const DEFAULT_PRICE_CENTS = 5000; // $50
 
 const ALLOWED_TYPES = ["application/pdf", "application/epub+zip"];
 const ALLOWED_EXTENSIONS = ["pdf", "epub"];
-const MAX_SIZE = 100 * 1024 * 1024; // 100MB per file
+const MAX_SIZE = 50 * 1024 * 1024; // 50MB per file
 const MAX_FILES = 20;
 
 export const runtime = "nodejs";
+export const maxDuration = 60;
+
+/**
+ * Stop starting new files once we are this far in. The proxy in front of this
+ * app abandons an origin request at ~100s and answers the browser with an HTML
+ * page, which the importer can only report as a JSON parse error. Returning a
+ * partial-but-honest result well before that is far better: the admin sees what
+ * landed and can re-run the import for the rest.
+ */
+const TIME_BUDGET_MS = 70_000;
 
 function slugify(title: string): string {
   return (
@@ -63,15 +73,24 @@ export async function POST(request: Request) {
 
     const created: { id: string; title: string; slug: string }[] = [];
     const failed: { name: string; error: string }[] = [];
+    const startedAt = Date.now();
 
     for (const file of files) {
+      if (Date.now() - startedAt > TIME_BUDGET_MS) {
+        failed.push({
+          name: file.name,
+          error: "Not processed — import time limit reached. Re-run the import for this file.",
+        });
+        continue;
+      }
+
       const ext = file.name.split(".").pop()?.toLowerCase() || "";
       if (!ALLOWED_TYPES.includes(file.type) && !ALLOWED_EXTENSIONS.includes(ext)) {
         failed.push({ name: file.name, error: "Unsupported type (PDF/EPUB only)" });
         continue;
       }
       if (file.size > MAX_SIZE) {
-        failed.push({ name: file.name, error: "File too large (max 100MB)" });
+        failed.push({ name: file.name, error: "File too large (max 50MB)" });
         continue;
       }
 

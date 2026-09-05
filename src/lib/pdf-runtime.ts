@@ -55,3 +55,24 @@ export function ensurePdfRuntimePolyfills(): void {
     proto.transfer = copyInto;
   }
 }
+
+/**
+ * Run heavy pdf.js work one job at a time, process-wide.
+ *
+ * Both rasterising a page and walking its text layer pull the document into the
+ * heap (rasterising also spins up a native canvas). Two of those overlapping is
+ * enough to push a small instance over its memory limit, and an OOM restart
+ * reaches the browser as an HTML error page — which any `res.json()` caller
+ * reports as a JSON parse error. The cost is latency, which is far cheaper.
+ */
+let pdfChain: Promise<unknown> = Promise.resolve();
+
+export function queuePdfWork<T>(task: () => Promise<T>): Promise<T> {
+  const run = pdfChain.then(task, task);
+  // Keep the chain alive regardless of individual outcomes.
+  pdfChain = run.then(
+    () => undefined,
+    () => undefined
+  );
+  return run;
+}
