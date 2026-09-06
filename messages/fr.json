@@ -506,6 +506,7 @@
     "filterAll": "Tous",
     "findMyOrders": "Retrouver mes commandes",
     "free": "Gratuit",
+    "pagesCount": "{count, plural, one {# page} other {# pages}}",
     "freeDesc": "Aucun paiement requis — saisissez votre e-mail et téléchargez immédiatement.",
     "freeError": "Impossible de finaliser votre commande gratuite. Veuillez réessayer.",
     "freeProcessing": "Traitement…",

@@ -38,3 +38,35 @@ export function slugify(text: string): string {
     .replace(/[\s_]+/g, "-")
     .replace(/^-+|-+$/g, "");
 }
+
+/**
+ * Human file size for download listings, e.g. 5_452_595 -> "5.2 MB".
+ * Uses binary units (what an OS reports) and drops the decimal above 100 units,
+ * where the extra precision is noise.
+ */
+export function formatFileSize(bytes: number): string {
+  if (!Number.isFinite(bytes) || bytes <= 0) return "";
+  const units = ["B", "KB", "MB", "GB"];
+  let value = bytes;
+  let unit = 0;
+  while (value >= 1024 && unit < units.length - 1) {
+    value /= 1024;
+    unit += 1;
+  }
+  const decimals = unit === 0 || value >= 100 ? 0 : 1;
+  return `${value.toFixed(decimals)} ${units[unit]}`;
+}
+
+/**
+ * "application/pdf" → "PDF". Returns null for anything we can't name.
+ *
+ * Lives here rather than beside the card component so both the server-rendered
+ * book page and the client card can use it — a "use client" module cannot
+ * export a plain function to the server.
+ */
+export function fileFormatLabel(mimeType?: string | null): string | null {
+  if (!mimeType) return null;
+  if (mimeType.includes("pdf")) return "PDF";
+  if (mimeType.includes("epub")) return "EPUB";
+  return null;
+}

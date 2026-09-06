@@ -108,19 +108,57 @@ function CartDrawer({ open, onClose }: { open: boolean; onClose: () => void }) {
   const { items, subtotalCents, currency, setQuantity, removeItem, hydrated } = useCart();
   const panelRef = useRef<HTMLDivElement>(null);
 
-  // Lock body scroll + close on Escape while open.
+  // Lock body scroll, close on Escape, and keep Tab inside the panel while
+  // open. Without the trap, tabbing walks out of an aria-modal dialog into the
+  // page behind it — which is still there, just visually covered — and a
+  // keyboard user ends up operating a page they cannot see. Focus returns to
+  // whatever opened the drawer on close.
   useEffect(() => {
     if (!open) return;
+    const opener = document.activeElement as HTMLElement | null;
     const prevOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
+
+    const focusable = () =>
+      Array.from(
+        panelRef.current?.querySelectorAll<HTMLElement>(
+          'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+        ) ?? []
+      ).filter((el) => el.offsetParent !== null);
+
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
+      if (e.key === "Escape") {
+        onClose();
+        return;
+      }
+      if (e.key !== "Tab") return;
+
+      const items = focusable();
+      if (items.length === 0) {
+        // Nothing to focus inside: keep focus on the panel rather than losing it.
+        e.preventDefault();
+        panelRef.current?.focus();
+        return;
+      }
+      const first = items[0];
+      const last = items[items.length - 1];
+      const active = document.activeElement;
+
+      if (e.shiftKey && (active === first || active === panelRef.current)) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && active === last) {
+        e.preventDefault();
+        first.focus();
+      }
     };
+
     document.addEventListener("keydown", onKey);
     panelRef.current?.focus();
     return () => {
       document.body.style.overflow = prevOverflow;
       document.removeEventListener("keydown", onKey);
+      opener?.focus?.();
     };
   }, [open, onClose]);
 

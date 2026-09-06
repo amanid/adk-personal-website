@@ -4,7 +4,7 @@ import Image from "next/image";
 import { Link } from "@/i18n/routing";
 import { BookOpen, Star } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { formatPrice } from "@/lib/utils";
+import { formatPrice, fileFormatLabel } from "@/lib/utils";
 import AddToCartButton from "./AddToCartButton";
 
 export interface StoreBook {
@@ -20,10 +20,14 @@ export interface StoreBook {
   category?: string | null;
   tags?: string[];
   featured?: boolean;
+  /** What the buyer actually receives — shown so the card isn't a mystery. */
+  pageCount?: number | null;
+  fileMimeType?: string | null;
 }
 
 export default function BookCard({ book }: { book: StoreBook }) {
   const t = useTranslations("store");
+  const format = fileFormatLabel(book.fileMimeType);
   return (
     <div className="group glass rounded-xl overflow-hidden flex flex-col hover:border-gold/40 transition-all">
       <Link href={`/store/${book.slug}`} className="block">
@@ -56,15 +60,38 @@ export default function BookCard({ book }: { book: StoreBook }) {
       </Link>
       <div className="p-4 flex flex-col flex-1">
         <Link href={`/store/${book.slug}`}>
-          <h2 className="font-semibold text-base leading-snug line-clamp-2 hover:text-gold transition-colors">
+          {/* title attribute so a clamped title is still readable on hover */}
+          <h2
+            title={book.title}
+            className="font-semibold text-base leading-snug line-clamp-2 hover:text-gold transition-colors"
+          >
             {book.title}
           </h2>
         </Link>
-        <p className="text-xs text-text-secondary mt-1">{book.publicationYear}</p>
+        {book.subtitle && (
+          <p className="text-xs text-text-secondary mt-1 line-clamp-1">{book.subtitle}</p>
+        )}
+        {/* Year, format and length: what the buyer is actually getting. A card
+            that only shows a price makes a 300-page PDF look like a pamphlet. */}
+        <p className="text-xs text-text-secondary mt-1 flex flex-wrap items-center gap-x-1.5">
+          <span>{book.publicationYear}</span>
+          {format && (
+            <>
+              <span aria-hidden="true">·</span>
+              <span>{format}</span>
+            </>
+          )}
+          {book.pageCount ? (
+            <>
+              <span aria-hidden="true">·</span>
+              <span>{t("pagesCount", { count: book.pageCount })}</span>
+            </>
+          ) : null}
+        </p>
         {book.firstInsight && (
           <p className="text-sm text-text-secondary mt-2 line-clamp-2">{book.firstInsight}</p>
         )}
-        <div className="mt-4 flex items-center justify-between gap-2">
+        <div className="mt-4">
           <span className="text-lg font-bold text-gold">
             {book.priceCents === 0 ? t("free") : formatPrice(book.priceCents, book.currency)}
           </span>

@@ -3,20 +3,21 @@ import Image from "next/image";
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import {
+  BASE_URL,
   buildPageMetadata,
   bookOgImageUrl,
   normalizeLocale,
   OG_IMAGE_HEIGHT,
   OG_IMAGE_WIDTH,
 } from "@/lib/seo";
-import { formatPrice } from "@/lib/utils";
+import { formatPrice, formatFileSize, fileFormatLabel, safeJsonLd } from "@/lib/utils";
 import { isPaypalCurrency } from "@/lib/currency";
 import { isPaypalApiConfigured, isPaypalDirectConfigured } from "@/lib/paypal-direct";
 import { Link } from "@/i18n/routing";
 import AddToCartButton from "@/components/store/AddToCartButton";
 import BookViewBeacon from "@/components/store/BookViewBeacon";
 import BookCard, { type StoreBook } from "@/components/store/BookCard";
-import { BookOpen, Check, ChevronLeft, Calendar, Globe, Hash } from "lucide-react";
+import { BookOpen, Check, ChevronLeft, Calendar, Globe, Hash, FileDown } from "lucide-react";
 import type { Book } from "@prisma/client";
 
 export const revalidate = 60;
@@ -102,6 +103,18 @@ export default async function BookDetailPage({
     (l === "fr" && book.keyInsightsFr.length ? book.keyInsightsFr : book.keyInsights) || [];
   const coverUrl = book.coverImageId ? `/api/uploads/${book.coverImageId}` : null;
 
+  // What the buyer receives. The file's size lives on the asset, not the book,
+  // and is worth showing: these are multi-hundred-page PDFs and someone on a
+  // mobile connection deserves to know before paying.
+  const format = fileFormatLabel(book.fileMimeType);
+  const asset = book.fileId
+    ? await prisma.bookAsset.findUnique({
+        where: { id: book.fileId },
+        select: { size: true },
+      })
+    : null;
+  const fileSize = asset?.size ? formatFileSize(asset.size) : null;
+
   // Only promise the payment methods this book's currency can actually use:
   // PayPal cannot settle XOF, so an XOF title is mobile money only.
   const paypalAvailable =
@@ -130,10 +143,45 @@ export default async function BookDetailPage({
     category: b.category,
     tags: b.tags,
     featured: b.featured,
+    pageCount: b.pageCount,
+    fileMimeType: b.fileMimeType,
   }));
+
+  // Structured data so a search result can carry the cover, price and
+  // availability instead of a bare blue link. Declared as both Book and Product:
+  // Book is the accurate type, Product is what search engines read offers from.
+  const canonical = `${BASE_URL}/${l}/store/${book.slug}`;
+  const bookJsonLd = {
+    "@context": "https://schema.org",
+    "@type": ["Book", "Product"],
+    name: title,
+    ...(subtitle ? { alternativeHeadline: subtitle } : {}),
+    description,
+    url: canonical,
+    ...(coverUrl ? { image: `${BASE_URL}${coverUrl}` } : {}),
+    author: { "@type": "Person", name: book.author },
+    datePublished: String(book.publicationYear),
+    ...(book.pageCount ? { numberOfPages: book.pageCount } : {}),
+    ...(book.language ? { inLanguage: book.language } : {}),
+    ...(book.isbn ? { isbn: book.isbn } : {}),
+    bookFormat: "https://schema.org/EBook",
+    ...(format ? { fileFormat: book.fileMimeType } : {}),
+    offers: {
+      "@type": "Offer",
+      price: (book.priceCents / 100).toFixed(2),
+      priceCurrency: book.currency,
+      availability: "https://schema.org/InStock",
+      url: canonical,
+      seller: { "@type": "Person", name: book.author },
+    },
+  };
 
   return (
     <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: safeJsonLd(bookJsonLd) }}
+      />
       <BookViewBeacon slug={book.slug} />
       <Link
         href="/store"
@@ -223,13 +271,20 @@ export default async function BookDetailPage({
             {book.pageCount ? (
               <span className="flex items-center gap-1.5">
                 <BookOpen className="w-4 h-4 text-gold/60" />
-                {book.pageCount} {l === "fr" ? "pages" : "pages"}
+                {book.pageCount.toLocaleString(l)} pages
               </span>
             ) : null}
             {book.isbn && (
               <span className="flex items-center gap-1.5">
                 <Hash className="w-4 h-4 text-gold/60" />
                 ISBN {book.isbn}
+              </span>
+            )}
+            {format && (
+              <span className="flex items-center gap-1.5">
+                <FileDown className="w-4 h-4 text-gold/60" />
+                {format}
+                {fileSize ? ` · ${fileSize}` : ""}
               </span>
             )}
           </div>

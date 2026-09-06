@@ -60,6 +60,8 @@ export default async function StorePage({
     category: b.category,
     tags: b.tags,
     featured: b.featured,
+    pageCount: b.pageCount,
+    fileMimeType: b.fileMimeType,
   }));
 
   return (
