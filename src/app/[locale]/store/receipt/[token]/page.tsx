@@ -104,18 +104,25 @@ export default async function ReceiptPage({
         {order.status === "PENDING" && isMobileMoney && (
           <div className="rounded-xl border border-gold/25 bg-gold/5 p-5 mb-6">
             <p className="text-sm text-text-secondary mb-3">{t("invoicePayInstruction")}</p>
-            <div className="grid sm:grid-cols-2 gap-3 mb-4">
+            {/* Amount, destination and reference together: a mobile-money transfer
+                carries only a phone number, so without the order number there is
+                nothing tying the payment that arrives to this order. */}
+            <div className="grid sm:grid-cols-3 gap-3 mb-4">
               <div className="rounded-lg bg-navy/50 border border-glass-border p-3">
                 <div className="text-[11px] text-text-secondary">{t("mmAmount")}</div>
                 <div className="font-bold text-gold text-lg">
                   {formatPrice(order.totalCents, order.currency)}
                 </div>
               </div>
-              <div className="rounded-lg bg-navy/50 border border-glass-border p-3">
+              <div className="rounded-lg bg-navy/50 border border-glass-border p-3 min-w-0">
                 <div className="text-[11px] text-text-secondary">
                   {t("mmNumber")} · {mobileMoneyLabel(order.paymentMethod)}
                 </div>
                 <div className="font-bold text-lg">{MOBILE_MONEY_NUMBER}</div>
+              </div>
+              <div className="rounded-lg bg-navy/50 border border-glass-border p-3">
+                <div className="text-[11px] text-text-secondary">{t("mmOrderReference")}</div>
+                <div className="font-semibold text-lg tracking-wide">{order.orderNumber}</div>
               </div>
             </div>
             <p className="text-xs text-text-secondary">{t("invoiceThenProof")}</p>

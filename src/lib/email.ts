@@ -1,7 +1,7 @@
 import nodemailer, { type Transporter } from "nodemailer";
 import { prisma } from "./prisma";
 import { formatMoney } from "./currency";
-import { MOBILE_MONEY_NUMBER, mobileMoneyLabel } from "./mobile-money";
+import { MOBILE_MONEY_NUMBER, MOBILE_MONEY_PROVIDERS, mobileMoneyLabel } from "./mobile-money";
 import { PAYPAL_ME_HANDLE, PAYPAL_RECEIVE_EMAIL, paypalMeLink } from "./paypal-direct";
 import { getEmailConfig, isConfigComplete, type EmailConfig } from "./email-config";
 
@@ -264,13 +264,31 @@ export async function sendOrderInvoiceEmail(params: OrderInvoiceParams): Promise
   await sendEmail(params.to, `Invoice — please complete payment · Order ${params.orderNumber}`, html);
 }
 
-/** Payment instructions panel for a mobile-money invoice. */
-function mobileMoneyPayBlock(total: string, providerLabel: string): string {
+/**
+ * Payment instructions panel for a mobile-money invoice.
+ *
+ * The order number is shown as the payment reference and repeated in the
+ * follow-up step: these transfers arrive with only a phone number attached, so
+ * without a reference the merchant cannot tell which order a payment settles.
+ */
+function mobileMoneyPayBlock(
+  total: string,
+  providerLabel: string,
+  orderNumber: string
+): string {
+  // The same number accepts every provider, so offer the others as fallbacks —
+  // without listing the one they already chose back at them.
+  const alternatives = MOBILE_MONEY_PROVIDERS.map((p) => p.label)
+    .filter((label) => label !== providerLabel)
+    .join(" / ");
+
   return `
           <div style="background-color:#0a0f1e;border:1px solid rgba(212,168,67,0.2);border-radius:10px;padding:16px;margin:8px 0 20px;">
-            <p style="margin:0 0 8px;font-size:13px;color:#8892a4;">Pay <strong style="color:#f1f5f9;">${total}</strong> via <strong style="color:#f1f5f9;">${providerLabel}</strong> (or Wave / Djamo / Orange Money) to:</p>
-            <p style="margin:0 0 8px;font-size:20px;color:#d4a843;font-weight:700;letter-spacing:0.5px;">${MOBILE_MONEY_NUMBER}</p>
-            <p style="margin:0;font-size:12px;color:#8892a4;">After paying, send your proof of payment (a screenshot) to this number so we can confirm it.</p>
+            <p style="margin:0 0 8px;font-size:13px;color:#8892a4;">Pay <strong style="color:#f1f5f9;">${total}</strong> via <strong style="color:#f1f5f9;">${providerLabel}</strong>${alternatives ? ` (${alternatives} also work)` : ""} to:</p>
+            <p style="margin:0 0 12px;font-size:20px;color:#d4a843;font-weight:700;letter-spacing:0.5px;">${MOBILE_MONEY_NUMBER}</p>
+            <p style="margin:0 0 4px;font-size:12px;color:#8892a4;">Use this as the payment reference:</p>
+            <p style="margin:0 0 12px;font-size:16px;color:#f1f5f9;font-weight:700;letter-spacing:1px;">${orderNumber}</p>
+            <p style="margin:0;font-size:12px;color:#8892a4;">After paying, send your proof of payment (a screenshot) to <strong style="color:#f1f5f9;">${MOBILE_MONEY_NUMBER}</strong> on WhatsApp, quoting <strong style="color:#f1f5f9;">${orderNumber}</strong>, so we can match and confirm it quickly.</p>
           </div>`;
 }
 
@@ -336,7 +354,7 @@ function buildOrderInvoiceEmail({
   const payBlock =
     provider === "PAYPAL"
       ? paypalPayBlock(total, totalCents, currency, orderNumber)
-      : mobileMoneyPayBlock(total, mobileMoneyLabel(provider));
+      : mobileMoneyPayBlock(total, mobileMoneyLabel(provider), orderNumber);
 
   return `
 <!DOCTYPE html>
@@ -577,4 +595,103 @@ export async function sendOrderLookupEmail(
 </html>`;
 
   await sendEmail(to, "Your bookstore orders & downloads", html);
+}
+
+interface AdminOrderAlertParams {
+  orderNumber: string;
+  buyerEmail: string;
+  buyerName?: string | null;
+  provider: string;
+  currency: string;
+  totalCents: number;
+  paymentReference?: string | null;
+  items: ReceiptItem[];
+  adminUrl: string;
+}
+
+/**
+ * Where admin alerts go. Mobile-money and PayPal-direct payments land in an
+ * account, not a webhook, so nothing tells the merchant an order is waiting
+ * unless we do — and an order nobody confirms is a sale that quietly dies.
+ *
+ * Defaults to the SMTP reply-to (else the SMTP user) so this works the moment
+ * mail is configured, with ADMIN_NOTIFY_EMAIL to send the alerts elsewhere.
+ */
+async function adminNotifyAddress(): Promise<string> {
+  const explicit = process.env.ADMIN_NOTIFY_EMAIL?.trim();
+  if (explicit) return explicit;
+  const cfg = await getEmailConfig();
+  return cfg.replyTo || cfg.user || "";
+}
+
+/**
+ * Tell the merchant a manually-settled order is waiting for confirmation.
+ *
+ * Best-effort and deliberately separate from the buyer's invoice: the buyer
+ * getting their instructions matters more than the alert, so a failure here
+ * must never be able to swallow that.
+ */
+export async function notifyAdminOfManualOrder(
+  params: AdminOrderAlertParams
+): Promise<void> {
+  const to = await adminNotifyAddress();
+  if (!to) return; // Nowhere to send — not an error worth failing an order over.
+
+  const {
+    orderNumber, buyerEmail, buyerName, provider, currency,
+    totalCents, paymentReference, items, adminUrl,
+  } = params;
+
+  const total = fmtMoney(totalCents, currency);
+  const label = provider === "PAYPAL" ? "PayPal (direct)" : mobileMoneyLabel(provider);
+  const rows = items
+    .map(
+      (i) => `
+            <tr>
+              <td style="padding:4px 0;font-size:14px;color:#f1f5f9;">${i.title}</td>
+              <td style="padding:4px 0;font-size:14px;color:#8892a4;text-align:center;">&times;${i.quantity}</td>
+              <td style="padding:4px 0;font-size:14px;color:#f1f5f9;text-align:right;">${fmtMoney(i.lineTotalCents, currency)}</td>
+            </tr>`
+    )
+    .join("");
+
+  const reference = paymentReference
+    ? `<p style="margin:0 0 4px;font-size:13px;color:#8892a4;">Reference given by the buyer: <strong style="color:#f1f5f9;">${paymentReference}</strong></p>`
+    : `<p style="margin:0 0 4px;font-size:13px;color:#8892a4;">The buyer did not provide a transaction reference.</p>`;
+
+  const html = `
+<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"></head>
+<body style="margin:0;padding:0;background-color:#0a0f1e;font-family:Arial,Helvetica,sans-serif;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#0a0f1e;">
+    <tr><td align="center" style="padding:40px 20px;">
+      <table role="presentation" width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;">
+        <tr><td style="text-align:center;padding-bottom:24px;">
+          <h1 style="margin:0;font-size:24px;color:#d4a843;font-weight:bold;">KONAN Amani Dieudonn&eacute;</h1>
+          <p style="margin:4px 0 0;font-size:13px;color:#8892a4;">Bookstore &middot; Action needed</p>
+        </td></tr>
+        <tr><td style="background-color:#111827;border:1px solid rgba(212,168,67,0.2);border-radius:12px;padding:32px;">
+          <p style="margin:0 0 4px;font-size:12px;color:#d4a843;text-transform:uppercase;letter-spacing:1px;font-weight:600;">Awaiting your confirmation</p>
+          <h2 style="margin:0 0 4px;font-size:20px;color:#f1f5f9;">Order ${orderNumber}</h2>
+          <p style="margin:0 0 20px;font-size:14px;color:#8892a4;line-height:1.6;">A buyer has placed an order to be paid by <strong style="color:#f1f5f9;">${label}</strong>. Check that the money has arrived, then mark the order paid &mdash; that is what sends their download links.</p>
+
+          <div style="background-color:#0a0f1e;border:1px solid rgba(212,168,67,0.2);border-radius:10px;padding:16px;margin:0 0 20px;">
+            <p style="margin:0 0 4px;font-size:13px;color:#8892a4;">Buyer: <strong style="color:#f1f5f9;">${buyerName ? `${buyerName} &middot; ` : ""}${buyerEmail}</strong></p>
+            <p style="margin:0 0 4px;font-size:13px;color:#8892a4;">Expected amount: <strong style="color:#d4a843;font-size:16px;">${total}</strong></p>
+            ${reference}
+          </div>
+
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:20px;">${rows}</table>
+
+          <a href="${adminUrl}" style="display:inline-block;padding:11px 24px;background-color:#d4a843;color:#0a0f1e;text-decoration:none;border-radius:8px;font-weight:600;font-size:14px;">Open the orders page</a>
+        </td></tr>
+        <tr><td style="text-align:center;padding-top:24px;"><p style="margin:0;font-size:12px;color:#4b5563;">The buyer sees &ldquo;awaiting confirmation&rdquo; until you mark this order paid.</p></td></tr>
+      </table>
+    </td></tr>
+  </table>
+</body>
+</html>`;
+
+  await sendEmail(to, `Payment to confirm — Order ${orderNumber} (${total} via ${label})`, html);
 }

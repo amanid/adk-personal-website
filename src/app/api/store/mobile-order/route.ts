@@ -1,8 +1,8 @@
-import { NextResponse } from "next/server";
+import { NextResponse, after } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { manualOrderSchema } from "@/lib/validations";
 import { priceOrder, generateOrderNumber, secureToken } from "@/lib/store";
-import { sendOrderInvoiceEmail } from "@/lib/email";
+import { sendOrderInvoiceEmail, notifyAdminOfManualOrder } from "@/lib/email";
 import { sanitizeInput } from "@/lib/sanitize";
 import { rateLimit } from "@/lib/rate-limit";
 import { checkOrigin } from "@/lib/origin-check";
@@ -107,10 +107,13 @@ export async function POST(request: Request) {
       },
     });
 
-    // Email the invoice with payment instructions (best-effort).
+    // Mail is sent after the response so the buyer isn't kept waiting on SMTP,
+    // but it must be handed to after() rather than left as a floating promise:
+    // an un-awaited send can be cut off when the response ends, losing both the
+    // email and the invoiceEmailedAt write with nothing recorded anywhere.
     const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
     const locale = localeFromReferer(request);
-    sendOrderInvoiceEmail({
+    const invoiceParams = {
       to: order.email,
       name: order.name,
       orderNumber: order.orderNumber,
@@ -127,22 +130,43 @@ export async function POST(request: Request) {
       })),
       provider,
       receiptUrl: `${appUrl}/${locale}/store/receipt/${order.receiptToken}`,
-    })
-      .then(() =>
-        prisma.order.update({
+    };
+
+    after(async () => {
+      try {
+        await sendOrderInvoiceEmail(invoiceParams);
+        await prisma.order.update({
           where: { id: order.id },
           data: { invoiceEmailedAt: new Date(), lastEmailError: null },
-        })
-      )
-      .catch((err) => {
+        });
+      } catch (err) {
         console.error("Invoice email failed:", err);
-        return prisma.order
+        await prisma.order
           .update({
             where: { id: order.id },
-            data: { lastEmailError: String(err?.message || err).slice(0, 500) },
+            data: { lastEmailError: String((err as Error)?.message || err).slice(0, 500) },
           })
           .catch(() => {});
-      });
+      }
+
+      // A manual payment is only money once the admin confirms it, so tell
+      // them an order is waiting. Never let this failure mask the invoice.
+      try {
+        await notifyAdminOfManualOrder({
+          orderNumber: order.orderNumber,
+          buyerEmail: order.email,
+          buyerName: order.name,
+          provider,
+          currency: priced.currency,
+          totalCents: priced.totalCents,
+          paymentReference: order.paymentReference,
+          items: invoiceParams.items,
+          adminUrl: `${appUrl}/${locale}/admin/store/orders`,
+        });
+      } catch (err) {
+        console.error("Admin new-order notification failed:", err);
+      }
+    });
 
     return NextResponse.json({ receiptToken: order.receiptToken });
   } catch (error) {
