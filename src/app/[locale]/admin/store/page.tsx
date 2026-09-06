@@ -115,6 +115,8 @@ export default function AdminStorePage() {
   const cancelEnrich = useRef(false);
   const [aiBusy, setAiBusy] = useState(false);
   const [aiError, setAiError] = useState<string | null>(null);
+  // What a file replacement changed, so the refresh isn't silent.
+  const [refreshNote, setRefreshNote] = useState<string | null>(null);
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [confirmDialog, setConfirmDialog] = useState<null | {
     title: string;
@@ -191,6 +193,7 @@ export default function AdminStorePage() {
     setForm(emptyForm);
     setError(null);
     setAiError(null);
+    setRefreshNote(null);
     setShowEditor(true);
   };
 
@@ -225,6 +228,7 @@ export default function AdminStorePage() {
     });
     setError(null);
     setAiError(null);
+    setRefreshNote(null);
     setShowEditor(true);
   };
 
@@ -288,50 +292,104 @@ export default function AdminStorePage() {
     }
   };
 
-  // Auto-fill empty form fields from parsed file metadata; never overwrite
-  // values the admin has already entered.
+  /**
+   * Apply an uploaded file to the editor.
+   *
+   * A first upload fills whatever is still empty. Replacing the file of a book
+   * that already has one is different: page count, cover, ISBN, language and
+   * year describe the FILE, so once the file changes the old values are simply
+   * wrong — and they are shown to buyers on the storefront. Those are refreshed
+   * unconditionally, and the listing prose is redrafted from the new text.
+   *
+   * The title and subtitle are deliberately left alone. They are the most
+   * curated fields, and a PDF's embedded title is frequently junk
+   * ("Microsoft Word - final_v3"), so replacing a file must not rename a book.
+   *
+   * Nothing here is persisted until Save, so an unwanted refresh is undone by
+   * closing the editor.
+   */
   const handleBookFileUpload = (result: BookUploadResult) => {
-    setForm((prev) => {
-      const next = {
-        ...prev,
-        fileId: result.fileId,
-        fileName: result.fileName,
-        fileMimeType: result.fileMimeType,
-      };
-      const m = result.metadata;
-      if (m) {
-        if (!prev.title.trim() && m.title) next.title = m.title;
-        if (!prev.description.trim() && m.description) next.description = m.description;
-        if (!prev.isbn.trim() && m.isbn) next.isbn = m.isbn;
-        if (m.publicationYear) next.publicationYear = m.publicationYear;
-        if ((!prev.pageCount || prev.pageCount === 0) && m.pageCount) next.pageCount = m.pageCount;
-        if ((!prev.language.trim() || prev.language === "English") && m.language)
-          next.language = m.language;
-        if (!prev.keyInsights.trim() && m.keyInsights?.length)
-          next.keyInsights = m.keyInsights.join("\n");
-        if (!prev.category.trim() && m.category) next.category = m.category;
-        if (!prev.tags.trim() && m.tags?.length) next.tags = m.tags.join(", ");
+    // Derived from the current form rather than inside the setForm updater:
+    // React may run an updater twice, which would double-count the changes.
+    const prev = form;
+    const isReplacement = Boolean(prev.fileId);
+    const m = result.metadata;
+    const changed: string[] = [];
+
+    const next = {
+      ...prev,
+      fileId: result.fileId,
+      fileName: result.fileName,
+      fileMimeType: result.fileMimeType,
+    };
+
+    if (m) {
+      if (!prev.title.trim() && m.title) next.title = m.title;
+      if (!prev.description.trim() && m.description) next.description = m.description;
+
+      // File-derived facts: follow the file on a replacement.
+      if (m.isbn && (isReplacement || !prev.isbn.trim())) {
+        if (isReplacement && m.isbn !== prev.isbn) changed.push(`ISBN ${m.isbn}`);
+        next.isbn = m.isbn;
       }
-      if (result.coverImageId && !prev.coverImageId) {
-        next.coverImageId = result.coverImageId;
+      if (m.publicationYear) next.publicationYear = m.publicationYear;
+      if (m.pageCount && (isReplacement || !prev.pageCount)) {
+        if (isReplacement && m.pageCount !== prev.pageCount) {
+          changed.push(`${m.pageCount.toLocaleString()} pages`);
+        }
+        next.pageCount = m.pageCount;
       }
-      return next;
-    });
+      if (
+        m.language &&
+        (isReplacement || !prev.language.trim() || prev.language === "English")
+      ) {
+        if (isReplacement && m.language !== prev.language) changed.push(m.language);
+        next.language = m.language;
+      }
+
+      if (!prev.keyInsights.trim() && m.keyInsights?.length)
+        next.keyInsights = m.keyInsights.join("\n");
+      if (!prev.category.trim() && m.category) next.category = m.category;
+      if (!prev.tags.trim() && m.tags?.length) next.tags = m.tags.join(", ");
+    }
+
+    // A new file means a new first page, so the old rasterised cover no longer
+    // represents it.
+    if (result.coverImageId && (isReplacement || !prev.coverImageId)) {
+      if (isReplacement && result.coverImageId !== prev.coverImageId) changed.push("cover");
+      next.coverImageId = result.coverImageId;
+    }
+
+    setForm(next);
+    setRefreshNote(
+      isReplacement
+        ? changed.length
+          ? `Updated from the new file: ${changed.join(", ")}.` +
+            (result.aiPending ? " Redrafting the listing…" : "")
+          : "File replaced. Nothing else changed."
+        : null
+    );
 
     // AI drafting is a SEPARATE request on purpose. Doing it inside the upload
     // used to push that one request past the proxy's origin timeout on a big
     // PDF, and the browser got an HTML error page instead of JSON.
     if (result.aiPending) {
-      void autoDraftWithAI(result);
+      void autoDraftWithAI(result, { overwrite: isReplacement });
     }
   };
 
   /**
-   * Fill the description / insights / category / tags from AI right after an
-   * upload — but only where the admin has not already typed something, and
-   * never blocking the editor if it fails.
+   * Draft the description / insights / category / tags from AI right after an
+   * upload. Never blocks the editor if it fails.
+   *
+   * `overwrite` is set when replacing an existing book's file: the prose
+   * describes content that has just changed, so leaving the old text in place
+   * would leave the listing describing a file that is no longer there.
    */
-  const autoDraftWithAI = async (result: BookUploadResult) => {
+  const autoDraftWithAI = async (
+    result: BookUploadResult,
+    { overwrite = false }: { overwrite?: boolean } = {}
+  ) => {
     setAiBusy(true);
     setAiError(null);
     try {
@@ -351,16 +409,31 @@ export default function AdminStorePage() {
         tags?: string[];
       }>(res, "AI drafting failed");
 
+      const take = (hasValue: boolean) => overwrite || !hasValue;
       setForm((prev) => ({
         ...prev,
-        description: !prev.description.trim() && data.description ? data.description : prev.description,
+        description:
+          data.description && take(Boolean(prev.description.trim()))
+            ? data.description
+            : prev.description,
         keyInsights:
-          !prev.keyInsights.trim() && data.keyInsights?.length
+          data.keyInsights?.length && take(Boolean(prev.keyInsights.trim()))
             ? data.keyInsights.join("\n")
             : prev.keyInsights,
-        category: !prev.category.trim() && data.category ? data.category : prev.category,
-        tags: !prev.tags.trim() && data.tags?.length ? data.tags.join(", ") : prev.tags,
+        category:
+          data.category && take(Boolean(prev.category.trim())) ? data.category : prev.category,
+        tags:
+          data.tags?.length && take(Boolean(prev.tags.trim()))
+            ? data.tags.join(", ")
+            : prev.tags,
       }));
+      if (overwrite) {
+        setRefreshNote((note) =>
+          note
+            ? note.replace("Redrafting the listing…", "Listing redrafted from the new file.")
+            : "Listing redrafted from the new file."
+        );
+      }
     } catch (err) {
       // The file is already saved; a failed draft is not a failed upload.
       setAiError(
@@ -1236,9 +1309,18 @@ export default function AdminStorePage() {
                   onClear={() => setForm({ ...form, fileId: "", fileName: "", fileMimeType: "" })}
                 />
               </div>
+              {refreshNote && (
+                <p className="text-xs text-gold -mt-2 flex items-start gap-1.5">
+                  <Sparkles className="w-3.5 h-3.5 mt-0.5 shrink-0" />
+                  <span>{refreshNote}</span>
+                </p>
+              )}
               <p className="text-xs text-text-secondary -mt-2">
-                Uploading a PDF/EPUB auto-fills empty fields (title, author, year, pages, ISBN,
-                language, description) — and the cover for EPUBs. Your edits are never overwritten.
+                A first upload fills whatever is still empty (title, author, year, pages, ISBN,
+                language, description) and sets the cover. <strong>Replacing</strong> the file
+                refreshes everything that describes it — pages, ISBN, language, cover — and
+                redrafts the listing, since those would otherwise describe the old file. The title
+                and subtitle are never changed. Nothing is saved until you press Save.
               </p>
 
               <div className="grid sm:grid-cols-3 gap-4 items-end">
