@@ -105,6 +105,14 @@ export default function AdminStorePage() {
   const [bulkBusy, setBulkBusy] = useState(false);
   const [bulkResult, setBulkResult] = useState<string | null>(null);
   const bulkInputRef = useRef<HTMLInputElement>(null);
+  // Bulk AI enrichment runs book-by-book; this tracks where it has got to.
+  const [enrichRun, setEnrichRun] = useState<null | {
+    done: number;
+    total: number;
+    current: string;
+    log: string[];
+  }>(null);
+  const cancelEnrich = useRef(false);
   const [aiBusy, setAiBusy] = useState(false);
   const [aiError, setAiError] = useState<string | null>(null);
   const [selected, setSelected] = useState<Set<string>>(new Set());
@@ -411,6 +419,71 @@ export default function AdminStorePage() {
     }
   };
 
+  /**
+   * Draft catalogue copy for every book, one request per book.
+   *
+   * Sequential on purpose: each book means extracting its text and waiting on
+   * the model, so a single request for the whole catalogue would run past the
+   * proxy's ~100s limit and come back as an HTML error page. Doing one at a
+   * time also keeps it resumable — stopping or a failure part-way leaves every
+   * book already processed saved.
+   */
+  const runBulkEnrich = async (overwrite: boolean) => {
+    const targets = books.map((b) => ({ id: b.id, title: b.title }));
+    if (targets.length === 0) return;
+
+    cancelEnrich.current = false;
+    setBulkResult(null);
+    setEnrichRun({ done: 0, total: targets.length, current: targets[0].title, log: [] });
+
+    let updated = 0;
+    let skipped = 0;
+    let failed = 0;
+    const log: string[] = [];
+
+    for (let i = 0; i < targets.length; i++) {
+      if (cancelEnrich.current) {
+        log.push(`Stopped after ${i} of ${targets.length}.`);
+        break;
+      }
+      const book = targets[i];
+      setEnrichRun({ done: i, total: targets.length, current: book.title, log: [...log] });
+
+      try {
+        const res = await fetch(`/api/admin/books/${book.id}/enrich`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ overwrite }),
+        });
+        const data = await readJson<{
+          status?: string;
+          fields?: string[];
+          reason?: string;
+        }>(res, "Enrichment failed");
+
+        if (data.status === "updated") {
+          updated++;
+          log.push(`✓ ${book.title} — ${(data.fields || []).join(", ")}`);
+        } else {
+          skipped++;
+          log.push(`– ${book.title} — ${data.reason || "skipped"}`);
+        }
+      } catch (err) {
+        failed++;
+        log.push(`✗ ${book.title} — ${err instanceof Error ? err.message : "failed"}`);
+      }
+    }
+
+    setEnrichRun(null);
+    setBulkResult(
+      `AI drafting finished: ${updated} updated` +
+        (skipped ? `, ${skipped} skipped` : "") +
+        (failed ? `, ${failed} failed` : "") +
+        `.\n${log.join("\n")}`
+    );
+    fetchBooks();
+  };
+
   const handleBulkImport = async (fileList: FileList) => {
     if (fileList.length === 0) return;
     setBulkBusy(true);
@@ -608,11 +681,33 @@ export default function AdminStorePage() {
           />
           <button
             onClick={() => bulkInputRef.current?.click()}
-            disabled={bulkBusy}
+            disabled={bulkBusy || enrichRun !== null}
             className="flex items-center gap-2 px-4 py-2 border border-gold/40 text-gold font-medium rounded-lg hover:bg-gold/10 transition-all disabled:opacity-50"
           >
             <UploadCloud className="w-4 h-4" />
             {bulkBusy ? "Importing…" : "Bulk import"}
+          </button>
+          <button
+            onClick={() =>
+              setConfirmDialog({
+                title: "Draft listings for every book with AI",
+                message:
+                  `This reads each of the ${books.length} books and rewrites its description from ` +
+                  `the actual text. Key insights, category and tags are only filled in where they ` +
+                  `are currently empty, so nothing you have written by hand is replaced. Any DOI ` +
+                  `in an existing description is carried across.\n\n` +
+                  `It runs one book at a time — roughly ${Math.max(1, Math.round(books.length * 10 / 60))}–` +
+                  `${Math.max(2, Math.round(books.length * 25 / 60))} minutes for ${books.length}. You can stop it ` +
+                  `part-way; books already done stay saved.`,
+                confirmLabel: "Draft all listings",
+                onConfirm: () => runBulkEnrich(false),
+              })
+            }
+            disabled={bulkBusy || enrichRun !== null || books.length === 0}
+            className="flex items-center gap-2 px-4 py-2 border border-gold/40 text-gold font-medium rounded-lg hover:bg-gold/10 transition-all disabled:opacity-50"
+          >
+            <Sparkles className="w-4 h-4" />
+            Draft all with AI
           </button>
           <button
             onClick={openCreate}
@@ -624,10 +719,50 @@ export default function AdminStorePage() {
         </div>
       </div>
 
+      {enrichRun && (
+        <div className="glass rounded-lg p-4 mb-4 text-sm">
+          <div className="flex items-center gap-2 mb-2">
+            <Sparkles className="w-4 h-4 text-gold shrink-0 animate-pulse" />
+            <span className="flex-1">
+              Drafting {enrichRun.done + 1} of {enrichRun.total} —{" "}
+              <span className="text-text-secondary">{enrichRun.current}</span>
+            </span>
+            <button
+              onClick={() => {
+                cancelEnrich.current = true;
+              }}
+              className="text-xs px-2 py-1 rounded border border-glass-border text-text-secondary hover:text-gold hover:border-gold/40"
+            >
+              Stop
+            </button>
+          </div>
+          <div
+            className="h-1.5 rounded-full bg-navy/60 overflow-hidden"
+            role="progressbar"
+            aria-valuemin={0}
+            aria-valuemax={enrichRun.total}
+            aria-valuenow={enrichRun.done}
+            aria-label="Books drafted"
+          >
+            <div
+              className="h-full bg-gold transition-all duration-300"
+              style={{ width: `${(enrichRun.done / enrichRun.total) * 100}%` }}
+            />
+          </div>
+          {enrichRun.log.length > 0 && (
+            <ul className="mt-3 space-y-0.5 text-xs text-text-secondary max-h-32 overflow-y-auto">
+              {enrichRun.log.map((line, i) => (
+                <li key={i}>{line}</li>
+              ))}
+            </ul>
+          )}
+        </div>
+      )}
+
       {bulkResult && (
         <div className="glass rounded-lg p-3 mb-4 text-sm flex items-start gap-2">
           <UploadCloud className="w-4 h-4 text-gold mt-0.5 shrink-0" />
-          <span className="flex-1">{bulkResult}</span>
+          <span className="flex-1 whitespace-pre-wrap">{bulkResult}</span>
           <button
             onClick={() => setBulkResult(null)}
             className="text-text-secondary hover:text-gold text-xs"
