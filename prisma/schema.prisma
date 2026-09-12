@@ -606,3 +606,55 @@ model DownloadGrant {
   @@index([token])
   @@index([orderId])
 }
+
+/// Broad instrument class, used to group the watchlist in the admin UI.
+enum InstrumentCategory {
+  FOREX
+  ENERGY
+  METALS
+  SOFTS
+  INDEX
+  EQUITY
+  OTHER
+}
+
+/// An instrument the admin follows. `symbol` is a Yahoo Finance ticker
+/// (e.g. "CL=F", "EURUSD=X", "^GSPC") — quotes and history are fetched by it.
+model WatchlistItem {
+  id        String             @id @default(cuid())
+  symbol    String             @unique
+  name      String
+  category  InstrumentCategory @default(OTHER)
+  /// Display unit, e.g. "$/bbl". Free text; purely cosmetic.
+  unit      String?
+  notes     String?
+  sortOrder Int                @default(0)
+  createdAt DateTime           @default(now())
+
+  @@index([category, sortOrder])
+}
+
+/// A recorded position, marked to market against live quotes.
+///
+/// Bookkeeping only: nothing here places, settles or clears an order. Quantity
+/// and prices are Float because a symbolic stake buys fractional units and the
+/// quotes themselves arrive as floats; this is a tracker, not a ledger of record.
+model Position {
+  id         String    @id @default(cuid())
+  symbol     String
+  name       String
+  quantity   Float
+  entryPrice Float
+  /// Currency the prices are quoted in (informational; no FX conversion).
+  currency   String    @default("USD")
+  openedAt   DateTime  @default(now())
+  /// Set together when a position is closed; null while it is open.
+  closedAt   DateTime?
+  closePrice Float?
+  notes      String?
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+
+  @@index([symbol])
+  @@index([closedAt])
+}

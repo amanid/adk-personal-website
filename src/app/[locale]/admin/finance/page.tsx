@@ -8,13 +8,14 @@ import {
   ExternalLink,
   Clock,
   BarChart3,
-  Activity,
   Percent,
   Layers,
 } from "lucide-react";
 import StatCard from "@/components/admin/charts/StatCard";
 import SparklineChart from "@/components/admin/charts/SparklineChart";
 import CommodityPriceChart from "@/components/admin/charts/CommodityPriceChart";
+import MarketWatchlist from "@/components/admin/finance/MarketWatchlist";
+import PositionTracker from "@/components/admin/finance/PositionTracker";
 
 interface Commodity {
   symbol: string;
@@ -311,6 +312,11 @@ export default function FinancePage() {
 
       {/* Quick Links */}
       <h2 className="text-lg font-semibold mb-3">Quick Links</h2>
+      <div className="space-y-6 mb-8">
+        <MarketWatchlist />
+        <PositionTracker />
+      </div>
+
       <div className="flex flex-wrap gap-3">
         <a
           href="https://www.abidjan.net/bourse/"
