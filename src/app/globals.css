@@ -1,34 +1,79 @@
 @import "tailwindcss";
 
+/*
+ * Surfaces are stepped in PERCEPTUAL lightness (CIE L*), not in contrast ratio.
+ * Contrast ratio is near-useless for separating dark greys — the previous
+ * palette measured 1.08:1 between the page, cards and "glass", which is why
+ * everything read as one flat plane. Even L* steps of ~5 give a ladder the eye
+ * actually climbs.
+ *
+ * Token NAMES are unchanged on purpose: `glass` is used 468 times and
+ * `bg-navy/50` 131 times, so the whole site re-skins from this block alone.
+ *   charcoal   = page
+ *   navy       = recessed wells (inputs) — must stay DARKER than a card
+ *   glass      = card surface
+ *   navy-light = raised surface
+ */
 @theme {
-  --color-charcoal: #0c0c14;
-  --color-navy: #0f1629;
-  --color-navy-light: #1a2540;
+  --color-charcoal: #0e1320;
+  --color-navy: #080b12;
+  --color-navy-light: #1e2946;
   --color-gold: #c9a84c;
   --color-gold-light: #dfc272;
   --color-gold-dark: #a68b32;
-  --color-glass: rgba(255, 255, 255, 0.04);
-  --color-glass-border: rgba(255, 255, 255, 0.08);
-  --color-text-primary: #eef2f7;
-  --color-text-secondary: #8b9bb4;
-  --color-text-muted: #7d8ca6;
+  --color-glass: #171f34;
+  --color-glass-border: #334575;
+  /* Text ramp: even perceptual steps (1.56 then 1.62 between levels). The old
+     secondary/muted pair sat 1.21 apart — effectively one colour doing two
+     jobs — so nothing below a heading had any hierarchy. Muted is set at the
+     AA floor for the LIGHTEST surface, so it stays legible on every layer. */
+  --color-text-primary: #f2f5fa;
+  --color-text-secondary: #bac7dc;
+  --color-text-muted: #8a9db9;
+
+  /* Elevation, addressable directly as bg-surface-1/2/3 in new work. */
+  --color-surface-1: #171f34;
+  --color-surface-2: #1e2946;
+  --color-surface-3: #263457;
+
   --font-sans: var(--font-inter), 'Inter', sans-serif;
   --font-display: var(--font-playfair), 'Playfair Display', serif;
 }
 
+/*
+ * Shadows carry the elevation that colour alone cannot at these lightness
+ * levels. Layered (tight contact shadow + broad ambient) rather than a single
+ * blur, which is what separates a considered dark UI from a flat one.
+ *
+ * Named --elev-* rather than --shadow-*: the latter are Tailwind v4 theme
+ * tokens backing the shadow-sm/md/lg utilities, and overwriting them would
+ * silently restyle every existing use of those classes.
+ */
+:root {
+  --elev-sm: 0 1px 2px rgba(0, 0, 0, 0.28), 0 1px 3px rgba(0, 0, 0, 0.22);
+  --elev-md: 0 2px 4px rgba(0, 0, 0, 0.30), 0 6px 16px rgba(0, 0, 0, 0.28);
+  --elev-lg: 0 4px 8px rgba(0, 0, 0, 0.32), 0 16px 40px rgba(0, 0, 0, 0.36);
+  /* A hairline of light along the top edge: the cue that a surface is lit from
+     above, and the cheapest way to make a card look raised rather than drawn. */
+  --sheen-top: inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
 /* Theme: Midnight Gold (default) */
 [data-theme="midnight-gold"] {
-  --color-charcoal: #0c0c14;
-  --color-navy: #0f1629;
-  --color-navy-light: #1a2540;
+  --color-charcoal: #0e1320;
+  --color-navy: #080b12;
+  --color-navy-light: #1e2946;
   --color-gold: #c9a84c;
   --color-gold-light: #dfc272;
   --color-gold-dark: #a68b32;
-  --color-glass: rgba(255, 255, 255, 0.04);
-  --color-glass-border: rgba(255, 255, 255, 0.08);
-  --color-text-primary: #eef2f7;
-  --color-text-secondary: #8b9bb4;
-  --color-text-muted: #7d8ca6;
+  --color-glass: #171f34;
+  --color-glass-border: #334575;
+  --color-text-primary: #f2f5fa;
+  --color-text-secondary: #bac7dc;
+  --color-text-muted: #8a9db9;
+  --color-surface-1: #171f34;
+  --color-surface-2: #1e2946;
+  --color-surface-3: #263457;
 }
 
 /* Theme: Light Professional */
@@ -39,8 +84,8 @@
   --color-gold: #1e3a5f;
   --color-gold-light: #2d5a8e;
   --color-gold-dark: #14273d;
-  --color-glass: rgba(0, 0, 0, 0.03);
-  --color-glass-border: rgba(0, 0, 0, 0.12);
+  --color-glass: #ffffff;
+  --color-glass-border: #d3dbe6;
   /* Light-theme text ramp, verified against all three light surfaces
      (--color-charcoal / --color-navy / --color-navy-light). Muted was #94a3b8,
      which failed WCAG AA badly (2.45:1 on the page, 2.08:1 on cards) and made
@@ -49,70 +94,88 @@
   --color-text-primary: #0f172a;
   --color-text-secondary: #334155;
   --color-text-muted: #4d5a6a;
+  --color-surface-1: #ffffff;
+  --color-surface-2: #f1f5f9;
+  --color-surface-3: #e7edf4;
 }
 
 /* Theme: Ocean Blue */
 [data-theme="ocean-blue"] {
   --color-charcoal: #0a1628;
-  --color-navy: #0d1f3c;
-  --color-navy-light: #132d56;
+  --color-navy: #070f1a;
+  --color-navy-light: #142d51;
   --color-gold: #22d3ee;
   --color-gold-light: #67e8f9;
   --color-gold-dark: #0891b2;
-  --color-glass: rgba(255, 255, 255, 0.04);
-  --color-glass-border: rgba(255, 255, 255, 0.08);
+  --color-glass: #0f223e;
+  --color-glass-border: #214984;
   --color-text-primary: #e0f2fe;
-  --color-text-secondary: #7dd3fc;
-  --color-text-muted: #38bdf8;
+  --color-text-secondary: #a5d8f3;
+  /* Was #38bdf8 — brighter and more saturated than secondary, so muted text
+     read as an accent and the hierarchy ran backwards. */
+  --color-text-muted: #7d9cb8;
+  --color-surface-1: #0f223e;
+  --color-surface-2: #142d51;
+  --color-surface-3: #193764;
 }
 
 /* Theme: Emerald */
 [data-theme="emerald"] {
   --color-charcoal: #0a1a14;
-  --color-navy: #0d2818;
-  --color-navy-light: #153d24;
+  --color-navy: #07130e;
+  --color-navy-light: #143428;
   --color-gold: #34d399;
   --color-gold-light: #6ee7b7;
   --color-gold-dark: #059669;
-  --color-glass: rgba(255, 255, 255, 0.04);
-  --color-glass-border: rgba(255, 255, 255, 0.08);
+  --color-glass: #0f281e;
+  --color-glass-border: #205440;
   --color-text-primary: #ecfdf5;
   --color-text-secondary: #a7f3d0;
-  --color-text-muted: #6ee7b7;
+  /* Was #6ee7b7 — brighter than secondary, inverting the hierarchy. */
+  --color-text-muted: #82ab9a;
+  --color-surface-1: #0f281e;
+  --color-surface-2: #143428;
+  --color-surface-3: #184031;
 }
 
 /* Theme: Burgundy Rose */
 [data-theme="burgundy-rose"] {
   --color-charcoal: #1a0a14;
-  --color-navy: #2d1024;
-  --color-navy-light: #451a39;
+  --color-navy: #0e050a;
+  --color-navy-light: #401931;
   --color-gold: #f472b6;
   --color-gold-light: #f9a8d4;
   --color-gold-dark: #db2777;
-  --color-glass: rgba(255, 255, 255, 0.04);
-  --color-glass-border: rgba(255, 255, 255, 0.08);
+  --color-glass: #301225;
+  --color-glass-border: #6e2a54;
   --color-text-primary: #fdf2f8;
   --color-text-secondary: #f9a8d4;
   /* Was #f472b6 — the same value as --color-gold, which made muted text read as
      an accent. Desaturated so the hierarchy primary > secondary > muted holds. */
   --color-text-muted: #c99bb5;
+  --color-surface-1: #301225;
+  --color-surface-2: #401931;
+  --color-surface-3: #521f3f;
 }
 
 /* Theme: Sunset Warm */
 [data-theme="sunset-warm"] {
   --color-charcoal: #1a120a;
-  --color-navy: #2d1f0e;
-  --color-navy-light: #453117;
+  --color-navy: #0f0b06;
+  --color-navy-light: #382715;
   --color-gold: #f59e0b;
   --color-gold-light: #fbbf24;
   --color-gold-dark: #d97706;
-  --color-glass: rgba(255, 255, 255, 0.04);
-  --color-glass-border: rgba(255, 255, 255, 0.08);
+  --color-glass: #2b1d10;
+  --color-glass-border: #5e4124;
   --color-text-primary: #fffbeb;
   --color-text-secondary: #fde68a;
   /* Was #fbbf24 — identical to --color-gold-light, so muted text competed with
      accents. Desaturated to a warm neutral. */
   --color-text-muted: #cbb894;
+  --color-surface-1: #2b1d10;
+  --color-surface-2: #382715;
+  --color-surface-3: #46311b;
 }
 
 * {
@@ -132,42 +195,58 @@ body {
   color: var(--color-charcoal);
 }
 
+/*
+ * A card is an opaque surface with a hairline, a top sheen and a layered
+ * shadow — not a blur. Blur was standing in for depth the palette did not
+ * have; now that the surfaces actually separate, the blur only softened the
+ * type and cost a compositing layer on all 468 of these.
+ *
+ * backdrop-filter is kept exclusively for .glass-strong, which sits over
+ * scrolling content (navigation, drawers, modals) where translucency means
+ * something.
+ */
 .glass {
   background: var(--color-glass);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
   border: 1px solid var(--color-glass-border);
+  box-shadow: var(--elev-sm), var(--sheen-top);
 }
 
 .glass-strong {
-  background: color-mix(in srgb, var(--color-navy) 85%, transparent);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
+  background: color-mix(in srgb, var(--color-surface-2) 92%, transparent);
+  backdrop-filter: blur(20px) saturate(140%);
+  -webkit-backdrop-filter: blur(20px) saturate(140%);
   border: 1px solid var(--color-glass-border);
+  box-shadow: var(--elev-lg), var(--sheen-top);
 }
 
-[data-theme="light-professional"] .glass {
-  background: rgba(255, 255, 255, 0.6);
-  border: 1px solid rgba(0, 0, 0, 0.08);
+/* Light theme is lit the same way, but a raised surface there means moving
+   toward white, and the shadow has to be far softer or it reads as grime. */
+[data-theme="light-professional"] {
+  --elev-sm: 0 1px 2px rgba(15, 23, 42, 0.06), 0 1px 3px rgba(15, 23, 42, 0.04);
+  --elev-md: 0 2px 4px rgba(15, 23, 42, 0.06), 0 6px 16px rgba(15, 23, 42, 0.07);
+  --elev-lg: 0 4px 8px rgba(15, 23, 42, 0.07), 0 16px 40px rgba(15, 23, 42, 0.10);
+  --sheen-top: inset 0 1px 0 rgba(255, 255, 255, 0.9);
 }
 
 [data-theme="light-professional"] .glass-strong {
-  background: rgba(248, 250, 252, 0.92);
-  border: 1px solid rgba(0, 0, 0, 0.1);
+  background: color-mix(in srgb, #ffffff 92%, transparent);
 }
 
+/*
+ * Static. This looped forever, on 55 headings, at 6s a cycle — perpetual
+ * motion with nothing to communicate, which reads as a template rather than a
+ * considered piece of work. The gradient itself does the job standing still.
+ */
 .gradient-text {
-  background: linear-gradient(135deg, var(--color-gold-light), var(--color-gold), var(--color-gold-dark));
-  background-size: 200% 200%;
-  animation: gradient-shift 6s ease-in-out infinite;
+  background: linear-gradient(
+    104deg,
+    var(--color-gold-light) 0%,
+    var(--color-gold) 42%,
+    var(--color-gold-dark) 100%
+  );
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
-}
-
-@keyframes gradient-shift {
-  0%, 100% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
 }
 
 .gradient-border {
@@ -476,11 +555,6 @@ body,
   .animate-ticker {
     animation: none !important;
   }
-
-  .gradient-text {
-    animation: none !important;
-    background-size: 100% 100%;
-  }
 }
 
 /* Print styles */
@@ -506,4 +580,16 @@ body,
     -webkit-text-fill-color: black !important;
     background: none !important;
   }
+}
+
+
+/*
+ * One focus ring for the whole site. Offset so it reads clearly against a card
+ * edge, and :focus-visible so it appears for keyboard users without ringing
+ * every mouse click.
+ */
+:where(a, button, input, select, textarea, [tabindex]):focus-visible {
+  outline: 2px solid var(--color-gold);
+  outline-offset: 2px;
+  border-radius: 4px;
 }
