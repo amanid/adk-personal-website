@@ -15,29 +15,34 @@
  *   navy-light = raised surface
  */
 @theme {
-  --color-charcoal: #0e1320;
-  --color-navy: #080b12;
-  --color-navy-light: #1e2946;
-  --color-gold: #c9a84c;
-  --color-gold-light: #dfc272;
-  --color-gold-dark: #a68b32;
-  --color-glass: #171f34;
-  --color-glass-border: #334575;
-  /* Text ramp: even perceptual steps (1.56 then 1.62 between levels). The old
-     secondary/muted pair sat 1.21 apart — effectively one colour doing two
-     jobs — so nothing below a heading had any hierarchy. Muted is set at the
-     AA floor for the LIGHTEST surface, so it stays legible on every layer. */
-  --color-text-primary: #f2f5fa;
-  --color-text-secondary: #bac7dc;
-  --color-text-muted: #8a9db9;
+  /* Default: Ink & Signal. Warm off-black and bone rather than navy and gold —
+     a single vermilion accent, and data colours (signal / violet) that are
+     reserved for charts and validated for colour-blind separation. */
+  --color-charcoal: #111110;
+  --color-navy: #0b0b0a;
+  --color-navy-light: #232320;
+  --color-gold: #ea5536;
+  --color-gold-light: #f2765b;
+  --color-gold-dark: #c43e22;
+  --color-glass: #1a1a18;
+  --color-glass-border: #2e2d2a;
+  --color-text-primary: #edeae3;
+  --color-text-secondary: #c4bfb4;
+  --color-text-muted: #9a968c;
 
-  /* Elevation, addressable directly as bg-surface-1/2/3 in new work. */
-  --color-surface-1: #171f34;
-  --color-surface-2: #1e2946;
-  --color-surface-3: #263457;
+  --color-surface-1: #1a1a18;
+  --color-surface-2: #232320;
+  --color-surface-3: #2c2b28;
 
-  --font-sans: var(--font-inter), 'Inter', sans-serif;
-  --font-display: var(--font-playfair), 'Playfair Display', serif;
+  /* Chart series, in fixed order: signal, accent, violet. Validated with the
+     dataviz palette checker on the card surface (CVD ΔE ≥ 25). */
+  --color-signal: #3d82ee;
+  --color-violet: #9a7be8;
+  --color-sand: #c9b98a;
+
+  --font-sans: var(--font-instrument), 'Instrument Sans', ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-instrument), 'Instrument Sans', ui-sans-serif, sans-serif;
+  --font-mono: var(--font-plex-mono), 'IBM Plex Mono', ui-monospace, monospace;
 }
 
 /*
@@ -58,7 +63,34 @@
   --sheen-top: inset 0 1px 0 rgba(255, 255, 255, 0.05);
 }
 
-/* Theme: Midnight Gold (default) */
+/* Theme: Ink & Signal (default) */
+[data-theme="ink-signal"] {
+  --color-charcoal: #111110;
+  --color-navy: #0b0b0a;
+  --color-navy-light: #232320;
+  --color-gold: #ea5536;
+  --color-gold-light: #f2765b;
+  --color-gold-dark: #c43e22;
+  --color-glass: #1a1a18;
+  --color-glass-border: #2e2d2a;
+  --color-text-primary: #edeae3;
+  --color-text-secondary: #c4bfb4;
+  --color-text-muted: #9a968c;
+  --color-surface-1: #1a1a18;
+  --color-surface-2: #232320;
+  --color-surface-3: #2c2b28;
+  --elev-sm: 0 1px 0 rgba(0, 0, 0, 0.4);
+  --elev-md: 0 1px 0 rgba(0, 0, 0, 0.4), 0 8px 24px rgba(0, 0, 0, 0.35);
+  --elev-lg: 0 1px 0 rgba(0, 0, 0, 0.4), 0 20px 48px rgba(0, 0, 0, 0.5);
+  --sheen-top: inset 0 1px 0 rgba(255, 255, 255, 0.035);
+}
+
+/* The older themes keep the serif display face they were designed around. */
+[data-theme]:not([data-theme="ink-signal"]) {
+  --font-display: var(--font-playfair), 'Playfair Display', serif;
+}
+
+/* Theme: Midnight Gold */
 [data-theme="midnight-gold"] {
   --color-charcoal: #0e1320;
   --color-navy: #080b12;
@@ -279,24 +311,6 @@ body {
   animation-play-state: paused;
 }
 
-@keyframes float {
-  0%, 100% { transform: translateY(0px); }
-  50% { transform: translateY(-8px); }
-}
-
-@keyframes pulse-gold {
-  0%, 100% { opacity: 0.3; }
-  50% { opacity: 0.6; }
-}
-
-.animate-float {
-  animation: float 6s ease-in-out infinite;
-}
-
-.animate-pulse-gold {
-  animation: pulse-gold 4s ease-in-out infinite;
-}
-
 .section-padding {
   padding: 5rem 1rem;
 }
@@ -482,7 +496,7 @@ body {
 }
 
 .blog-table .selectedCell {
-  background: rgba(201, 168, 76, 0.1);
+  background: color-mix(in srgb, var(--color-gold) 10%, transparent);
 }
 
 .blog-table .column-resize-handle {
@@ -493,34 +507,6 @@ body {
   width: 4px;
   background: var(--color-gold);
   pointer-events: none;
-}
-
-/* Card hover shine overlay */
-.glass {
-  position: relative;
-  overflow: hidden;
-}
-
-.glass::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(
-    105deg,
-    transparent 40%,
-    rgba(255, 255, 255, 0.03) 45%,
-    rgba(255, 255, 255, 0.06) 50%,
-    rgba(255, 255, 255, 0.03) 55%,
-    transparent 60%
-  );
-  transform: translateX(-100%);
-  transition: transform 0.6s ease;
-  pointer-events: none;
-  z-index: 1;
-}
-
-.glass:hover::after {
-  transform: translateX(100%);
 }
 
 /* Focus visible outlines for accessibility */
@@ -592,4 +578,52 @@ body,
   outline: 2px solid var(--color-gold);
   outline-offset: 2px;
   border-radius: 4px;
+}
+
+
+/*
+ * Ink & Signal: an editorial, print-derived finish. Tighter corners, a hairline
+ * rather than a glow, a solid accent instead of a gradient fill, and a faint
+ * measurement grid behind the page — the one decorative device, and one that
+ * belongs to the subject (data) rather than to a template.
+ */
+[data-theme="ink-signal"] .glass:not(.rounded-full),
+[data-theme="ink-signal"] .glass-strong:not(.rounded-full) {
+  border-radius: 6px;
+}
+
+[data-theme="ink-signal"] .gradient-text {
+  background: none;
+  -webkit-text-fill-color: currentColor;
+  color: var(--color-text-primary);
+}
+
+[data-theme="ink-signal"] h1,
+[data-theme="ink-signal"] h2,
+[data-theme="ink-signal"] h3 {
+  letter-spacing: -0.02em;
+}
+
+[data-theme="ink-signal"] body {
+  background-image:
+    linear-gradient(to right, rgba(237, 234, 227, 0.025) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(237, 234, 227, 0.025) 1px, transparent 1px);
+  background-size: 72px 72px;
+  background-attachment: fixed;
+}
+
+/* Tabular figures for anything numeric. */
+.figure {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.01em;
+}
+
+/* Small uppercase mono label used above section titles. */
+.eyebrow {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
 }

@@ -10,13 +10,13 @@ export async function GET(request: NextRequest) {
   const type = searchParams.get("type") || "page";
 
   const typeColors: Record<string, string> = {
-    page: "#c9a84c",
-    blog: "#22d3ee",
-    publication: "#a78bfa",
-    project: "#34d399",
+    page: "#ea5536",
+    blog: "#3d82ee",
+    publication: "#9a7be8",
+    project: "#c9b98a",
   };
 
-  const accentColor = typeColors[type] || "#c9a84c";
+  const accentColor = typeColors[type] || "#ea5536";
 
   return new ImageResponse(
     (
@@ -28,7 +28,7 @@ export async function GET(request: NextRequest) {
           flexDirection: "column",
           justifyContent: "center",
           padding: "60px 80px",
-          background: "linear-gradient(135deg, #0c0c14 0%, #0f1629 50%, #1a2540 100%)",
+          background: "#111110",
           fontFamily: "sans-serif",
         }}
       >
@@ -74,7 +74,7 @@ export async function GET(request: NextRequest) {
           style={{
             fontSize: title.length > 60 ? "36px" : "48px",
             fontWeight: 800,
-            color: "#ffffff",
+            color: "#edeae3",
             lineHeight: 1.2,
             marginBottom: "16px",
             maxWidth: "900px",
@@ -92,7 +92,7 @@ export async function GET(request: NextRequest) {
         <div
           style={{
             fontSize: "20px",
-            color: "#9ca3af",
+            color: "#c4bfb4",
             maxWidth: "800px",
             lineHeight: 1.4,
             overflow: "hidden",
@@ -136,7 +136,7 @@ export async function GET(request: NextRequest) {
             <div
               style={{
                 fontSize: "14px",
-                color: "#6b7280",
+                color: "#9a968c",
               }}
             >
               konanamanidieudonne.org
@@ -145,7 +145,7 @@ export async function GET(request: NextRequest) {
           <div
             style={{
               fontSize: "14px",
-              color: "#6b7280",
+              color: "#9a968c",
             }}
           >
             KONAN Amani Dieudonné

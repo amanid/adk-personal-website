@@ -4,8 +4,8 @@
   "description": "Full-Stack Senior Statistician, Data Scientist, ML & AI Professional",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#0c0c14",
-  "theme_color": "#c9a84c",
+  "background_color": "#111110",
+  "theme_color": "#111110",
   "orientation": "portrait-primary",
   "icons": [
     {

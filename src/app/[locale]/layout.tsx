@@ -1,5 +1,5 @@
 import { NextIntlClientProvider, hasLocale } from "next-intl";
-import { Inter, Playfair_Display } from "next/font/google";
+import { Instrument_Sans, IBM_Plex_Mono, Playfair_Display } from "next/font/google";
 import { notFound } from "next/navigation";
 import { routing } from "@/i18n/routing";
 import Providers from "@/components/Providers";
@@ -17,17 +17,25 @@ import "../globals.css";
 
 // Self-hosted, preloaded fonts (replaces the render-blocking CSS @import).
 // Exposed as CSS variables that globals.css maps onto --font-sans/--font-display.
-const inter = Inter({
+const instrument = Instrument_Sans({
   subsets: ["latin"],
-  weight: ["300", "400", "500", "600", "700"],
-  variable: "--font-inter",
+  weight: ["400", "500", "600", "700"],
+  variable: "--font-instrument",
   display: "swap",
 });
+const plexMono = IBM_Plex_Mono({
+  subsets: ["latin"],
+  weight: ["400", "500"],
+  variable: "--font-plex-mono",
+  display: "swap",
+});
+// Only the legacy themes use the serif, so it isn't preloaded on every page.
 const playfair = Playfair_Display({
   subsets: ["latin"],
   weight: ["400", "500", "600", "700"],
   variable: "--font-playfair",
   display: "swap",
+  preload: false,
 });
 
 export const metadata = {
@@ -192,12 +200,12 @@ export default async function LocaleLayout({
   return (
     <html
       lang={locale}
-      className={`dark ${inter.variable} ${playfair.variable}`}
-      data-theme="midnight-gold"
+      className={`dark ${instrument.variable} ${plexMono.variable} ${playfair.variable}`}
+      data-theme="ink-signal"
     >
       <head>
         <link rel="manifest" href="/manifest.json" />
-        <meta name="theme-color" content="#c9a84c" />
+        <meta name="theme-color" content="#111110" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
         <link rel="alternate" type="application/rss+xml" title="Blog RSS Feed" href="/feed.xml" />

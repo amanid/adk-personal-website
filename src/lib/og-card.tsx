@@ -11,14 +11,15 @@ import { loadOgFonts } from "./og-fonts";
 export const OG_WIDTH = 1200;
 export const OG_HEIGHT = 630;
 
-// Brand palette (Midnight Gold), kept in sync with globals.css.
-const CHARCOAL = "#0c0c14";
-const NAVY = "#0f1629";
-const NAVY_LIGHT = "#1a2540";
-const GOLD = "#c9a84c";
-const GOLD_LIGHT = "#dfc272";
-const TEXT_PRIMARY = "#eef2f7";
-const TEXT_SECONDARY = "#8b9bb4";
+// Brand palette (Ink & Signal), kept in sync with globals.css. The constant
+// names are historical: GOLD is the accent, whatever its hue.
+const CHARCOAL = "#111110";
+const NAVY = "#1a1a18";
+const NAVY_LIGHT = "#232320";
+const GOLD = "#ea5536";
+const GOLD_LIGHT = "#f2765b";
+const TEXT_PRIMARY = "#edeae3";
+const TEXT_SECONDARY = "#c4bfb4";
 
 /** Trim to a word boundary so long titles don't overflow the card. */
 export function clip(text: string, max: number): string {
@@ -93,7 +94,7 @@ export async function renderShareCard(opts: ShareCardOptions): Promise<ImageResp
             flexShrink: 0,
             borderRadius: 12,
             overflow: "hidden",
-            border: "1px solid rgba(201,168,76,0.35)",
+            border: "1px solid rgba(234,85,54,0.35)",
             background: NAVY,
             alignItems: "center",
             justifyContent: "center",
@@ -115,7 +116,7 @@ export async function renderShareCard(opts: ShareCardOptions): Promise<ImageResp
                 display: "flex",
                 fontSize: 96,
                 fontFamily: display,
-                color: "rgba(201,168,76,0.5)",
+                color: "rgba(234,85,54,0.5)",
               }}
             >
               ADK
@@ -139,8 +140,8 @@ export async function renderShareCard(opts: ShareCardOptions): Promise<ImageResp
               alignSelf: "flex-start",
               padding: "6px 16px",
               borderRadius: 20,
-              background: "rgba(201,168,76,0.15)",
-              border: "1px solid rgba(201,168,76,0.35)",
+              background: "rgba(234,85,54,0.15)",
+              border: "1px solid rgba(234,85,54,0.35)",
               color: GOLD,
               fontSize: 18,
               fontWeight: 600,
@@ -213,7 +214,7 @@ export async function renderShareCard(opts: ShareCardOptions): Promise<ImageResp
             display: "flex",
             alignItems: "center",
             fontSize: 19,
-            color: "rgba(139,155,180,0.85)",
+            color: "rgba(196,191,180,0.85)",
           }}
         >
           <span style={{ color: GOLD, fontWeight: 600 }}>KONAN Amani Dieudonné</span>

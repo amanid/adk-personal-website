@@ -3,6 +3,15 @@ import { pageAlternates, normalizeLocale } from "@/lib/seo";
 import { prisma } from "@/lib/prisma";
 import { getSiteSettings } from "@/lib/settings";
 import HomeClient from "./HomeClient";
+import { buildCapabilityData } from "@/lib/capabilities";
+import { projects as staticProjects } from "@/data/projects";
+import { experiences as staticExperiences } from "@/data/experience";
+import { publications as staticPublications } from "@/data/publications";
+import {
+  education as staticEducation,
+  certifications as staticCertifications,
+  skillCategories as staticSkillCategories,
+} from "@/data/skills";
 
 // The homepage keeps the rich default title/description/OpenGraph from the root
 // layout; we only override the canonical + hreflang so it stops inheriting the
@@ -20,7 +29,7 @@ export async function generateMetadata({
 export const revalidate = 300;
 
 export default async function HomePage() {
-  const [projects, experiences, publications, settings] = await Promise.all([
+  const [projects, experiences, publications, settings, education, certifications, skillCategories] = await Promise.all([
     prisma.project
       .findMany({
         orderBy: { sortOrder: "asc" },
@@ -70,7 +79,30 @@ export default async function HomePage() {
       })
       .catch(() => []),
     getSiteSettings(),
+    prisma.education
+      .findMany({ orderBy: { sortOrder: "asc" }, select: { degree: true, institution: true, year: true } })
+      .catch(() => []),
+    prisma.certification
+      .findMany({ orderBy: { sortOrder: "asc" }, select: { name: true, issuer: true, year: true } })
+      .catch(() => []),
+    prisma.skillCategory
+      .findMany({
+        orderBy: { sortOrder: "asc" },
+        select: { name: true, nameFr: true, skills: { select: { name: true } } },
+      })
+      .catch(() => []),
   ]);
+
+  // Same fallback rule HomeClient applies: the DB when it has rows, the static
+  // seed otherwise, so the charts always describe what the page itself shows.
+  const capabilities = buildCapabilityData({
+    roles: experiences.length ? experiences : staticExperiences,
+    publications: publications.length ? publications : staticPublications,
+    projects: projects.length ? projects : staticProjects,
+    education: education.length ? education : staticEducation,
+    certifications: certifications.length ? certifications : staticCertifications,
+    skillCategories: skillCategories.length ? skillCategories : staticSkillCategories,
+  });
 
   const visibility = settings.sectionVisibility as Record<string, boolean>;
   const cvUrl = typeof settings.cvFileUrl === "string" ? settings.cvFileUrl : "";
@@ -82,6 +114,7 @@ export default async function HomePage() {
       initialPublications={publications}
       initialVisibility={visibility}
       initialCvUrl={cvUrl}
+      capabilities={capabilities}
     />
   );
 }

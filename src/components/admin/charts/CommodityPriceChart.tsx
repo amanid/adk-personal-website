@@ -25,7 +25,7 @@ export default function CommodityPriceChart({
 }: CommodityPriceChartProps) {
   const id = useId();
   const gradientId = `price-${id.replace(/:/g, "")}`;
-  const strokeColor = color || "var(--color-gold, #c9a84c)";
+  const strokeColor = color || "var(--color-gold, #ea5536)";
 
   return (
     <div className="glass rounded-xl p-5">

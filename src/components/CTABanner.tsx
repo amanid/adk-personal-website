@@ -68,7 +68,6 @@ export default function CTABanner({ variant = "consulting" }: CTABannerProps) {
       viewport={{ once: true }}
       className="my-8 glass rounded-2xl p-6 md:p-8 relative overflow-hidden"
     >
-      <div className="absolute top-0 right-0 w-32 h-32 bg-gold/5 rounded-full blur-3xl" />
       <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-gold/10 text-gold text-xs font-medium mb-3">
         <Sparkles className="w-3 h-3" />
         {c.badge}

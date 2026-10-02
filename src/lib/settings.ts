@@ -4,6 +4,7 @@ export const DEFAULT_SECTION_VISIBILITY: Record<string, boolean> = {
   marketTicker: true,
   whoIAm: true,
   stats: true,
+  capabilities: true,
   trustedBy: true,
   marketIntelligence: true,
   expertise: true,

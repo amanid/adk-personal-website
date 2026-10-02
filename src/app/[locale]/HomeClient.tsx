@@ -32,6 +32,8 @@ import TechStackSection from "@/components/home/TechStackSection";
 import GlobalReachSection from "@/components/home/GlobalReachSection";
 import CertificationsShowcase from "@/components/home/CertificationsShowcase";
 import TestimonialsSection from "@/components/home/TestimonialsSection";
+import CapabilitiesSection from "@/components/home/CapabilitiesSection";
+import type { CapabilityData } from "@/lib/capabilities";
 import { projects as staticProjects } from "@/data/projects";
 import { experiences as staticExperiences } from "@/data/experience";
 import { publications as staticPublications } from "@/data/publications";
@@ -133,6 +135,7 @@ interface HomeClientProps {
   initialPublications?: PublicationEntry[];
   initialVisibility?: SectionVisibility;
   initialCvUrl?: string;
+  capabilities?: CapabilityData;
 }
 
 export default function HomeClient({
@@ -141,6 +144,7 @@ export default function HomeClient({
   initialPublications,
   initialVisibility,
   initialCvUrl,
+  capabilities,
 }: HomeClientProps) {
   const t = useTranslations();
   const locale = useLocale();
@@ -154,11 +158,23 @@ export default function HomeClient({
   const featuredProjects = projects.filter((p) => p.featured).slice(0, 4);
   const featuredPublications = publications.filter((p) => p.featured).slice(0, 3);
   const topExperiences = experiences.slice(0, 4);
+  const current = experiences.find((e) => !e.endDate);
+  const currentRole = current
+    ? {
+        role: locale === "fr" && current.roleFr ? current.roleFr : current.role,
+        organization: current.organization,
+        location: current.location,
+      }
+    : null;
 
   return (
     <>
       {/* 1. Hero */}
-      <HeroSection showCvDownload={vis.cvDownload !== false && vis.cvDownload === true} cvUrl={cvUrl} />
+      <HeroSection
+        showCvDownload={vis.cvDownload !== false && vis.cvDownload === true}
+        cvUrl={cvUrl}
+        currentRole={currentRole}
+      />
 
       {/* 2. Market Ticker */}
       {vis.marketTicker !== false && <MarketTicker />}
@@ -189,14 +205,19 @@ export default function HomeClient({
       {vis.stats !== false && <section className="section-padding bg-navy/30">
         <div className="max-w-5xl mx-auto">
           <div className="grid grid-cols-2 md:grid-cols-5 gap-8">
-            <StatsCounter value={13} suffix="+" label={t("stats.years")} />
-            <StatsCounter value={11} suffix="" label={t("stats.organizations")} />
+            {/* Years, organisations and publications are counted from the
+                records; countries and projects are the owner's own figures. */}
+            <StatsCounter value={capabilities?.facts.years ?? 13} suffix="+" label={t("stats.years")} />
+            <StatsCounter value={capabilities?.facts.organizations ?? 11} suffix="" label={t("stats.organizations")} />
             <StatsCounter value={6} suffix="+" label={t("stats.countries")} />
-            <StatsCounter value={27} suffix="" label={t("stats.publications")} />
+            <StatsCounter value={capabilities?.facts.publications ?? publications.length} suffix="" label={t("stats.publications")} />
             <StatsCounter value={50} suffix="+" label={t("stats.projects")} />
           </div>
         </div>
       </section>}
+
+      {/* Capabilities infographics, computed from the records */}
+      {vis.capabilities !== false && capabilities && <CapabilitiesSection data={capabilities} />}
 
       {/* 5. Trusted By Organizations */}
       {vis.trustedBy !== false && <TrustedBySection />}

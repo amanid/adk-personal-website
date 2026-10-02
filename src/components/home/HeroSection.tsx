@@ -6,16 +6,23 @@ import { ArrowRight, Download } from "lucide-react";
 import { Link } from "@/i18n/routing";
 import Image from "next/image";
 import { useState, useEffect } from "react";
-import ParticleBackground from "./ParticleBackground";
-import TypingEffect from "./TypingEffect";
 
 interface HeroSectionProps {
   showCvDownload?: boolean;
   cvUrl?: string;
+  /** The role with no end date, taken from the experience records. */
+  currentRole?: { role: string; organization: string; location: string } | null;
 }
 
-export default function HeroSection({ showCvDownload = false, cvUrl }: HeroSectionProps) {
+/*
+ * Editorial rather than ambient: no particles, glow orbs, typing effect or
+ * bouncing scroll cue. The name carries the page, the roles are stated once,
+ * and the portrait is captioned with the current position from the records.
+ */
+export default function HeroSection({ showCvDownload = false, cvUrl, currentRole }: HeroSectionProps) {
   const t = useTranslations("hero");
+  // The owner's own role list, as written in messages/{en,fr}.json.
+  const roles = t("roles").split("|").map((r) => r.trim()).filter(Boolean);
   const cacheBust = "v2";
   const [profilePhoto, setProfilePhoto] = useState(`/images/profile.jpg?${cacheBust}`);
 
@@ -31,85 +38,46 @@ export default function HeroSection({ showCvDownload = false, cvUrl }: HeroSecti
       .catch(() => {});
   }, []);
 
-  const roles = [
-    "Global Statistician",
-    "Data Science & Analytics Leader",
-    "Machine Learning & AI Architect",
-    "Data Engineering & Architecture Expert",
-    "Full-Stack Developer & MLOps Engineer",
-    "Econometrician & Causal Inference Specialist",
-    "Strategic AI & Data Advisor",
-    "DBA Candidate in Artificial Intelligence",
-  ];
-
   return (
-    <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
-      <ParticleBackground />
-
-      {/* Gradient overlays */}
-      <div className="absolute inset-0 bg-gradient-to-b from-charcoal via-transparent to-charcoal z-[1]" />
-      <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-gold/5 rounded-full blur-3xl animate-pulse-gold" />
-      <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-gold/3 rounded-full blur-3xl animate-pulse-gold" style={{ animationDelay: "1.5s" }} />
-
-      <div className="relative z-10 max-w-6xl mx-auto px-4">
-        <div className="flex flex-col md:flex-row items-center gap-8 md:gap-12">
-          {/* Profile Photo */}
+    <section className="relative overflow-hidden border-b border-glass-border">
+      <div className="relative max-w-6xl mx-auto px-4 pt-16 pb-20 md:pt-24 md:pb-28">
+        <div className="grid md:grid-cols-12 gap-10 md:gap-12 items-end">
           <motion.div
-            initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.6 }}
-            className="shrink-0"
-          >
-            <div className="relative w-48 h-48 md:w-64 md:h-64 rounded-full overflow-hidden border-4 border-gold/40 shadow-2xl shadow-gold/10">
-              <Image
-                src={profilePhoto}
-                alt="KONAN Amani Dieudonné"
-                fill
-                className="object-cover"
-                priority
-                sizes="(max-width: 768px) 192px, 256px"
-                unoptimized
-              />
-            </div>
-          </motion.div>
-
-          {/* Text Content */}
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
+            initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.2 }}
-            className="text-center md:text-left"
+            transition={{ duration: 0.6, ease: [0.2, 0.7, 0.2, 1] }}
+            className="md:col-span-7 order-2 md:order-1"
           >
-            {/* Greeting */}
-            <p className="text-text-secondary text-lg mb-2">{t("greeting")}</p>
+            <p className="eyebrow mb-6">{t("greeting")}</p>
 
-            {/* Name */}
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold font-[family-name:var(--font-display)] mb-4">
-              <span className="gradient-text">{t("name")}</span>
+            <h1 className="text-5xl sm:text-6xl lg:text-7xl font-semibold font-[family-name:var(--font-display)] leading-[0.95] tracking-tight mb-8">
+              {t("name")}
             </h1>
 
-            {/* Typing roles */}
-            <div className="text-xl md:text-2xl text-text-secondary h-8 mb-6">
-              <TypingEffect texts={roles} />
-            </div>
+            <ul className="flex flex-wrap gap-x-4 gap-y-2 mb-8 text-sm text-text-secondary" >
+              {roles.map((r, i) => (
+                <li key={r} className="flex items-center gap-4">
+                  {i > 0 && <span className="w-1 h-1 rounded-full bg-gold" aria-hidden />}
+                  {r}
+                </li>
+              ))}
+            </ul>
 
-            {/* Description */}
-            <p className="text-text-secondary max-w-2xl text-base md:text-lg leading-relaxed mb-8">
+            <p className="text-text-secondary max-w-2xl text-base md:text-lg leading-relaxed mb-10">
               {t("description")}
             </p>
 
-            {/* CTAs */}
-            <div className="flex flex-col sm:flex-row items-center md:items-start gap-4">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-3">
               <Link
                 href="/services"
-                className="group flex items-center gap-2 px-8 py-3 bg-gold text-charcoal font-semibold rounded-lg hover:bg-gold-light transition-all duration-300 hover:shadow-lg hover:shadow-gold/20"
+                className="group inline-flex items-center justify-center gap-2 px-6 py-3 bg-gold text-charcoal font-semibold rounded-md hover:bg-gold-light transition-colors"
               >
                 {t("cta_services")}
-                <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
               </Link>
               <Link
                 href="/contact"
-                className="flex items-center gap-2 px-8 py-3 border border-gold/30 text-gold rounded-lg hover:bg-gold/10 transition-all duration-300"
+                className="inline-flex items-center justify-center gap-2 px-6 py-3 border border-glass-border text-text-primary rounded-md hover:border-text-muted transition-colors"
               >
                 {t("cta_contact")}
               </Link>
@@ -117,7 +85,7 @@ export default function HeroSection({ showCvDownload = false, cvUrl }: HeroSecti
                 <a
                   href={cvUrl || "/cv/CV-Amani-Konan-Senior-Data-Scientist.pdf"}
                   download
-                  className="flex items-center gap-2 px-6 py-3 text-text-secondary hover:text-gold transition-colors"
+                  className="inline-flex items-center justify-center gap-2 px-4 py-3 text-text-secondary hover:text-text-primary transition-colors"
                 >
                   <Download className="w-4 h-4" />
                   {t("download_cv")}
@@ -125,19 +93,39 @@ export default function HeroSection({ showCvDownload = false, cvUrl }: HeroSecti
               )}
             </div>
           </motion.div>
+
+          <motion.figure
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.8, delay: 0.1 }}
+            className="md:col-span-5 order-1 md:order-2 max-w-xs sm:max-w-sm md:max-w-none"
+          >
+            <div className="relative aspect-[4/5] overflow-hidden rounded-md border border-glass-border bg-surface-1">
+              <Image
+                src={profilePhoto}
+                alt="KONAN Amani Dieudonné"
+                fill
+                // The source photo has a thin white strip on its bottom and right
+                // edges; a slight zoom anchored top-left keeps it out of frame.
+                className="object-cover scale-[1.04] origin-top-left"
+                priority
+                sizes="(max-width: 768px) 320px, 420px"
+                unoptimized
+              />
+            </div>
+            {currentRole && (
+              <figcaption className="mt-3 flex gap-3 text-xs leading-relaxed">
+                <span className="figure text-gold shrink-0 pt-px">●</span>
+                <span className="text-text-secondary">
+                  <span className="text-text-primary">{currentRole.role}</span>
+                  <br />
+                  {currentRole.organization} · {currentRole.location}
+                </span>
+              </figcaption>
+            )}
+          </motion.figure>
         </div>
       </div>
-
-      {/* Scroll indicator */}
-      <motion.div
-        animate={{ y: [0, 10, 0] }}
-        transition={{ repeat: Infinity, duration: 2 }}
-        className="absolute bottom-8 left-1/2 -translate-x-1/2 z-10"
-      >
-        <div className="w-6 h-10 rounded-full border-2 border-gold/30 flex justify-center pt-2">
-          <div className="w-1 h-2 bg-gold rounded-full" />
-        </div>
-      </motion.div>
     </section>
   );
 }

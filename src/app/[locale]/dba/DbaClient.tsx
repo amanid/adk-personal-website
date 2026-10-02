@@ -55,9 +55,6 @@ export default function DbaClient() {
           animate={{ opacity: 1, y: 0 }}
           className="relative glass rounded-3xl overflow-hidden mb-14"
         >
-          {/* decorative gradient glow */}
-          <div className="pointer-events-none absolute -top-24 -right-24 w-72 h-72 rounded-full bg-gold/10 blur-3xl animate-pulse-gold" />
-          <div className="pointer-events-none absolute -bottom-24 -left-24 w-72 h-72 rounded-full bg-gold/5 blur-3xl" />
 
           <div className="relative p-8 md:p-14 text-center">
             <div className="inline-flex items-center gap-2 rounded-full border border-gold/30 bg-gold/5 px-4 py-1.5 text-xs font-medium uppercase tracking-[0.2em] text-gold mb-6">

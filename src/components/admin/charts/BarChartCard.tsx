@@ -17,7 +17,7 @@ interface BarChartCardProps {
 }
 
 export default function BarChartCard({ title, data, color }: BarChartCardProps) {
-  const barColor = color || "var(--color-gold, #c9a84c)";
+  const barColor = color || "var(--color-gold, #ea5536)";
 
   return (
     <div className="glass rounded-xl p-6">

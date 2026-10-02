@@ -31,6 +31,27 @@ export interface ThemeDefinition {
 
 export const themes: ThemeDefinition[] = [
   {
+    id: "ink-signal",
+    label: "Ink & Signal",
+    labelFr: "Encre & Signal",
+    swatch: ["#111110", "#ea5536"],
+    colors: {
+      charcoal: "#111110",
+      navy: "#0b0b0a",
+      navyLight: "#232320",
+      gold: "#ea5536",
+      goldLight: "#f2765b",
+      goldDark: "#c43e22",
+      glass: "#1a1a18",
+      glassBorder: "#2e2d2a",
+      textPrimary: "#edeae3",
+      textSecondary: "#c4bfb4",
+      textMuted: "#9a968c",
+      glassStrongBg: "rgba(35, 35, 32, 0.92)",
+      isDark: true,
+    },
+  },
+  {
     id: "midnight-gold",
     label: "Midnight Gold",
     labelFr: "Or de Minuit",
@@ -158,7 +179,7 @@ export const themes: ThemeDefinition[] = [
   },
 ];
 
-export const defaultThemeId = "midnight-gold";
+export const defaultThemeId = "ink-signal";
 
 export function getThemeById(id: string): ThemeDefinition {
   return themes.find((t) => t.id === id) || themes[0];

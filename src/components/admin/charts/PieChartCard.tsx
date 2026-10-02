@@ -2,7 +2,9 @@
 
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from "recharts";
 
-const COLORS = ["#c9a84c", "#3b82f6", "#22c55e", "#ef4444", "#a855f7", "#f59e0b", "#06b6d4", "#ec4899"];
+// Fixed series order, validated on the dark card surface (#1a1a18) with the
+// dataviz palette checker: all 8 pass lightness, chroma, CVD and contrast.
+const COLORS = ["#3d82ee", "#ea5536", "#199e70", "#9a7be8", "#c98500", "#d55181", "#008300", "#e66767"];
 
 interface PieChartCardProps {
   title: string;
