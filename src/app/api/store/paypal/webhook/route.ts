@@ -18,13 +18,22 @@ interface PayPalWebhookEvent {
 export async function POST(request: NextRequest) {
   const rawBody = await request.text();
 
+  // Parse before verifying, but inside a try: a malformed body used to throw
+  // here, outside any handler, and surface as an unhandled 500.
+  let parsed: unknown = null;
+  try {
+    parsed = rawBody ? JSON.parse(rawBody) : null;
+  } catch {
+    return NextResponse.json({ error: "Invalid body" }, { status: 400 });
+  }
+
   const verified = await verifyPayPalWebhook({
     authAlgo: request.headers.get("paypal-auth-algo"),
     certUrl: request.headers.get("paypal-cert-url"),
     transmissionId: request.headers.get("paypal-transmission-id"),
     transmissionSig: request.headers.get("paypal-transmission-sig"),
     transmissionTime: request.headers.get("paypal-transmission-time"),
-    event: rawBody ? JSON.parse(rawBody) : null,
+    event: parsed,
   });
 
   if (!verified) {

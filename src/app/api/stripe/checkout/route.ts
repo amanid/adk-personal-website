@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
+import { checkOrigin } from "@/lib/origin-check";
 import { prisma } from "@/lib/prisma";
 import { stripe, SUBSCRIPTION_PRICES } from "@/lib/stripe";
 import { rateLimit } from "@/lib/rate-limit";
@@ -8,6 +9,10 @@ export async function POST(request: NextRequest) {
   try {
     const limited = rateLimit(request, { limit: 5, windowSeconds: 60 });
     if (limited) return limited;
+
+    // State-changing and cookie-authenticated: refuse cross-site callers.
+    const originBlocked = checkOrigin(request);
+    if (originBlocked) return originBlocked;
 
     const session = await auth();
     if (!session?.user) {
@@ -56,7 +61,8 @@ export async function POST(request: NextRequest) {
       customerId = customer.id;
     }
 
-    const origin = request.headers.get("origin") || "http://localhost:3000";
+    // Redirect targets come from config, never from the request's Origin header.
+    const origin = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
 
     const checkoutSession = await stripe.checkout.sessions.create({
       customer: customerId,

@@ -1,4 +1,5 @@
 import { mkdir, readFile, writeFile } from "node:fs/promises";
+import { STATIC_GATED_FILES, PRIVATE_PUBLICATIONS_DIR } from "@/lib/publication-access";
 import os from "node:os";
 import path from "node:path";
 import crypto from "node:crypto";
@@ -43,7 +44,9 @@ async function resolvePublication(
       category: stat.category ?? null,
       year: stat.year,
       authors: stat.authors ?? [],
-      pdfUrl: stat.pdfUrl ?? null,
+      // A gated entry's URL is the protected route; the cover is rendered
+      // from the file itself, which the server can still read.
+      pdfUrl: STATIC_GATED_FILES[slug] ? `/publications/${STATIC_GATED_FILES[slug]}` : (stat.pdfUrl ?? null),
     };
   }
 
@@ -99,16 +102,22 @@ async function loadPdf(pdfUrl: string | null): Promise<Buffer | null> {
   }
 
   if (!pdfUrl.startsWith("/publications/")) return null;
-  try {
-    const root = path.join(process.cwd(), "public", "publications");
-    const decoded = decodeURIComponent(pdfUrl.slice("/publications/".length));
+  const decoded = decodeURIComponent(pdfUrl.slice("/publications/".length));
+  // Public files first, then the private folder that holds gated PDFs.
+  for (const root of [
+    path.join(process.cwd(), "public", "publications"),
+    path.join(process.cwd(), ...PRIVATE_PUBLICATIONS_DIR),
+  ]) {
     const full = path.join(root, decoded);
     // Reject traversal outside the publications directory.
-    if (path.relative(root, full).startsWith("..")) return null;
-    return await readFile(full);
-  } catch {
-    return null;
+    if (path.relative(root, full).startsWith("..")) continue;
+    try {
+      return await readFile(full);
+    } catch {
+      /* try the next folder */
+    }
   }
+  return null;
 }
 
 /**

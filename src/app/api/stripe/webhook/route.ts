@@ -91,7 +91,9 @@ export async function POST(request: NextRequest) {
         await prisma.subscription.update({
           where: { stripeSubscriptionId: sub.id },
           data: {
-            status: (statusMap[sub.status] || "ACTIVE") as
+            // Unknown or unpaid states (incomplete, incomplete_expired,
+            // paused, …) must not grant access; they used to default to ACTIVE.
+            status: (statusMap[sub.status] || "EXPIRED") as
               | "ACTIVE"
               | "CANCELLED"
               | "PAST_DUE"

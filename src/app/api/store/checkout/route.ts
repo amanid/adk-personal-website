@@ -3,7 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { checkoutSchema } from "@/lib/validations";
 import { priceOrder, generateOrderNumber, secureToken } from "@/lib/store";
 import { createPayPalOrder } from "@/lib/paypal";
-import { rateLimit } from "@/lib/rate-limit";
+import { rateLimit, clientIp } from "@/lib/rate-limit";
 import { checkOrigin } from "@/lib/origin-check";
 
 export const runtime = "nodejs";
@@ -53,8 +53,7 @@ export async function POST(request: Request) {
       select: { id: true },
     });
 
-    const forwarded = request.headers.get("x-forwarded-for");
-    const ip = forwarded?.split(",")[0]?.trim() || null;
+    const ip = clientIp(request);
 
     // Create the pending order + items.
     let orderNumber = generateOrderNumber();

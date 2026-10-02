@@ -4,7 +4,7 @@ import { manualOrderSchema } from "@/lib/validations";
 import { priceOrder, generateOrderNumber, secureToken } from "@/lib/store";
 import { sendOrderInvoiceEmail, notifyAdminOfManualOrder } from "@/lib/email";
 import { sanitizeInput } from "@/lib/sanitize";
-import { rateLimit } from "@/lib/rate-limit";
+import { rateLimit, clientIp } from "@/lib/rate-limit";
 import { checkOrigin } from "@/lib/origin-check";
 
 function localeFromReferer(request: Request): "en" | "fr" {
@@ -69,8 +69,7 @@ export async function POST(request: Request) {
       select: { id: true },
     });
 
-    const forwarded = request.headers.get("x-forwarded-for");
-    const ip = forwarded?.split(",")[0]?.trim() || null;
+    const ip = clientIp(request);
 
     let orderNumber = generateOrderNumber();
     for (let i = 0; i < 3; i++) {

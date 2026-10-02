@@ -14,7 +14,9 @@ export async function POST(request: Request) {
     if (originBlocked) return originBlocked;
 
     const body = await request.json();
-    const { name, email, password } = body;
+    const { name, password } = body;
+    // One canonical form, so "Victim@Gmail.com" can't sit beside "victim@gmail.com".
+    const email = typeof body.email === "string" ? body.email.trim().toLowerCase() : body.email;
 
     // Validate
     const validationResult = registerSchema.safeParse({
@@ -31,8 +33,9 @@ export async function POST(request: Request) {
     }
 
     // Check if user exists
-    const existingUser = await prisma.user.findUnique({
-      where: { email },
+    const existingUser = await prisma.user.findFirst({
+      where: { email: { equals: email, mode: "insensitive" } },
+      select: { id: true },
     });
 
     if (existingUser) {

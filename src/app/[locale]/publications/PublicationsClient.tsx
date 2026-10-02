@@ -74,6 +74,7 @@ export interface DbPublicationRow {
   year: number;
   category: string | null;
   pdfUrl: string | null;
+  accessLevel?: string | null;
   tags: string[];
   featured: boolean;
   views: number;
@@ -102,9 +103,13 @@ export default function PublicationsClient({
   // Merge the static seed set with DB publications (server-provided) once, so the
   // full list is present in the server-rendered HTML.
   const [allPublications] = useState<Publication[]>(() => {
+    // Gating is set per publication in the admin panel (the DB); the static
+    // catalogue can lag behind, so a DB "GATED" wins.
+    const dbGated = new Set(initialDbPublications.filter((p) => p.accessLevel === "GATED").map((p) => p.slug));
     const base = staticPublications.map((p) => ({
       ...p,
       publicationType: p.publicationType as PublicationType,
+      ...(dbGated.has(p.slug) ? { accessLevel: "GATED" as const } : {}),
     }));
     const staticSlugs = new Set(staticPublications.map((p) => p.slug));
     const dbMapped: Publication[] = initialDbPublications.map((p) => ({
@@ -119,6 +124,7 @@ export default function PublicationsClient({
       year: p.year,
       category: p.category || "",
       pdfUrl: p.pdfUrl || undefined,
+      accessLevel: p.accessLevel === "GATED" ? "GATED" : "FREE",
       tags: p.tags || [],
       featured: p.featured || false,
       views: p.views || 0,

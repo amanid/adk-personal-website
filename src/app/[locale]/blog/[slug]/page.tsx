@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { buildPageMetadata, normalizeLocale } from "@/lib/seo";
 import { prisma } from "@/lib/prisma";
 import BlogDetailClient from "./BlogDetailClient";
+import { sanitizeRichText } from "@/lib/sanitize";
 
 function clip(text: string, max = 160): string {
   const clean = text
@@ -122,6 +123,10 @@ export default async function BlogPostPage({
     if (post) {
       initialPost = {
         ...post,
+        // Rendered as raw HTML, so it is cleaned here as well as on save:
+        // posts stored before sanitising existed are covered too.
+        content: sanitizeRichText(post.content),
+        contentFr: post.contentFr ? sanitizeRichText(post.contentFr) : post.contentFr,
         createdAt: post.createdAt.toISOString(),
         comments: post.comments.map((c) => ({
           ...c,

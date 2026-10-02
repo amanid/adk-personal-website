@@ -44,6 +44,14 @@ export async function sendOrderReceipt(
   });
 }
 
+/** A free order whose coupon ran out between pricing and fulfilment. */
+export class CouponExhaustedError extends Error {
+  constructor() {
+    super("Coupon redemption limit reached");
+    this.name = "CouponExhaustedError";
+  }
+}
+
 /**
  * Mark an order PAID (idempotent), create its download grants, and email the
  * receipt. Shared by PayPal capture, the PayPal webhook, and admin manual
@@ -58,22 +66,41 @@ export async function fulfilPaidOrder(
 
   if (order.status !== "PAID") {
     await prisma.$transaction(async (tx) => {
-      await tx.order.update({
-        where: { id: orderId },
+      // Flip the status conditionally, inside the transaction. PayPal capture
+      // and the webhook can arrive together; with a read-then-write both saw
+      // "not PAID" and both created grants and counted the coupon twice. Only
+      // the caller whose update actually changes the row carries on.
+      const flipped = await tx.order.updateMany({
+        where: { id: orderId, status: { not: "PAID" } },
         data: {
           status: "PAID",
           paidAt: order.paidAt ?? new Date(),
           ...(opts.paypalCaptureId ? { paypalCaptureId: opts.paypalCaptureId } : {}),
         },
       });
-      await createDownloadGrants(tx, orderId);
-      // Count the redemption exactly once, when the order first becomes PAID.
+      if (flipped.count === 0) return;
+      // Count the redemption exactly once, when the order first becomes PAID,
+      // and enforce the cap in the same statement: the check made at pricing
+      // time can be raced by parallel requests for a single-use code.
       if (order.couponId) {
-        await tx.coupon.update({
-          where: { id: order.couponId },
+        const counted = await tx.coupon.updateMany({
+          where: {
+            id: order.couponId,
+            OR: [{ maxRedemptions: null }, { timesRedeemed: { lt: tx.coupon.fields.maxRedemptions } }],
+          },
           data: { timesRedeemed: { increment: 1 } },
         });
+        if (counted.count === 0) {
+          // Nothing was paid for a free order, so refuse it (rolls back).
+          if (order.totalCents === 0) throw new CouponExhaustedError();
+          // Money has been taken: honour the order, still count the use.
+          await tx.coupon.update({
+            where: { id: order.couponId },
+            data: { timesRedeemed: { increment: 1 } },
+          });
+        }
       }
+      await createDownloadGrants(tx, orderId);
     });
   }
 

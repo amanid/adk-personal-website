@@ -10,8 +10,11 @@ const securityHeaders = [
   { key: "X-Content-Type-Options", value: "nosniff" },
   { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
   { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=(), payment=(), usb=(), magnetometer=(), gyroscope=(), accelerometer=()" },
-  { key: "X-XSS-Protection", value: "1; mode=block" },
-  { key: "Cross-Origin-Opener-Policy", value: "same-origin" },
+  // "0" is the current recommendation: the legacy XSS auditor this enabled
+  // could itself be abused to selectively disable scripts on a page.
+  { key: "X-XSS-Protection", value: "0" },
+  // allow-popups: PayPal's checkout runs in a popup that must reach its opener.
+  { key: "Cross-Origin-Opener-Policy", value: "same-origin-allow-popups" },
   { key: "Cross-Origin-Resource-Policy", value: "same-origin" },
   { key: "X-Robots-Tag", value: "index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" },
   {
@@ -27,6 +30,9 @@ const securityHeaders = [
       "frame-ancestors 'self'",
       "base-uri 'self'",
       "form-action 'self'",
+      "object-src 'none'",
+      // Production only: on http://localhost it would rewrite dev requests to https.
+      ...(process.env.NODE_ENV === "production" ? ["upgrade-insecure-requests"] : []),
     ].join("; "),
   },
 ];

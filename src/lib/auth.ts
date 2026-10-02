@@ -3,17 +3,22 @@ import Credentials from "next-auth/providers/credentials";
 import Google from "next-auth/providers/google";
 import { prisma } from "./prisma";
 import bcrypt from "bcryptjs";
+import { clientIp, rateLimitKey } from "./rate-limit";
 
-// Lightweight in-process brute-force protection for the credentials provider.
-// Keyed by email; locks out after too many failures within the window.
+// Brute-force protection for the credentials provider, at three levels:
+//  - email + IP: 5 failures lock that pair out. Keying on the pair means a
+//    stranger can no longer lock the real owner out of their own account.
+//  - email alone: a much higher ceiling, for guessing spread across many IPs.
+//  - IP alone (rateLimitKey below): caps password spraying across accounts.
 const LOGIN_MAX_ATTEMPTS = 5;
+const LOGIN_MAX_ATTEMPTS_PER_EMAIL = 50;
 const LOGIN_WINDOW_MS = 15 * 60 * 1000;
 const loginAttempts = new Map<string, { count: number; resetAt: number }>();
 
-function loginAllowed(key: string): boolean {
+function loginAllowed(key: string, max = LOGIN_MAX_ATTEMPTS): boolean {
   const entry = loginAttempts.get(key);
   if (!entry || Date.now() > entry.resetAt) return true;
-  return entry.count < LOGIN_MAX_ATTEMPTS;
+  return entry.count < max;
 }
 
 function recordLoginFailure(key: string): void {
@@ -30,10 +35,20 @@ function clearLoginFailures(key: string): void {
   loginAttempts.delete(key);
 }
 
-// A fixed bcrypt hash used to equalize response time when the account doesn't
-// exist (or has no password), so an attacker can't distinguish "no such user"
-// from "wrong password" by timing. The plaintext is irrelevant — it never matches.
-const DUMMY_HASH = "$2a$10$CwTycUXWue0Thq9StjUM0uJ8Dvywht0z0v8m7Qw8N7Q2vN7Q2vN7";
+// A bcrypt hash compared against when the account doesn't exist (or has no
+// password), so "no such user" takes as long as "wrong password". It must be a
+// VALID hash at the SAME cost as real ones: the previous hard-coded string was
+// 59 characters, which bcrypt rejects in about a millisecond, so the timing
+// difference it was meant to hide was ~50x. Generated once, lazily.
+let dummyHash: string | null = null;
+function getDummyHash(): string {
+  dummyHash ??= bcrypt.hashSync(crypto.randomUUID(), 12);
+  return dummyHash;
+}
+
+// How often a session re-reads its role, so a demoted or deleted account loses
+// access within minutes rather than at token expiry.
+const ROLE_REFRESH_MS = 5 * 60 * 1000;
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
   providers: [
@@ -47,16 +62,24 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         email: { label: "Email", type: "email" },
         password: { label: "Password", type: "password" },
       },
-      async authorize(credentials) {
+      async authorize(credentials, request) {
         if (!credentials?.email || !credentials?.password) return null;
+        if (typeof credentials.email !== "string" || typeof credentials.password !== "string") return null;
+        // bcrypt only reads 72 bytes; refuse anything absurd before hashing.
+        if (credentials.email.length > 254 || credentials.password.length > 256) return null;
 
-        const key = (credentials.email as string).toLowerCase().trim();
+        const email = credentials.email.toLowerCase().trim();
+        const ip = (request instanceof Request ? clientIp(request) : null) || "unknown";
+        const pairKey = `${email}|${ip}`;
+        const emailKey = `${email}|*`;
 
         // Throttle repeated failures to blunt password guessing.
-        if (!loginAllowed(key)) return null;
+        if (rateLimitKey(`login-ip:${ip}`, { limit: 30, windowSeconds: 15 * 60 })) return null;
+        if (!loginAllowed(pairKey) || !loginAllowed(emailKey, LOGIN_MAX_ATTEMPTS_PER_EMAIL)) return null;
 
-        const user = await prisma.user.findUnique({
-          where: { email: credentials.email as string },
+        // Emails were historically stored as typed, so match case-insensitively.
+        const user = await prisma.user.findFirst({
+          where: { email: { equals: email, mode: "insensitive" } },
         });
 
         // Always run a bcrypt comparison (against a dummy hash when the user or
@@ -64,15 +87,16 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         // denies a timing oracle for account enumeration.
         const isValid = await bcrypt.compare(
           credentials.password as string,
-          user?.hashedPassword || DUMMY_HASH
+          user?.hashedPassword || getDummyHash()
         );
 
         if (!user || !user.hashedPassword || !isValid) {
-          recordLoginFailure(key);
+          recordLoginFailure(pairKey);
+          recordLoginFailure(emailKey);
           return null;
         }
 
-        clearLoginFailures(key);
+        clearLoginFailures(pairKey);
 
         return {
           id: user.id,
@@ -90,17 +114,19 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         token.role = (user as { role?: string }).role;
         token.id = user.id;
       }
-      // Ensure role is populated from the DB — Google OAuth users arrive with no
-      // role on the provider `user` object, so read it authoritatively here.
-      if (token.email && !token.role) {
-        const dbUser = await prisma.user.findUnique({
-          where: { email: token.email },
+      // Read the role from the DB — Google users arrive without one — and keep
+      // re-reading it, so a demotion or deletion takes effect within minutes.
+      const checkedAt = typeof token.roleCheckedAt === "number" ? token.roleCheckedAt : 0;
+      if (token.email && (!token.role || Date.now() - checkedAt > ROLE_REFRESH_MS)) {
+        const dbUser = await prisma.user.findFirst({
+          where: { email: { equals: token.email, mode: "insensitive" } },
           select: { id: true, role: true },
         });
-        if (dbUser) {
-          token.role = dbUser.role;
-          token.id = token.id || dbUser.id;
-        }
+        // Account deleted: end the session.
+        if (!dbUser) return null;
+        token.role = dbUser.role;
+        token.id = token.id || dbUser.id;
+        token.roleCheckedAt = Date.now();
       }
       return token;
     },
@@ -111,11 +137,43 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       }
       return session;
     },
-    async signIn({ user, account }) {
+    async signIn({ user, account, profile }) {
       if (account?.provider === "google") {
-        const existingUser = await prisma.user.findUnique({
-          where: { email: user.email! },
+        // Sessions are matched to accounts by email, so only accept an email
+        // Google has verified.
+        if (!user.email || profile?.email_verified !== true) return false;
+
+        const existingUser = await prisma.user.findFirst({
+          where: { email: { equals: user.email, mode: "insensitive" } },
+          include: { accounts: { where: { provider: "google" }, select: { id: true } } },
         });
+
+        // Pre-hijack defence. Password sign-up never verifies the email, so a
+        // stranger could register someone's address, wait for the real owner
+        // to arrive through Google, and keep a password into the account they
+        // then use. The first verified Google sign-in therefore invalidates a
+        // password it did not set. Admin accounts are exempt: they are created
+        // by the operator, not by public sign-up.
+        if (
+          existingUser &&
+          existingUser.accounts.length === 0 &&
+          existingUser.hashedPassword &&
+          existingUser.role !== "ADMIN"
+        ) {
+          await prisma.user.update({
+            where: { id: existingUser.id },
+            data: {
+              hashedPassword: null,
+              accounts: {
+                create: {
+                  type: account.type,
+                  provider: account.provider,
+                  providerAccountId: account.providerAccountId,
+                },
+              },
+            },
+          });
+        }
 
         if (!existingUser) {
           await prisma.user.create({

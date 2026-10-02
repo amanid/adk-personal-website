@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import { buildPageMetadata, normalizeLocale } from "@/lib/seo";
 import { prisma } from "@/lib/prisma";
+import { protectFiles } from "@/lib/publication-access";
 import PublicationsClient, { type DbPublicationRow } from "./PublicationsClient";
 
 export async function generateMetadata({
@@ -44,6 +45,7 @@ export default async function PublicationsPage() {
         year: true,
         category: true,
         pdfUrl: true,
+        accessLevel: true,
         tags: true,
         featured: true,
         views: true,
@@ -58,5 +60,5 @@ export default async function PublicationsPage() {
   } catch {
     // DB unavailable — the client falls back to the static seed set.
   }
-  return <PublicationsClient initialDbPublications={dbPublications} />;
+  return <PublicationsClient initialDbPublications={dbPublications.map((p) => protectFiles(p))} />;
 }

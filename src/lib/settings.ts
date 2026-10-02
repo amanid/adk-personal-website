@@ -1,4 +1,5 @@
 import { prisma } from "./prisma";
+import { SMTP_SETTING_PREFIX } from "./email-config";
 
 export const DEFAULT_SECTION_VISIBILITY: Record<string, boolean> = {
   marketTicker: true,
@@ -32,7 +33,11 @@ export type SiteSettings = Record<string, string | Record<string, boolean>> & {
 export async function getSiteSettings(): Promise<SiteSettings> {
   const settings: Record<string, string | Record<string, boolean>> = {};
   try {
-    const rows = await prisma.siteSetting.findMany();
+    // Everything this returns reaches the browser (public /api/settings and
+    // server-rendered pages), so mail credentials must never be read here.
+    const rows = await prisma.siteSetting.findMany({
+      where: { NOT: { key: { startsWith: SMTP_SETTING_PREFIX } } },
+    });
     for (const s of rows) {
       if (s.key === "sectionVisibility") {
         try {

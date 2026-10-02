@@ -11,8 +11,9 @@ export async function GET(request: Request) {
     const result = await getQuestionsPage({
       q: searchParams.get("q") || "",
       sort: searchParams.get("sort") || "recent",
-      page: parseInt(searchParams.get("page") || "1"),
-      limit: parseInt(searchParams.get("limit") || "20"),
+      // Bounded: ?limit=1000000 used to run an unbounded query.
+      page: Math.min(Math.max(parseInt(searchParams.get("page") || "1") || 1, 1), 1000),
+      limit: Math.min(Math.max(parseInt(searchParams.get("limit") || "20") || 20, 1), 50),
     });
     return NextResponse.json(result);
   } catch (error) {

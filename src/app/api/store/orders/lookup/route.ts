@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+import { NextResponse, after } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { sendOrderLookupEmail } from "@/lib/email";
 import { rateLimit } from "@/lib/rate-limit";
@@ -52,22 +52,26 @@ export async function POST(request: Request) {
     if (orders.length > 0) {
       const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
       const locale = localeFromReferer(request);
-      try {
-        await sendOrderLookupEmail(
-          email,
-          orders.map((o) => ({
-            orderNumber: o.orderNumber,
-            status: o.status,
-            createdAt: o.createdAt,
-            currency: o.currency,
-            totalCents: o.totalCents,
-            receiptUrl: `${appUrl}/${locale}/store/receipt/${o.receiptToken}`,
-          }))
-        );
-      } catch (err) {
-        // Don't leak whether the email exists via an error path.
-        console.error("Order lookup email failed:", err);
-      }
+      // Sent after the response: awaiting SMTP only when orders exist made the
+      // response time reveal whether an email had bought anything.
+      after(async () => {
+        try {
+          await sendOrderLookupEmail(
+            email,
+            orders.map((o) => ({
+              orderNumber: o.orderNumber,
+              status: o.status,
+              createdAt: o.createdAt,
+              currency: o.currency,
+              totalCents: o.totalCents,
+              receiptUrl: `${appUrl}/${locale}/store/receipt/${o.receiptToken}`,
+            }))
+          );
+        } catch (err) {
+          // Don't leak whether the email exists via an error path.
+          console.error("Order lookup email failed:", err);
+        }
+      });
     }
 
     return ok;

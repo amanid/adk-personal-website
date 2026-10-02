@@ -122,6 +122,7 @@ interface PublicationEntry {
   year: number;
   category?: string | null;
   pdfUrl?: string | null;
+  accessLevel?: string | null;
   featured: boolean;
 }
 
@@ -378,7 +379,9 @@ export default function HomeClient({
                 <p className="text-text-secondary text-sm leading-relaxed line-clamp-2 mb-3">
                   {locale === "fr" ? pub.abstractFr : pub.abstract}
                 </p>
-                {pub.pdfUrl && (
+                {/* Gated titles open their page (with the subscribe prompt)
+                    rather than a file link that would only return 403. */}
+                {pub.pdfUrl && pub.accessLevel !== "GATED" && (
                   <a
                     href={pub.pdfUrl}
                     download

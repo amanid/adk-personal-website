@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { protectFiles } from "@/lib/publication-access";
 
 export async function GET(
   _request: Request,
@@ -55,7 +56,7 @@ export async function GET(
         _source: "research_activity",
       };
 
-      return NextResponse.json({ publication });
+      return NextResponse.json({ publication: protectFiles(publication) });
     }
 
     // Regular publication lookup
@@ -77,7 +78,7 @@ export async function GET(
       );
     }
 
-    return NextResponse.json({ publication });
+    return NextResponse.json({ publication: protectFiles(publication) });
   } catch (error) {
     console.error("Publication fetch error:", error);
     return NextResponse.json(

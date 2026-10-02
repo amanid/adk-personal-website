@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { getSiteSettings } from "@/lib/settings";
 import HomeClient from "./HomeClient";
 import { buildCapabilityData } from "@/lib/capabilities";
+import { protectFiles } from "@/lib/publication-access";
 import { projects as staticProjects } from "@/data/projects";
 import { experiences as staticExperiences } from "@/data/experience";
 import { publications as staticPublications } from "@/data/publications";
@@ -71,9 +72,11 @@ export default async function HomePage() {
           abstract: true,
           abstractFr: true,
           authors: true,
+          slug: true,
           year: true,
           category: true,
           pdfUrl: true,
+          accessLevel: true,
           featured: true,
         },
       })
@@ -111,7 +114,7 @@ export default async function HomePage() {
     <HomeClient
       initialProjects={projects}
       initialExperiences={experiences}
-      initialPublications={publications}
+      initialPublications={publications.map((p) => protectFiles(p))}
       initialVisibility={visibility}
       initialCvUrl={cvUrl}
       capabilities={capabilities}

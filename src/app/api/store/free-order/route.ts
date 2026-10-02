@@ -2,8 +2,8 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { freeOrderSchema } from "@/lib/validations";
 import { priceOrder, generateOrderNumber, secureToken } from "@/lib/store";
-import { fulfilPaidOrder } from "@/lib/order-fulfillment";
-import { rateLimit } from "@/lib/rate-limit";
+import { fulfilPaidOrder, CouponExhaustedError } from "@/lib/order-fulfillment";
+import { rateLimit, clientIp } from "@/lib/rate-limit";
 import { checkOrigin } from "@/lib/origin-check";
 
 export const runtime = "nodejs";
@@ -61,8 +61,7 @@ export async function POST(request: Request) {
       select: { id: true },
     });
 
-    const forwarded = request.headers.get("x-forwarded-for");
-    const ip = forwarded?.split(",")[0]?.trim() || null;
+    const ip = clientIp(request);
 
     let orderNumber = generateOrderNumber();
     for (let i = 0; i < 3; i++) {
@@ -103,6 +102,9 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ receiptToken: order.receiptToken });
   } catch (error) {
+    if (error instanceof CouponExhaustedError) {
+      return NextResponse.json({ error: "This coupon has reached its redemption limit." }, { status: 409 });
+    }
     console.error("Free order error:", error);
     return NextResponse.json({ error: "Could not place order" }, { status: 500 });
   }

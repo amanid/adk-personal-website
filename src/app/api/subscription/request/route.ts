@@ -3,6 +3,7 @@ import { subscriptionRequestSchema } from "@/lib/validations";
 import { sendEmail } from "@/lib/email";
 import { rateLimit } from "@/lib/rate-limit";
 import { checkOrigin } from "@/lib/origin-check";
+import { escapeHtml } from "@/lib/html";
 
 const NOTIFY_EMAILS = [
   "amani_dieudonne@yahoo.fr",
@@ -120,13 +121,4 @@ export async function POST(request: NextRequest) {
       { status: 500 }
     );
   }
-}
-
-function escapeHtml(str: string): string {
-  return str
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#039;");
 }

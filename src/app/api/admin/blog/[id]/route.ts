@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
 import { slugify } from "@/lib/utils";
 import { notifySubscribers } from "@/lib/email";
+import { sanitizeRichText } from "@/lib/sanitize";
 
 export async function PUT(
   request: Request,
@@ -35,8 +36,8 @@ export async function PUT(
       data: {
         title: body.title,
         titleFr: body.titleFr || null,
-        content: body.content,
-        contentFr: body.contentFr || null,
+        content: sanitizeRichText(body.content),
+        contentFr: body.contentFr ? sanitizeRichText(body.contentFr) : null,
         excerpt: body.excerpt || null,
         excerptFr: body.excerptFr || null,
         coverImage: body.coverImage || null,

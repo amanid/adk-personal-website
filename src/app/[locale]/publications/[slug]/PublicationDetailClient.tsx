@@ -160,7 +160,11 @@ export default function PublicationDetailClient({
   const bookTitle = locale === "fr" ? (dbPub?.bookTitleFr || dbPub?.bookTitle) : dbPub?.bookTitle;
   const institution = locale === "fr" ? (dbPub?.institutionFr || dbPub?.institution) : dbPub?.institution;
   const citationCount = dbPub?.citationCount;
-  const accessLevel = (staticPub as PublicationData | undefined)?.accessLevel || "FREE";
+  // The server's verdict (DB access level) wins; the static catalogue is the fallback.
+  const accessLevel =
+    (dbPub as { accessLevel?: string } | null)?.accessLevel === "GATED"
+      ? "GATED"
+      : (staticPub as PublicationData | undefined)?.accessLevel || "FREE";
 
   const trackDownload = () => {
     fetch(`/api/publications/${slug}/download`, { method: "POST" }).catch(() => {});

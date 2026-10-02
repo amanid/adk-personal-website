@@ -28,10 +28,11 @@ export async function applyCoupon(
   const coupon = await prisma.coupon.findUnique({ where: { code } });
   if (!coupon || !coupon.active) throw new Error("This coupon code is not valid.");
   if (coupon.expiresAt && coupon.expiresAt.getTime() < Date.now()) {
-    throw new Error("This coupon has expired.");
+    // Same message as an unknown code, so probing can't tell which codes exist.
+    throw new Error("This coupon code is not valid.");
   }
   if (coupon.maxRedemptions != null && coupon.timesRedeemed >= coupon.maxRedemptions) {
-    throw new Error("This coupon has reached its usage limit.");
+    throw new Error("This coupon code is not valid.");
   }
   // Currency restriction (always set for FIXED; optional for PERCENT).
   if (coupon.currency && coupon.currency !== currency) {

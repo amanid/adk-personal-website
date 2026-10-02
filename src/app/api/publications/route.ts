@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
 import { publicationSchema } from "@/lib/validations";
 import { slugify } from "@/lib/utils";
+import { protectFiles } from "@/lib/publication-access";
 
 export async function GET(request: Request) {
   try {
@@ -61,7 +62,11 @@ export async function GET(request: Request) {
       _source: "research_activity" as const,
     }));
 
-    return NextResponse.json({ publications: [...publications, ...activityPubs] });
+    // Gated file URLs are swapped for the access-checked route before they
+    // leave the server; the UI gate alone protects nothing.
+    return NextResponse.json({
+      publications: [...publications, ...activityPubs].map((p) => protectFiles(p)),
+    });
   } catch (error) {
     console.error("Publications fetch error:", error);
     return NextResponse.json(

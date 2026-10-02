@@ -1,8 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { auth } from "@/lib/auth";
-import { publications as staticPublications } from "@/data/publications";
-import { checkPublicationAccess } from "@/lib/subscription";
+import { isGated, viewerHasGatedAccess } from "@/lib/publication-access";
 
 export async function POST(
   _request: Request,
@@ -11,16 +9,11 @@ export async function POST(
   try {
     const { slug } = await params;
 
-    // Check if publication is gated
-    const staticPub = staticPublications.find((p) => p.slug === slug);
-    const accessLevel = staticPub?.accessLevel || "FREE";
-
-    if (accessLevel === "GATED") {
-      const session = await auth();
-      const userId = (session?.user as { id?: string })?.id || null;
-      const access = await checkPublicationAccess(userId, "GATED");
-
-      if (!access.hasDocumentAccess) {
+    // Gating comes from the DB row as well as the static catalogue: a
+    // publication gated in the admin panel was previously treated as free.
+    const row = await prisma.publication.findUnique({ where: { slug }, select: { accessLevel: true } });
+    if (isGated(slug, row?.accessLevel)) {
+      if (!(await viewerHasGatedAccess())) {
         return NextResponse.json(
           { error: "Subscription required" },
           { status: 403 }

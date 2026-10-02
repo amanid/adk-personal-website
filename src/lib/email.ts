@@ -4,6 +4,7 @@ import { formatMoney } from "./currency";
 import { MOBILE_MONEY_NUMBER, MOBILE_MONEY_PROVIDERS, mobileMoneyLabel } from "./mobile-money";
 import { PAYPAL_ME_HANDLE, PAYPAL_RECEIVE_EMAIL, paypalMeLink } from "./paypal-direct";
 import { getEmailConfig, isConfigComplete, type EmailConfig } from "./email-config";
+import { escapeHtml } from "./html";
 
 /**
  * Transporters are cached by configuration signature rather than by process, so
@@ -169,8 +170,8 @@ function buildNotificationEmail({ title, excerpt, url, type, unsubscribeUrl }: E
           <tr>
             <td style="background-color:#111827;border:1px solid rgba(212,168,67,0.2);border-radius:12px;padding:32px;">
               <p style="margin:0 0 8px;font-size:12px;color:#d4a843;text-transform:uppercase;letter-spacing:1px;font-weight:600;">${type}</p>
-              <h2 style="margin:0 0 16px;font-size:22px;color:#f1f5f9;line-height:1.3;">${title}</h2>
-              <p style="margin:0 0 24px;font-size:15px;color:#8892a4;line-height:1.6;">${excerpt}</p>
+              <h2 style="margin:0 0 16px;font-size:22px;color:#f1f5f9;line-height:1.3;">${escapeHtml(title)}</h2>
+              <p style="margin:0 0 24px;font-size:15px;color:#8892a4;line-height:1.6;">${escapeHtml(excerpt)}</p>
               <a href="${url}" style="display:inline-block;padding:12px 28px;background-color:#d4a843;color:#0a0f1e;text-decoration:none;border-radius:8px;font-weight:600;font-size:14px;">Read Now</a>
             </td>
           </tr>
@@ -230,7 +231,7 @@ function discountRows(
   couponCode: string | null | undefined
 ): string {
   if (!discountCents || discountCents <= 0 || subtotalCents == null) return "";
-  const label = couponCode ? `Discount (${couponCode})` : "Discount";
+  const label = couponCode ? `Discount (${escapeHtml(couponCode)})` : "Discount";
   return `
     <tr>
       <td style="padding:8px 0 2px;font-size:14px;color:#8892a4;">Subtotal</td>
@@ -344,7 +345,7 @@ function buildOrderInvoiceEmail({
     .map(
       (i) => `
       <tr>
-        <td style="padding:8px 0;font-size:14px;color:#f1f5f9;border-bottom:1px solid rgba(255,255,255,0.08);">${i.title}</td>
+        <td style="padding:8px 0;font-size:14px;color:#f1f5f9;border-bottom:1px solid rgba(255,255,255,0.08);">${escapeHtml(i.title)}</td>
         <td style="padding:8px 0;font-size:14px;color:#8892a4;text-align:center;border-bottom:1px solid rgba(255,255,255,0.08);">${i.quantity}</td>
         <td style="padding:8px 0;font-size:14px;color:#f1f5f9;text-align:right;border-bottom:1px solid rgba(255,255,255,0.08);">${fmtMoney(i.lineTotalCents, currency)}</td>
       </tr>`
@@ -371,7 +372,7 @@ function buildOrderInvoiceEmail({
         <tr><td style="background-color:#111827;border:1px solid rgba(212,168,67,0.2);border-radius:12px;padding:32px;">
           <p style="margin:0 0 4px;font-size:12px;color:#d4a843;text-transform:uppercase;letter-spacing:1px;font-weight:600;">Payment required</p>
           <h2 style="margin:0 0 4px;font-size:20px;color:#f1f5f9;">Order ${orderNumber}</h2>
-          <p style="margin:0 0 20px;font-size:14px;color:#8892a4;line-height:1.6;">Hello${name ? ` ${name}` : ""}, thank you for your order. To complete it, please pay the total below${provider === "PAYPAL" ? " from your PayPal account" : " via mobile money"}, then send us your proof of payment so we can confirm it.</p>
+          <p style="margin:0 0 20px;font-size:14px;color:#8892a4;line-height:1.6;">Hello${name ? ` ${escapeHtml(name)}` : ""}, thank you for your order. To complete it, please pay the total below${provider === "PAYPAL" ? " from your PayPal account" : " via mobile money"}, then send us your proof of payment so we can confirm it.</p>
 
           <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:16px;">
             <tr>
@@ -426,7 +427,7 @@ function buildOrderReceiptEmail({
     .map(
       (i) => `
       <tr>
-        <td style="padding:8px 0;font-size:14px;color:#f1f5f9;border-bottom:1px solid rgba(255,255,255,0.08);">${i.title}</td>
+        <td style="padding:8px 0;font-size:14px;color:#f1f5f9;border-bottom:1px solid rgba(255,255,255,0.08);">${escapeHtml(i.title)}</td>
         <td style="padding:8px 0;font-size:14px;color:#8892a4;text-align:center;border-bottom:1px solid rgba(255,255,255,0.08);">${i.quantity}</td>
         <td style="padding:8px 0;font-size:14px;color:#f1f5f9;text-align:right;border-bottom:1px solid rgba(255,255,255,0.08);">${fmtMoney(i.lineTotalCents, currency)}</td>
       </tr>`
@@ -438,7 +439,7 @@ function buildOrderReceiptEmail({
       (d) => `
       <tr>
         <td style="padding:6px 0;">
-          <a href="${d.url}" style="display:inline-block;padding:10px 20px;background-color:#d4a843;color:#0a0f1e;text-decoration:none;border-radius:8px;font-weight:600;font-size:14px;">⬇ Download “${d.title}”</a>
+          <a href="${d.url}" style="display:inline-block;padding:10px 20px;background-color:#d4a843;color:#0a0f1e;text-decoration:none;border-radius:8px;font-weight:600;font-size:14px;">⬇ Download “${escapeHtml(d.title)}”</a>
         </td>
       </tr>`
     )
@@ -464,7 +465,7 @@ function buildOrderReceiptEmail({
           </tr>
           <tr>
             <td style="background-color:#111827;border:1px solid rgba(212,168,67,0.2);border-radius:12px;padding:32px;">
-              <p style="margin:0 0 4px;font-size:12px;color:#d4a843;text-transform:uppercase;letter-spacing:1px;font-weight:600;">Thank you${name ? `, ${name}` : ""}!</p>
+              <p style="margin:0 0 4px;font-size:12px;color:#d4a843;text-transform:uppercase;letter-spacing:1px;font-weight:600;">Thank you${name ? `, ${escapeHtml(name)}` : ""}!</p>
               <h2 style="margin:0 0 4px;font-size:20px;color:#f1f5f9;">Payment confirmed</h2>
               <p style="margin:0 0 20px;font-size:13px;color:#8892a4;">Order <strong style="color:#f1f5f9;">${orderNumber}</strong> &middot; ${paidAt.toUTCString()}</p>
 
@@ -648,7 +649,7 @@ export async function notifyAdminOfManualOrder(
     .map(
       (i) => `
             <tr>
-              <td style="padding:4px 0;font-size:14px;color:#f1f5f9;">${i.title}</td>
+              <td style="padding:4px 0;font-size:14px;color:#f1f5f9;">${escapeHtml(i.title)}</td>
               <td style="padding:4px 0;font-size:14px;color:#8892a4;text-align:center;">&times;${i.quantity}</td>
               <td style="padding:4px 0;font-size:14px;color:#f1f5f9;text-align:right;">${fmtMoney(i.lineTotalCents, currency)}</td>
             </tr>`
@@ -656,7 +657,7 @@ export async function notifyAdminOfManualOrder(
     .join("");
 
   const reference = paymentReference
-    ? `<p style="margin:0 0 4px;font-size:13px;color:#8892a4;">Reference given by the buyer: <strong style="color:#f1f5f9;">${paymentReference}</strong></p>`
+    ? `<p style="margin:0 0 4px;font-size:13px;color:#8892a4;">Reference given by the buyer: <strong style="color:#f1f5f9;">${escapeHtml(paymentReference)}</strong></p>`
     : `<p style="margin:0 0 4px;font-size:13px;color:#8892a4;">The buyer did not provide a transaction reference.</p>`;
 
   const html = `
@@ -677,7 +678,7 @@ export async function notifyAdminOfManualOrder(
           <p style="margin:0 0 20px;font-size:14px;color:#8892a4;line-height:1.6;">A buyer has placed an order to be paid by <strong style="color:#f1f5f9;">${label}</strong>. Check that the money has arrived, then mark the order paid &mdash; that is what sends their download links.</p>
 
           <div style="background-color:#0a0f1e;border:1px solid rgba(212,168,67,0.2);border-radius:10px;padding:16px;margin:0 0 20px;">
-            <p style="margin:0 0 4px;font-size:13px;color:#8892a4;">Buyer: <strong style="color:#f1f5f9;">${buyerName ? `${buyerName} &middot; ` : ""}${buyerEmail}</strong></p>
+            <p style="margin:0 0 4px;font-size:13px;color:#8892a4;">Buyer: <strong style="color:#f1f5f9;">${buyerName ? `${escapeHtml(buyerName)} &middot; ` : ""}${escapeHtml(buyerEmail)}</strong></p>
             <p style="margin:0 0 4px;font-size:13px;color:#8892a4;">Expected amount: <strong style="color:#d4a843;font-size:16px;">${total}</strong></p>
             ${reference}
           </div>

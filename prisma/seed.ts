@@ -11,7 +11,10 @@ async function main() {
   const existingAdmin = await prisma.user.findUnique({ where: { email: adminEmail } });
   if (!existingAdmin) {
     console.log("Seeding admin user...");
-    const hashedPassword = await bcrypt.hash("Admin@2026", 12);
+    // Never commit a password: the seed reads it from the environment, and
+    // without one the admin can only sign in with Google.
+    const seedPassword = process.env.SEED_ADMIN_PASSWORD;
+    const hashedPassword = seedPassword ? await bcrypt.hash(seedPassword, 12) : null;
     await prisma.user.create({
       data: {
         name: "KONAN Amani Dieudonné",

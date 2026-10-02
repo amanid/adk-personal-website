@@ -4,6 +4,7 @@ import { auth } from "@/lib/auth";
 import { blogPostSchema } from "@/lib/validations";
 import { slugify } from "@/lib/utils";
 import { notifySubscribers } from "@/lib/email";
+import { sanitizeRichText } from "@/lib/sanitize";
 
 export async function GET(request: Request) {
   try {
@@ -70,6 +71,10 @@ export async function POST(request: Request) {
     const post = await prisma.blogPost.create({
       data: {
         ...validation.data,
+        content: sanitizeRichText(validation.data.content),
+        ...("contentFr" in validation.data && typeof validation.data.contentFr === "string"
+          ? { contentFr: sanitizeRichText(validation.data.contentFr) }
+          : {}),
         slug,
         tags: validation.data.tags || [],
         authorId: (session.user as { id: string }).id,
