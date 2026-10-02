@@ -1,5 +1,5 @@
 import { NextIntlClientProvider, hasLocale } from "next-intl";
-import { Instrument_Sans, IBM_Plex_Mono, Playfair_Display } from "next/font/google";
+import { Figtree, Playfair_Display } from "next/font/google";
 import { notFound } from "next/navigation";
 import { routing } from "@/i18n/routing";
 import Providers from "@/components/Providers";
@@ -17,16 +17,13 @@ import "../globals.css";
 
 // Self-hosted, preloaded fonts (replaces the render-blocking CSS @import).
 // Exposed as CSS variables that globals.css maps onto --font-sans/--font-display.
-const instrument = Instrument_Sans({
-  subsets: ["latin"],
+// Figtree: open, rounded letterforms that stay readable at small sizes —
+// approachable without losing the professional register. latin-ext covers
+// the accented French text.
+const figtree = Figtree({
+  subsets: ["latin", "latin-ext"],
   weight: ["400", "500", "600", "700"],
-  variable: "--font-instrument",
-  display: "swap",
-});
-const plexMono = IBM_Plex_Mono({
-  subsets: ["latin"],
-  weight: ["400", "500"],
-  variable: "--font-plex-mono",
+  variable: "--font-figtree",
   display: "swap",
 });
 // Only the legacy themes use the serif, so it isn't preloaded on every page.
@@ -200,7 +197,7 @@ export default async function LocaleLayout({
   return (
     <html
       lang={locale}
-      className={`dark ${instrument.variable} ${plexMono.variable} ${playfair.variable}`}
+      className={`dark ${figtree.variable} ${playfair.variable}`}
       data-theme="ink-signal"
     >
       <head>

@@ -40,9 +40,10 @@
   --color-violet: #9a7be8;
   --color-sand: #c9b98a;
 
-  --font-sans: var(--font-instrument), 'Instrument Sans', ui-sans-serif, system-ui, sans-serif;
-  --font-display: var(--font-instrument), 'Instrument Sans', ui-sans-serif, sans-serif;
-  --font-mono: var(--font-plex-mono), 'IBM Plex Mono', ui-monospace, monospace;
+  --font-sans: var(--font-figtree), 'Figtree', ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-figtree), 'Figtree', ui-sans-serif, sans-serif;
+  /* Code and coupon codes only; no webfont download for it. */
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
 }
 
 /*
@@ -601,7 +602,7 @@ body,
 [data-theme="ink-signal"] h1,
 [data-theme="ink-signal"] h2,
 [data-theme="ink-signal"] h3 {
-  letter-spacing: -0.02em;
+  letter-spacing: -0.015em;
 }
 
 [data-theme="ink-signal"] body {
@@ -612,18 +613,17 @@ body,
   background-attachment: fixed;
 }
 
-/* Tabular figures for anything numeric. */
+/* Numbers keep the text face but use tabular digits, so columns align. */
 .figure {
-  font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
-  letter-spacing: -0.01em;
+  font-weight: 500;
 }
 
-/* Small uppercase mono label used above section titles. */
+/* Small label above section titles. */
 .eyebrow {
-  font-family: var(--font-mono);
-  font-size: 0.75rem;
-  letter-spacing: 0.12em;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
-  color: var(--color-text-muted);
+  color: var(--color-gold);
 }
