@@ -7,6 +7,10 @@
  */
 
 function getBaseUrl(): string {
+  // Local testing against a mock PayPal; ignored in production builds.
+  if (process.env.NODE_ENV !== "production" && process.env.PAYPAL_API_BASE) {
+    return process.env.PAYPAL_API_BASE;
+  }
   return process.env.PAYPAL_ENV === "live"
     ? "https://api-m.paypal.com"
     : "https://api-m.sandbox.paypal.com";
@@ -211,4 +215,84 @@ export async function verifyPayPalWebhook({
   if (!res.ok) return false;
   const data = (await res.json()) as { verification_status?: string };
   return data.verification_status === "SUCCESS";
+}
+
+// ── Subscriptions (Catalog Products v1 + Billing v1) ─────────────────────────
+// Field names follow PayPal's published schemas: product type is one of
+// PHYSICAL | DIGITAL | SERVICE; a plan needs product_id, name, billing_cycles
+// and payment_preferences; subscription status is one of APPROVAL_PENDING,
+// APPROVED, ACTIVE, SUSPENDED, CANCELLED, EXPIRED.
+
+async function paypalApi<T>(path: string, method: "GET" | "POST", body?: unknown): Promise<T> {
+  const token = await getAccessToken();
+  const res = await fetch(`${getBaseUrl()}${path}`, {
+    method,
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+      // Ask for the full resource back (create calls default to minimal).
+      Prefer: "return=representation",
+    },
+    body: body === undefined ? undefined : JSON.stringify(body),
+    cache: "no-store",
+  });
+  if (res.status === 204) return undefined as T;
+  const text = await res.text();
+  if (!res.ok) throw new Error(`PayPal ${method} ${path} failed (${res.status}): ${text.slice(0, 500)}`);
+  return (text ? JSON.parse(text) : undefined) as T;
+}
+
+export function createCatalogProduct(name: string, description: string, homeUrl: string) {
+  return paypalApi<{ id: string }>("/v1/catalogs/products", "POST", {
+    name: name.slice(0, 127),
+    description: description.slice(0, 256),
+    type: "DIGITAL",
+    home_url: homeUrl,
+  });
+}
+
+export function createBillingPlan(p: {
+  productId: string;
+  name: string;
+  intervalUnit: "MONTH" | "YEAR";
+  amountCents: number;
+  currency: string;
+}) {
+  return paypalApi<{ id: string; status: string }>("/v1/billing/plans", "POST", {
+    product_id: p.productId,
+    name: p.name.slice(0, 127),
+    status: "ACTIVE",
+    billing_cycles: [
+      {
+        frequency: { interval_unit: p.intervalUnit, interval_count: 1 },
+        tenure_type: "REGULAR",
+        sequence: 1,
+        total_cycles: 0, // renews until cancelled
+        pricing_scheme: { fixed_price: { value: centsToMoney(p.amountCents), currency_code: p.currency } },
+      },
+    ],
+    payment_preferences: {
+      auto_bill_outstanding: true,
+      setup_fee_failure_action: "CANCEL",
+      payment_failure_threshold: 3,
+    },
+  });
+}
+
+export interface PayPalSubscription {
+  id: string;
+  status: "APPROVAL_PENDING" | "APPROVED" | "ACTIVE" | "SUSPENDED" | "CANCELLED" | "EXPIRED";
+  plan_id: string;
+  custom_id?: string;
+  billing_info?: { next_billing_time?: string; last_payment?: { time?: string } };
+}
+
+export function getBillingSubscription(id: string) {
+  return paypalApi<PayPalSubscription>(`/v1/billing/subscriptions/${encodeURIComponent(id)}`, "GET");
+}
+
+export function cancelBillingSubscription(id: string, reason: string) {
+  return paypalApi<void>(`/v1/billing/subscriptions/${encodeURIComponent(id)}/cancel`, "POST", {
+    reason: reason.slice(0, 128),
+  });
 }

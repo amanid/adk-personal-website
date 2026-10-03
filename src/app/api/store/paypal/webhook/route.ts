@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { syncPayPalSubscription } from "@/lib/paypal-subscriptions";
 import { prisma } from "@/lib/prisma";
 import { verifyPayPalWebhook, moneyToCents } from "@/lib/paypal";
 import { fulfilPaidOrder, voidUnpaidOrder, revokeRefundedOrder } from "@/lib/order-fulfillment";
@@ -49,6 +50,27 @@ export async function POST(request: NextRequest) {
 
   try {
     const orderId = event.resource?.custom_id;
+
+    // Research subscriptions: re-read the subscription from PayPal and sync.
+    const subEvents = [
+      "BILLING.SUBSCRIPTION.ACTIVATED",
+      "BILLING.SUBSCRIPTION.UPDATED",
+      "BILLING.SUBSCRIPTION.CANCELLED",
+      "BILLING.SUBSCRIPTION.SUSPENDED",
+      "BILLING.SUBSCRIPTION.EXPIRED",
+      "BILLING.SUBSCRIPTION.PAYMENT.FAILED",
+    ];
+    if (event.event_type && subEvents.includes(event.event_type)) {
+      const id = (event.resource as { id?: string } | undefined)?.id;
+      if (id) await syncPayPalSubscription(id);
+      return NextResponse.json({ received: true });
+    }
+    if (event.event_type === "PAYMENT.SALE.COMPLETED") {
+      // A recurring payment: its subscription id is the billing agreement.
+      const id = (event.resource as { billing_agreement_id?: string } | undefined)?.billing_agreement_id;
+      if (id) await syncPayPalSubscription(id);
+      return NextResponse.json({ received: true });
+    }
 
     switch (event.event_type) {
       case "PAYMENT.CAPTURE.COMPLETED": {

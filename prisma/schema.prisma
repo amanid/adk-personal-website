@@ -439,6 +439,10 @@ model Subscription {
   stripeCustomerId     String?            @unique
   stripeSubscriptionId String?            @unique
   stripePriceId        String?
+  /// PayPal Subscriptions: the subscription id, its plan and billing interval.
+  paypalSubscriptionId String?            @unique
+  paypalPlanId         String?
+  billingInterval      String?
   currentPeriodStart   DateTime?
   currentPeriodEnd     DateTime?
   cancelAtPeriodEnd    Boolean            @default(false)

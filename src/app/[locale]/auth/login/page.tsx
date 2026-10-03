@@ -24,6 +24,13 @@ export default function LoginPage() {
     resolver: zodResolver(loginSchema),
   });
 
+  // Where to go after signing in: a same-site path from ?callbackUrl= only
+  // (never another origin), else the home page.
+  const nextPath = () => {
+    const raw = typeof window !== "undefined" ? new URLSearchParams(window.location.search).get("callbackUrl") : null;
+    return raw && raw.startsWith("/") && !raw.startsWith("//") && !raw.startsWith("/\\") ? raw : "/";
+  };
+
   const onSubmit = async (data: LoginInput) => {
     setError("");
     const result = await signIn("credentials", {
@@ -35,7 +42,7 @@ export default function LoginPage() {
     if (result?.error) {
       setError("Invalid email or password");
     } else {
-      router.push("/");
+      router.push(nextPath());
       router.refresh();
     }
   };
@@ -117,7 +124,7 @@ export default function LoginPage() {
             </div>
 
             <button
-              onClick={() => signIn("google", { callbackUrl: "/" })}
+              onClick={() => signIn("google", { callbackUrl: nextPath() })}
               className="w-full flex items-center justify-center gap-2 px-6 py-2.5 border border-glass-border rounded-lg text-text-secondary hover:text-gold hover:border-gold/30 transition-all text-sm"
             >
               {t("google")}

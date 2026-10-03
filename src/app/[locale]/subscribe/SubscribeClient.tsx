@@ -1,9 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useCallback, useEffect, useState } from "react";
+import { useSession } from "next-auth/react";
+import PayPalSubscribeButton from "@/components/payments/PayPalSubscribeButton";
 import { useTranslations, useLocale } from "next-intl";
 import { motion, AnimatePresence } from "framer-motion";
 import { Link } from "@/i18n/routing";
+import { TIER_PRICES } from "@/lib/subscription-plans";
 import {
   Check,
   FileText,
@@ -23,8 +26,8 @@ const tiers = [
     id: "DOCUMENT_ACCESS" as const,
     icon: FileText,
     color: "text-cyan-400",
-    monthlyPrice: 9.99,
-    yearlyPrice: 99,
+    monthlyPrice: TIER_PRICES.DOCUMENT_ACCESS.MONTH / 100,
+    yearlyPrice: TIER_PRICES.DOCUMENT_ACCESS.YEAR / 100,
     features: {
       en: [
         "Full PDF access for all premium publications",
@@ -49,8 +52,8 @@ const tiers = [
     id: "DATA_ACCESS" as const,
     icon: Database,
     color: "text-emerald-400",
-    monthlyPrice: 14.99,
-    yearlyPrice: 149,
+    monthlyPrice: TIER_PRICES.DATA_ACCESS.MONTH / 100,
+    yearlyPrice: TIER_PRICES.DATA_ACCESS.YEAR / 100,
     features: {
       en: [
         "Underlying datasets for all premium publications",
@@ -75,8 +78,8 @@ const tiers = [
     id: "FULL_ACCESS" as const,
     icon: Crown,
     color: "text-gold",
-    monthlyPrice: 19.99,
-    yearlyPrice: 199,
+    monthlyPrice: TIER_PRICES.FULL_ACCESS.MONTH / 100,
+    yearlyPrice: TIER_PRICES.FULL_ACCESS.YEAR / 100,
     features: {
       en: [
         "Everything in Document Access",
@@ -112,6 +115,41 @@ export default function SubscribeClient() {
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState(false);
+
+  // Automatic billing through PayPal, when plans have been set up in admin.
+  const { data: session } = useSession();
+  const userId = (session?.user as { id?: string } | undefined)?.id ?? null;
+  const [plans, setPlans] = useState<Record<string, { MONTH: string; YEAR: string }> | null>(null);
+  const [current, setCurrent] = useState<{
+    tier: string | null;
+    currentPeriodEnd: string | null;
+    cancelAtPeriodEnd: boolean;
+    provider?: string;
+  } | null>(null);
+  const [subscribed, setSubscribed] = useState(false);
+
+  const loadStatus = useCallback(() => {
+    fetch("/api/subscription/status", { cache: "no-store" })
+      .then((r) => r.json())
+      .then((d) => setCurrent(d?.tier ? d : null))
+      .catch(() => {});
+  }, []);
+  useEffect(() => {
+    fetch("/api/subscription/paypal/config", { cache: "no-store" })
+      .then((r) => r.json())
+      .then((d) => setPlans(d.plans ?? null))
+      .catch(() => {});
+    loadStatus();
+  }, [loadStatus, userId]);
+
+  const cancelRenewal = async () => {
+    if (!confirm(t("pp_cancel_confirm"))) return;
+    const res = await fetch("/api/subscription/paypal/cancel", { method: "POST" });
+    if (res.ok) loadStatus();
+    else alert(t("pp_error"));
+  };
+  const fmtDate = (d: string) =>
+    new Intl.DateTimeFormat(locale === "fr" ? "fr-FR" : "en-GB", { dateStyle: "long" }).format(new Date(d));
 
   const yearlySavings = Math.round(
     ((tiers[2].monthlyPrice * 12 - tiers[2].yearlyPrice) /
@@ -207,6 +245,27 @@ export default function SubscribeClient() {
             </span>
           </button>
         </div>
+
+        {/* Current plan */}
+        {current?.tier && (
+          <div className="glass rounded-xl p-5 max-w-2xl mx-auto mb-10 flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <p className="font-semibold">{t("pp_active", { tier: t(`tier_${current.tier.toLowerCase()}`) })}</p>
+              {current.currentPeriodEnd && (
+                <p className="text-sm text-text-secondary">
+                  {current.cancelAtPeriodEnd
+                    ? t("pp_ends", { date: fmtDate(current.currentPeriodEnd) })
+                    : t("pp_renews", { date: fmtDate(current.currentPeriodEnd) })}
+                </p>
+              )}
+            </div>
+            {current.provider === "PAYPAL" && !current.cancelAtPeriodEnd && (
+              <button onClick={cancelRenewal} className="text-sm px-4 py-2 rounded-lg border border-glass-border text-text-secondary hover:text-text-primary">
+                {t("pp_cancel")}
+              </button>
+            )}
+          </div>
+        )}
 
         {/* Pricing cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-16">
@@ -323,6 +382,37 @@ export default function SubscribeClient() {
                 {" — "}
                 {t("form_desc")}
               </p>
+
+              {/* Automatic billing with PayPal */}
+              {plans && selectedTier && plans[selectedTier] && (
+                <div className="mb-8 pb-8 border-b border-glass-border">
+                  <p className="font-semibold mb-1">{t("pp_title")}</p>
+                  <p className="text-sm text-text-secondary mb-4">
+                    {t("pp_desc", { period: billing === "monthly" ? t("pp_month") : t("pp_year") })}
+                  </p>
+                  {subscribed ? (
+                    <p className="p-4 rounded-lg bg-green-500/10 border border-green-500/30 text-green-400 text-sm">{t("pp_success")}</p>
+                  ) : userId ? (
+                    <PayPalSubscribeButton
+                      planId={plans[selectedTier][billing === "monthly" ? "MONTH" : "YEAR"]}
+                      userId={userId}
+                      onActivated={() => {
+                        setSubscribed(true);
+                        loadStatus();
+                      }}
+                      labels={{ loading: t("pp_loading"), error: t("pp_error"), verifying: t("pp_verifying") }}
+                    />
+                  ) : (
+                    <Link
+                      href={`/auth/login?callbackUrl=${encodeURIComponent(`/${locale}/subscribe`)}`}
+                      className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-gold text-charcoal font-semibold"
+                    >
+                      {t("pp_signin")}
+                    </Link>
+                  )}
+                  <p className="text-xs text-text-muted mt-4">{t("pp_or_manual")}</p>
+                </div>
+              )}
 
               {submitted && (
                 <motion.div

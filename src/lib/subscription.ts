@@ -1,4 +1,5 @@
 import { prisma } from "./prisma";
+import { subscriptionGrantsAccess } from "./subscription-plans";
 
 export interface AccessResult {
   hasDocumentAccess: boolean;
@@ -33,7 +34,8 @@ export async function checkPublicationAccess(
     where: { userId },
   });
 
-  if (!subscription || subscription.status !== "ACTIVE") {
+  // Active, or cancelled but still inside the period already paid for.
+  if (!subscription || !subscriptionGrantsAccess(subscription)) {
     return {
       hasDocumentAccess: false,
       hasDataAccess: false,

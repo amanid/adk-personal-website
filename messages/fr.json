@@ -434,7 +434,22 @@
     "success_title": "Abonnement Activé !",
     "success_desc": "Votre abonnement est maintenant actif. Vous avez accès au contenu premium.",
     "cancelled_title": "Abonnement Annulé",
-    "cancelled_desc": "Votre paiement a été annulé. Aucun frais n'a été prélevé."
+    "cancelled_desc": "Votre paiement a été annulé. Aucun frais n'a été prélevé.",
+    "pp_title": "S'abonner avec PayPal",
+    "pp_desc": "Prélevé automatiquement chaque {period}. Résiliable à tout moment ; l'accès court jusqu'à la fin de la période payée.",
+    "pp_signin": "Connectez-vous ou créez un compte gratuit pour vous abonner",
+    "pp_loading": "Chargement de PayPal…",
+    "pp_verifying": "Confirmation de votre abonnement…",
+    "pp_error": "PayPal n'a pas pu finaliser l'abonnement. Veuillez réessayer.",
+    "pp_success": "Vous êtes abonné — bienvenue.",
+    "pp_or_manual": "Vous préférez le mobile money ou une facture ? Demandez l'accès ci-dessous et je vous enverrai les modalités de paiement.",
+    "pp_active": "Votre formule : {tier}",
+    "pp_renews": "Renouvellement le {date}",
+    "pp_ends": "Accès jusqu'au {date} (renouvellement annulé)",
+    "pp_cancel": "Annuler le renouvellement",
+    "pp_cancel_confirm": "Annuler le renouvellement automatique ? Vous conservez l'accès jusqu'à la fin de la période en cours.",
+    "pp_month": "mois",
+    "pp_year": "an"
   },
   "common": {
     "loading": "Chargement...",

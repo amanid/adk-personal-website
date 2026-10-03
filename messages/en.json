@@ -434,7 +434,22 @@
     "success_title": "Subscription Activated!",
     "success_desc": "Your subscription is now active. You have full access to premium content.",
     "cancelled_title": "Subscription Cancelled",
-    "cancelled_desc": "Your checkout was cancelled. No charges were made."
+    "cancelled_desc": "Your checkout was cancelled. No charges were made.",
+    "pp_title": "Subscribe with PayPal",
+    "pp_desc": "Billed automatically each {period}. Cancel any time; access runs to the end of the period you've paid for.",
+    "pp_signin": "Sign in or create a free account to subscribe",
+    "pp_loading": "Loading PayPal…",
+    "pp_verifying": "Confirming your subscription…",
+    "pp_error": "PayPal couldn't complete the subscription. Please try again.",
+    "pp_success": "You're subscribed — welcome aboard.",
+    "pp_or_manual": "Prefer mobile money or an invoice? Request access below and I'll send payment details.",
+    "pp_active": "Your plan: {tier}",
+    "pp_renews": "Renews on {date}",
+    "pp_ends": "Access until {date} (renewal cancelled)",
+    "pp_cancel": "Cancel renewal",
+    "pp_cancel_confirm": "Cancel automatic renewal? You keep access until the end of the current period.",
+    "pp_month": "month",
+    "pp_year": "year"
   },
   "common": {
     "loading": "Loading...",

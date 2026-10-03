@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { subscriptionGrantsAccess } from "@/lib/subscription-plans";
 
 export async function GET() {
   try {
@@ -28,7 +29,7 @@ export async function GET() {
       where: { userId },
     });
 
-    if (!subscription || subscription.status !== "ACTIVE") {
+    if (!subscription || !subscriptionGrantsAccess(subscription)) {
       return NextResponse.json({
         tier: null,
         status: subscription?.status || null,
@@ -50,6 +51,8 @@ export async function GET() {
         subscription.tier === "FULL_ACCESS",
       currentPeriodEnd: subscription.currentPeriodEnd,
       cancelAtPeriodEnd: subscription.cancelAtPeriodEnd,
+      // Only a PayPal-billed subscription can be cancelled from the site.
+      provider: subscription.paypalSubscriptionId ? "PAYPAL" : "OTHER",
     });
   } catch {
     return NextResponse.json(
