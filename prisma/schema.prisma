@@ -1023,3 +1023,45 @@ model BetEntry {
   @@index([placedAt])
   @@index([bookmaker, status])
 }
+
+// ── Outbound webhooks ────────────────────────────────────────────────────────
+
+model WebhookEndpoint {
+  id          String            @id @default(cuid())
+  url         String
+  description String?
+  /// Event types to send; empty = all.
+  events      String[]
+  /// "whsec_…" secret, encrypted at rest (AES-256-GCM, key from AUTH_SECRET).
+  secretEnc   String
+  active      Boolean           @default(true)
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+  deliveries  WebhookDelivery[]
+}
+
+enum WebhookDeliveryStatus {
+  PENDING
+  SUCCESS
+  FAILED
+}
+
+model WebhookDelivery {
+  id             String                @id @default(cuid())
+  endpointId     String
+  /// Stable message id (webhook-id header); the same across retries.
+  messageId      String
+  event          String
+  payload        Json
+  status         WebhookDeliveryStatus @default(PENDING)
+  attempts       Int                   @default(0)
+  nextAttemptAt  DateTime              @default(now())
+  lastStatusCode Int?
+  lastError      String?
+  deliveredAt    DateTime?
+  createdAt      DateTime              @default(now())
+  endpoint       WebhookEndpoint       @relation(fields: [endpointId], references: [id], onDelete: Cascade)
+
+  @@index([status, nextAttemptAt])
+  @@index([endpointId, createdAt])
+}

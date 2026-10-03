@@ -7,7 +7,7 @@ import { sanitizeInput } from "@/lib/sanitize";
 import { getBookingSettings, reserveSlot, SlotUnavailableError } from "@/lib/booking";
 import { createOrderRecord, notifyManualOrder, startPayPalPayment } from "@/lib/orders";
 import { sendBookingConfirmation } from "@/lib/booking-notify";
-import { voidUnpaidOrder } from "@/lib/order-fulfillment";
+import { voidUnpaidOrder, emitBookingConfirmed } from "@/lib/order-fulfillment";
 import { isPaypalCurrency } from "@/lib/currency";
 
 export const runtime = "nodejs";
@@ -75,6 +75,7 @@ export async function POST(request: Request) {
       } catch (err) {
         console.error("Booking confirmation email failed:", err);
       }
+      await emitBookingConfirmed(booking);
       return NextResponse.json({ manageToken: booking.manageToken });
     }
 

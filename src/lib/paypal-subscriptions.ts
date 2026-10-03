@@ -8,6 +8,7 @@
  * user's access.
  */
 import { prisma } from "./prisma";
+import { emitWebhook } from "./webhooks";
 import {
   cancelBillingSubscription,
   createBillingPlan,
@@ -128,6 +129,25 @@ export async function syncPayPalSubscription(
     cancelAtPeriodEnd: mapped === "CANCELLED",
   } as const;
   await prisma.subscription.upsert({ where: { userId }, update: data, create: { userId, ...data } });
+  const changed =
+    !existing ||
+    existing.status !== mapped ||
+    existing.tier !== info.tier ||
+    existing.currentPeriodEnd?.getTime() !== periodEnd?.getTime();
+  if (changed) {
+    const user = await prisma.user.findUnique({ where: { id: userId }, select: { email: true, name: true } });
+    await emitWebhook("subscription.changed", {
+      user_id: userId,
+      email: user?.email ?? null,
+      name: user?.name ?? null,
+      tier: info.tier,
+      status: mapped,
+      billing_interval: info.interval,
+      current_period_end: periodEnd?.toISOString() ?? null,
+      cancel_at_period_end: mapped === "CANCELLED",
+      provider: "PAYPAL",
+    });
+  }
   return { ok: true, tier: info.tier, status: mapped };
 }
 

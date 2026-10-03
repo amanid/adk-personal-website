@@ -116,7 +116,7 @@ export default function SalesEmailsPage() {
           To run hourly without you, set a <code className="figure">CRON_SECRET</code> environment variable (at least 16 random
           characters) on Render, then have any scheduler call:
         </p>
-        <pre className="figure text-xs bg-navy/60 rounded-md p-3 overflow-x-auto">{`GET https://www.konanamanidieudonne.org/api/cron/sales-emails
+        <pre className="figure text-xs bg-navy/60 rounded-md p-3 overflow-x-auto">{`GET https://www.konanamanidieudonne.org/api/cron/tick
 Authorization: Bearer <CRON_SECRET>`}</pre>
         <p className="text-text-muted text-xs">Until then, use &ldquo;Run now&rdquo;.</p>
       </div>

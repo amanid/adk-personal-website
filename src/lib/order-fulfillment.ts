@@ -5,6 +5,7 @@ import { confirmBookingForOrder, releaseBookingForOrder } from "./booking";
 import { sendBookingConfirmation } from "./booking-notify";
 import { markQuoteStagePaid } from "./quotes";
 import { recordCommission, voidCommission } from "./affiliates";
+import { emitWebhook } from "./webhooks";
 import { sendQuotePaymentReceived } from "./quote-notify";
 
 function appUrl(): string {
@@ -87,6 +88,7 @@ export async function fulfilPaidOrder(
   const order = await prisma.order.findUnique({ where: { id: orderId } });
   if (!order) return false;
 
+  let newlyPaid = false;
   if (order.status !== "PAID") {
     await prisma.$transaction(async (tx) => {
       // Flip the status conditionally, inside the transaction. PayPal capture
@@ -127,11 +129,64 @@ export async function fulfilPaidOrder(
       if (order.kind === "BOOKING") await confirmBookingForOrder(tx, orderId);
       if (order.kind === "QUOTE") await markQuoteStagePaid(tx, orderId);
       await recordCommission(tx, orderId);
+      newlyPaid = true;
     });
   }
 
   await deliverReceipt(orderId, opts.locale ?? "en");
+  if (newlyPaid) await emitOrderWebhooks(orderId);
   return true;
+}
+
+/** Tell subscribed integrations about a payment that just happened. */
+async function emitOrderWebhooks(orderId: string): Promise<void> {
+  const o = await prisma.order.findUnique({
+    where: { id: orderId },
+    include: { items: true, booking: { include: { package: true } }, quote: true },
+  });
+  if (!o) return;
+  await emitWebhook("order.paid", {
+    order_id: o.id,
+    order_number: o.orderNumber,
+    kind: o.kind,
+    email: o.email,
+    name: o.name,
+    currency: o.currency,
+    total_cents: o.totalCents,
+    discount_cents: o.discountCents,
+    coupon_code: o.couponCode,
+    payment_method: o.paymentMethod,
+    paid_at: o.paidAt?.toISOString() ?? null,
+    items: o.items.map((i) => ({ title: i.titleSnapshot, quantity: i.quantity, unit_price_cents: i.unitPriceCents })),
+    ...(o.quote ? { quote_number: o.quote.number, quote_stage: o.quoteStage } : {}),
+    affiliate_id: o.affiliateId,
+  });
+  if (o.kind === "BOOKING" && o.booking && (o.booking.status === "CONFIRMED" || o.booking.status === "RESCHEDULE_NEEDED")) {
+    await emitBookingConfirmed(o.booking);
+  }
+}
+
+export async function emitBookingConfirmed(b: {
+  id: string;
+  status: string;
+  name: string;
+  email: string;
+  company: string | null;
+  startsAt: Date;
+  endsAt: Date;
+  package: { title: string; slug: string };
+}): Promise<void> {
+  await emitWebhook("booking.confirmed", {
+    booking_id: b.id,
+    status: b.status,
+    session: b.package.title,
+    session_slug: b.package.slug,
+    starts_at: b.startsAt.toISOString(),
+    ends_at: b.endsAt.toISOString(),
+    name: b.name,
+    email: b.email,
+    company: b.company,
+  });
 }
 
 /**
@@ -190,4 +245,15 @@ export async function revokeRefundedOrder(orderId: string): Promise<void> {
     })
     .catch(() => {});
   await voidCommission(orderId).catch(() => {});
+  const o = await prisma.order.findUnique({ where: { id: orderId }, select: { orderNumber: true, kind: true, email: true, totalCents: true, currency: true } });
+  if (o) {
+    await emitWebhook("order.refunded", {
+      order_id: orderId,
+      order_number: o.orderNumber,
+      kind: o.kind,
+      email: o.email,
+      total_cents: o.totalCents,
+      currency: o.currency,
+    });
+  }
 }

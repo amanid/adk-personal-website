@@ -27,6 +27,7 @@ import {
   MailCheck,
   Repeat,
   CandlestickChart,
+  Webhook,
 } from "lucide-react";
 
 export const metadata = {
@@ -51,6 +52,7 @@ const adminLinks = [
   { href: "/admin/affiliates", label: "Affiliates", icon: Handshake },
   { href: "/admin/sales-emails", label: "Sales emails", icon: MailCheck },
   { href: "/admin/subscriptions", label: "Subscriptions", icon: Repeat },
+  { href: "/admin/webhooks", label: "Webhooks", icon: Webhook },
   { href: "/admin/research-activities", label: "Research Activities", icon: FlaskConical },
   { href: "/admin/experience", label: "Experience", icon: Building2 },
   { href: "/admin/projects", label: "Projects", icon: FolderOpen },

@@ -7,6 +7,7 @@ import { sanitizeInput } from "@/lib/sanitize";
 import { quoteByToken } from "@/lib/quote-access";
 import { isQuoteExpired } from "@/lib/quotes";
 import { notifyAdmin } from "@/lib/quote-notify";
+import { emitWebhook } from "@/lib/webhooks";
 
 /** The client accepts the quote, typing their name as a signature. */
 export async function POST(request: Request, { params }: { params: Promise<{ token: string }> }) {
@@ -36,6 +37,17 @@ export async function POST(request: Request, { params }: { params: Promise<{ tok
   });
   if (res.count === 0) return NextResponse.json({ error: "This proposal can no longer be accepted." }, { status: 409 });
 
+  await emitWebhook("quote.accepted", {
+    quote_id: q.id,
+    quote_number: q.number,
+    title: q.title,
+    client_name: q.clientName,
+    client_email: q.clientEmail,
+    company: q.company,
+    currency: q.currency,
+    total_cents: q.totalCents,
+    deposit_cents: q.depositCents,
+  });
   after(() =>
     notifyAdmin(`Quote accepted: ${q.number} — ${q.clientName}`, `${q.clientName} accepted “${q.title}”.`, q).catch(
       (e) => console.error("Quote accepted alert failed:", e)

@@ -7,6 +7,7 @@ import { sanitizeInput } from "@/lib/sanitize";
 import { secureToken } from "@/lib/store";
 import { generateAffiliateCode, getAffiliateSettings } from "@/lib/affiliates";
 import { notifyAdminOfApplication } from "@/lib/affiliate-notify";
+import { emitWebhook } from "@/lib/webhooks";
 
 /**
  * Apply to the affiliate program. Every application waits for the admin's
@@ -44,6 +45,13 @@ export async function POST(request: Request) {
       },
     });
     after(() => notifyAdminOfApplication(affiliate).catch((e) => console.error("Affiliate alert failed:", e)));
+    await emitWebhook("affiliate.applied", {
+      affiliate_id: affiliate.id,
+      name: affiliate.name,
+      email: affiliate.email,
+      website: affiliate.website,
+      code: affiliate.code,
+    });
   }
   return NextResponse.json({ ok: true });
 }
