@@ -69,7 +69,13 @@ interface BetStat {
 }
 
 const WATCH_KEY = "adk_trading_watch";
-const DEFAULT_WATCH = ["EUR_USD", "GBP_USD", "USD_JPY", "WTICO_USD", "BCO_USD", "XAU_USD"];
+// International markets: major FX, oil, metals and global indices. Anything
+// the connected account doesn't offer is hidden automatically, and the
+// watchlist can be edited on the page.
+const DEFAULT_WATCH = [
+  "EUR_USD", "GBP_USD", "USD_JPY", "WTICO_USD", "BCO_USD", "XAU_USD", "XAG_USD",
+  "US30_USD", "SPX500_USD", "NAS100_USD", "UK100_GBP", "DE30_EUR", "FR40_EUR",
+];
 
 async function send(url: string, method: string, body?: unknown) {
   const res = await fetch(url, {
