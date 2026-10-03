@@ -3,6 +3,8 @@ import { createDownloadGrants } from "./store";
 import { sendOrderReceiptEmail } from "./email";
 import { confirmBookingForOrder, releaseBookingForOrder } from "./booking";
 import { sendBookingConfirmation } from "./booking-notify";
+import { markQuoteStagePaid } from "./quotes";
+import { sendQuotePaymentReceived } from "./quote-notify";
 
 function appUrl(): string {
   return process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
@@ -15,13 +17,19 @@ export async function sendOrderReceipt(
 ): Promise<void> {
   const order = await prisma.order.findUnique({
     where: { id: orderId },
-    include: { items: true, downloads: true, booking: { include: { package: true } } },
+    include: { items: true, downloads: true, booking: { include: { package: true } }, quote: true },
   });
   if (!order || order.status !== "PAID") return;
 
   // A booking's "receipt" is its confirmation, with the calendar invite.
   if (order.kind === "BOOKING") {
     if (order.booking) await sendBookingConfirmation(order.booking);
+    return;
+  }
+  if (order.kind === "QUOTE") {
+    if (order.quote && order.quoteStage) {
+      await sendQuotePaymentReceived(order.quote, order.quoteStage, order.totalCents);
+    }
     return;
   }
 
@@ -110,6 +118,7 @@ export async function fulfilPaidOrder(
       }
       await createDownloadGrants(tx, orderId);
       if (order.kind === "BOOKING") await confirmBookingForOrder(tx, orderId);
+      if (order.kind === "QUOTE") await markQuoteStagePaid(tx, orderId);
     });
   }
 

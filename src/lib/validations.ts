@@ -379,3 +379,38 @@ export const blockedPeriodSchema = z
     reason: z.string().max(200).optional().or(z.literal("")),
   })
   .refine((b) => new Date(b.endsAt) > new Date(b.startsAt), "End must be after start");
+
+// ── Quotes ───────────────────────────────────────────────────────────────────
+
+export const quoteInputSchema = z.object({
+  clientName: z.string().trim().min(2).max(200),
+  clientEmail: z.string().email().max(320),
+  company: z.string().max(200).optional().or(z.literal("")),
+  title: z.string().trim().min(2).max(200),
+  scope: z.string().trim().min(2).max(20000),
+  items: z
+    .array(z.object({ description: z.string().trim().min(1).max(500), amountCents: z.number().int().min(0).max(10_000_000_000) }))
+    .min(1)
+    .max(50),
+  currency: z.string().regex(/^[A-Z]{3}$/),
+  depositPercent: z.number().int().min(0).max(100),
+  validUntil: z.string().datetime().optional().or(z.literal("")),
+  locale: z.enum(["en", "fr"]),
+  internalNotes: z.string().max(5000).optional().or(z.literal("")),
+  serviceRequestId: z.string().max(40).optional().or(z.literal("")),
+});
+
+export const quoteAcceptSchema = z.object({
+  name: z.string().trim().min(2, "Type your full name to accept").max(200),
+  agree: z.literal(true),
+});
+
+export const quoteDeclineSchema = z.object({
+  reason: z.string().max(2000).optional().or(z.literal("")),
+});
+
+export const quotePaySchema = z.object({
+  payment: z.enum(["PAYPAL", "MANUAL"]),
+  provider: z.enum(["WAVE", "DJAMO", "ORANGE_MONEY", "PAYPAL"]).optional(),
+  reference: z.string().max(120).optional().or(z.literal("")),
+});

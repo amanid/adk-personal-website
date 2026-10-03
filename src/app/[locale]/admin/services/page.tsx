@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { formatDate } from "@/lib/utils";
+import { Link } from "@/i18n/routing";
 
 interface ServiceRequest {
   id: string;
@@ -65,6 +66,12 @@ export default function AdminServicesPage() {
                   <option value="COMPLETED">Completed</option>
                   <option value="CANCELLED">Cancelled</option>
                 </select>
+                <Link
+                  href={`/admin/quotes?fromRequest=${req.id}`}
+                  className="px-3 py-1 rounded-lg bg-gold text-charcoal text-sm font-semibold whitespace-nowrap"
+                >
+                  Create quote
+                </Link>
               </div>
             </div>
             <div className="flex items-center gap-3 mb-3 text-xs text-text-muted">

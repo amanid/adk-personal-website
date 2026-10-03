@@ -582,10 +582,15 @@ model Order {
   items            OrderItem[]
   downloads        DownloadGrant[]
   booking          Booking?
+  /// For QUOTE orders: which quote, and whether this pays the deposit or balance.
+  quoteId          String?
+  quoteStage       QuoteStage?
+  quote            Quote?          @relation(fields: [quoteId], references: [id])
 
   @@index([email])
   @@index([status, createdAt])
   @@index([kind, status])
+  @@index([quoteId])
 }
 
 model OrderItem {
@@ -757,4 +762,62 @@ model Booking {
   @@index([startsAt, endsAt])
   @@index([status])
   @@index([email])
+}
+
+// ── Quotes & deposits ────────────────────────────────────────────────────────
+
+enum QuoteStatus {
+  DRAFT
+  SENT
+  ACCEPTED
+  DEPOSIT_PAID
+  /// Admin has asked for the remaining balance.
+  BALANCE_DUE
+  PAID
+  DECLINED
+  CANCELLED
+}
+
+enum QuoteStage {
+  DEPOSIT
+  BALANCE
+}
+
+model Quote {
+  id                 String      @id @default(cuid())
+  number             String      @unique
+  /// Bearer token for the client's quote page.
+  token              String      @unique
+  clientName         String
+  clientEmail        String
+  company            String?
+  title              String
+  scope              String      @db.Text
+  /// [{ description: string, amountCents: number }]
+  items              Json
+  currency           String      @default("USD")
+  totalCents         Int
+  depositPercent     Int
+  depositCents       Int
+  validUntil         DateTime?
+  status             QuoteStatus @default(DRAFT)
+  locale             String      @default("en")
+  /// Private to the admin.
+  internalNotes      String?     @db.Text
+  serviceRequestId   String?
+  acceptedName       String?
+  acceptedIp         String?
+  declineReason      String?
+  sentAt             DateTime?
+  acceptedAt         DateTime?
+  depositPaidAt      DateTime?
+  balanceRequestedAt DateTime?
+  paidAt             DateTime?
+  declinedAt         DateTime?
+  createdAt          DateTime    @default(now())
+  updatedAt          DateTime    @updatedAt
+  orders             Order[]
+
+  @@index([status])
+  @@index([clientEmail])
 }

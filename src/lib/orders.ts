@@ -6,7 +6,7 @@
  * computes an amount itself, and nothing in it trusts the client.
  */
 import { after } from "next/server";
-import type { OrderKind, PaymentMethod } from "@prisma/client";
+import type { OrderKind, PaymentMethod, QuoteStage } from "@prisma/client";
 import { prisma } from "./prisma";
 import { generateOrderNumber, secureToken } from "./store";
 import { createPayPalOrder } from "./paypal";
@@ -31,6 +31,8 @@ export interface OrderLine {
 
 export interface NewOrder {
   kind?: OrderKind;
+  quoteId?: string | null;
+  quoteStage?: QuoteStage | null;
   email: string;
   name?: string | null;
   currency: string;
@@ -66,6 +68,8 @@ export async function createOrderRecord(input: NewOrder) {
     data: {
       orderNumber,
       kind: input.kind ?? "STORE",
+      quoteId: input.quoteId ?? null,
+      quoteStage: input.quoteStage ?? null,
       email: input.email,
       name: input.name || null,
       userId: existingUser?.id ?? null,
