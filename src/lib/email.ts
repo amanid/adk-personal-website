@@ -119,7 +119,7 @@ interface NotifyParams {
   title: string;
   excerpt: string;
   url: string;
-  type: "blog" | "publication";
+  type: "blog" | "publication" | "product";
 }
 
 export async function notifySubscribers({ title, excerpt, url, type }: NotifyParams) {
@@ -129,7 +129,7 @@ export async function notifySubscribers({ title, excerpt, url, type }: NotifyPar
 
   const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
   const fullUrl = url.startsWith("http") ? url : `${appUrl}${url}`;
-  const typeLabel = type === "blog" ? "Blog Post" : "Publication";
+  const typeLabel = type === "blog" ? "Blog Post" : type === "product" ? "In the store" : "Publication";
 
   for (const subscriber of subscribers) {
     const unsubscribeUrl = `${appUrl}/api/subscribe?token=${subscriber.token}&action=unsubscribe`;

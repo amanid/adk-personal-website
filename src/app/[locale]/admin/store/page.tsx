@@ -19,6 +19,7 @@ import {
   X,
   CheckSquare,
   Square,
+  Megaphone,
 } from "lucide-react";
 import FileUpload from "@/components/admin/FileUpload";
 import BookFileUpload, { type BookUploadResult } from "@/components/admin/BookFileUpload";
@@ -58,6 +59,7 @@ interface Book {
   saleStartsAt: string | null;
   saleEndsAt: string | null;
   payWhatYouWant: boolean;
+  announcedAt: string | null;
   coverImageId: string | null;
   fileId: string | null;
   fileName: string | null;
@@ -731,6 +733,18 @@ export default function AdminStorePage() {
     }
   };
 
+  const announceBook = async (b: Book) => {
+    if (!confirm(`Email all confirmed newsletter subscribers about "${b.title}"? This can only be done once.`)) return;
+    try {
+      const res = await fetch(`/api/admin/books/${b.id}/announce`, { method: "POST" });
+      const data = await res.json().catch(() => ({}));
+      alert(data.message || data.error || "Done");
+      fetchBooks();
+    } catch {
+      alert("Could not send the announcement");
+    }
+  };
+
   const setBookStatus = async (b: Book, status: "PUBLISHED" | "ARCHIVED") => {
     try {
       const res = await fetch(`/api/admin/books/${b.id}`, {
@@ -1024,6 +1038,16 @@ export default function AdminStorePage() {
                     title="Archive (hide from store)"
                   >
                     <Archive className="w-4 h-4" />
+                  </button>
+                )}
+                {b.status === "PUBLISHED" && !b.announcedAt && (
+                  <button
+                    onClick={() => announceBook(b)}
+                    className="p-2 text-text-secondary hover:text-gold transition-colors"
+                    aria-label="Announce to subscribers"
+                    title="Email newsletter subscribers about this product (once)"
+                  >
+                    <Megaphone className="w-4 h-4" />
                   </button>
                 )}
                 <button

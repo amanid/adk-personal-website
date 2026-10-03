@@ -24,6 +24,7 @@ import {
   FileSignature,
   Layers,
   Handshake,
+  MailCheck,
 } from "lucide-react";
 
 export const metadata = {
@@ -45,6 +46,7 @@ const adminLinks = [
   { href: "/admin/bookings", label: "Bookings", icon: CalendarClock },
   { href: "/admin/quotes", label: "Quotes", icon: FileSignature },
   { href: "/admin/affiliates", label: "Affiliates", icon: Handshake },
+  { href: "/admin/sales-emails", label: "Sales emails", icon: MailCheck },
   { href: "/admin/research-activities", label: "Research Activities", icon: FlaskConical },
   { href: "/admin/experience", label: "Experience", icon: Building2 },
   { href: "/admin/projects", label: "Projects", icon: FolderOpen },

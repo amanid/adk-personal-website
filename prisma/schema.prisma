@@ -546,6 +546,8 @@ model Book {
   saleEndsAt      DateTime?
   /// Buyers choose the amount; the (sale) price is the minimum.
   payWhatYouWant  Boolean      @default(false)
+  /// When subscribers were told about this product (sent once).
+  announcedAt     DateTime?
   fileId          String? // -> BookAsset.id (downloadable file)
   fileName        String?
   fileMimeType    String?
@@ -594,6 +596,9 @@ model Order {
   invoiceEmailedAt DateTime?
   receiptEmailedAt DateTime?
   lastEmailError   String?
+  /// Sales automation: each is sent at most once per order.
+  reminderSentAt   DateTime?
+  followUpSentAt   DateTime?
   ipAddress        String?
   createdAt        DateTime             @default(now())
   updatedAt        DateTime             @updatedAt
@@ -956,4 +961,10 @@ model AffiliateCommission {
   order       Order            @relation(fields: [orderId], references: [id])
 
   @@index([affiliateId, status])
+}
+
+/// Addresses that opted out of sales emails (reminders, follow-ups).
+model EmailOptOut {
+  email     String   @id
+  createdAt DateTime @default(now())
 }
