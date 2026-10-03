@@ -972,3 +972,54 @@ model EmailOptOut {
   email     String   @id
   createdAt DateTime @default(now())
 }
+
+// ── Trading desk (admin only) ────────────────────────────────────────────────
+
+/// Every order and close sent to the broker, successful or not.
+model TradeAuditLog {
+  id          String   @id @default(cuid())
+  environment String
+  action      String
+  instrument  String?
+  units       String?
+  request     Json
+  ok          Boolean
+  response    Json?
+  error       String?
+  createdAt   DateTime @default(now())
+
+  @@index([createdAt])
+}
+
+enum BetStatus {
+  OPEN
+  WON
+  LOST
+  VOID
+  CASHED_OUT
+}
+
+/// A bet placed by hand at a bookmaker, recorded for bankroll tracking.
+model BetEntry {
+  id          String    @id @default(cuid())
+  bookmaker   String
+  sport       String?
+  event       String
+  market      String?
+  selection   String
+  /// Decimal odds × 1000 (2.15 → 2150), to keep arithmetic exact.
+  oddsMilli   Int
+  stakeCents  Int
+  currency    String    @default("XOF")
+  status      BetStatus @default(OPEN)
+  /// Amount returned (stake included); set when settled.
+  returnCents Int?
+  notes       String?
+  placedAt    DateTime  @default(now())
+  settledAt   DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([placedAt])
+  @@index([bookmaker, status])
+}

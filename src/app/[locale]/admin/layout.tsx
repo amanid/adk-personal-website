@@ -26,6 +26,7 @@ import {
   Handshake,
   MailCheck,
   Repeat,
+  CandlestickChart,
 } from "lucide-react";
 
 export const metadata = {
@@ -37,6 +38,7 @@ const adminLinks = [
   { href: "/admin/analytics", label: "Analytics", icon: BarChart3 },
   { href: "/admin/visitors", label: "Visitors", icon: Users },
   { href: "/admin/finance", label: "Finance", icon: DollarSign },
+  { href: "/admin/trading", label: "Trading desk", icon: CandlestickChart },
   { href: "/admin/blog", label: "Blog", icon: FileText },
   { href: "/admin/publications", label: "Publications", icon: BookOpen },
   { href: "/admin/store", label: "Bookstore", icon: ShoppingBag },
