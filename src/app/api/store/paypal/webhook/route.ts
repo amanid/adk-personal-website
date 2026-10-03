@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { verifyPayPalWebhook, moneyToCents } from "@/lib/paypal";
-import { fulfilPaidOrder } from "@/lib/order-fulfillment";
+import { fulfilPaidOrder, voidUnpaidOrder, revokeRefundedOrder } from "@/lib/order-fulfillment";
 
 export const runtime = "nodejs";
 
@@ -71,25 +71,15 @@ export async function POST(request: NextRequest) {
       case "PAYMENT.CAPTURE.DENIED":
       case "PAYMENT.CAPTURE.DECLINED": {
         if (!orderId) break;
-        await prisma.order
-          .updateMany({
-            where: { id: orderId, status: { not: "PAID" } },
-            data: { status: "FAILED" },
-          })
-          .catch(() => {});
+        await voidUnpaidOrder(orderId, "FAILED").catch(() => {});
         break;
       }
 
       case "PAYMENT.CAPTURE.REFUNDED":
       case "PAYMENT.CAPTURE.REVERSED": {
         if (!orderId) break;
-        await prisma.order
-          .update({ where: { id: orderId }, data: { status: "REFUNDED" } })
-          .catch(() => {});
-        // Revoke downloads on refund.
-        await prisma.downloadGrant
-          .updateMany({ where: { orderId }, data: { expiresAt: new Date(0) } })
-          .catch(() => {});
+        // Revoke downloads and cancel any booking the payment was for.
+        await revokeRefundedOrder(orderId);
         break;
       }
     }

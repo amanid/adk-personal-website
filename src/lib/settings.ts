@@ -36,7 +36,13 @@ export async function getSiteSettings(): Promise<SiteSettings> {
     // Everything this returns reaches the browser (public /api/settings and
     // server-rendered pages), so mail credentials must never be read here.
     const rows = await prisma.siteSetting.findMany({
-      where: { NOT: { key: { startsWith: SMTP_SETTING_PREFIX } } },
+      where: {
+        AND: [
+          { NOT: { key: { startsWith: SMTP_SETTING_PREFIX } } },
+          // "private." keys (e.g. the meeting link) are server-only too.
+          { NOT: { key: { startsWith: "private." } } },
+        ],
+      },
     });
     for (const s of rows) {
       if (s.key === "sectionVisibility") {

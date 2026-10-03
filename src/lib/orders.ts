@@ -10,7 +10,7 @@ import type { OrderKind, PaymentMethod } from "@prisma/client";
 import { prisma } from "./prisma";
 import { generateOrderNumber, secureToken } from "./store";
 import { createPayPalOrder } from "./paypal";
-import { sendOrderInvoiceEmail, notifyAdminOfManualOrder } from "./email";
+import { sendOrderInvoiceEmail, notifyAdminOfManualOrder, type InvoiceCopy } from "./email";
 
 export function appUrl(): string {
   return process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
@@ -131,7 +131,8 @@ export function notifyManualOrder(
   },
   lines: OrderLine[],
   provider: string,
-  locale: "en" | "fr"
+  locale: "en" | "fr",
+  copy?: InvoiceCopy
 ): void {
   const base = appUrl();
   const items = lines.map((l) => ({
@@ -155,6 +156,7 @@ export function notifyManualOrder(
         items,
         provider,
         receiptUrl: `${base}/${locale}/store/receipt/${order.receiptToken}`,
+        copy,
       });
       await prisma.order.update({
         where: { id: order.id },

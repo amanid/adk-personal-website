@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
-import { deliverReceipt, fulfilPaidOrder } from "@/lib/order-fulfillment";
+import { deliverReceipt, fulfilPaidOrder, voidUnpaidOrder } from "@/lib/order-fulfillment";
 
 export const runtime = "nodejs";
 
@@ -54,7 +54,11 @@ export async function POST(
 
     if (action === "cancel" || action === "fail") {
       const status = action === "cancel" ? "CANCELLED" : "FAILED";
-      await prisma.order.update({ where: { id }, data: { status } });
+      if (order.status === "PAID") {
+        return NextResponse.json({ error: "A paid order can't be cancelled here; refund it instead." }, { status: 400 });
+      }
+      // Also frees the time slot of an unpaid booking.
+      await voidUnpaidOrder(id, status);
       return NextResponse.json({ status });
     }
 

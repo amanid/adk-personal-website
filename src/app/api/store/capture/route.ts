@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { capturePayPalOrder } from "@/lib/paypal";
-import { fulfilPaidOrder } from "@/lib/order-fulfillment";
+import { fulfilPaidOrder, voidUnpaidOrder } from "@/lib/order-fulfillment";
 import { localeFromReferer } from "@/lib/orders";
 import { rateLimit } from "@/lib/rate-limit";
 import { checkOrigin } from "@/lib/origin-check";
@@ -47,13 +47,8 @@ export async function POST(request: Request) {
     const amountOk = capture.amountCents === order.totalCents;
     const currencyOk = capture.currency === order.currency;
     if (capture.status !== "COMPLETED" || !amountOk || !currencyOk) {
-      await prisma.order.update({
-        where: { id: order.id },
-        data: {
-          status: "FAILED",
-          paypalCaptureId: capture.captureId,
-        },
-      });
+      await prisma.order.update({ where: { id: order.id }, data: { paypalCaptureId: capture.captureId } });
+      await voidUnpaidOrder(order.id, "FAILED");
       return NextResponse.json(
         { error: "Payment could not be verified" },
         { status: 402 }

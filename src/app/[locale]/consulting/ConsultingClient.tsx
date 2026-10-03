@@ -46,6 +46,8 @@ const packages = [
       { text: "Strategic recommendations", textFr: "Recommandations stratégiques" },
       { text: "No obligation", textFr: "Sans engagement" },
     ],
+    // Bookable online: the slug of the matching ServicePackage.
+    bookSlug: "discovery-call",
     cta: "Book Free Call",
     ctaFr: "Réserver un appel gratuit",
     popular: false,
@@ -70,6 +72,7 @@ const packages = [
       { text: "Data pipeline optimization", textFr: "Optimisation des pipelines de données" },
       { text: "Written summary & action items", textFr: "Résumé écrit et plan d'action" },
     ],
+    bookSlug: "expert-advisory",
     cta: "Get Started",
     ctaFr: "Commencer",
     popular: true,
@@ -200,15 +203,13 @@ export default function ConsultingClient() {
               {locale === "fr" ? "Discuter de votre projet" : "Discuss Your Project"}
               <ArrowRight className="w-4 h-4" />
             </Link>
-            <a
-              href="https://calendly.com"
-              target="_blank"
-              rel="noopener noreferrer"
+            <Link
+              href="/book"
               className="inline-flex items-center gap-2 px-6 py-3 glass rounded-lg text-text-secondary hover:text-gold transition-colors"
             >
               <Calendar className="w-4 h-4" />
               {locale === "fr" ? "Réserver un appel" : "Schedule a Call"}
-            </a>
+            </Link>
           </div>
         </motion.div>
 
@@ -275,7 +276,7 @@ export default function ConsultingClient() {
                 ))}
               </ul>
               <Link
-                href="/contact"
+                href={"bookSlug" in pkg && pkg.bookSlug ? `/book?package=${pkg.bookSlug}` : "/contact"}
                 className={`w-full text-center py-2.5 rounded-lg font-medium text-sm transition-colors ${
                   pkg.popular
                     ? "bg-gold text-charcoal hover:bg-gold-light"

@@ -43,7 +43,18 @@ export async function isEmailConfigured(): Promise<boolean> {
 const NOT_CONFIGURED =
   "Email is not configured. Set the SMTP details in Admin → Email, or provide SMTP_HOST / SMTP_USER / SMTP_PASSWORD.";
 
-export async function sendEmail(to: string, subject: string, html: string) {
+export interface EmailAttachment {
+  filename: string;
+  content: string | Buffer;
+  contentType: string;
+}
+
+export async function sendEmail(
+  to: string,
+  subject: string,
+  html: string,
+  attachments?: EmailAttachment[]
+) {
   const cfg = await getEmailConfig();
   if (!isConfigComplete(cfg)) throw new Error(NOT_CONFIGURED);
 
@@ -53,8 +64,12 @@ export async function sendEmail(to: string, subject: string, html: string) {
     subject,
     html,
     ...(cfg.replyTo ? { replyTo: cfg.replyTo } : {}),
+    ...(attachments?.length ? { attachments } : {}),
   });
 }
+
+/** The address admin alerts go to (settings, else the configured sender). */
+export { adminNotifyAddress };
 
 /**
  * Open an SMTP connection and authenticate without sending anything. Used by the
@@ -257,7 +272,24 @@ interface OrderInvoiceParams {
   items: ReceiptItem[];
   provider: string; // PaymentMethod enum value (WAVE/DJAMO/ORANGE_MONEY/PAYPAL)
   receiptUrl: string;
+  /** Wording for non-book orders; defaults to the bookstore's. */
+  copy?: InvoiceCopy;
 }
+
+export interface InvoiceCopy {
+  /** Header label, already HTML (e.g. "Consulting &middot; Invoice"). */
+  label: string;
+  /** What happens once the payment is confirmed (plain text). */
+  afterPayment: string;
+  /** Footer line (plain text). */
+  footer: string;
+}
+
+const BOOKSTORE_INVOICE_COPY: InvoiceCopy = {
+  label: "Bookstore &middot; Invoice",
+  afterPayment: "Once we confirm your payment, we'll email your secure download links.",
+  footer: "Books are delivered digitally after payment is confirmed.",
+};
 
 /** Send an invoice requesting payment (mobile money) with settlement instructions. */
 export async function sendOrderInvoiceEmail(params: OrderInvoiceParams): Promise<void> {
@@ -338,6 +370,7 @@ function buildOrderInvoiceEmail({
   items,
   provider,
   receiptUrl,
+  copy = BOOKSTORE_INVOICE_COPY,
 }: OrderInvoiceParams): string {
   const total = fmtMoney(totalCents, currency);
   const discount = discountRows(currency, subtotalCents, discountCents, couponCode);
@@ -367,7 +400,7 @@ function buildOrderInvoiceEmail({
       <table role="presentation" width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;">
         <tr><td style="text-align:center;padding-bottom:24px;">
           <h1 style="margin:0;font-size:24px;color:#d4a843;font-weight:bold;">KONAN Amani Dieudonn&eacute;</h1>
-          <p style="margin:4px 0 0;font-size:13px;color:#8892a4;">Bookstore &middot; Invoice</p>
+          <p style="margin:4px 0 0;font-size:13px;color:#8892a4;">${copy.label}</p>
         </td></tr>
         <tr><td style="background-color:#111827;border:1px solid rgba(212,168,67,0.2);border-radius:12px;padding:32px;">
           <p style="margin:0 0 4px;font-size:12px;color:#d4a843;text-transform:uppercase;letter-spacing:1px;font-weight:600;">Payment required</p>
@@ -391,11 +424,11 @@ function buildOrderInvoiceEmail({
 
           ${payBlock}
 
-          <p style="margin:20px 0 0;font-size:13px;color:#8892a4;line-height:1.6;">Once we confirm your payment, we'll email your secure download links. You can also track this order here:<br>
+          <p style="margin:20px 0 0;font-size:13px;color:#8892a4;line-height:1.6;">${escapeHtml(copy.afterPayment)} You can also track this order here:<br>
             <a href="${receiptUrl}" style="color:#d4a843;text-decoration:underline;">${receiptUrl}</a>
           </p>
         </td></tr>
-        <tr><td style="text-align:center;padding-top:24px;"><p style="margin:0;font-size:12px;color:#4b5563;">Books are delivered digitally after payment is confirmed.</p></td></tr>
+        <tr><td style="text-align:center;padding-top:24px;"><p style="margin:0;font-size:12px;color:#4b5563;">${escapeHtml(copy.footer)}</p></td></tr>
       </table>
     </td></tr>
   </table>

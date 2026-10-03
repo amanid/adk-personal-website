@@ -20,6 +20,7 @@ import {
   Receipt,
   LineChart,
   Ticket,
+  CalendarClock,
 } from "lucide-react";
 
 export const metadata = {
@@ -37,6 +38,7 @@ const adminLinks = [
   { href: "/admin/store/orders", label: "Orders", icon: Receipt },
   { href: "/admin/store/coupons", label: "Coupons", icon: Ticket },
   { href: "/admin/store/analytics", label: "Store Analytics", icon: LineChart },
+  { href: "/admin/bookings", label: "Bookings", icon: CalendarClock },
   { href: "/admin/research-activities", label: "Research Activities", icon: FlaskConical },
   { href: "/admin/experience", label: "Experience", icon: Building2 },
   { href: "/admin/projects", label: "Projects", icon: FolderOpen },

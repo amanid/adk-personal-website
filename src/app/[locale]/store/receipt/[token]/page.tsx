@@ -28,7 +28,7 @@ export default async function ReceiptPage({
 
   const order = await prisma.order.findUnique({
     where: { receiptToken: token },
-    include: { items: true, downloads: true },
+    include: { items: true, downloads: true, booking: { select: { manageToken: true } } },
   });
 
   if (!order) notFound();
@@ -166,6 +166,17 @@ export default async function ReceiptPage({
             <p className="text-xs text-text-secondary mb-1.5">{t("ppdGoodsServices")}</p>
             <p className="text-xs text-text-secondary">{t("ppdQuoteOrder")}</p>
           </div>
+        )}
+
+        {/* A consulting booking: its own page has the time, link and calendar file */}
+        {order.booking && (
+          <Link
+            href={`/book/manage/${order.booking.manageToken}`}
+            className="mb-6 flex items-center justify-between gap-3 rounded-lg border border-gold/40 bg-gold/10 px-4 py-3 text-sm font-medium text-text-primary hover:bg-gold/15 transition-colors"
+          >
+            {l === "fr" ? "Voir votre réservation" : "View your booking"}
+            <ExternalLink className="w-4 h-4 text-gold shrink-0" />
+          </Link>
         )}
 
         {/* Receipt meta */}

@@ -1,6 +1,8 @@
 import { prisma } from "./prisma";
 import { createDownloadGrants } from "./store";
 import { sendOrderReceiptEmail } from "./email";
+import { confirmBookingForOrder, releaseBookingForOrder } from "./booking";
+import { sendBookingConfirmation } from "./booking-notify";
 
 function appUrl(): string {
   return process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
@@ -13,9 +15,15 @@ export async function sendOrderReceipt(
 ): Promise<void> {
   const order = await prisma.order.findUnique({
     where: { id: orderId },
-    include: { items: true, downloads: true },
+    include: { items: true, downloads: true, booking: { include: { package: true } } },
   });
   if (!order || order.status !== "PAID") return;
+
+  // A booking's "receipt" is its confirmation, with the calendar invite.
+  if (order.kind === "BOOKING") {
+    if (order.booking) await sendBookingConfirmation(order.booking);
+    return;
+  }
 
   const titles = new Map(order.items.map((i) => [i.bookId, i.titleSnapshot]));
   const base = appUrl();
@@ -101,6 +109,7 @@ export async function fulfilPaidOrder(
         }
       }
       await createDownloadGrants(tx, orderId);
+      if (order.kind === "BOOKING") await confirmBookingForOrder(tx, orderId);
     });
   }
 
@@ -134,4 +143,30 @@ export async function deliverReceipt(
       .catch(() => {});
     return message;
   }
+}
+
+/**
+ * Mark an unpaid order CANCELLED or FAILED and release whatever it was
+ * holding (a booking's time slot). A PAID order is never touched here.
+ */
+export async function voidUnpaidOrder(orderId: string, status: "CANCELLED" | "FAILED"): Promise<void> {
+  const res = await prisma.order.updateMany({
+    where: { id: orderId, status: { not: "PAID" } },
+    data: { status },
+  });
+  if (res.count > 0) await releaseBookingForOrder(orderId);
+}
+
+/** After a refund or reversal: revoke downloads and cancel any booking. */
+export async function revokeRefundedOrder(orderId: string): Promise<void> {
+  await prisma.order.update({ where: { id: orderId }, data: { status: "REFUNDED" } }).catch(() => {});
+  await prisma.downloadGrant
+    .updateMany({ where: { orderId }, data: { expiresAt: new Date(0) } })
+    .catch(() => {});
+  await prisma.booking
+    .updateMany({
+      where: { orderId, status: { notIn: ["CANCELLED", "COMPLETED"] } },
+      data: { status: "CANCELLED", cancelledAt: new Date() },
+    })
+    .catch(() => {});
 }

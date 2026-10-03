@@ -305,3 +305,77 @@ export type CheckoutInput = z.infer<typeof checkoutSchema>;
 export type ManualOrderInput = z.infer<typeof manualOrderSchema>;
 export type FreeOrderInput = z.infer<typeof freeOrderSchema>;
 export type CouponInput = z.infer<typeof couponSchema>;
+
+// ── Consulting bookings ──────────────────────────────────────────────────────
+
+const httpsUrl = z
+  .string()
+  .max(500)
+  .url()
+  .refine((u) => u.startsWith("https://"), "Must be an https:// link");
+
+export const adminBookingUpdateSchema = z.object({
+  status: z.enum(["CONFIRMED", "COMPLETED", "CANCELLED"]).optional(),
+  meetingUrl: httpsUrl.optional().or(z.literal("")),
+  /** Reschedule to this start (keeps the package duration). */
+  startsAt: z.string().datetime().optional(),
+});
+
+export const bookingRequestSchema = z.object({
+  packageSlug: z.string().min(1).max(120),
+  startsAt: z.string().datetime(),
+  name: z.string().trim().min(2, "Please enter your name").max(200),
+  email: z.string().email("A valid email is required").max(320),
+  company: z.string().max(200).optional().or(z.literal("")),
+  notes: z.string().max(4000).optional().or(z.literal("")),
+  timezone: z.string().max(64).optional(),
+  locale: z.enum(["en", "fr"]).optional(),
+  /** FREE only for zero-price packages (enforced server-side). */
+  payment: z.enum(["PAYPAL", "MANUAL", "FREE"]),
+  provider: z.enum(["WAVE", "DJAMO", "ORANGE_MONEY", "PAYPAL"]).optional(),
+  reference: z.string().max(120).optional().or(z.literal("")),
+});
+
+export const servicePackageSchema = z.object({
+  title: z.string().trim().min(2).max(200),
+  titleFr: z.string().max(200).optional().or(z.literal("")),
+  description: z.string().trim().min(2).max(4000),
+  descriptionFr: z.string().max(4000).optional().or(z.literal("")),
+  durationMinutes: z.number().int().min(15).max(480),
+  priceCents: z.number().int().min(0).max(100_000_00),
+  currency: z.string().regex(/^[A-Z]{3}$/),
+  active: z.boolean(),
+  sortOrder: z.number().int().min(0).max(1000).optional(),
+});
+
+export const availabilitySchema = z.object({
+  rules: z
+    .array(
+      z
+        .object({
+          weekday: z.number().int().min(0).max(6),
+          startMinute: z.number().int().min(0).max(1440),
+          endMinute: z.number().int().min(0).max(1440),
+        })
+        .refine((r) => r.endMinute > r.startMinute, "End must be after start")
+    )
+    .max(50),
+  settings: z.object({
+    timeZone: z.string().min(1).max(64),
+    minNoticeHours: z.number().int().min(0).max(720),
+    windowDays: z.number().int().min(1).max(180),
+    bufferMinutes: z.number().int().min(0).max(240),
+    slotStepMinutes: z.number().int().min(5).max(240),
+    manualHoldHours: z.number().int().min(1).max(336),
+    // https only: it is rendered as a link to clients.
+    meetingUrl: httpsUrl.optional().or(z.literal("")),
+  }),
+});
+
+export const blockedPeriodSchema = z
+  .object({
+    startsAt: z.string().datetime(),
+    endsAt: z.string().datetime(),
+    reason: z.string().max(200).optional().or(z.literal("")),
+  })
+  .refine((b) => new Date(b.endsAt) > new Date(b.startsAt), "End must be after start");

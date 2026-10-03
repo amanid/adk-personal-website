@@ -581,6 +581,7 @@ model Order {
   coupon           Coupon?         @relation(fields: [couponId], references: [id])
   items            OrderItem[]
   downloads        DownloadGrant[]
+  booking          Booking?
 
   @@index([email])
   @@index([status, createdAt])
@@ -668,4 +669,92 @@ model Position {
 
   @@index([symbol])
   @@index([closedAt])
+}
+
+// ── Consulting bookings ──────────────────────────────────────────────────────
+
+/// A bookable consultation offered on the site (e.g. "1-hour advisory call").
+model ServicePackage {
+  id              String    @id @default(cuid())
+  slug            String    @unique
+  title           String
+  titleFr         String?
+  description     String    @db.Text
+  descriptionFr   String?   @db.Text
+  durationMinutes Int
+  /// 0 = free (e.g. a discovery call): confirmed without payment.
+  priceCents      Int
+  currency        String    @default("USD")
+  active          Boolean   @default(true)
+  sortOrder       Int       @default(0)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  bookings        Booking[]
+
+  @@index([active, sortOrder])
+}
+
+/// A weekly window of availability, in the booking time zone (site setting).
+model AvailabilityRule {
+  id          String   @id @default(cuid())
+  /// 0 = Sunday … 6 = Saturday
+  weekday     Int
+  /// Minutes after local midnight, e.g. 540 = 09:00.
+  startMinute Int
+  endMinute   Int
+  createdAt   DateTime @default(now())
+
+  @@index([weekday])
+}
+
+/// Time off: no slot may overlap it.
+model BlockedPeriod {
+  id        String   @id @default(cuid())
+  startsAt  DateTime
+  endsAt    DateTime
+  reason    String?
+  createdAt DateTime @default(now())
+
+  @@index([startsAt, endsAt])
+}
+
+enum BookingStatus {
+  /// Slot held while the client pays; released when holdExpiresAt passes.
+  PENDING_PAYMENT
+  CONFIRMED
+  /// Paid after the hold lapsed and the slot had been taken meanwhile.
+  RESCHEDULE_NEEDED
+  COMPLETED
+  CANCELLED
+  EXPIRED
+}
+
+model Booking {
+  id             String         @id @default(cuid())
+  packageId      String
+  startsAt       DateTime
+  endsAt         DateTime
+  status         BookingStatus  @default(PENDING_PAYMENT)
+  holdExpiresAt  DateTime?
+  name           String
+  email          String
+  company        String?
+  notes          String?        @db.Text
+  /// The client's own time zone, for showing times back to them.
+  clientTimezone String?
+  /// "en" or "fr": the language of the client's emails and links.
+  locale         String         @default("en")
+  /// Bearer token for the client's booking page.
+  manageToken    String         @unique
+  meetingUrl     String?
+  orderId        String?        @unique
+  cancelledAt    DateTime?
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+  package        ServicePackage @relation(fields: [packageId], references: [id])
+  order          Order?         @relation(fields: [orderId], references: [id])
+
+  @@index([startsAt, endsAt])
+  @@index([status])
+  @@index([email])
 }
