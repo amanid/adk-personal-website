@@ -869,6 +869,10 @@
     "cancel_pro_confirm": "Arrêter le renouvellement Pro ? Pro reste actif jusqu'à la fin du mois payé.",
     "pp_loading": "Chargement de PayPal…",
     "pp_verifying": "Confirmation…",
-    "pp_error": "PayPal n'a pas pu finaliser l'abonnement."
+    "pp_error": "PayPal n'a pas pu finaliser l'abonnement.",
+    "ai_title": "Assistants IA et agents (MCP)",
+    "ai_body": "Connectez Claude, ChatGPT ou tout client Model Context Protocol au catalogue public — publications, boutique, séances de conseil et blog. Sans clé ; lecture seule.",
+    "ai_server": "URL du serveur MCP (Streamable HTTP)",
+    "ai_llms": "Plan du site pour les modèles de langage"
   }
 }

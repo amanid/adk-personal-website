@@ -869,6 +869,10 @@
     "cancel_pro_confirm": "Stop Pro renewal? Pro stays active until the end of the paid month.",
     "pp_loading": "Loading PayPal…",
     "pp_verifying": "Confirming…",
-    "pp_error": "PayPal couldn't complete the subscription."
+    "pp_error": "PayPal couldn't complete the subscription.",
+    "ai_title": "AI assistants & agents (MCP)",
+    "ai_body": "Connect Claude, ChatGPT or any Model Context Protocol client to the public catalogue — publications, store, consulting sessions and blog. No key needed; read-only.",
+    "ai_server": "MCP server URL (Streamable HTTP)",
+    "ai_llms": "Site map for language models"
   }
 }

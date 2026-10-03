@@ -95,6 +95,23 @@ print(r.json()["data"][0]["title"])`}</pre>
         </p>
       </section>
 
+      <section className="mb-12">
+        <h2 className="text-xl font-semibold mb-2">{t("ai_title")}</h2>
+        <p className="text-sm text-text-secondary max-w-2xl mb-4">{t("ai_body")}</p>
+        <dl className="text-sm space-y-2">
+          <div>
+            <dt className="text-text-muted text-xs">{t("ai_server")}</dt>
+            <dd className="figure break-all">{BASE_URL}/api/mcp</dd>
+          </div>
+          <div>
+            <dt className="text-text-muted text-xs">{t("ai_llms")}</dt>
+            <dd className="figure">
+              <a href="/llms.txt" className="text-gold">/llms.txt</a> · <a href="/llms-full.txt" className="text-gold">/llms-full.txt</a>
+            </dd>
+          </div>
+        </dl>
+      </section>
+
       <section id="get-key">
         <h2 className="text-xl font-semibold mb-4">{t("get_key")}</h2>
         <ApiKeyForm />
