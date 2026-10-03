@@ -4,6 +4,7 @@ import { priceOrder } from "@/lib/store";
 import { createOrderRecord, localeFromReferer } from "@/lib/orders";
 import { fulfilPaidOrder, CouponExhaustedError } from "@/lib/order-fulfillment";
 import { rateLimit, clientIp } from "@/lib/rate-limit";
+import { resolveAffiliate } from "@/lib/affiliates";
 import { checkOrigin } from "@/lib/origin-check";
 
 export const runtime = "nodejs";
@@ -69,6 +70,7 @@ export async function POST(request: Request) {
       totalCents: 0,
       paymentMethod: "FREE",
       ipAddress: clientIp(request),
+      affiliateId: await resolveAffiliate(request, email),
     });
 
     // No payment needed — fulfil immediately (grants + confirmation email).

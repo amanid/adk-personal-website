@@ -4,6 +4,7 @@ import { sendOrderReceiptEmail } from "./email";
 import { confirmBookingForOrder, releaseBookingForOrder } from "./booking";
 import { sendBookingConfirmation } from "./booking-notify";
 import { markQuoteStagePaid } from "./quotes";
+import { recordCommission, voidCommission } from "./affiliates";
 import { sendQuotePaymentReceived } from "./quote-notify";
 
 function appUrl(): string {
@@ -125,6 +126,7 @@ export async function fulfilPaidOrder(
       await createDownloadGrants(tx, orderId);
       if (order.kind === "BOOKING") await confirmBookingForOrder(tx, orderId);
       if (order.kind === "QUOTE") await markQuoteStagePaid(tx, orderId);
+      await recordCommission(tx, orderId);
     });
   }
 
@@ -169,7 +171,10 @@ export async function voidUnpaidOrder(orderId: string, status: "CANCELLED" | "FA
     where: { id: orderId, status: { not: "PAID" } },
     data: { status },
   });
-  if (res.count > 0) await releaseBookingForOrder(orderId);
+  if (res.count > 0) {
+    await releaseBookingForOrder(orderId);
+    await voidCommission(orderId);
+  }
 }
 
 /** After a refund or reversal: revoke downloads and cancel any booking. */
@@ -184,4 +189,5 @@ export async function revokeRefundedOrder(orderId: string): Promise<void> {
       data: { status: "CANCELLED", cancelledAt: new Date() },
     })
     .catch(() => {});
+  await voidCommission(orderId).catch(() => {});
 }

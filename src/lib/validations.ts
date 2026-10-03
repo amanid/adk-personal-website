@@ -446,3 +446,33 @@ export const bundleSchema = z.object({
   featured: z.boolean().optional(),
   sortOrder: z.number().int().min(0).max(1000).optional(),
 });
+
+// ── Affiliates ───────────────────────────────────────────────────────────────
+
+export const affiliateApplySchema = z.object({
+  name: z.string().trim().min(2, "Please enter your name").max(120),
+  email: z.string().email("A valid email is required").max(320),
+  website: z.string().max(300).optional().or(z.literal("")),
+  pitch: z.string().trim().min(10, "Tell me briefly how you'll share the books").max(2000),
+  payoutMethod: z.enum(["PAYPAL", "WAVE", "DJAMO", "ORANGE_MONEY"]),
+  payoutDetails: z.string().trim().min(3, "Where should commissions be paid?").max(200),
+  locale: z.enum(["en", "fr"]).optional(),
+  agree: z.literal(true),
+});
+
+export const affiliateAdminUpdateSchema = z.object({
+  status: z.enum(["PENDING", "APPROVED", "SUSPENDED", "REJECTED"]).optional(),
+  commissionPercent: z.number().int().min(1).max(90).optional(),
+});
+
+export const commissionActionSchema = z.object({
+  action: z.enum(["approve", "pay", "void"]),
+  ids: z.array(z.string().min(1).max(40)).min(1).max(500),
+  note: z.string().max(300).optional().or(z.literal("")),
+});
+
+export const affiliateSettingsSchema = z.object({
+  defaultPercent: z.number().int().min(1).max(90),
+  cookieDays: z.number().int().min(1).max(365),
+  holdDays: z.number().int().min(0).max(120),
+});

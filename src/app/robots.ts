@@ -13,6 +13,11 @@ export default function robots(): MetadataRoute.Robots {
           "/*/auth",
           "/*/store/cart",
           "/*/store/receipt",
+          // Private bearer-token pages and referral redirects.
+          "/*/book/manage",
+          "/*/quote",
+          "/*/affiliates/dashboard",
+          "/r/",
         ],
       },
     ],

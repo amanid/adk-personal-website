@@ -3,6 +3,7 @@ import { checkoutSchema } from "@/lib/validations";
 import { priceOrder } from "@/lib/store";
 import { createOrderRecord, startPayPalPayment } from "@/lib/orders";
 import { rateLimit, clientIp } from "@/lib/rate-limit";
+import { resolveAffiliate } from "@/lib/affiliates";
 import { checkOrigin } from "@/lib/origin-check";
 
 export const runtime = "nodejs";
@@ -63,6 +64,7 @@ export async function POST(request: Request) {
       couponCode: priced.couponCode,
       totalCents: priced.totalCents,
       ipAddress: clientIp(request),
+      affiliateId: await resolveAffiliate(request, email),
     });
     const { paypalOrderId } = await startPayPalPayment(order);
 

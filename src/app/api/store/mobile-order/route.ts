@@ -4,6 +4,7 @@ import { priceOrder } from "@/lib/store";
 import { createOrderRecord, notifyManualOrder, localeFromReferer } from "@/lib/orders";
 import { sanitizeInput } from "@/lib/sanitize";
 import { rateLimit, clientIp } from "@/lib/rate-limit";
+import { resolveAffiliate } from "@/lib/affiliates";
 import { checkOrigin } from "@/lib/origin-check";
 
 export const runtime = "nodejs";
@@ -78,6 +79,7 @@ export async function POST(request: Request) {
       paymentMethod: provider,
       paymentReference: reference ? sanitizeInput(reference) : null,
       ipAddress: clientIp(request),
+      affiliateId: await resolveAffiliate(request, email),
     });
 
     // Invoice to the buyer + "payment awaiting confirmation" to the admin.

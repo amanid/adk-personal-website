@@ -35,6 +35,8 @@ export interface NewOrder {
   kind?: OrderKind;
   quoteId?: string | null;
   quoteStage?: QuoteStage | null;
+  /** Referring affiliate (see lib/affiliates resolveAffiliate). */
+  affiliateId?: string | null;
   email: string;
   name?: string | null;
   currency: string;
@@ -72,6 +74,7 @@ export async function createOrderRecord(input: NewOrder) {
       kind: input.kind ?? "STORE",
       quoteId: input.quoteId ?? null,
       quoteStage: input.quoteStage ?? null,
+      affiliateId: input.affiliateId ?? null,
       email: input.email,
       name: input.name || null,
       userId: existingUser?.id ?? null,
