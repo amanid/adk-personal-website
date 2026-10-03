@@ -24,12 +24,25 @@ interface BRVMData {
   fetchedAt: string;
 }
 
+// The last good snapshot, served (marked stale) while the source is down,
+// and a short backoff so a dead source doesn't make every request wait.
+let lastGood: BRVMData | null = null;
+let downUntil = 0;
+const FETCH_TIMEOUT_MS = 6000;
+const BACKOFF_MS = 5 * 60 * 1000;
+
+function unavailable(error: string) {
+  if (lastGood) return NextResponse.json({ ...lastGood, stale: true });
+  return NextResponse.json({ indices: [], stocks: [], fetchedAt: new Date().toISOString(), error });
+}
+
 export async function GET() {
   try {
     const cached = getCached<BRVMData>(CACHE_KEY);
     if (cached) {
       return NextResponse.json(cached);
     }
+    if (Date.now() < downUntil) return unavailable("BRVM source unavailable");
 
     const cheerio = await import("cheerio");
     const res = await fetch("https://afx.kwayisi.org/brvm/", {
@@ -38,15 +51,12 @@ export async function GET() {
           "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
       },
       next: { revalidate: 0 },
+      signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
     });
 
     if (!res.ok) {
-      return NextResponse.json({
-        indices: [],
-        stocks: [],
-        fetchedAt: new Date().toISOString(),
-        error: "BRVM source unavailable",
-      });
+      downUntil = Date.now() + BACKOFF_MS;
+      return unavailable("BRVM source unavailable");
     }
 
     const html = await res.text();
@@ -113,15 +123,14 @@ export async function GET() {
     };
 
     setCache(CACHE_KEY, response, CACHE_TTL);
+    if (stocks.length || indices.length) lastGood = response;
 
     return NextResponse.json(response);
   } catch (error) {
-    console.error("BRVM fetch error:", error);
-    return NextResponse.json({
-      indices: [],
-      stocks: [],
-      fetchedAt: new Date().toISOString(),
-      error: "Failed to fetch BRVM data",
-    });
+    // One line, not a stack trace: an unreachable third-party site is expected.
+    const cause = (error as { cause?: { code?: string } })?.cause?.code ?? (error as Error)?.name;
+    console.error(`BRVM fetch failed (${cause}); serving ${lastGood ? "last good data" : "empty"} for ${BACKOFF_MS / 60000} min`);
+    downUntil = Date.now() + BACKOFF_MS;
+    return unavailable("Failed to fetch BRVM data");
   }
 }
