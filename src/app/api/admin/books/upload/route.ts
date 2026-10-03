@@ -10,9 +10,26 @@ import {
   type ProcessedImage,
 } from "@/lib/cover-image";
 
-// The downloadable book file. Restricted to document formats.
-const ALLOWED_TYPES = ["application/pdf", "application/epub+zip"];
-const ALLOWED_EXTENSIONS = ["pdf", "epub"];
+// The downloadable product file: books and reports, but also datasets,
+// templates and toolkits. The stored MIME type comes from this map, never from
+// the browser, and downloads are always served as attachments with nosniff.
+const FILE_TYPES: Record<string, string> = {
+  pdf: "application/pdf",
+  epub: "application/epub+zip",
+  csv: "text/csv",
+  xlsx: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+  xls: "application/vnd.ms-excel",
+  docx: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+  pptx: "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+  zip: "application/zip",
+  json: "application/json",
+  txt: "text/plain",
+  md: "text/markdown",
+  ipynb: "application/x-ipynb+json",
+  parquet: "application/vnd.apache.parquet",
+  dta: "application/x-stata-dta",
+};
+const ALLOWED_LABEL = Object.keys(FILE_TYPES).map((e) => e.toUpperCase()).join(", ");
 
 // Cloudflare sits in front of this app and caps request bodies; the origin
 // instance is far tighter still, since the bytes are held in memory and then
@@ -41,9 +58,11 @@ export async function POST(request: Request) {
     }
 
     const ext = file.name.split(".").pop()?.toLowerCase() || "";
-    if (!ALLOWED_TYPES.includes(file.type) && !ALLOWED_EXTENSIONS.includes(ext)) {
-      return NextResponse.json({ error: `Invalid file type. Allowed: PDF, EPUB` }, { status: 400 });
+    const mimeType = FILE_TYPES[ext];
+    if (!mimeType) {
+      return NextResponse.json({ error: `Invalid file type. Allowed: ${ALLOWED_LABEL}` }, { status: 400 });
     }
+    const isDocument = ext === "pdf" || ext === "epub";
 
     if (file.size > MAX_SIZE) {
       return NextResponse.json(
@@ -52,13 +71,13 @@ export async function POST(request: Request) {
       );
     }
 
-    const filename = `${randomUUID()}.${ext || "bin"}`;
+    const filename = `${randomUUID()}.${ext}`;
     const buffer = Buffer.from(await file.arrayBuffer());
 
     const asset = await prisma.bookAsset.create({
       data: {
         filename,
-        mimeType: file.type || "application/octet-stream",
+        mimeType,
         size: file.size,
         data: buffer,
       },
@@ -67,34 +86,37 @@ export async function POST(request: Request) {
     // Best-effort metadata extraction so the editor can auto-fill fields.
     let metadata: Record<string, unknown> | null = null;
     let coverImageId: string | null = null;
-    try {
-      const parsed = await parseBookFile(buffer, file.name, file.type);
+    // Only books/reports (PDF, EPUB) have metadata and a cover to extract.
+    if (isDocument) {
+      try {
+        const parsed = await parseBookFile(buffer, file.name, mimeType);
 
-      // Cover: use the EPUB's embedded cover, else rasterize the PDF's first page.
-      // Always downscale to a small JPEG so serving it can't blow up memory.
-      let cover: ProcessedImage | null = null;
-      if (parsed.cover) {
-        cover = await processCoverImage(parsed.cover.data);
-      } else if (ext === "pdf" || file.type === "application/pdf") {
-        cover = await renderPdfCover(buffer);
-      }
-      if (cover) {
-        const created = await prisma.upload.create({
-          data: {
-            filename: `${randomUUID()}-cover.jpg`,
-            mimeType: cover.mimeType,
-            data: Buffer.from(cover.data),
-          },
-        });
-        coverImageId = created.id;
-      }
+        // Cover: use the EPUB's embedded cover, else rasterize the PDF's first page.
+        // Always downscale to a small JPEG so serving it can't blow up memory.
+        let cover: ProcessedImage | null = null;
+        if (parsed.cover) {
+          cover = await processCoverImage(parsed.cover.data);
+        } else if (ext === "pdf") {
+          cover = await renderPdfCover(buffer);
+        }
+        if (cover) {
+          const created = await prisma.upload.create({
+            data: {
+              filename: `${randomUUID()}-cover.jpg`,
+              mimeType: cover.mimeType,
+              data: Buffer.from(cover.data),
+            },
+          });
+          coverImageId = created.id;
+        }
 
-      // Don't ship the raw cover buffer back to the client.
-      const { cover: _rawCover, ...rest } = parsed;
-      void _rawCover;
-      metadata = { ...rest };
-    } catch (err) {
-      console.error("Book metadata parse failed:", err);
+        // Don't ship the raw cover buffer back to the client.
+        const { cover: _rawCover, ...rest } = parsed;
+        void _rawCover;
+        metadata = { ...rest };
+      } catch (err) {
+        console.error("Book metadata parse failed:", err);
+      }
     }
 
     return NextResponse.json({

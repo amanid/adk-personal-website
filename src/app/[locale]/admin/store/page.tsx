@@ -35,6 +35,7 @@ interface BookStats {
 
 interface Book {
   id: string;
+  kind: ProductKind;
   title: string;
   titleFr: string | null;
   slug: string;
@@ -66,7 +67,18 @@ interface Book {
 const INPUT_CLASS =
   "w-full px-4 py-2.5 bg-navy/50 border border-glass-border rounded-lg text-text-primary focus:border-gold/50 focus:outline-none text-sm";
 
+type ProductKind = "BOOK" | "REPORT" | "DATASET" | "TEMPLATE" | "TOOLKIT" | "COURSE";
+const PRODUCT_KINDS: { id: ProductKind; label: string }[] = [
+  { id: "BOOK", label: "Book" },
+  { id: "REPORT", label: "Report" },
+  { id: "DATASET", label: "Dataset" },
+  { id: "TEMPLATE", label: "Template" },
+  { id: "TOOLKIT", label: "Toolkit" },
+  { id: "COURSE", label: "Course" },
+];
+
 const emptyForm = {
+  kind: "BOOK" as ProductKind,
   title: "",
   titleFr: "",
   subtitle: "",
@@ -200,6 +212,7 @@ export default function AdminStorePage() {
   const openEdit = (b: Book) => {
     setEditingId(b.id);
     setForm({
+      kind: b.kind ?? "BOOK",
       title: b.title,
       titleFr: b.titleFr || "",
       subtitle: b.subtitle || "",
@@ -247,6 +260,7 @@ export default function AdminStorePage() {
     }
 
     const payload = {
+      kind: form.kind,
       title: form.title,
       titleFr: form.titleFr || undefined,
       subtitle: form.subtitle || undefined,
@@ -1273,6 +1287,20 @@ export default function AdminStorePage() {
                     value={form.isbn}
                     onChange={(e) => setForm({ ...form, isbn: e.target.value })}
                   />
+                </div>
+                <div>
+                  <label className="block text-sm text-text-secondary mb-1">Product type</label>
+                  <select
+                    className={INPUT_CLASS}
+                    value={form.kind}
+                    onChange={(e) => setForm({ ...form, kind: e.target.value as ProductKind })}
+                  >
+                    {PRODUCT_KINDS.map((k) => (
+                      <option key={k.id} value={k.id}>
+                        {k.label}
+                      </option>
+                    ))}
+                  </select>
                 </div>
                 <div>
                   <label className="block text-sm text-text-secondary mb-1">Category</label>

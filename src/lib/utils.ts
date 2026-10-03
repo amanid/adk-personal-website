@@ -68,5 +68,19 @@ export function fileFormatLabel(mimeType?: string | null): string | null {
   if (!mimeType) return null;
   if (mimeType.includes("pdf")) return "PDF";
   if (mimeType.includes("epub")) return "EPUB";
-  return null;
+  const labels: Record<string, string> = {
+    "text/csv": "CSV",
+    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": "Excel",
+    "application/vnd.ms-excel": "Excel",
+    "application/vnd.openxmlformats-officedocument.wordprocessingml.document": "Word",
+    "application/vnd.openxmlformats-officedocument.presentationml.presentation": "PowerPoint",
+    "application/zip": "ZIP",
+    "application/json": "JSON",
+    "text/plain": "TXT",
+    "text/markdown": "Markdown",
+    "application/x-ipynb+json": "Jupyter notebook",
+    "application/vnd.apache.parquet": "Parquet",
+    "application/x-stata-dta": "Stata",
+  };
+  return labels[mimeType] ?? null;
 }

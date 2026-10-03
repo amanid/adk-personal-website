@@ -602,7 +602,13 @@
     "subtotal": "Subtotal",
     "total": "Total",
     "viewCartCheckout": "View cart & checkout",
-    "yourCart": "Your cart"
+    "yourCart": "Your cart",
+    "kind_BOOK": "Books",
+    "kind_REPORT": "Report",
+    "kind_DATASET": "Dataset",
+    "kind_TEMPLATE": "Template",
+    "kind_TOOLKIT": "Toolkit",
+    "kind_COURSE": "Course"
   },
   "capabilities": {
     "eyebrow": "Capabilities · computed from the record",

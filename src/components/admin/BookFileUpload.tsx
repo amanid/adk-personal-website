@@ -34,7 +34,7 @@ interface BookFileUploadProps {
   onClear: () => void;
 }
 
-/** Uploads the downloadable book file (PDF/EPUB) to /api/admin/books/upload. */
+/** Uploads the downloadable product file to /api/admin/books/upload (server allowlist decides). */
 export default function BookFileUpload({
   currentFileName,
   onUpload,
@@ -94,7 +94,7 @@ export default function BookFileUpload({
   return (
     <div className="space-y-2">
       <label className="block text-sm text-text-secondary">
-        Book file (PDF / EPUB) — the secured download
+        Product file — the secured download
       </label>
       <div
         onClick={() => inputRef.current?.click()}
@@ -103,7 +103,7 @@ export default function BookFileUpload({
         <input
           ref={inputRef}
           type="file"
-          accept=".pdf,.epub,application/pdf,application/epub+zip"
+          accept=".pdf,.epub,.csv,.xlsx,.xls,.docx,.pptx,.zip,.json,.txt,.md,.ipynb,.parquet,.dta"
           onChange={(e) => {
             const f = e.target.files?.[0];
             if (f) handleFile(f);
@@ -137,7 +137,7 @@ export default function BookFileUpload({
           <div className="flex flex-col items-center gap-2">
             <Upload className="w-8 h-8 text-text-muted" />
             <span className="text-sm text-text-secondary">Drop or click to upload the book file</span>
-            <span className="text-xs text-text-muted">PDF or EPUB · Max 50MB</span>
+            <span className="text-xs text-text-muted">PDF, EPUB, CSV, Excel, Word, PowerPoint, ZIP, JSON, notebook… · Max 50MB</span>
           </div>
         )}
       </div>

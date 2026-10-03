@@ -11,6 +11,10 @@ export default function StoreBrowser({ books }: { books: StoreBook[] }) {
   const t = useTranslations("store");
   const [query, setQuery] = useState("");
   const [category, setCategory] = useState<string>("");
+  const [kind, setKind] = useState<string>("");
+  // Product types present in the catalogue; the filter only appears when
+  // there is more than one to choose between.
+  const kinds = useMemo(() => [...new Set(books.map((b) => b.kind || "BOOK"))], [books]);
   const [freeOnly, setFreeOnly] = useState(false);
   const [sort, setSort] = useState<SortKey>("featured");
 
@@ -25,6 +29,7 @@ export default function StoreBrowser({ books }: { books: StoreBook[] }) {
     let list = books.filter((b) => {
       if (freeOnly && b.priceCents !== 0) return false;
       if (category && b.category !== category) return false;
+      if (kind && (b.kind || "BOOK") !== kind) return false;
       if (q) {
         const haystack = [b.title, b.subtitle, b.firstInsight, b.category, ...(b.tags || [])]
           .filter(Boolean)
@@ -49,9 +54,9 @@ export default function StoreBrowser({ books }: { books: StoreBook[] }) {
       }
     });
     return list;
-  }, [books, query, category, freeOnly, sort]);
+  }, [books, query, category, kind, freeOnly, sort]);
 
-  const hasFilters = query.trim() !== "" || category !== "" || freeOnly;
+  const hasFilters = query.trim() !== "" || category !== "" || kind !== "" || freeOnly;
 
   const chipBase =
     "px-3 py-1.5 rounded-full text-sm border transition-all whitespace-nowrap";
@@ -89,6 +94,20 @@ export default function StoreBrowser({ books }: { books: StoreBook[] }) {
             </select>
           </div>
         </div>
+
+        {kinds.length > 1 && (
+          <div className="flex flex-wrap items-center gap-2">
+            {kinds.map((k) => (
+              <button
+                key={k}
+                onClick={() => setKind((cur) => (cur === k ? "" : k))}
+                className={`${chipBase} ${kind === k ? chipActive : chipIdle}`}
+              >
+                {t(`kind_${k}`)}
+              </button>
+            ))}
+          </div>
+        )}
 
         {(categories.length > 0 || books.some((b) => b.priceCents === 0)) && (
           <div className="flex flex-wrap items-center gap-2">

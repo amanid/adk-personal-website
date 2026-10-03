@@ -53,7 +53,7 @@ export async function sendOrderReceipt(
       lineTotalCents: i.unitPriceCents * i.quantity,
     })),
     downloads: order.downloads.map((d) => ({
-      title: titles.get(d.bookId) || "Your book",
+      title: titles.get(d.bookId) || "Your file",
       url: `${base}/api/store/download/${d.token}`,
     })),
     receiptUrl: `${base}/${locale}/store/receipt/${order.receiptToken}`,

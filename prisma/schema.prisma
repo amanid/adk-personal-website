@@ -453,6 +453,17 @@ model Subscription {
 // Bookstore
 // ---------------------------------------------------------------------------
 
+/// What a store product is. Every kind shares checkout, coupons and secure
+/// downloads; the kind drives labels, filters and which details are shown.
+enum ProductKind {
+  BOOK
+  REPORT
+  DATASET
+  TEMPLATE
+  TOOLKIT
+  COURSE
+}
+
 enum BookStatus {
   DRAFT
   PUBLISHED
@@ -509,6 +520,7 @@ model Coupon {
 
 model Book {
   id              String      @id @default(cuid())
+  kind            ProductKind @default(BOOK)
   title           String
   titleFr         String?
   slug            String      @unique
@@ -540,6 +552,7 @@ model Book {
   orderItems      OrderItem[]
 
   @@index([status, sortOrder])
+  @@index([kind, status])
 }
 
 model BookAsset {

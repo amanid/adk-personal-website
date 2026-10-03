@@ -212,6 +212,7 @@ export type SubscriptionRequestInput = z.infer<typeof subscriptionRequestSchema>
 // --------------------------------------------------------------------------
 
 export const bookSchema = z.object({
+  kind: z.enum(["BOOK", "REPORT", "DATASET", "TEMPLATE", "TOOLKIT", "COURSE"]).optional(),
   title: z.string().min(2, "Title is required").max(300),
   titleFr: z.string().max(300).optional().or(z.literal("")),
   subtitle: z.string().max(300).optional().or(z.literal("")),

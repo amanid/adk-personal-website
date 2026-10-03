@@ -602,7 +602,13 @@
     "subtotal": "Sous-total",
     "total": "Total",
     "viewCartCheckout": "Voir le panier et payer",
-    "yourCart": "Votre panier"
+    "yourCart": "Votre panier",
+    "kind_BOOK": "Livres",
+    "kind_REPORT": "Rapport",
+    "kind_DATASET": "Jeu de données",
+    "kind_TEMPLATE": "Modèle",
+    "kind_TOOLKIT": "Boîte à outils",
+    "kind_COURSE": "Formation"
   },
   "capabilities": {
     "eyebrow": "Compétences · calculées à partir des données",

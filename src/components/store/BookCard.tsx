@@ -23,6 +23,7 @@ export interface StoreBook {
   /** What the buyer actually receives — shown so the card isn't a mystery. */
   pageCount?: number | null;
   fileMimeType?: string | null;
+  kind?: string;
 }
 
 export default function BookCard({ book }: { book: StoreBook }) {
@@ -74,6 +75,12 @@ export default function BookCard({ book }: { book: StoreBook }) {
         {/* Year, format and length: what the buyer is actually getting. A card
             that only shows a price makes a 300-page PDF look like a pamphlet. */}
         <p className="text-xs text-text-secondary mt-1 flex flex-wrap items-center gap-x-1.5">
+          {book.kind && book.kind !== "BOOK" && (
+            <>
+              <span className="font-semibold text-gold">{t(`kind_${book.kind}`)}</span>
+              <span aria-hidden="true">·</span>
+            </>
+          )}
           <span>{book.publicationYear}</span>
           {format && (
             <>

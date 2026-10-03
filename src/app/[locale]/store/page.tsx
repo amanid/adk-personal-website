@@ -62,6 +62,7 @@ export default async function StorePage({
     featured: b.featured,
     pageCount: b.pageCount,
     fileMimeType: b.fileMimeType,
+    kind: b.kind,
   }));
 
   return (

@@ -47,6 +47,7 @@ export async function PUT(
     const book = await prisma.book.update({
       where: { id },
       data: {
+        ...(data.kind ? { kind: data.kind } : {}),
         title: sanitizeInput(data.title),
         titleFr: data.titleFr ? sanitizeInput(data.titleFr) : null,
         subtitle: data.subtitle ? sanitizeInput(data.subtitle) : null,

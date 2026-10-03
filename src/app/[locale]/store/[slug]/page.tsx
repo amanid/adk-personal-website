@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import { notFound } from "next/navigation";
+import { getTranslations } from "next-intl/server";
 import { prisma } from "@/lib/prisma";
 import {
   BASE_URL,
@@ -94,6 +95,7 @@ export default async function BookDetailPage({
   const { locale, slug } = await params;
   const l = normalizeLocale(locale);
   const book = await getBook(slug);
+  const tStore = await getTranslations({ locale: l, namespace: "store" });
   if (!book) notFound();
 
   const title = l === "fr" && book.titleFr ? book.titleFr : book.title;
@@ -151,9 +153,12 @@ export default async function BookDetailPage({
   // availability instead of a bare blue link. Declared as both Book and Product:
   // Book is the accurate type, Product is what search engines read offers from.
   const canonical = `${BASE_URL}/${l}/store/${book.slug}`;
+  // The schema.org type follows what is actually sold: books and reports are
+  // Book, a dataset is Dataset, anything else is a plain Product.
+  const isDocument = book.kind === "BOOK" || book.kind === "REPORT";
   const bookJsonLd = {
     "@context": "https://schema.org",
-    "@type": ["Book", "Product"],
+    "@type": isDocument ? ["Book", "Product"] : book.kind === "DATASET" ? ["Dataset", "Product"] : "Product",
     name: title,
     ...(subtitle ? { alternativeHeadline: subtitle } : {}),
     description,
@@ -163,8 +168,8 @@ export default async function BookDetailPage({
     datePublished: String(book.publicationYear),
     ...(book.pageCount ? { numberOfPages: book.pageCount } : {}),
     ...(book.language ? { inLanguage: book.language } : {}),
-    ...(book.isbn ? { isbn: book.isbn } : {}),
-    bookFormat: "https://schema.org/EBook",
+    ...(book.isbn && isDocument ? { isbn: book.isbn } : {}),
+    ...(isDocument ? { bookFormat: "https://schema.org/EBook" } : {}),
     ...(format ? { fileFormat: book.fileMimeType } : {}),
     offers: {
       "@type": "Offer",
@@ -254,6 +259,7 @@ export default async function BookDetailPage({
 
         {/* Details */}
         <div>
+          {book.kind !== "BOOK" && <p className="eyebrow mb-2">{tStore(`kind_${book.kind}`)}</p>}
           <h1 className="text-3xl font-bold font-[family-name:var(--font-display)]">{title}</h1>
           {subtitle && <p className="text-lg text-text-secondary mt-2">{subtitle}</p>}
 

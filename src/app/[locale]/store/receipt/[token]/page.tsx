@@ -286,7 +286,7 @@ export default async function ReceiptPage({
                   >
                     <div className="min-w-0">
                       <p className="font-medium truncate">
-                        {titles.get(grant.bookId) || "Your book"}
+                        {titles.get(grant.bookId) || "Your file"}
                       </p>
                       <p className="text-xs text-text-secondary">
                         {expired
