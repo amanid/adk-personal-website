@@ -46,6 +46,7 @@ export default function PayPalSubscribeButton({
   currency = "USD",
   onActivated,
   labels,
+  activateUrl = "/api/subscription/paypal/activate",
 }: {
   planId: string;
   /** Sent as custom_id; the server checks it against the signed-in user. */
@@ -53,6 +54,8 @@ export default function PayPalSubscribeButton({
   currency?: string;
   onActivated: () => void;
   labels: { loading: string; error: string; verifying: string };
+  /** Where to confirm the approved subscription (defaults to research subscriptions). */
+  activateUrl?: string;
 }) {
   const ref = useRef<HTMLDivElement>(null);
   const [state, setState] = useState<"loading" | "ready" | "verifying" | "error">("loading");
@@ -72,7 +75,7 @@ export default function PayPalSubscribeButton({
           createSubscription: (_data, actions) => actions.subscription.create({ plan_id: planId, custom_id: userId }),
           onApprove: async (data) => {
             setState("verifying");
-            const res = await fetch("/api/subscription/paypal/activate", {
+            const res = await fetch(activateUrl, {
               method: "POST",
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify({ subscriptionId: data.subscriptionID }),
@@ -103,7 +106,7 @@ export default function PayPalSubscribeButton({
     };
     // Re-render the button when the plan changes (tier or billing switch).
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [clientId, planId, userId, currency]);
+  }, [clientId, planId, userId, currency, activateUrl]);
 
   return (
     <div>

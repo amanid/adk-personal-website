@@ -1,5 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { syncPayPalSubscription } from "@/lib/paypal-subscriptions";
+import { syncApiSubscription } from "@/lib/data-api-billing";
+
+/** A subscription is either a research subscription or a Data API Pro plan. */
+async function syncAnySubscription(id: string) {
+  const r = await syncPayPalSubscription(id);
+  if (!r.ok && r.reason === "Unknown plan") await syncApiSubscription(id);
+}
 import { prisma } from "@/lib/prisma";
 import { verifyPayPalWebhook, moneyToCents } from "@/lib/paypal";
 import { fulfilPaidOrder, voidUnpaidOrder, revokeRefundedOrder } from "@/lib/order-fulfillment";
@@ -62,13 +69,13 @@ export async function POST(request: NextRequest) {
     ];
     if (event.event_type && subEvents.includes(event.event_type)) {
       const id = (event.resource as { id?: string } | undefined)?.id;
-      if (id) await syncPayPalSubscription(id);
+      if (id) await syncAnySubscription(id);
       return NextResponse.json({ received: true });
     }
     if (event.event_type === "PAYMENT.SALE.COMPLETED") {
       // A recurring payment: its subscription id is the billing agreement.
       const id = (event.resource as { billing_agreement_id?: string } | undefined)?.billing_agreement_id;
-      if (id) await syncPayPalSubscription(id);
+      if (id) await syncAnySubscription(id);
       return NextResponse.json({ received: true });
     }
 

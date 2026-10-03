@@ -1065,3 +1065,49 @@ model WebhookDelivery {
   @@index([status, nextAttemptAt])
   @@index([endpointId, createdAt])
 }
+
+// ── Data & Research API ──────────────────────────────────────────────────────
+
+enum ApiPlan {
+  FREE
+  PRO
+}
+
+enum ApiKeyStatus {
+  ACTIVE
+  REVOKED
+}
+
+model ApiKey {
+  id                   String       @id @default(cuid())
+  name                 String
+  email                String
+  useCase              String?
+  /// First characters of the key, shown so the owner can recognise it.
+  keyPrefix            String
+  /// SHA-256 of the full key; the key itself is never stored.
+  keyHash              String       @unique
+  /// Bearer token for the owner's key page (usage, upgrade, rotate).
+  manageToken          String       @unique
+  plan                 ApiPlan      @default(FREE)
+  status               ApiKeyStatus @default(ACTIVE)
+  paypalSubscriptionId String?      @unique
+  currentPeriodEnd     DateTime?
+  lastUsedAt           DateTime?
+  revokedAt            DateTime?
+  createdAt            DateTime     @default(now())
+  updatedAt            DateTime     @updatedAt
+  usage                ApiUsage[]
+
+  @@index([email])
+}
+
+/// Requests per key per calendar month (UTC), e.g. period "2026-10".
+model ApiUsage {
+  keyId  String
+  period String
+  count  Int    @default(0)
+  key    ApiKey @relation(fields: [keyId], references: [id], onDelete: Cascade)
+
+  @@id([keyId, period])
+}
