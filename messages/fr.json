@@ -608,7 +608,19 @@
     "kind_DATASET": "Jeu de données",
     "kind_TEMPLATE": "Modèle",
     "kind_TOOLKIT": "Boîte à outils",
-    "kind_COURSE": "Formation"
+    "kind_COURSE": "Formation",
+    "pwyw_minimum": "minimum — payez ce que vous voulez",
+    "pwyw_label": "Votre prix ({currency})",
+    "pwyw_invalid": "Saisissez au moins {min}.",
+    "pwyw_from": "à partir de",
+    "offer_ends": "L'offre de lancement se termine dans",
+    "offer_ended": "Cette offre est terminée ; le prix normal s'applique au paiement.",
+    "bundles_title": "Packs",
+    "bundles_subtitle": "Plusieurs titres ensemble, pour moins cher.",
+    "bundle_includes": "Comprend",
+    "bundle_save": "Économisez {amount}",
+    "bundle_value": "Achetés séparément : {amount}",
+    "add_bundle": "Ajouter le pack au panier"
   },
   "capabilities": {
     "eyebrow": "Compétences · calculées à partir des données",

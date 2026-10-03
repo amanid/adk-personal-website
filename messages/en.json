@@ -608,7 +608,19 @@
     "kind_DATASET": "Dataset",
     "kind_TEMPLATE": "Template",
     "kind_TOOLKIT": "Toolkit",
-    "kind_COURSE": "Course"
+    "kind_COURSE": "Course",
+    "pwyw_minimum": "minimum — pay what you want",
+    "pwyw_label": "Your price ({currency})",
+    "pwyw_invalid": "Enter at least {min}.",
+    "pwyw_from": "from",
+    "offer_ends": "Launch offer ends in",
+    "offer_ended": "This offer has ended; the regular price applies at checkout.",
+    "bundles_title": "Bundles",
+    "bundles_subtitle": "Several titles together, for less.",
+    "bundle_includes": "Includes",
+    "bundle_save": "Save {amount}",
+    "bundle_value": "Bought separately: {amount}",
+    "add_bundle": "Add bundle to cart"
   },
   "capabilities": {
     "eyebrow": "Capabilities · computed from the record",

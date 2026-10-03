@@ -54,6 +54,10 @@ interface Book {
   tags: string[];
   priceCents: number;
   currency: string;
+  salePriceCents: number | null;
+  saleStartsAt: string | null;
+  saleEndsAt: string | null;
+  payWhatYouWant: boolean;
   coverImageId: string | null;
   fileId: string | null;
   fileName: string | null;
@@ -63,6 +67,12 @@ interface Book {
   sortOrder: number;
   stats: BookStats;
 }
+
+/** ISO → datetime-local value in the browser's time zone. */
+const toLocalInput = (iso: string) => {
+  const d = new Date(iso);
+  return new Date(d.getTime() - d.getTimezoneOffset() * 60_000).toISOString().slice(0, 16);
+};
 
 const INPUT_CLASS =
   "w-full px-4 py-2.5 bg-navy/50 border border-glass-border rounded-lg text-text-primary focus:border-gold/50 focus:outline-none text-sm";
@@ -97,6 +107,11 @@ const emptyForm = {
   free: false,
   priceDollars: "50.00",
   currency: "USD",
+  // Launch offer + pay-what-you-want (datetime-local values, browser time).
+  saleDollars: "",
+  saleStartsAt: "",
+  saleEndsAt: "",
+  payWhatYouWant: false,
   status: "DRAFT",
   featured: false,
   sortOrder: 0,
@@ -231,6 +246,10 @@ export default function AdminStorePage() {
       free: b.priceCents === 0,
       priceDollars: String(minorToMajor(b.priceCents, b.currency || "USD")),
       currency: b.currency || "USD",
+      saleDollars: b.salePriceCents != null ? String(minorToMajor(b.salePriceCents, b.currency || "USD")) : "",
+      saleStartsAt: b.saleStartsAt ? toLocalInput(b.saleStartsAt) : "",
+      saleEndsAt: b.saleEndsAt ? toLocalInput(b.saleEndsAt) : "",
+      payWhatYouWant: !!b.payWhatYouWant,
       status: b.status,
       featured: b.featured,
       sortOrder: b.sortOrder,
@@ -278,6 +297,10 @@ export default function AdminStorePage() {
       tags: form.tags.split(",").map((t) => t.trim()).filter(Boolean),
       priceCents,
       currency: form.currency,
+      salePriceCents: form.saleDollars.trim() ? majorToMinor(Number(form.saleDollars), form.currency) : null,
+      saleStartsAt: form.saleStartsAt ? new Date(form.saleStartsAt).toISOString() : null,
+      saleEndsAt: form.saleEndsAt ? new Date(form.saleEndsAt).toISOString() : null,
+      payWhatYouWant: form.payWhatYouWant,
       coverImageId: form.coverImageId || undefined,
       fileId: form.fileId || undefined,
       fileName: form.fileName || undefined,
@@ -1287,6 +1310,49 @@ export default function AdminStorePage() {
                     value={form.isbn}
                     onChange={(e) => setForm({ ...form, isbn: e.target.value })}
                   />
+                </div>
+                <div className="sm:col-span-2 rounded-lg border border-glass-border p-4 space-y-3">
+                  <p className="text-sm font-medium">Launch offer &amp; pricing</p>
+                  <div className="grid sm:grid-cols-3 gap-3">
+                    <label className="block text-xs text-text-secondary">
+                      Launch price (empty = none)
+                      <input
+                        type="text"
+                        inputMode="decimal"
+                        className={INPUT_CLASS}
+                        value={form.saleDollars}
+                        onChange={(e) => setForm({ ...form, saleDollars: e.target.value })}
+                        placeholder="e.g. 29"
+                      />
+                    </label>
+                    <label className="block text-xs text-text-secondary">
+                      Starts (optional)
+                      <input
+                        type="datetime-local"
+                        className={INPUT_CLASS}
+                        value={form.saleStartsAt}
+                        onChange={(e) => setForm({ ...form, saleStartsAt: e.target.value })}
+                      />
+                    </label>
+                    <label className="block text-xs text-text-secondary">
+                      Ends (optional — shows a countdown)
+                      <input
+                        type="datetime-local"
+                        className={INPUT_CLASS}
+                        value={form.saleEndsAt}
+                        onChange={(e) => setForm({ ...form, saleEndsAt: e.target.value })}
+                      />
+                    </label>
+                  </div>
+                  <label className="flex items-center gap-2 text-sm text-text-secondary cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={form.payWhatYouWant}
+                      onChange={(e) => setForm({ ...form, payWhatYouWant: e.target.checked })}
+                      className="accent-gold"
+                    />
+                    Pay what you want — the (launch) price above becomes the minimum
+                  </label>
                 </div>
                 <div>
                   <label className="block text-sm text-text-secondary mb-1">Product type</label>

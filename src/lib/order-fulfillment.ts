@@ -33,7 +33,13 @@ export async function sendOrderReceipt(
     return;
   }
 
-  const titles = new Map(order.items.map((i) => [i.bookId, i.titleSnapshot]));
+  // Grants from a bundle are for books that aren't order lines themselves.
+  const titles = new Map<string | null, string>(order.items.map((i) => [i.bookId, i.titleSnapshot]));
+  const missing = order.downloads.map((d) => d.bookId).filter((id) => !titles.has(id));
+  if (missing.length) {
+    const books = await prisma.book.findMany({ where: { id: { in: missing } }, select: { id: true, title: true } });
+    for (const b of books) titles.set(b.id, b.title);
+  }
   const base = appUrl();
 
   await sendOrderReceiptEmail({

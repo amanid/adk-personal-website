@@ -230,6 +230,11 @@ export const bookSchema = z.object({
   tags: z.array(z.string().max(60)).max(30).optional(),
   priceCents: z.number().int().min(0, "Price cannot be negative").max(100000000),
   currency: z.string().length(3).optional(),
+  // Launch offer (must undercut the price) and pay-what-you-want.
+  salePriceCents: z.number().int().min(0).max(100000000).nullable().optional(),
+  saleStartsAt: z.string().datetime().nullable().optional().or(z.literal("")),
+  saleEndsAt: z.string().datetime().nullable().optional().or(z.literal("")),
+  payWhatYouWant: z.boolean().optional(),
   coverImageId: z.string().max(200).optional().or(z.literal("")),
   fileId: z.string().max(200).optional().or(z.literal("")),
   fileName: z.string().max(300).optional().or(z.literal("")),
@@ -237,13 +242,23 @@ export const bookSchema = z.object({
   status: z.enum(["DRAFT", "PUBLISHED", "ARCHIVED"]).optional(),
   featured: z.boolean().optional(),
   sortOrder: z.number().int().optional(),
-});
+})
+  .refine((b) => b.salePriceCents == null || b.salePriceCents < b.priceCents, {
+    message: "The launch price must be lower than the regular price",
+    path: ["salePriceCents"],
+  })
+  .refine((b) => !b.saleStartsAt || !b.saleEndsAt || new Date(b.saleEndsAt) > new Date(b.saleStartsAt), {
+    message: "The offer must end after it starts",
+    path: ["saleEndsAt"],
+  });
 
 const cartItemsSchema = z
   .array(
     z.object({
-      bookId: z.string().min(1),
+      bookId: z.string().min(1).max(100),
       quantity: z.number().int().min(1).max(99),
+      /** Pay-what-you-want amount; validated against the minimum server-side. */
+      amountCents: z.number().int().min(0).max(100_000_000).optional(),
     })
   )
   .min(1, "Your cart is empty")
@@ -414,4 +429,20 @@ export const quotePaySchema = z.object({
   payment: z.enum(["PAYPAL", "MANUAL"]),
   provider: z.enum(["WAVE", "DJAMO", "ORANGE_MONEY", "PAYPAL"]).optional(),
   reference: z.string().max(120).optional().or(z.literal("")),
+});
+
+// ── Bundles ──────────────────────────────────────────────────────────────────
+
+export const bundleSchema = z.object({
+  title: z.string().trim().min(2).max(300),
+  titleFr: z.string().max(300).optional().or(z.literal("")),
+  description: z.string().trim().min(10).max(20000),
+  descriptionFr: z.string().max(20000).optional().or(z.literal("")),
+  priceCents: z.number().int().min(1, "A bundle needs a price").max(100000000),
+  currency: z.string().regex(/^[A-Z]{3}$/),
+  bookIds: z.array(z.string().min(1).max(40)).min(2, "Pick at least two products").max(50),
+  coverImageId: z.string().max(200).optional().or(z.literal("")),
+  status: z.enum(["DRAFT", "PUBLISHED", "ARCHIVED"]),
+  featured: z.boolean().optional(),
+  sortOrder: z.number().int().min(0).max(1000).optional(),
 });

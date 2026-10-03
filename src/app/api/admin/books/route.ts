@@ -91,6 +91,10 @@ export async function POST(request: Request) {
     const book = await prisma.book.create({
       data: {
         ...(data.kind ? { kind: data.kind } : {}),
+        salePriceCents: data.salePriceCents ?? null,
+        saleStartsAt: data.saleStartsAt ? new Date(data.saleStartsAt) : null,
+        saleEndsAt: data.saleEndsAt ? new Date(data.saleEndsAt) : null,
+        payWhatYouWant: data.payWhatYouWant ?? false,
         title: sanitizeInput(data.title),
         titleFr: data.titleFr ? sanitizeInput(data.titleFr) : null,
         slug,

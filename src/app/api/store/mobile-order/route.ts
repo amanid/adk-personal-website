@@ -60,6 +60,7 @@ export async function POST(request: Request) {
 
     const lines = priced.items.map((i) => ({
       bookId: i.bookId,
+      bundleId: i.bundleId,
       title: i.title,
       unitPriceCents: i.unitPriceCents,
       quantity: i.quantity,

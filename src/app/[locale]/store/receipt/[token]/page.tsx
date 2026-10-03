@@ -43,7 +43,13 @@ export default async function ReceiptPage({
   const paypalPayUrl = isPaypalDirect ? paypalMeLink(order.totalCents, order.currency) : null;
   const paypalAccount =
     PAYPAL_RECEIVE_EMAIL || (PAYPAL_ME_HANDLE ? `paypal.me/${PAYPAL_ME_HANDLE}` : "");
-  const titles = new Map(order.items.map((i) => [i.bookId, i.titleSnapshot]));
+  // Grants from a bundle are for books that aren't order lines themselves.
+  const titles = new Map<string | null, string>(order.items.map((i) => [i.bookId, i.titleSnapshot]));
+  const missing = order.downloads.map((d) => d.bookId).filter((id) => !titles.has(id));
+  if (missing.length) {
+    const books = await prisma.book.findMany({ where: { id: { in: missing } }, select: { id: true, title: true } });
+    for (const b of books) titles.set(b.id, b.title);
+  }
   // Server Component: reading the current time at request render is intentional.
   // eslint-disable-next-line react-hooks/purity
   const now = Date.now();

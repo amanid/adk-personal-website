@@ -13,6 +13,12 @@ import { Trash2, ShoppingCart, BookOpen, Lock, ShieldCheck, RefreshCw, Mail, Gif
 
 export default function CartPage() {
   const { items, subtotalCents, currency, setQuantity, removeItem, clear, hydrated } = useCart();
+  // What the server prices: the line, its quantity and any chosen amount.
+  const cartLines = items.map((i) => ({
+    bookId: i.bookId,
+    quantity: i.quantity,
+    ...(i.amountCents !== undefined ? { amountCents: i.amountCents } : {}),
+  }));
   const t = useTranslations("store");
   const router = useRouter();
   const [email, setEmail] = useState("");
@@ -75,7 +81,7 @@ export default function CartPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           code,
-          items: items.map((i) => ({ bookId: i.bookId, quantity: i.quantity })),
+          items: cartLines,
         }),
       });
       const data = await res.json().catch(() => null);
@@ -105,7 +111,6 @@ export default function CartPage() {
   // A stale coupon (from before a cart edit) would show a wrong discount; drop it
   // whenever the cart contents change. The server is authoritative at checkout.
   const cartSig = items.map((i) => `${i.bookId}:${i.quantity}`).join(",");
-  const cartLines = items.map((i) => ({ bookId: i.bookId, quantity: i.quantity }));
   useEffect(() => {
     setAppliedCode((code) => {
       if (code) {
@@ -129,7 +134,7 @@ export default function CartPage() {
           email,
           name,
           couponCode: appliedCode || undefined,
-          items: items.map((i) => ({ bookId: i.bookId, quantity: i.quantity })),
+          items: cartLines,
         }),
       });
       const data = await res.json().catch(() => null);

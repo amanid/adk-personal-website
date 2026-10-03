@@ -24,6 +24,9 @@ export interface StoreBook {
   pageCount?: number | null;
   fileMimeType?: string | null;
   kind?: string;
+  /** Regular price while a launch offer runs. */
+  regularCents?: number | null;
+  payWhatYouWant?: boolean;
 }
 
 export default function BookCard({ book }: { book: StoreBook }) {
@@ -99,9 +102,13 @@ export default function BookCard({ book }: { book: StoreBook }) {
           <p className="text-sm text-text-secondary mt-2 line-clamp-2">{book.firstInsight}</p>
         )}
         <div className="mt-4">
+          {book.payWhatYouWant && <span className="text-xs text-text-secondary mr-1.5">{t("pwyw_from")}</span>}
           <span className="text-lg font-bold text-gold">
-            {book.priceCents === 0 ? t("free") : formatPrice(book.priceCents, book.currency)}
+            {book.priceCents === 0 && !book.payWhatYouWant ? t("free") : formatPrice(book.priceCents, book.currency)}
           </span>
+          {book.regularCents ? (
+            <span className="ml-2 text-sm text-text-muted line-through">{formatPrice(book.regularCents, book.currency)}</span>
+          ) : null}
         </div>
         <div className="mt-3">
           <AddToCartButton

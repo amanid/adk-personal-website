@@ -22,6 +22,7 @@ import {
   Ticket,
   CalendarClock,
   FileSignature,
+  Layers,
 } from "lucide-react";
 
 export const metadata = {
@@ -38,6 +39,7 @@ const adminLinks = [
   { href: "/admin/store", label: "Bookstore", icon: ShoppingBag },
   { href: "/admin/store/orders", label: "Orders", icon: Receipt },
   { href: "/admin/store/coupons", label: "Coupons", icon: Ticket },
+  { href: "/admin/bundles", label: "Bundles", icon: Layers },
   { href: "/admin/store/analytics", label: "Store Analytics", icon: LineChart },
   { href: "/admin/bookings", label: "Bookings", icon: CalendarClock },
   { href: "/admin/quotes", label: "Quotes", icon: FileSignature },

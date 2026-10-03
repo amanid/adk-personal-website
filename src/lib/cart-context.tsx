@@ -18,6 +18,8 @@ export interface CartItem {
   currency: string;
   coverUrl?: string | null;
   quantity: number;
+  /** Pay-what-you-want: the amount the buyer chose (priceCents mirrors it). */
+  amountCents?: number;
 }
 
 interface CartContextValue {
@@ -62,6 +64,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
               priceCents: Number.isFinite(i.priceCents as number) ? (i.priceCents as number) : 0,
               currency: typeof i.currency === "string" && i.currency ? (i.currency as string) : "USD",
               coverUrl: typeof i.coverUrl === "string" ? (i.coverUrl as string) : null,
+              ...(Number.isInteger(i.amountCents) ? { amountCents: i.amountCents as number } : {}),
               quantity:
                 Number.isFinite(i.quantity as number) && (i.quantity as number) > 0
                   ? Math.min(99, Math.floor(i.quantity as number))
@@ -98,7 +101,12 @@ export function CartProvider({ children }: { children: ReactNode }) {
       if (existing) {
         return prev.map((i) =>
           i.bookId === item.bookId
-            ? { ...i, quantity: Math.min(99, i.quantity + quantity) }
+            ? {
+                ...i,
+                quantity: Math.min(99, i.quantity + quantity),
+                // A newly chosen pay-what-you-want amount replaces the old one.
+                ...(item.amountCents !== undefined ? { amountCents: item.amountCents, priceCents: item.priceCents } : {}),
+              }
             : i
         );
       }

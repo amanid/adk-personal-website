@@ -22,8 +22,10 @@ export function localeFromReferer(request: Request): "en" | "fr" {
 }
 
 export interface OrderLine {
-  /** Set for a downloadable book; null for a service line. */
+  /** Set for a downloadable product; null for a service line. */
   bookId: string | null;
+  /** Set for a bundle line. */
+  bundleId?: string | null;
   title: string;
   unitPriceCents: number;
   quantity: number;
@@ -87,6 +89,7 @@ export async function createOrderRecord(input: NewOrder) {
       items: {
         create: input.lines.map((l) => ({
           bookId: l.bookId,
+          bundleId: l.bundleId ?? null,
           titleSnapshot: l.title,
           unitPriceCents: l.unitPriceCents,
           quantity: l.quantity,

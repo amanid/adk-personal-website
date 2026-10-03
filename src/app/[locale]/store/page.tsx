@@ -1,8 +1,11 @@
 import type { Metadata } from "next";
 import { prisma } from "@/lib/prisma";
+import { cardPrice } from "@/lib/pricing";
 import { buildPageMetadata, normalizeLocale } from "@/lib/seo";
 import { type StoreBook } from "@/components/store/BookCard";
 import StoreBrowser from "@/components/store/StoreBrowser";
+import BundleCard, { type BundleCardData } from "@/components/store/BundleCard";
+import { loadBundles } from "@/lib/bundles";
 import { Link } from "@/i18n/routing";
 import { BookOpen, Search } from "lucide-react";
 
@@ -52,7 +55,7 @@ export default async function StorePage({
     title: l === "fr" && b.titleFr ? b.titleFr : b.title,
     subtitle: l === "fr" && b.subtitleFr ? b.subtitleFr : b.subtitle,
     publicationYear: b.publicationYear,
-    priceCents: b.priceCents,
+    ...cardPrice(b),
     currency: b.currency,
     coverUrl: b.coverImageId ? `/api/uploads/${b.coverImageId}` : null,
     firstInsight:
@@ -63,6 +66,20 @@ export default async function StorePage({
     pageCount: b.pageCount,
     fileMimeType: b.fileMimeType,
     kind: b.kind,
+  }));
+
+  const bundles: BundleCardData[] = (await loadBundles().catch(() => [])).map((b) => ({
+    id: b.id,
+    slug: b.slug,
+    title: b.title,
+    titleFr: b.titleFr,
+    priceCents: b.priceCents,
+    currency: b.currency,
+    savingCents: b.savingCents,
+    separateCents: b.separateCents,
+    coverUrl: b.coverImageId ? `/api/uploads/${b.coverImageId}` : null,
+    bookTitles: b.items.map((i) => (l === "fr" && i.book.titleFr ? i.book.titleFr : i.book.title)),
+    covers: b.items.flatMap((i) => (i.book.coverImageId ? [`/api/uploads/${i.book.coverImageId}`] : [])),
   }));
 
   return (
@@ -84,6 +101,24 @@ export default async function StorePage({
           {l === "fr" ? "Retrouver mes commandes" : "Find my orders"}
         </Link>
       </header>
+
+      {bundles.length > 0 && (
+        <section className="mb-12" aria-labelledby="bundles-heading">
+          <div className="flex items-baseline justify-between gap-4 mb-4">
+            <h2 id="bundles-heading" className="text-xl font-semibold">
+              {l === "fr" ? "Packs" : "Bundles"}
+            </h2>
+            <p className="text-sm text-text-secondary">
+              {l === "fr" ? "Plusieurs titres ensemble, pour moins cher." : "Several titles together, for less."}
+            </p>
+          </div>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+            {bundles.map((b) => (
+              <BundleCard key={b.id} bundle={b} />
+            ))}
+          </div>
+        </section>
+      )}
 
       {storeBooks.length === 0 ? (
         <div className="glass rounded-xl p-12 text-center text-text-secondary">

@@ -519,37 +519,44 @@ model Coupon {
 }
 
 model Book {
-  id              String      @id @default(cuid())
-  kind            ProductKind @default(BOOK)
+  id              String       @id @default(cuid())
+  kind            ProductKind  @default(BOOK)
   title           String
   titleFr         String?
-  slug            String      @unique
+  slug            String       @unique
   subtitle        String?
   subtitleFr      String?
-  description     String      @db.Text
-  descriptionFr   String?     @db.Text
+  description     String       @db.Text
+  descriptionFr   String?      @db.Text
   keyInsights     String[]
   keyInsightsFr   String[]
-  author          String      @default("KONAN Amani Dieudonné")
+  author          String       @default("KONAN Amani Dieudonné")
   publicationYear Int
   isbn            String?
-  language        String?     @default("English")
+  language        String?      @default("English")
   pageCount       Int?
   category        String?
   tags            String[]
   priceCents      Int
-  currency        String      @default("USD")
+  currency        String       @default("USD")
   coverImageId    String? // -> Upload.id (cover image)
+  /// Launch offer: a sale price, optionally limited to a window.
+  salePriceCents  Int?
+  saleStartsAt    DateTime?
+  saleEndsAt      DateTime?
+  /// Buyers choose the amount; the (sale) price is the minimum.
+  payWhatYouWant  Boolean      @default(false)
   fileId          String? // -> BookAsset.id (downloadable file)
   fileName        String?
   fileMimeType    String?
-  status          BookStatus  @default(DRAFT)
-  featured        Boolean     @default(false)
-  sortOrder       Int         @default(0)
-  views           Int         @default(0)
-  createdAt       DateTime    @default(now())
-  updatedAt       DateTime    @updatedAt
+  status          BookStatus   @default(DRAFT)
+  featured        Boolean      @default(false)
+  sortOrder       Int          @default(0)
+  views           Int          @default(0)
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
   orderItems      OrderItem[]
+  bundleItems     BundleItem[]
 
   @@index([status, sortOrder])
   @@index([kind, status])
@@ -616,6 +623,9 @@ model OrderItem {
   quantity       Int
   order          Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
   book           Book?   @relation(fields: [bookId], references: [id], onDelete: Restrict)
+  /// Set when the line is a bundle; its books are granted individually.
+  bundleId       String?
+  bundle         Bundle? @relation(fields: [bundleId], references: [id], onDelete: Restrict)
 
   @@index([orderId])
   @@index([bookId])
@@ -833,4 +843,38 @@ model Quote {
 
   @@index([status])
   @@index([clientEmail])
+}
+
+// ── Bundles ──────────────────────────────────────────────────────────────────
+
+/// Several products sold together at one price.
+model Bundle {
+  id            String       @id @default(cuid())
+  slug          String       @unique
+  title         String
+  titleFr       String?
+  description   String       @db.Text
+  descriptionFr String?      @db.Text
+  priceCents    Int
+  currency      String       @default("USD")
+  coverImageId  String?
+  status        BookStatus   @default(DRAFT)
+  featured      Boolean      @default(false)
+  sortOrder     Int          @default(0)
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+  items         BundleItem[]
+  orderItems    OrderItem[]
+
+  @@index([status, sortOrder])
+}
+
+model BundleItem {
+  bundleId String
+  bookId   String
+  bundle   Bundle @relation(fields: [bundleId], references: [id], onDelete: Cascade)
+  book     Book   @relation(fields: [bookId], references: [id], onDelete: Restrict)
+
+  @@id([bundleId, bookId])
+  @@index([bookId])
 }

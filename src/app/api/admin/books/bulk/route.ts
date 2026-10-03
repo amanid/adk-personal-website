@@ -223,6 +223,15 @@ export async function DELETE(request: Request) {
     }
 
     const bookIds = books.map((b) => b.id);
+    // A bundle would silently lose a title (and its buyers a download).
+    const inBundles = await prisma.bundleItem.count({ where: { bookId: { in: bookIds } } });
+    if (inBundles > 0) {
+      return NextResponse.json(
+        { error: "Some selected products are in bundles. Remove them from those bundles first." },
+        { status: 409 }
+      );
+    }
+
     const sold = await prisma.orderItem.count({ where: { bookId: { in: bookIds } } });
 
     if (sold > 0 && !force) {

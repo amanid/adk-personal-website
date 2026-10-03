@@ -48,6 +48,10 @@ export async function PUT(
       where: { id },
       data: {
         ...(data.kind ? { kind: data.kind } : {}),
+        salePriceCents: data.salePriceCents ?? null,
+        saleStartsAt: data.saleStartsAt ? new Date(data.saleStartsAt) : null,
+        saleEndsAt: data.saleEndsAt ? new Date(data.saleEndsAt) : null,
+        payWhatYouWant: data.payWhatYouWant ?? false,
         title: sanitizeInput(data.title),
         titleFr: data.titleFr ? sanitizeInput(data.titleFr) : null,
         subtitle: data.subtitle ? sanitizeInput(data.subtitle) : null,
@@ -98,6 +102,15 @@ export async function DELETE(
       select: { id: true, fileId: true, coverImageId: true },
     });
     if (!book) return NextResponse.json({ error: "Not found" }, { status: 404 });
+
+    // A bundle would silently lose a title (and its buyers a download).
+    const inBundles = await prisma.bundleItem.count({ where: { bookId: id } });
+    if (inBundles > 0) {
+      return NextResponse.json(
+        { error: `This product is in ${inBundles} bundle${inBundles === 1 ? "" : "s"}. Remove it from them first.` },
+        { status: 409 }
+      );
+    }
 
     const sold = await prisma.orderItem.count({ where: { bookId: id } });
 

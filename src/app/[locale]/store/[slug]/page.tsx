@@ -11,11 +11,12 @@ import {
   OG_IMAGE_HEIGHT,
   OG_IMAGE_WIDTH,
 } from "@/lib/seo";
-import { formatPrice, formatFileSize, fileFormatLabel, safeJsonLd } from "@/lib/utils";
+import { formatFileSize, fileFormatLabel, safeJsonLd } from "@/lib/utils";
 import { isPaypalCurrency } from "@/lib/currency";
 import { isPaypalApiConfigured, isPaypalDirectConfigured } from "@/lib/paypal-direct";
 import { Link } from "@/i18n/routing";
-import AddToCartButton from "@/components/store/AddToCartButton";
+import ProductPurchase from "@/components/store/ProductPurchase";
+import { cardPrice, effectivePrice } from "@/lib/pricing";
 import BookViewBeacon from "@/components/store/BookViewBeacon";
 import BookCard, { type StoreBook } from "@/components/store/BookCard";
 import { BookOpen, Check, ChevronLeft, Calendar, Globe, Hash, FileDown } from "lucide-react";
@@ -97,6 +98,8 @@ export default async function BookDetailPage({
   const book = await getBook(slug);
   const tStore = await getTranslations({ locale: l, namespace: "store" });
   if (!book) notFound();
+  // The price in force now (launch offer applied); checkout re-prices anyway.
+  const price = effectivePrice(book);
 
   const title = l === "fr" && book.titleFr ? book.titleFr : book.title;
   const subtitle = l === "fr" && book.subtitleFr ? book.subtitleFr : book.subtitle;
@@ -137,7 +140,7 @@ export default async function BookDetailPage({
     title: l === "fr" && b.titleFr ? b.titleFr : b.title,
     subtitle: l === "fr" && b.subtitleFr ? b.subtitleFr : b.subtitle,
     publicationYear: b.publicationYear,
-    priceCents: b.priceCents,
+    ...cardPrice(b),
     currency: b.currency,
     coverUrl: b.coverImageId ? `/api/uploads/${b.coverImageId}` : null,
     firstInsight:
@@ -173,7 +176,7 @@ export default async function BookDetailPage({
     ...(format ? { fileFormat: book.fileMimeType } : {}),
     offers: {
       "@type": "Offer",
-      price: (book.priceCents / 100).toFixed(2),
+      price: (price.priceCents / 100).toFixed(2),
       priceCurrency: book.currency,
       availability: "https://schema.org/InStock",
       url: canonical,
@@ -217,24 +220,13 @@ export default async function BookDetailPage({
           </div>
 
           <div className="glass rounded-xl p-5 mt-4">
-            <div className="text-2xl font-bold text-gold mb-4">
-              {book.priceCents === 0
-                ? l === "fr"
-                  ? "Gratuit"
-                  : "Free"
-                : formatPrice(book.priceCents, book.currency)}
-            </div>
-            <AddToCartButton
-              book={{
-                bookId: book.id,
-                slug: book.slug,
-                title,
-                priceCents: book.priceCents,
-                currency: book.currency,
-                coverUrl,
-              }}
-              withQuantity
-              buyNow
+            <ProductPurchase
+              item={{ bookId: book.id, slug: book.slug, title, currency: book.currency, coverUrl }}
+              priceCents={price.priceCents}
+              regularCents={price.regularCents}
+              saleEndsAt={price.saleEndsAt ? price.saleEndsAt.toISOString() : null}
+              payWhatYouWant={price.payWhatYouWant}
+              withQuantity={!price.payWhatYouWant}
             />
             <ul className="text-xs text-text-secondary mt-4 space-y-1.5">
               <li className="flex items-start gap-1.5">
@@ -313,7 +305,9 @@ export default async function BookDetailPage({
 
           <div className="mt-8">
             <h2 className="text-xl font-semibold mb-3">
-              {l === "fr" ? "À propos de cet ouvrage" : "About this book"}
+              {isDocument
+                ? l === "fr" ? "À propos de cet ouvrage" : "About this book"
+                : l === "fr" ? "À propos de ce produit" : "About this product"}
             </h2>
             <div className="text-text-secondary leading-relaxed whitespace-pre-wrap">
               {description}

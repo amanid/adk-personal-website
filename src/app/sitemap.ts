@@ -92,6 +92,27 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     // Database might not be available during build
   }
 
+  // Bundle pages (published only)
+  try {
+    const bundles = await prisma.bundle.findMany({
+      where: { status: "PUBLISHED" },
+      select: { slug: true, updatedAt: true },
+    });
+    for (const locale of locales) {
+      for (const b of bundles) {
+        entries.push({
+          url: `${BASE_URL}/${locale}/store/bundles/${b.slug}`,
+          lastModified: b.updatedAt,
+          changeFrequency: "weekly" as const,
+          priority: 0.7,
+          alternates: langAlternates(`/store/bundles/${b.slug}`),
+        });
+      }
+    }
+  } catch {
+    // Database might not be available during build
+  }
+
   // Blog posts from database
   try {
     const posts = await prisma.blogPost.findMany({

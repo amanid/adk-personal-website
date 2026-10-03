@@ -9,6 +9,7 @@ import { randomBytes } from "crypto";
 import type { Prisma, PrismaClient } from "@prisma/client";
 import { prisma } from "./prisma";
 import { applyCoupon } from "./coupon";
+import { effectivePrice, parseCartId, payWhatYouWantMax } from "./pricing";
 
 export const STORE_CURRENCY = "USD";
 export const DOWNLOAD_EXPIRY_DAYS = 7;
@@ -16,7 +17,10 @@ export const DOWNLOAD_MAX_PER_ITEM = 5;
 
 /** A validated, DB-sourced line item ready to persist as an OrderItem. */
 export interface PricedItem {
-  bookId: string;
+  /** Set for a single product line. */
+  bookId: string | null;
+  /** Set for a bundle line (its products are granted on payment). */
+  bundleId: string | null;
   title: string;
   unitPriceCents: number;
   quantity: number;
@@ -31,8 +35,11 @@ export interface PricedCart {
 }
 
 export interface CartInput {
+  /** A product id, or a bundle as `bundle:<id>` (see lib/pricing). */
   bookId: string;
   quantity: number;
+  /** Pay-what-you-want only: the buyer's chosen unit amount. */
+  amountCents?: number;
 }
 
 export interface PricedOrder {
@@ -78,49 +85,117 @@ export async function priceOrder(
 }
 
 /**
- * Recompute cart pricing from the database. Only PUBLISHED books that have an
- * attached downloadable file are purchasable. Throws on any invalid item.
+ * Recompute cart pricing from the database. Only PUBLISHED products with a
+ * downloadable file (and PUBLISHED bundles made only of such products) are
+ * purchasable. Launch offers and pay-what-you-want are applied here, and only
+ * here. Throws a buyer-safe message on any invalid line.
  */
-export async function priceCart(items: CartInput[]): Promise<PricedCart> {
+export async function priceCart(items: CartInput[], now: Date = new Date()): Promise<PricedCart> {
   if (!items.length) throw new Error("Cart is empty");
 
-  // Merge duplicate bookIds, summing quantities.
-  const merged = new Map<string, number>();
-  for (const { bookId, quantity } of items) {
+  // Merge duplicate lines, summing quantities (the last chosen amount wins).
+  const merged = new Map<string, { quantity: number; amountCents?: number }>();
+  for (const { bookId, quantity, amountCents } of items) {
     if (!Number.isInteger(quantity) || quantity < 1 || quantity > 99) {
       throw new Error("Invalid quantity");
     }
-    merged.set(bookId, (merged.get(bookId) || 0) + quantity);
+    const prev = merged.get(bookId);
+    merged.set(bookId, { quantity: (prev?.quantity || 0) + quantity, amountCents: amountCents ?? prev?.amountCents });
   }
 
-  const ids = [...merged.keys()];
-  const books = await prisma.book.findMany({
-    where: { id: { in: ids }, status: "PUBLISHED" },
-    select: { id: true, title: true, priceCents: true, fileId: true, currency: true },
-  });
+  const bookIds: string[] = [];
+  const bundleIds: string[] = [];
+  for (const id of merged.keys()) {
+    const ref = parseCartId(id);
+    if ("bundleId" in ref) bundleIds.push(ref.bundleId);
+    else bookIds.push(ref.bookId);
+  }
 
-  const byId = new Map(books.map((b) => [b.id, b]));
+  const [books, bundles] = await Promise.all([
+    bookIds.length
+      ? prisma.book.findMany({
+          where: { id: { in: bookIds }, status: "PUBLISHED" },
+          select: {
+            id: true,
+            title: true,
+            priceCents: true,
+            fileId: true,
+            currency: true,
+            salePriceCents: true,
+            saleStartsAt: true,
+            saleEndsAt: true,
+            payWhatYouWant: true,
+          },
+        })
+      : [],
+    bundleIds.length
+      ? prisma.bundle.findMany({
+          where: { id: { in: bundleIds }, status: "PUBLISHED" },
+          select: {
+            id: true,
+            title: true,
+            priceCents: true,
+            currency: true,
+            items: { select: { book: { select: { status: true, fileId: true } } } },
+          },
+        })
+      : [],
+  ]);
+  const bookById = new Map(books.map((b) => [b.id, b]));
+  const bundleById = new Map(bundles.map((b) => [b.id, b]));
 
   const priced: PricedItem[] = [];
   let currency: string | null = null;
-  for (const [bookId, quantity] of merged) {
-    const book = byId.get(bookId);
-    if (!book) throw new Error("One or more books are unavailable");
-    if (!book.fileId) throw new Error(`"${book.title}" is not available for download yet`);
-    if (book.priceCents < 0) throw new Error("Invalid price");
-
+  const sameCurrency = (c: string) => {
     // All items in an order must share one currency (single, coherent total).
-    if (currency === null) currency = book.currency;
-    else if (currency !== book.currency) {
-      throw new Error("Your cart mixes currencies. Please order books of one currency at a time.");
+    if (currency === null) currency = c;
+    else if (currency !== c) {
+      throw new Error("Your cart mixes currencies. Please order items of one currency at a time.");
+    }
+  };
+
+  for (const [id, line] of merged) {
+    const ref = parseCartId(id);
+    if ("bundleId" in ref) {
+      const bundle = bundleById.get(ref.bundleId);
+      if (!bundle || bundle.items.length === 0) throw new Error("One or more bundles are unavailable");
+      if (bundle.items.some((i) => i.book.status !== "PUBLISHED" || !i.book.fileId)) {
+        throw new Error(`"${bundle.title}" is not available right now`);
+      }
+      sameCurrency(bundle.currency);
+      priced.push({
+        bookId: null,
+        bundleId: bundle.id,
+        title: bundle.title,
+        unitPriceCents: bundle.priceCents,
+        quantity: line.quantity,
+        lineTotalCents: bundle.priceCents * line.quantity,
+      });
+      continue;
     }
 
+    const book = bookById.get(ref.bookId);
+    if (!book) throw new Error("One or more items are unavailable");
+    if (!book.fileId) throw new Error(`"${book.title}" is not available for download yet`);
+    if (book.priceCents < 0) throw new Error("Invalid price");
+    sameCurrency(book.currency);
+
+    const price = effectivePrice(book, now);
+    let unit = price.priceCents;
+    if (price.payWhatYouWant && line.amountCents !== undefined) {
+      if (!Number.isInteger(line.amountCents) || line.amountCents < price.priceCents) {
+        throw new Error(`The minimum for "${book.title}" is ${formatUsd(price.priceCents, book.currency)}`);
+      }
+      if (line.amountCents > payWhatYouWantMax(price.priceCents)) throw new Error("That amount is too high");
+      unit = line.amountCents;
+    }
     priced.push({
       bookId: book.id,
+      bundleId: null,
       title: book.title,
-      unitPriceCents: book.priceCents,
-      quantity,
-      lineTotalCents: book.priceCents * quantity,
+      unitPriceCents: unit,
+      quantity: line.quantity,
+      lineTotalCents: unit * line.quantity,
     });
   }
 
@@ -162,10 +237,18 @@ export async function createDownloadGrants(
   const existing = await db.downloadGrant.count({ where: { orderId } });
   if (existing > 0) return;
 
-  // Only book lines carry a download; a booking or quote line has none.
-  const items = (
-    await db.orderItem.findMany({ where: { orderId, bookId: { not: null } }, select: { bookId: true } })
-  ).flatMap((i) => (i.bookId ? [{ bookId: i.bookId }] : []));
+  // Product lines carry one download each; a bundle line carries one per
+  // product in it. Booking and quote lines carry none.
+  const lines = await db.orderItem.findMany({
+    where: { orderId, OR: [{ bookId: { not: null } }, { bundleId: { not: null } }] },
+    select: { bookId: true, bundle: { select: { items: { select: { bookId: true } } } } },
+  });
+  const ids = new Set<string>();
+  for (const l of lines) {
+    if (l.bookId) ids.add(l.bookId);
+    for (const i of l.bundle?.items ?? []) ids.add(i.bookId);
+  }
+  const items = [...ids].map((bookId) => ({ bookId }));
   if (items.length === 0) return;
 
   const expiresAt = new Date(Date.now() + DOWNLOAD_EXPIRY_DAYS * 24 * 60 * 60 * 1000);
