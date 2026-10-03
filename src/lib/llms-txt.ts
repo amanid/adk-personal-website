@@ -5,15 +5,17 @@
  */
 import { BASE_URL } from "./seo";
 import { SITE, listPosts, listProducts, listServices, searchPublications } from "./ai-catalogue";
+import { getTopics } from "./topics";
 
 const line = (s: string | null | undefined) => (s || "").replace(/\s+/g, " ").trim();
 
 export async function buildLlmsTxt(full: boolean): Promise<string> {
-  const [pubs, products, services, posts] = await Promise.all([
+  const [pubs, products, services, posts, topics] = await Promise.all([
     searchPublications({ limit: 50 }),
     listProducts(),
     listServices(),
     listPosts(full ? 50 : 15),
+    getTopics(),
   ]);
   const out: string[] = [];
   out.push(`# ${SITE.name}`, "", `> ${line(SITE.roles)}`, "", line(SITE.summary), "");
@@ -22,6 +24,12 @@ export async function buildLlmsTxt(full: boolean): Promise<string> {
       "Publications marked \"subscription\" need a research subscription to read in full; their metadata is public.",
     ""
   );
+
+  if (topics.length) {
+    out.push("## Topics", "");
+    for (const tp of topics) out.push(`- [${tp.name}](${BASE_URL}/en/topics/${tp.slug}): ${tp.count} publication(s), ${tp.firstYear === tp.lastYear ? tp.lastYear : `${tp.firstYear}–${tp.lastYear}`}`);
+    out.push("");
+  }
 
   out.push(`## Publications (${pubs.total})`, "");
   for (const p of pubs.results) {

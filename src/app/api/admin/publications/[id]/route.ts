@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { announceChange } from "@/lib/indexnow";
 import { auth } from "@/lib/auth";
 import { publicationSchema } from "@/lib/validations";
 
@@ -32,6 +33,7 @@ export async function PUT(
       },
     });
 
+    announceChange(`/publications/${publication.slug}`);
     return NextResponse.json({ publication });
   } catch (error) {
     console.error("Publication update error:", error);

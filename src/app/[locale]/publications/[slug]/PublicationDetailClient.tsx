@@ -2,7 +2,7 @@
 
 import { useParams } from "next/navigation";
 import { useTranslations, useLocale } from "next-intl";
-import { safeJsonLd } from "@/lib/utils";
+import { safeJsonLd, slugify } from "@/lib/utils";
 import { motion } from "framer-motion";
 import { Link } from "@/i18n/routing";
 import {
@@ -227,9 +227,9 @@ export default function PublicationDetailClient({
               {getPublicationTypeLabel(pubType, locale)}
             </span>
             {pub.category && (
-              <span className="text-xs px-2 py-1 rounded-full bg-gold/10 text-gold">
+              <Link href={`/topics/${slugify(pub.category)}`} className="text-xs px-2 py-1 rounded-full bg-gold/10 text-gold hover:bg-gold/20">
                 {pub.category}
-              </span>
+              </Link>
             )}
             {pub.featured && (
               <span className="text-xs px-2 py-1 rounded-full bg-gold/20 text-gold font-medium">

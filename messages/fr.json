@@ -18,7 +18,9 @@
     "consulting": "Conseil",
     "subscribe": "Premium",
     "dba": "Mon DBA",
-    "store": "Librairie"
+    "store": "Librairie",
+    "topics": "Thèmes",
+    "developers": "Développeurs"
   },
   "hero": {
     "greeting": "Bonjour, je suis",
@@ -874,5 +876,28 @@
     "ai_body": "Connectez Claude, ChatGPT ou tout client Model Context Protocol au catalogue public — publications, boutique, séances de conseil et blog. Sans clé ; lecture seule.",
     "ai_server": "URL du serveur MCP (Streamable HTTP)",
     "ai_llms": "Plan du site pour les modèles de langage"
+  },
+  "topics": {
+    "meta_title": "Thèmes de recherche",
+    "meta_description": "Publications, produits de données et articles de KONAN Amani Dieudonné, classés par thème.",
+    "eyebrow": "Thèmes",
+    "title": "Thèmes de recherche",
+    "subtitle": "Toutes les publications, produits et articles, classés par thème.",
+    "n_publications": "{n, plural, one {# publication} other {# publications}}",
+    "topic_title": "{topic} : recherche et analyse",
+    "topic_meta_description": "{n, plural, one {# publication} other {# publications}} sur le thème {topic} ({years}) par KONAN Amani Dieudonné, avec rapports, jeux de données et articles associés.",
+    "stat_publications": "Publications",
+    "stat_years": "Période couverte",
+    "stat_free": "En accès libre",
+    "publications": "Publications",
+    "products": "Rapports, livres et jeux de données",
+    "posts": "Articles",
+    "free": "Libre",
+    "subscription": "Abonnement",
+    "all_topics": "Tous les thèmes",
+    "cta_title": "Besoin d’une analyse sur {topic} ?",
+    "cta_body": "Réservez une séance de conseil ou demandez un devis pour une étude sur mesure.",
+    "cta_book": "Réserver une séance",
+    "cta_quote": "Demander un devis"
   }
 }

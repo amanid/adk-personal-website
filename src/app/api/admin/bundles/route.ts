@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { announceChange } from "@/lib/indexnow";
 import { requireAdmin } from "@/lib/admin-guard";
 import { bundleSchema } from "@/lib/validations";
 import { checkBundleBooks } from "@/lib/bundle-admin";
@@ -59,5 +60,6 @@ export async function POST(request: Request) {
       items: { create: [...new Set(d.bookIds)].map((bookId) => ({ bookId })) },
     },
   });
+  if (bundle.status === "PUBLISHED") announceChange(`/store/bundles/${bundle.slug}`);
   return NextResponse.json({ bundle }, { status: 201 });
 }

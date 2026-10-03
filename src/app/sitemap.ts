@@ -1,6 +1,7 @@
 import { MetadataRoute } from "next";
 import { publications } from "@/data/publications";
 import { prisma } from "@/lib/prisma";
+import { getTopics } from "@/lib/topics";
 
 const BASE_URL = "https://www.konanamanidieudonne.org";
 
@@ -33,6 +34,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { path: "/blog", changeFrequency: "weekly" as const, priority: 0.8 },
     { path: "/qa", changeFrequency: "weekly" as const, priority: 0.5 },
     { path: "/developers", changeFrequency: "monthly" as const, priority: 0.6 },
+    { path: "/topics", changeFrequency: "weekly" as const, priority: 0.7 },
     { path: "/contact", changeFrequency: "yearly" as const, priority: 0.6 },
   ];
 
@@ -130,6 +132,23 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
           changeFrequency: "weekly" as const,
           priority: 0.7,
           alternates: langAlternates(`/blog/${post.slug}`),
+        });
+      }
+    }
+  } catch {
+    // Database might not be available during build
+  }
+
+  // Topic hubs, one per publication category
+  try {
+    const topics = await getTopics();
+    for (const locale of locales) {
+      for (const tp of topics) {
+        entries.push({
+          url: `${BASE_URL}/${locale}/topics/${tp.slug}`,
+          changeFrequency: "weekly" as const,
+          priority: 0.6,
+          alternates: langAlternates(`/topics/${tp.slug}`),
         });
       }
     }

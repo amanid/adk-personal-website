@@ -17,6 +17,7 @@ const LABELS: Record<string, Record<string, string>> = {
     qa: "Q&A",
     contact: "Contact",
     research: "Research",
+    topics: "Topics",
   },
   fr: {
     about: "À propos",
@@ -28,6 +29,7 @@ const LABELS: Record<string, Record<string, string>> = {
     qa: "Q&R",
     contact: "Contact",
     research: "Recherche",
+    topics: "Thèmes",
   },
 };
 

@@ -2,10 +2,10 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
-import { buildPageMetadata, normalizeLocale } from "@/lib/seo";
+import { buildPageMetadata, normalizeLocale, BASE_URL } from "@/lib/seo";
 import { loadBundles } from "@/lib/bundles";
 import { effectivePrice, bundleCartId } from "@/lib/pricing";
-import { formatPrice } from "@/lib/utils";
+import { formatPrice, safeJsonLd } from "@/lib/utils";
 import { Link } from "@/i18n/routing";
 import AddToCartButton from "@/components/store/AddToCartButton";
 import { ChevronLeft, Check } from "lucide-react";
@@ -43,8 +43,27 @@ export default async function BundlePage({ params }: { params: Promise<{ locale:
     (b.coverImageId && `/api/uploads/${b.coverImageId}`) ||
     (b.items[0]?.book.coverImageId ? `/api/uploads/${b.items[0].book.coverImageId}` : null);
 
+  const canonical = `${BASE_URL}/${l}/store/bundles/${b.slug}`;
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    name: title,
+    description,
+    url: canonical,
+    ...(cover ? { image: `${BASE_URL}${cover}` } : {}),
+    isRelatedTo: b.items.map(({ book }) => ({ "@type": "Product", name: book.title, url: `${BASE_URL}/${l}/store/${book.slug}` })),
+    offers: {
+      "@type": "Offer",
+      price: (b.priceCents / 100).toFixed(2),
+      priceCurrency: b.currency,
+      availability: "https://schema.org/InStock",
+      url: canonical,
+    },
+  };
+
   return (
     <div className="max-w-5xl mx-auto px-4 sm:px-6 py-10">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(jsonLd) }} />
       <Link href="/store" className="inline-flex items-center gap-1 text-sm text-text-secondary hover:text-gold mb-6">
         <ChevronLeft className="w-4 h-4" /> {l === "fr" ? "Retour à la boutique" : "Back to the store"}
       </Link>

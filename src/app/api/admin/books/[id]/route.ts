@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { announceChange } from "@/lib/indexnow";
 import { auth } from "@/lib/auth";
 import { bookSchema } from "@/lib/validations";
 import { sanitizeInput } from "@/lib/sanitize";
@@ -79,6 +80,7 @@ export async function PUT(
       },
     });
 
+    if (book.status === "PUBLISHED") announceChange(`/store/${book.slug}`);
     return NextResponse.json({ book });
   } catch (error) {
     console.error("Book update error:", error);
@@ -166,6 +168,8 @@ export async function PATCH(
       return NextResponse.json({ error: "Invalid status" }, { status: 400 });
     }
     const book = await prisma.book.update({ where: { id }, data: { status } });
+    // Published, or taken down: either way the page changed.
+    announceChange(`/store/${book.slug}`);
     return NextResponse.json({ book });
   } catch (error) {
     console.error("Book status update error:", error);

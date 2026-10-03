@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { announceChange } from "@/lib/indexnow";
 import { requireAdmin } from "@/lib/admin-guard";
 import { bundleSchema } from "@/lib/validations";
 import { checkBundleBooks } from "@/lib/bundle-admin";
@@ -16,7 +17,7 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
   const d = parsed.data;
   const problem = await checkBundleBooks(d);
   if (problem) return NextResponse.json({ error: problem }, { status: 400 });
-  const exists = await prisma.bundle.findUnique({ where: { id }, select: { id: true } });
+  const exists = await prisma.bundle.findUnique({ where: { id }, select: { id: true, status: true } });
   if (!exists) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
   // Past buyers keep their downloads: grants are per product and were
@@ -40,6 +41,7 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
       },
     });
   });
+  if (bundle.status === "PUBLISHED" || exists.status === "PUBLISHED") announceChange(`/store/bundles/${bundle.slug}`);
   return NextResponse.json({ bundle });
 }
 

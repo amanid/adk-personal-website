@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { announceChange } from "@/lib/indexnow";
 import { auth } from "@/lib/auth";
 import { blogPostSchema } from "@/lib/validations";
 import { slugify } from "@/lib/utils";
@@ -90,6 +91,7 @@ export async function POST(request: Request) {
       }).catch((err) => console.error("Notification error:", err));
     }
 
+    if (post.published) announceChange(`/blog/${post.slug}`);
     return NextResponse.json({ post }, { status: 201 });
   } catch (error) {
     console.error("Blog create error:", error);

@@ -18,7 +18,9 @@
     "consulting": "Consulting",
     "subscribe": "Premium",
     "dba": "My DBA",
-    "store": "Bookstore"
+    "store": "Bookstore",
+    "topics": "Topics",
+    "developers": "Developers"
   },
   "hero": {
     "greeting": "Hello, I'm",
@@ -874,5 +876,28 @@
     "ai_body": "Connect Claude, ChatGPT or any Model Context Protocol client to the public catalogue — publications, store, consulting sessions and blog. No key needed; read-only.",
     "ai_server": "MCP server URL (Streamable HTTP)",
     "ai_llms": "Site map for language models"
+  },
+  "topics": {
+    "meta_title": "Research topics",
+    "meta_description": "Publications, data products and articles by KONAN Amani Dieudonné, grouped by subject.",
+    "eyebrow": "Topics",
+    "title": "Research topics",
+    "subtitle": "Every publication, product and article, grouped by subject.",
+    "n_publications": "{n, plural, one {# publication} other {# publications}}",
+    "topic_title": "{topic}: research and analysis",
+    "topic_meta_description": "{n, plural, one {# publication} other {# publications}} on {topic} ({years}) by KONAN Amani Dieudonné, with related reports, datasets and articles.",
+    "stat_publications": "Publications",
+    "stat_years": "Years covered",
+    "stat_free": "Free to read",
+    "publications": "Publications",
+    "products": "Reports, books & datasets",
+    "posts": "Articles",
+    "free": "Free",
+    "subscription": "Subscription",
+    "all_topics": "All topics",
+    "cta_title": "Need analysis on {topic}?",
+    "cta_body": "Book a consulting session, or request a quote for a tailored study.",
+    "cta_book": "Book a session",
+    "cta_quote": "Request a quote"
   }
 }

@@ -21,27 +21,43 @@ export const SITE = {
 export interface CatalogPublication {
   slug: string;
   title: string;
+  titleFr: string | null;
   year: number;
   category: string | null;
   type: string;
   abstract: string;
+  abstractFr: string | null;
   access: "free" | "subscription";
   url: string;
 }
 
-const toPub = (p: { slug: string; title: string; year: number; category?: string | null; publicationType?: string | null; abstract: string; accessLevel?: string | null }): CatalogPublication => ({
+type PubSource = {
+  slug: string;
+  title: string;
+  titleFr?: string | null;
+  year: number;
+  category?: string | null;
+  publicationType?: string | null;
+  abstract: string;
+  abstractFr?: string | null;
+  accessLevel?: string | null;
+};
+
+const toPub = (p: PubSource): CatalogPublication => ({
   slug: p.slug,
   title: p.title,
+  titleFr: p.titleFr ?? null,
   year: p.year,
   category: p.category ?? null,
   type: p.publicationType ?? "OTHER",
   abstract: p.abstract,
+  abstractFr: p.abstractFr ?? null,
   access: p.accessLevel === "GATED" ? "subscription" : "free",
   url: `${BASE_URL}/en/publications/${p.slug}`,
 });
 
 /** Same source rule as the publications page: the database, else the seed set. */
-async function allPublications(): Promise<CatalogPublication[]> {
+export async function allPublications(): Promise<CatalogPublication[]> {
   const rows = await prisma.publication.findMany({ orderBy: [{ year: "desc" }, { createdAt: "desc" }] });
   return rows.length ? rows.map(toPub) : staticPublications.map(toPub).sort((a, b) => b.year - a.year);
 }

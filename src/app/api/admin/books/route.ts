@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { announceChange } from "@/lib/indexnow";
 import { auth } from "@/lib/auth";
 import { bookSchema } from "@/lib/validations";
 import { sanitizeInput } from "@/lib/sanitize";
@@ -123,6 +124,7 @@ export async function POST(request: Request) {
       },
     });
 
+    if (book.status === "PUBLISHED") announceChange(`/store/${book.slug}`);
     return NextResponse.json({ book }, { status: 201 });
   } catch (error) {
     console.error("Book create error:", error);

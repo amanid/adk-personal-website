@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { announceChange } from "@/lib/indexnow";
 import { auth } from "@/lib/auth";
 import { publicationSchema } from "@/lib/validations";
 import { notifySubscribers } from "@/lib/email";
@@ -77,6 +78,7 @@ export async function POST(request: Request) {
       type: "publication",
     }).catch((err) => console.error("Notification error:", err));
 
+    announceChange(`/publications/${publication.slug}`);
     return NextResponse.json({ publication }, { status: 201 });
   } catch (error) {
     console.error("Publication create error:", error);
