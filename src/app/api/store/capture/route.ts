@@ -2,15 +2,11 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { capturePayPalOrder } from "@/lib/paypal";
 import { fulfilPaidOrder } from "@/lib/order-fulfillment";
+import { localeFromReferer } from "@/lib/orders";
 import { rateLimit } from "@/lib/rate-limit";
 import { checkOrigin } from "@/lib/origin-check";
 
 export const runtime = "nodejs";
-
-function localeFromReferer(request: Request): "en" | "fr" {
-  const referer = request.headers.get("referer") || "";
-  return referer.includes("/fr/") || referer.endsWith("/fr") ? "fr" : "en";
-}
 
 export async function POST(request: Request) {
   const origin = checkOrigin(request);

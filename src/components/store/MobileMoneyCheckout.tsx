@@ -3,31 +3,29 @@
 import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { Smartphone, Copy, Check } from "lucide-react";
-import { useRouter } from "@/i18n/routing";
-import { useCart } from "@/lib/cart-context";
 import { formatPrice } from "@/lib/utils";
 import { MOBILE_MONEY_NUMBER, MOBILE_MONEY_PROVIDERS } from "@/lib/mobile-money";
 
 interface MobileMoneyCheckoutProps {
-  email: string;
-  name: string;
   amountCents: number;
   currency: string;
-  couponCode?: string | null;
   onValidate?: () => boolean;
+  /**
+   * Place the pending order on the server for this payment method and return
+   * its receipt token; throw an Error with a buyer-safe message on failure.
+   */
+  submitOrder: (provider: string, reference: string) => Promise<string>;
+  onPlaced: (receiptToken: string) => void;
 }
 
 export default function MobileMoneyCheckout({
-  email,
-  name,
   amountCents,
   currency,
-  couponCode,
   onValidate,
+  submitOrder,
+  onPlaced,
 }: MobileMoneyCheckoutProps) {
   const t = useTranslations("store");
-  const router = useRouter();
-  const { items, clear } = useCart();
   const [provider, setProvider] = useState<string>(MOBILE_MONEY_PROVIDERS[0].id);
   const [reference, setReference] = useState("");
   const [placing, setPlacing] = useState(false);
@@ -49,27 +47,9 @@ export default function MobileMoneyCheckout({
     if (onValidate && !onValidate()) return;
     setPlacing(true);
     try {
-      const res = await fetch("/api/store/mobile-order", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          email,
-          name,
-          provider,
-          reference,
-          couponCode: couponCode || undefined,
-          items: items.map((i) => ({ bookId: i.bookId, quantity: i.quantity })),
-        }),
-      });
-      const data = await res.json().catch(() => null);
-      if (!res.ok || !data?.receiptToken) {
-        setError(data?.error || t("mmError"));
-        return;
-      }
-      clear();
-      router.push(`/store/receipt/${data.receiptToken}`);
-    } catch {
-      setError(t("mmError"));
+      onPlaced(await submitOrder(provider, reference));
+    } catch (e) {
+      setError(e instanceof Error && e.message ? e.message : t("mmError"));
     } finally {
       setPlacing(false);
     }

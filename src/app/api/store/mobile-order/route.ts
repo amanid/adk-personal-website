@@ -1,16 +1,10 @@
-import { NextResponse, after } from "next/server";
-import { prisma } from "@/lib/prisma";
+import { NextResponse } from "next/server";
 import { manualOrderSchema } from "@/lib/validations";
-import { priceOrder, generateOrderNumber, secureToken } from "@/lib/store";
-import { sendOrderInvoiceEmail, notifyAdminOfManualOrder } from "@/lib/email";
+import { priceOrder } from "@/lib/store";
+import { createOrderRecord, notifyManualOrder, localeFromReferer } from "@/lib/orders";
 import { sanitizeInput } from "@/lib/sanitize";
 import { rateLimit, clientIp } from "@/lib/rate-limit";
 import { checkOrigin } from "@/lib/origin-check";
-
-function localeFromReferer(request: Request): "en" | "fr" {
-  const referer = request.headers.get("referer") || "";
-  return referer.includes("/fr/") || referer.endsWith("/fr") ? "fr" : "en";
-}
 
 export const runtime = "nodejs";
 
@@ -64,108 +58,29 @@ export async function POST(request: Request) {
       );
     }
 
-    const existingUser = await prisma.user.findUnique({
-      where: { email },
-      select: { id: true },
-    });
-
-    const ip = clientIp(request);
-
-    let orderNumber = generateOrderNumber();
-    for (let i = 0; i < 3; i++) {
-      const exists = await prisma.order.findUnique({ where: { orderNumber } });
-      if (!exists) break;
-      orderNumber = generateOrderNumber();
-    }
-
-    const order = await prisma.order.create({
-      data: {
-        orderNumber,
-        email,
-        name: name || null,
-        userId: existingUser?.id ?? null,
-        status: "PENDING",
-        paymentMethod: provider,
-        paymentReference: reference ? sanitizeInput(reference) : null,
-        currency: priced.currency,
-        subtotalCents: priced.subtotalCents,
-        discountCents: priced.discountCents,
-        couponId: priced.couponId,
-        couponCode: priced.couponCode,
-        totalCents: priced.totalCents,
-        receiptToken: secureToken(),
-        ipAddress: ip,
-        items: {
-          create: priced.items.map((i) => ({
-            bookId: i.bookId,
-            titleSnapshot: i.title,
-            unitPriceCents: i.unitPriceCents,
-            quantity: i.quantity,
-          })),
-        },
-      },
-    });
-
-    // Mail is sent after the response so the buyer isn't kept waiting on SMTP,
-    // but it must be handed to after() rather than left as a floating promise:
-    // an un-awaited send can be cut off when the response ends, losing both the
-    // email and the invoiceEmailedAt write with nothing recorded anywhere.
-    const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
-    const locale = localeFromReferer(request);
-    const invoiceParams = {
-      to: order.email,
-      name: order.name,
-      orderNumber: order.orderNumber,
+    const lines = priced.items.map((i) => ({
+      bookId: i.bookId,
+      title: i.title,
+      unitPriceCents: i.unitPriceCents,
+      quantity: i.quantity,
+    }));
+    const order = await createOrderRecord({
+      email,
+      name,
       currency: priced.currency,
+      lines,
       subtotalCents: priced.subtotalCents,
       discountCents: priced.discountCents,
+      couponId: priced.couponId,
       couponCode: priced.couponCode,
       totalCents: priced.totalCents,
-      items: priced.items.map((i) => ({
-        title: i.title,
-        quantity: i.quantity,
-        unitPriceCents: i.unitPriceCents,
-        lineTotalCents: i.lineTotalCents,
-      })),
-      provider,
-      receiptUrl: `${appUrl}/${locale}/store/receipt/${order.receiptToken}`,
-    };
-
-    after(async () => {
-      try {
-        await sendOrderInvoiceEmail(invoiceParams);
-        await prisma.order.update({
-          where: { id: order.id },
-          data: { invoiceEmailedAt: new Date(), lastEmailError: null },
-        });
-      } catch (err) {
-        console.error("Invoice email failed:", err);
-        await prisma.order
-          .update({
-            where: { id: order.id },
-            data: { lastEmailError: String((err as Error)?.message || err).slice(0, 500) },
-          })
-          .catch(() => {});
-      }
-
-      // A manual payment is only money once the admin confirms it, so tell
-      // them an order is waiting. Never let this failure mask the invoice.
-      try {
-        await notifyAdminOfManualOrder({
-          orderNumber: order.orderNumber,
-          buyerEmail: order.email,
-          buyerName: order.name,
-          provider,
-          currency: priced.currency,
-          totalCents: priced.totalCents,
-          paymentReference: order.paymentReference,
-          items: invoiceParams.items,
-          adminUrl: `${appUrl}/${locale}/admin/store/orders`,
-        });
-      } catch (err) {
-        console.error("Admin new-order notification failed:", err);
-      }
+      paymentMethod: provider,
+      paymentReference: reference ? sanitizeInput(reference) : null,
+      ipAddress: clientIp(request),
     });
+
+    // Invoice to the buyer + "payment awaiting confirmation" to the admin.
+    notifyManualOrder(order, lines, provider, localeFromReferer(request));
 
     return NextResponse.json({ receiptToken: order.receiptToken });
   } catch (error) {

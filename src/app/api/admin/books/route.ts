@@ -26,7 +26,8 @@ export async function GET() {
 
     // Per-book performance from PAID orders + download activity.
     const paidItems = await prisma.orderItem.findMany({
-      where: { order: { status: "PAID" } },
+      // Book lines only; bookings and quote payments have no book.
+      where: { order: { status: "PAID" }, bookId: { not: null } },
       select: { bookId: true, quantity: true, unitPriceCents: true },
     });
     const grants = await prisma.downloadGrant.groupBy({
@@ -36,6 +37,7 @@ export async function GET() {
 
     const soldByBook = new Map<string, { units: number; revenueCents: number }>();
     for (const it of paidItems) {
+      if (!it.bookId) continue;
       const prev = soldByBook.get(it.bookId) || { units: 0, revenueCents: 0 };
       prev.units += it.quantity;
       prev.revenueCents += it.unitPriceCents * it.quantity;

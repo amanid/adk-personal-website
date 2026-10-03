@@ -162,10 +162,11 @@ export async function createDownloadGrants(
   const existing = await db.downloadGrant.count({ where: { orderId } });
   if (existing > 0) return;
 
-  const items = await db.orderItem.findMany({
-    where: { orderId },
-    select: { bookId: true },
-  });
+  // Only book lines carry a download; a booking or quote line has none.
+  const items = (
+    await db.orderItem.findMany({ where: { orderId, bookId: { not: null } }, select: { bookId: true } })
+  ).flatMap((i) => (i.bookId ? [{ bookId: i.bookId }] : []));
+  if (items.length === 0) return;
 
   const expiresAt = new Date(Date.now() + DOWNLOAD_EXPIRY_DAYS * 24 * 60 * 60 * 1000);
 

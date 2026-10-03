@@ -2,8 +2,6 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
-import { useRouter } from "@/i18n/routing";
-import { useCart } from "@/lib/cart-context";
 
 // Minimal typing for the PayPal Buttons SDK we use.
 interface PayPalButtonsConfig {
@@ -45,34 +43,42 @@ function loadPayPalSdk(clientId: string, currency: string): Promise<void> {
   return sdkPromise;
 }
 
+export interface StartedCheckout {
+  /** Our Order id. */
+  orderId: string;
+  paypalOrderId: string;
+}
+
 interface PayPalCheckoutProps {
-  email: string;
-  name: string;
   currency?: string;
-  couponCode?: string | null;
   disabled?: boolean;
   /** Return false to block starting a payment (e.g. invalid email). */
   onValidate?: () => boolean;
+  /**
+   * Create the pending Order and its PayPal order on the server. What is being
+   * bought (a cart, a booking, a quote deposit) is the caller's business; the
+   * server always prices it, never this component.
+   */
+  startCheckout: () => Promise<StartedCheckout>;
+  /** Called with the receipt token once the payment is captured and verified. */
+  onPaid: (receiptToken: string) => void;
 }
 
 export default function PayPalCheckout({
-  email,
-  name,
   currency = "USD",
-  couponCode,
   disabled = false,
   onValidate,
+  startCheckout,
+  onPaid,
 }: PayPalCheckoutProps) {
-  const { items, clear } = useCart();
-  const router = useRouter();
   const t = useTranslations("store");
   const containerRef = useRef<HTMLDivElement>(null);
   const [error, setError] = useState<string | null>(null);
   const [ready, setReady] = useState(false);
 
-  // Keep the latest values available to the SDK callbacks without re-rendering buttons.
-  const stateRef = useRef({ email, name, items, couponCode });
-  stateRef.current = { email, name, items, couponCode };
+  // Keep the latest callbacks available to the SDK without re-rendering buttons.
+  const callbacksRef = useRef({ startCheckout, onPaid, onValidate });
+  callbacksRef.current = { startCheckout, onPaid, onValidate };
 
   // Our internal order id captured during createOrder, used by onApprove.
   const orderIdRef = useRef<string | null>(null);
@@ -93,26 +99,18 @@ export default function PayPalCheckout({
             style: { layout: "vertical", color: "gold", shape: "rect", label: "paypal" },
             createOrder: async () => {
               setError(null);
-              if (onValidate && !onValidate()) {
+              const { onValidate: validate, startCheckout: start } = callbacksRef.current;
+              if (validate && !validate()) {
                 throw new Error(t("completeFields"));
               }
-              const res = await fetch("/api/store/checkout", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                  email: stateRef.current.email,
-                  name: stateRef.current.name,
-                  couponCode: stateRef.current.couponCode || undefined,
-                  items: stateRef.current.items.map((i) => ({
-                    bookId: i.bookId,
-                    quantity: i.quantity,
-                  })),
-                }),
-              });
-              const data = await res.json();
-              if (!res.ok) throw new Error(data.error || "Checkout failed");
-              orderIdRef.current = data.orderId as string;
-              return data.paypalOrderId as string;
+              try {
+                const started = await start();
+                orderIdRef.current = started.orderId;
+                return started.paypalOrderId;
+              } catch (e) {
+                setError(e instanceof Error ? e.message : t("paypalError"));
+                throw e;
+              }
             },
             onApprove: async (approval) => {
               const res = await fetch("/api/store/capture", {
@@ -128,8 +126,7 @@ export default function PayPalCheckout({
                 setError(data.error || t("paymentUnverified"));
                 return;
               }
-              clear();
-              router.push(`/store/receipt/${data.receiptToken}`);
+              callbacksRef.current.onPaid(data.receiptToken);
             },
             onError: (err) => {
               console.error("PayPal error:", err);

@@ -1,17 +1,12 @@
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
 import { freeOrderSchema } from "@/lib/validations";
-import { priceOrder, generateOrderNumber, secureToken } from "@/lib/store";
+import { priceOrder } from "@/lib/store";
+import { createOrderRecord, localeFromReferer } from "@/lib/orders";
 import { fulfilPaidOrder, CouponExhaustedError } from "@/lib/order-fulfillment";
 import { rateLimit, clientIp } from "@/lib/rate-limit";
 import { checkOrigin } from "@/lib/origin-check";
 
 export const runtime = "nodejs";
-
-function localeFromReferer(request: Request): "en" | "fr" {
-  const referer = request.headers.get("referer") || "";
-  return referer.includes("/fr/") || referer.endsWith("/fr") ? "fr" : "en";
-}
 
 /**
  * Claim a free order. The server recomputes prices from the DB and only
@@ -56,45 +51,23 @@ export async function POST(request: Request) {
       );
     }
 
-    const existingUser = await prisma.user.findUnique({
-      where: { email },
-      select: { id: true },
-    });
-
-    const ip = clientIp(request);
-
-    let orderNumber = generateOrderNumber();
-    for (let i = 0; i < 3; i++) {
-      const exists = await prisma.order.findUnique({ where: { orderNumber } });
-      if (!exists) break;
-      orderNumber = generateOrderNumber();
-    }
-
-    const order = await prisma.order.create({
-      data: {
-        orderNumber,
-        email,
-        name: name || null,
-        userId: existingUser?.id ?? null,
-        status: "PENDING",
-        paymentMethod: "FREE",
-        currency: priced.currency,
-        subtotalCents: priced.subtotalCents,
-        discountCents: priced.discountCents,
-        couponId: priced.couponId,
-        couponCode: priced.couponCode,
-        totalCents: 0,
-        receiptToken: secureToken(),
-        ipAddress: ip,
-        items: {
-          create: priced.items.map((i) => ({
-            bookId: i.bookId,
-            titleSnapshot: i.title,
-            unitPriceCents: i.unitPriceCents,
-            quantity: i.quantity,
-          })),
-        },
-      },
+    const order = await createOrderRecord({
+      email,
+      name,
+      currency: priced.currency,
+      lines: priced.items.map((i) => ({
+        bookId: i.bookId,
+        title: i.title,
+        unitPriceCents: i.unitPriceCents,
+        quantity: i.quantity,
+      })),
+      subtotalCents: priced.subtotalCents,
+      discountCents: priced.discountCents,
+      couponId: priced.couponId,
+      couponCode: priced.couponCode,
+      totalCents: 0,
+      paymentMethod: "FREE",
+      ipAddress: clientIp(request),
     });
 
     // No payment needed — fulfil immediately (grants + confirmation email).

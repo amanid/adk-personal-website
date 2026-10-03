@@ -459,6 +459,14 @@ enum BookStatus {
   ARCHIVED
 }
 
+/// What an Order pays for. Every sale on the site is an Order, so receipts,
+/// invoices, admin confirmation and analytics work for all of them.
+enum OrderKind {
+  STORE
+  BOOKING
+  QUOTE
+}
+
 enum OrderStatus {
   PENDING
   PAID
@@ -550,6 +558,7 @@ model Order {
   name             String?
   userId           String?
   status           OrderStatus     @default(PENDING)
+  kind             OrderKind       @default(STORE)
   paymentMethod    PaymentMethod   @default(PAYPAL)
   paymentReference String?
   currency         String          @default("USD")
@@ -575,17 +584,19 @@ model Order {
 
   @@index([email])
   @@index([status, createdAt])
+  @@index([kind, status])
 }
 
 model OrderItem {
-  id             String @id @default(cuid())
+  id             String  @id @default(cuid())
   orderId        String
-  bookId         String
+  /// Null for lines that aren't a download (a booking, a quote payment).
+  bookId         String?
   titleSnapshot  String
   unitPriceCents Int
   quantity       Int
-  order          Order  @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  book           Book   @relation(fields: [bookId], references: [id])
+  order          Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  book           Book?   @relation(fields: [bookId], references: [id], onDelete: Restrict)
 
   @@index([orderId])
   @@index([bookId])

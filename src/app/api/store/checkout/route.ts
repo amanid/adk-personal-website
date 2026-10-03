@@ -1,8 +1,7 @@
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
 import { checkoutSchema } from "@/lib/validations";
-import { priceOrder, generateOrderNumber, secureToken } from "@/lib/store";
-import { createPayPalOrder } from "@/lib/paypal";
+import { priceOrder } from "@/lib/store";
+import { createOrderRecord, startPayPalPayment } from "@/lib/orders";
 import { rateLimit, clientIp } from "@/lib/rate-limit";
 import { checkOrigin } from "@/lib/origin-check";
 
@@ -47,65 +46,28 @@ export async function POST(request: Request) {
       );
     }
 
-    // Link to an existing account if the email matches one (guest-friendly).
-    const existingUser = await prisma.user.findUnique({
-      where: { email },
-      select: { id: true },
-    });
-
-    const ip = clientIp(request);
-
-    // Create the pending order + items.
-    let orderNumber = generateOrderNumber();
-    // Extremely unlikely collision guard.
-    for (let i = 0; i < 3; i++) {
-      const exists = await prisma.order.findUnique({ where: { orderNumber } });
-      if (!exists) break;
-      orderNumber = generateOrderNumber();
-    }
-
-    const order = await prisma.order.create({
-      data: {
-        orderNumber,
-        email,
-        name: name || null,
-        userId: existingUser?.id ?? null,
-        status: "PENDING",
-        currency: priced.currency,
-        subtotalCents: priced.subtotalCents,
-        discountCents: priced.discountCents,
-        couponId: priced.couponId,
-        couponCode: priced.couponCode,
-        totalCents: priced.totalCents,
-        receiptToken: secureToken(),
-        ipAddress: ip,
-        items: {
-          create: priced.items.map((i) => ({
-            bookId: i.bookId,
-            titleSnapshot: i.title,
-            unitPriceCents: i.unitPriceCents,
-            quantity: i.quantity,
-          })),
-        },
-      },
-    });
-
-    // Create the matching PayPal order.
-    const paypalOrder = await createPayPalOrder({
-      amountCents: priced.totalCents,
+    const order = await createOrderRecord({
+      email,
+      name,
       currency: priced.currency,
-      referenceId: order.id,
-      description: `Order ${order.orderNumber}`,
+      lines: priced.items.map((i) => ({
+        bookId: i.bookId,
+        title: i.title,
+        unitPriceCents: i.unitPriceCents,
+        quantity: i.quantity,
+      })),
+      subtotalCents: priced.subtotalCents,
+      discountCents: priced.discountCents,
+      couponId: priced.couponId,
+      couponCode: priced.couponCode,
+      totalCents: priced.totalCents,
+      ipAddress: clientIp(request),
     });
-
-    await prisma.order.update({
-      where: { id: order.id },
-      data: { paypalOrderId: paypalOrder.id },
-    });
+    const { paypalOrderId } = await startPayPalPayment(order);
 
     return NextResponse.json({
       orderId: order.id,
-      paypalOrderId: paypalOrder.id,
+      paypalOrderId,
       totalCents: priced.totalCents,
       currency: priced.currency,
     });

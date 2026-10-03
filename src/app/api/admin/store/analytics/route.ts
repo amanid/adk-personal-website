@@ -33,7 +33,8 @@ export async function GET(request: NextRequest) {
       prisma.order.count({ where: { status: "FAILED" } }),
       prisma.order.count({ where: { status: "REFUNDED" } }),
       prisma.orderItem.findMany({
-        where: { order: { status: "PAID" } },
+        // Book lines only; bookings and quote payments have no book.
+        where: { order: { status: "PAID" }, bookId: { not: null } },
         select: {
           bookId: true,
           titleSnapshot: true,
@@ -68,6 +69,7 @@ export async function GET(request: NextRequest) {
     >();
     let unitsSold = 0;
     for (const it of paidItems) {
+      if (!it.bookId) continue;
       unitsSold += it.quantity;
       const cur = it.order.currency;
       const prev = byBook.get(it.bookId) || {

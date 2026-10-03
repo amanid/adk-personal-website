@@ -3,18 +3,19 @@
 import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { Copy, Check, ExternalLink, ShieldCheck } from "lucide-react";
-import { useRouter } from "@/i18n/routing";
-import { useCart } from "@/lib/cart-context";
 import { formatPrice } from "@/lib/utils";
 import { PAYPAL_ME_HANDLE, PAYPAL_RECEIVE_EMAIL, paypalMeLink } from "@/lib/paypal-direct";
 
 interface PayPalDirectCheckoutProps {
-  email: string;
-  name: string;
   amountCents: number;
   currency: string;
-  couponCode?: string | null;
   onValidate?: () => boolean;
+  /**
+   * Place the pending order on the server for this payment method and return
+   * its receipt token; throw an Error with a buyer-safe message on failure.
+   */
+  submitOrder: (provider: string, reference: string) => Promise<string>;
+  onPlaced: (receiptToken: string) => void;
 }
 
 /**
@@ -23,16 +24,13 @@ interface PayPalDirectCheckoutProps {
  * admin confirms the transfer — the same settlement model as mobile money.
  */
 export default function PayPalDirectCheckout({
-  email,
-  name,
   amountCents,
   currency,
-  couponCode,
   onValidate,
+  submitOrder,
+  onPlaced,
 }: PayPalDirectCheckoutProps) {
   const t = useTranslations("store");
-  const router = useRouter();
-  const { items, clear } = useCart();
   const [reference, setReference] = useState("");
   const [placing, setPlacing] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -56,27 +54,9 @@ export default function PayPalDirectCheckout({
     if (onValidate && !onValidate()) return;
     setPlacing(true);
     try {
-      const res = await fetch("/api/store/mobile-order", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          email,
-          name,
-          provider: "PAYPAL",
-          reference,
-          couponCode: couponCode || undefined,
-          items: items.map((i) => ({ bookId: i.bookId, quantity: i.quantity })),
-        }),
-      });
-      const data = await res.json().catch(() => null);
-      if (!res.ok || !data?.receiptToken) {
-        setError(data?.error || t("ppdError"));
-        return;
-      }
-      clear();
-      router.push(`/store/receipt/${data.receiptToken}`);
-    } catch {
-      setError(t("ppdError"));
+      onPlaced(await submitOrder("PAYPAL", reference));
+    } catch (e) {
+      setError(e instanceof Error && e.message ? e.message : t("ppdError"));
     } finally {
       setPlacing(false);
     }
