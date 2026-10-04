@@ -24,6 +24,7 @@ import {
 import FileUpload from "@/components/admin/FileUpload";
 import BookFileUpload, { type BookUploadResult } from "@/components/admin/BookFileUpload";
 import ExtractionReport, { type ExtractionState } from "@/components/admin/ExtractionReport";
+import { uploadInPieces } from "@/lib/chunked-upload";
 import { applyDraft, applyFacts, type Draft, type FileFacts, type FoundCover, type ListingForm } from "@/lib/listing-fill";
 import { formatPrice } from "@/lib/utils";
 import { readJson } from "@/lib/api-response";
@@ -543,16 +544,35 @@ export default function AdminStorePage() {
     setBulkBusy(true);
     setBulkResult(null);
     try {
-      const fd = new FormData();
-      Array.from(fileList).forEach((f) => fd.append("files", f));
-      const res = await fetch("/api/admin/books/bulk", { method: "POST", body: fd });
+      // Upload each file in verified 4MB pieces first, then create the drafts.
+      const files = Array.from(fileList);
+      const uploaded: { fileId: string; fileName: string }[] = [];
+      const uploadFailures: string[] = [];
+      for (const [i, f] of files.entries()) {
+        try {
+          const u = await uploadInPieces(f, (fraction, step) =>
+            setBulkResult(`Uploading ${i + 1} of ${files.length}: ${f.name} — ${step} (${Math.round(fraction * 100)}%)`)
+          );
+          uploaded.push({ fileId: u.fileId, fileName: u.fileName });
+        } catch (err) {
+          uploadFailures.push(`✗ ${f.name} — ${err instanceof Error ? err.message : "upload failed"}`);
+        }
+      }
+      if (!uploaded.length) throw new Error(`Nothing was uploaded.\n${uploadFailures.join("\n")}`);
+      setBulkResult(`Reading ${uploaded.length} file${uploaded.length === 1 ? "" : "s"}…`);
+      const res = await fetch("/api/admin/books/bulk", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ files: uploaded }),
+      });
       const data = await readJson<{
         created?: { id: string; title: string; notes?: string[] }[];
         failed?: { name: string; error: string }[];
         aiAvailable?: boolean;
       }>(res, "Import failed");
       const okCount = data.created?.length || 0;
-      const failCount = data.failed?.length || 0;
+      const allFailed = [...uploadFailures, ...(data.failed ?? []).map((f) => `✗ ${f.name} — ${f.error}`)];
+      const failCount = allFailed.length;
       setBulkResult(
         `Imported ${okCount} book${okCount === 1 ? "" : "s"} as drafts, with title, author, year, pages, ISBN, ` +
           `language and cover read from each file.` +
@@ -560,7 +580,7 @@ export default function AdminStorePage() {
             .filter((c) => c.notes?.length)
             .map((c) => `\n! ${c.title}: ${c.notes!.join("; ")}`)
             .join("") +
-          (failCount ? `\n${failCount} failed:\n${data.failed!.map((f) => `✗ ${f.name} — ${f.error}`).join("\n")}` : "")
+          (failCount ? `\n${failCount} failed:\n${allFailed.join("\n")}` : "")
       );
       fetchBooks();
       // Then draft each new book's description and insights from its text,

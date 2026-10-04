@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { findAsset, streamAsset } from "@/lib/asset-store";
 import { rateLimit } from "@/lib/rate-limit";
 
 export const runtime = "nodejs";
@@ -47,7 +48,7 @@ export async function GET(
     });
     if (!book?.fileId) return notFound();
 
-    const asset = await prisma.bookAsset.findUnique({ where: { id: book.fileId } });
+    const asset = await findAsset(book.fileId);
     if (!asset) return notFound();
 
     // Atomically count the download (guard against exceeding the limit under races).
@@ -64,12 +65,12 @@ export async function GET(
       "_"
     );
 
-    // Stream the Buffer straight through (no extra Uint8Array copy).
-    return new NextResponse(asset.data, {
+    // Streamed piece by piece: a 50MB book never sits whole in memory.
+    return new NextResponse(streamAsset(asset), {
       headers: {
         "Content-Type": asset.mimeType || book.fileMimeType || "application/octet-stream",
         "Content-Disposition": `attachment; filename="${safeName}"`,
-        "Content-Length": String(asset.size || asset.data.length),
+        "Content-Length": String(asset.size),
         "Cache-Control": "private, no-store, max-age=0",
         "X-Content-Type-Options": "nosniff",
       },

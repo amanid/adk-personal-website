@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { findAsset, streamAsset } from "@/lib/asset-store";
 import { apiError, apiOptions, authenticateApi } from "@/lib/data-api";
 
 export const runtime = "nodejs";
@@ -16,10 +17,10 @@ export async function GET(request: Request, { params }: { params: Promise<{ slug
   const { slug } = await params;
   const b = await prisma.book.findFirst({ where: { slug, kind: "DATASET", status: "PUBLISHED" }, select: { fileId: true, fileName: true, slug: true } });
   if (!b?.fileId) return apiError(404, "not_found", "No dataset with that slug.");
-  const asset = await prisma.bookAsset.findUnique({ where: { id: b.fileId } });
+  const asset = await findAsset(b.fileId);
   if (!asset) return apiError(404, "not_found", "No dataset with that slug.");
   const name = (b.fileName || asset.filename).replace(/[^\w.\- ]/g, "_");
-  return new NextResponse(asset.data, {
+  return new NextResponse(streamAsset(asset), {
     headers: {
       "Content-Type": asset.mimeType,
       "Content-Disposition": `attachment; filename="${name}"`,

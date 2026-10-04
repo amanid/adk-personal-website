@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/admin-guard";
 import { analyseDocument } from "@/lib/doc-facts";
 import { storeDocumentCover } from "@/lib/book-analysis";
+import { findAsset, readAsset } from "@/lib/asset-store";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
@@ -20,12 +20,12 @@ export async function POST(request: Request) {
     const body = await request.json().catch(() => ({}));
     const fileId = typeof body?.fileId === "string" ? body.fileId : null;
     if (!fileId) return NextResponse.json({ error: "No file given" }, { status: 400 });
-    const asset = await prisma.bookAsset.findUnique({ where: { id: fileId } });
+    const asset = await findAsset(fileId);
     if (!asset) return NextResponse.json({ error: "File not found" }, { status: 404 });
 
     // The bytes are ours alone and unused afterwards, so pdf.js may take them
     // over rather than copy a file of up to 50MB.
-    const result = await analyseDocument(asset.data, asset.filename, asset.mimeType, { consume: true });
+    const result = await analyseDocument(await readAsset(asset), asset.filename, asset.mimeType, { consume: true });
 
     let cover: Awaited<ReturnType<typeof storeDocumentCover>> | null = null;
     if (body?.wantCover === true && result.cover) {

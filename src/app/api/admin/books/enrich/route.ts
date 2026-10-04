@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/admin-guard";
 import { draftListing, isAiEnrichConfigured } from "@/lib/ai-enrich";
 import { catalogueCategories, draftSource } from "@/lib/book-analysis";
+import { findAsset, readAsset } from "@/lib/asset-store";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
@@ -25,10 +25,10 @@ export async function POST(request: Request) {
     const body = await request.json().catch(() => ({}));
     const fileId = str(body?.fileId);
     if (!fileId) return NextResponse.json({ error: "Upload the book file first, then draft with AI." }, { status: 400 });
-    const asset = await prisma.bookAsset.findUnique({ where: { id: fileId } });
+    const asset = await findAsset(fileId);
     if (!asset) return NextResponse.json({ error: "Book file not found" }, { status: 404 });
 
-    const [source, categories] = await Promise.all([draftSource(asset.data, asset.filename, asset.mimeType), catalogueCategories()]);
+    const [source, categories] = await Promise.all([draftSource(await readAsset(asset), asset.filename, asset.mimeType), catalogueCategories()]);
     const draft = await draftListing({
       title: str(body?.title),
       subtitle: str(body?.subtitle),

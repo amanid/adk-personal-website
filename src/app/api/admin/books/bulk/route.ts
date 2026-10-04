@@ -1,21 +1,14 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { randomUUID } from "crypto";
-import { analyseDocument } from "@/lib/doc-facts";
+import { analyseDocument, docKind } from "@/lib/doc-facts";
+import { findAsset, readAsset } from "@/lib/asset-store";
 import { storeDocumentCover } from "@/lib/book-analysis";
 import { isAiEnrichConfigured } from "@/lib/ai-enrich";
 import { sanitizeInput } from "@/lib/sanitize";
 
 const DEFAULT_PRICE_CENTS = 5000; // $50
 
-const ALLOWED_EXTENSIONS: Record<string, string> = {
-  pdf: "application/pdf",
-  epub: "application/epub+zip",
-  docx: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-  pptx: "application/vnd.openxmlformats-officedocument.presentationml.presentation",
-};
-const MAX_SIZE = 50 * 1024 * 1024; // 50MB per file
 const MAX_FILES = 20;
 
 export const runtime = "nodejs";
@@ -51,8 +44,9 @@ async function uniqueSlug(base: string): Promise<string> {
 }
 
 /**
- * Bulk-import one or many PDF/EPUB files. Each file is read for its facts and
- * cover (no AI, so this stays fast) and a DRAFT book is created. The editor
+ * Create DRAFT books from files already uploaded in pieces (the same upload
+ * as the editor's). Body: { files: [{ fileId, fileName }] }. Each file is
+ * read for its facts and cover (no AI, so this stays fast). The editor
  * then runs the grounded AI draft per book (/api/admin/books/[id]/enrich),
  * one request each, so no single request outlives the proxy timeout.
  */
@@ -63,8 +57,11 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const formData = await request.formData();
-    const files = formData.getAll("files").filter((f): f is File => f instanceof File);
+    const body = await request.json().catch(() => null);
+    const files = (Array.isArray(body?.files) ? body.files : [])
+      .filter((f: unknown): f is { fileId: string; fileName: string } =>
+        typeof (f as { fileId?: unknown })?.fileId === "string" && typeof (f as { fileName?: unknown })?.fileName === "string")
+      .map((f: { fileId: string; fileName: string }) => ({ fileId: f.fileId, name: f.fileName.slice(0, 255) }));
 
     if (files.length === 0) {
       return NextResponse.json({ error: "No files provided" }, { status: 400 });
@@ -89,31 +86,18 @@ export async function POST(request: Request) {
         continue;
       }
 
-      const ext = file.name.split(".").pop()?.toLowerCase() || "";
-      // The stored type comes from the extension, never from the browser.
-      const mimeType = ALLOWED_EXTENSIONS[ext];
-      if (!mimeType) {
-        failed.push({ name: file.name, error: "Unsupported type (PDF, EPUB, Word or PowerPoint only)" });
-        continue;
-      }
-      if (file.size > MAX_SIZE) {
-        failed.push({ name: file.name, error: "File too large (max 50MB)" });
-        continue;
-      }
-
       try {
-        const buffer = Buffer.from(await file.arrayBuffer());
+        const asset = await findAsset(file.fileId);
+        if (!asset) {
+          failed.push({ name: file.name, error: "The uploaded file was not found — upload it again." });
+          continue;
+        }
+        if (docKind(asset.filename, asset.mimeType) === "other") {
+          failed.push({ name: file.name, error: "Unsupported type (PDF, EPUB, Word or PowerPoint only)" });
+          continue;
+        }
 
-        const asset = await prisma.bookAsset.create({
-          data: {
-            filename: `${randomUUID()}.${ext}`,
-            mimeType,
-            size: file.size,
-            data: buffer,
-          },
-        });
-
-        const { facts, cover } = await analyseDocument(buffer, file.name, mimeType);
+        const { facts, cover } = await analyseDocument(await readAsset(asset), asset.filename, asset.mimeType, { consume: true });
         let coverImageId: string | null = null;
         if (cover) {
           const stored = await storeDocumentCover(cover);

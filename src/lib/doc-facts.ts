@@ -299,7 +299,13 @@ async function analysePdf(buffer: Uint8Array, filename: string, renderCover: (pa
       };
       let cover = await safeRender(1);
       if (!cover && total > 1) cover = await safeRender(2);
-      if (!cover) facts.notes.push("The first pages could not be turned into a cover image. Upload a cover.");
+      if (!cover) {
+        facts.notes.push(
+          (pages.get(1)?.length ?? 0) > 0
+            ? "The first page has text but draws blank here — its fonts aren't embedded in the PDF. Upload a cover image (or export the PDF with fonts embedded)."
+            : "The first pages could not be turned into a cover image. Upload a cover."
+        );
+      }
       return { facts, cover, text };
     } finally {
       await pdf.destroy();

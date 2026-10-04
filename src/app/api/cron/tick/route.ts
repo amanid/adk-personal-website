@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { checkCronAuth } from "@/lib/cron-auth";
 import { runSalesAutomation } from "@/lib/sales-emails";
 import { retryDueWebhooks } from "@/lib/webhooks";
+import { purgeAbandonedUploads } from "@/lib/asset-store";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -11,12 +12,13 @@ export const dynamic = "force-dynamic";
  * minutes with `Authorization: Bearer <CRON_SECRET>`:
  *   - sales emails (reminders, follow-ups)
  *   - webhook retries
+ *   - removing book uploads started but never finished (over a day old)
  */
 async function handle(request: Request) {
   const denied = checkCronAuth(request);
   if (denied) return denied;
-  const [sales, webhooks] = await Promise.all([runSalesAutomation(), retryDueWebhooks()]);
-  return NextResponse.json({ sales, webhooks });
+  const [sales, webhooks, abandonedUploads] = await Promise.all([runSalesAutomation(), retryDueWebhooks(), purgeAbandonedUploads()]);
+  return NextResponse.json({ sales, webhooks, abandonedUploads });
 }
 
 export const GET = handle;

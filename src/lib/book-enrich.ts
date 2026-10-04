@@ -9,6 +9,7 @@
 import { prisma } from "./prisma";
 import { draftListing, isAiEnrichConfigured } from "./ai-enrich";
 import { catalogueCategories, draftSource } from "./book-analysis";
+import { findAsset, readAsset } from "./asset-store";
 import { sanitizeInput } from "./sanitize";
 
 export type EnrichOutcome =
@@ -55,10 +56,10 @@ export async function enrichBookById(
     return { status: "skipped", reason: "No book file to read — upload a PDF or EPUB first." };
   }
 
-  const asset = await prisma.bookAsset.findUnique({ where: { id: book.fileId } });
+  const asset = await findAsset(book.fileId);
   if (!asset) return { status: "skipped", reason: "The book's file is missing." };
 
-  const [source, categories] = await Promise.all([draftSource(asset.data, asset.filename, asset.mimeType), catalogueCategories()]);
+  const [source, categories] = await Promise.all([draftSource(await readAsset(asset), asset.filename, asset.mimeType), catalogueCategories()]);
   if (!source.text.trim()) {
     return { status: "skipped", reason: "No readable text in the file (a scanned PDF?)." };
   }

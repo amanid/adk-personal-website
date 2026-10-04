@@ -2,7 +2,7 @@
 
 import { useRef, useState } from "react";
 import { Upload, FileText, X } from "lucide-react";
-import { readJson } from "@/lib/api-response";
+import { uploadInPieces } from "@/lib/chunked-upload";
 
 export interface BookUploadResult {
   fileId: string;
@@ -30,6 +30,7 @@ export default function BookFileUpload({
   const [uploading, setUploading] = useState(false);
   const [fileName, setFileName] = useState<string | null>(currentFileName || null);
   const [error, setError] = useState<string | null>(null);
+  const [progress, setProgress] = useState<{ fraction: number; step: string } | null>(null);
 
   // Reject oversized files before spending minutes uploading bytes the server
   // will refuse anyway.
@@ -46,33 +47,23 @@ export default function BookFileUpload({
     }
 
     setUploading(true);
+    setProgress(null);
     try {
-      const formData = new FormData();
-      formData.append("file", file);
-
-      let res: Response;
-      try {
-        res = await fetch("/api/admin/books/upload", { method: "POST", body: formData });
-      } catch {
-        // fetch() itself rejected: the connection dropped mid-upload.
-        throw new Error(
-          "The connection dropped while uploading. Check your network and try again."
-        );
-      }
-
-      const data = await readJson<BookUploadResult>(res, "Upload failed");
+      // In 4MB pieces, each verified: no request ever carries the whole file.
+      const data = await uploadInPieces(file, (fraction, step) => setProgress({ fraction, step }));
       setFileName(data.fileName);
       onUpload({
         fileId: data.fileId,
         fileName: data.fileName,
         fileMimeType: data.fileMimeType,
-        analysable: data.analysable ?? false,
-        aiAvailable: data.aiAvailable ?? false,
+        analysable: data.analysable,
+        aiAvailable: data.aiAvailable,
       });
     } catch (err) {
       setError(err instanceof Error ? err.message : "Upload failed");
     } finally {
       setUploading(false);
+      setProgress(null);
     }
   };
 
@@ -98,7 +89,12 @@ export default function BookFileUpload({
         {uploading ? (
           <div className="flex flex-col items-center gap-2">
             <div className="w-8 h-8 border-2 border-gold border-t-transparent rounded-full animate-spin" />
-            <span className="text-sm text-text-secondary">Uploading…</span>
+            <span className="text-sm text-text-secondary">{progress?.step ?? "Uploading…"}</span>
+            {progress && (
+              <div className="w-full max-w-xs h-1.5 rounded-full bg-glass-border/60" role="progressbar" aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(progress.fraction * 100)}>
+                <div className="h-1.5 rounded-full bg-gold transition-all" style={{ width: `${Math.round(progress.fraction * 100)}%` }} />
+              </div>
+            )}
           </div>
         ) : fileName ? (
           <div className="flex items-center gap-3">

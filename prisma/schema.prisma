@@ -569,12 +569,31 @@ model Book {
 }
 
 model BookAsset {
-  id        String   @id @default(cuid())
+  id        String          @id @default(cuid())
   filename  String
   mimeType  String
   size      Int
-  data      Bytes
-  createdAt DateTime @default(now())
+  /// The whole file, for files stored in one piece (older uploads).
+  data      Bytes?
+  /// Number of 4MB pieces in BookAssetPart (0 = stored whole in `data`).
+  /// Large files are uploaded and stored in pieces so no request ever holds
+  /// the whole file in memory.
+  parts     Int             @default(0)
+  /// False while a piecewise upload is still arriving; never served then.
+  complete  Boolean         @default(true)
+  createdAt DateTime        @default(now())
+  pieces    BookAssetPart[]
+
+  @@index([complete, createdAt])
+}
+
+model BookAssetPart {
+  assetId String
+  index   Int
+  data    Bytes
+  asset   BookAsset @relation(fields: [assetId], references: [id], onDelete: Cascade)
+
+  @@id([assetId, index])
 }
 
 model Order {
