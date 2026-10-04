@@ -41,6 +41,13 @@ const nextConfig: NextConfig = {
   // Keep these server-only parsers/image libs out of the bundle
   // (pdfjs/zip internals + native sharp/canvas binaries).
   serverExternalPackages: ["unpdf", "pdf-lib", "jszip", "sharp", "@napi-rs/canvas"],
+  experimental: {
+    // /api/admin requests pass through the middleware's admin gate, which
+    // buffers the body and by default cuts it off at 10MB, breaking every
+    // larger book upload ("Failed to parse body as FormData"). Cloudflare
+    // already caps request bodies at 100MB, so match that.
+    proxyClientMaxBodySize: "100mb",
+  },
   images: {
     remotePatterns: [
       { protocol: "https", hostname: "lh3.googleusercontent.com" },
