@@ -23,6 +23,8 @@ import {
 } from "lucide-react";
 import FileUpload from "@/components/admin/FileUpload";
 import BookFileUpload, { type BookUploadResult } from "@/components/admin/BookFileUpload";
+import ExtractionReport, { type ExtractionState } from "@/components/admin/ExtractionReport";
+import { applyDraft, applyFacts, type Draft, type FileFacts, type FoundCover, type ListingForm } from "@/lib/listing-fill";
 import { formatPrice } from "@/lib/utils";
 import { readJson } from "@/lib/api-response";
 import { majorToMinor, minorToMajor, SUPPORTED_CURRENCIES } from "@/lib/currency";
@@ -145,7 +147,16 @@ export default function AdminStorePage() {
   const [aiBusy, setAiBusy] = useState(false);
   const [aiError, setAiError] = useState<string | null>(null);
   // What a file replacement changed, so the refresh isn't silent.
-  const [refreshNote, setRefreshNote] = useState<string | null>(null);
+  const [extraction, setExtraction] = useState<ExtractionState | null>(null);
+  // The latest form, for the multi-step upload flow (it outlives renders).
+  const formRef = useRef(form);
+  useEffect(() => {
+    formRef.current = form;
+  });
+  // Fields the admin set by hand in this editor session; the file never overrides them.
+  const touched = useRef(new Set<keyof ListingForm>());
+  // Bumped whenever the editor opens, so a slow read from an earlier file is ignored.
+  const extractionRun = useRef(0);
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [confirmDialog, setConfirmDialog] = useState<null | {
     title: string;
@@ -222,7 +233,9 @@ export default function AdminStorePage() {
     setForm(emptyForm);
     setError(null);
     setAiError(null);
-    setRefreshNote(null);
+    setExtraction(null);
+    touched.current = new Set();
+    extractionRun.current++;
     setShowEditor(true);
   };
 
@@ -262,7 +275,9 @@ export default function AdminStorePage() {
     });
     setError(null);
     setAiError(null);
-    setRefreshNote(null);
+    setExtraction(null);
+    touched.current = new Set();
+    extractionRun.current++;
     setShowEditor(true);
   };
 
@@ -332,216 +347,143 @@ export default function AdminStorePage() {
   };
 
   /**
-   * Apply an uploaded file to the editor.
+   * After an upload: read the file (facts + cover, no AI), then draft the
+   * listing prose with AI — each a separate request, so a big file never
+   * runs one request past the proxy's timeout.
    *
-   * A first upload fills whatever is still empty. Replacing the file of a book
-   * that already has one is different: page count, cover, ISBN, language and
-   * year describe the FILE, so once the file changes the old values are simply
-   * wrong — and they are shown to buyers on the storefront. Those are refreshed
-   * unconditionally, and the listing prose is redrafted from the new text.
-   *
-   * The title and subtitle are deliberately left alone. They are the most
-   * curated fields, and a PDF's embedded title is frequently junk
-   * ("Microsoft Word - final_v3"), so replacing a file must not rename a book.
-   *
-   * Nothing here is persisted until Save, so an unwanted refresh is undone by
-   * closing the editor.
+   * Nothing the admin typed is overwritten: a value from the file that
+   * differs is shown in the report as "Kept yours". Replacing the file is the
+   * exception for facts that describe the file itself (pages, ISBN, language,
+   * year, cover) and for the prose, which would otherwise describe a file
+   * that is gone. Title and subtitle are never replaced. Nothing is saved
+   * until Save.
    */
-  const handleBookFileUpload = (result: BookUploadResult) => {
-    // Derived from the current form rather than inside the setForm updater:
-    // React may run an updater twice, which would double-count the changes.
-    const prev = form;
-    const isReplacement = Boolean(prev.fileId);
-    const m = result.metadata;
-    const changed: string[] = [];
+  const handleBookFileUpload = async (result: BookUploadResult) => {
+    const start = formRef.current;
+    const isReplacement = Boolean(start.fileId);
+    const withFile = { ...start, fileId: result.fileId, fileName: result.fileName, fileMimeType: result.fileMimeType };
+    setForm(withFile);
+    formRef.current = withFile;
+    if (!result.analysable) {
+      setExtraction(null);
+      return;
+    }
+    const run = ++extractionRun.current;
+    const fromFile = new Set<keyof ListingForm>();
+    const state: ExtractionState = { phase: "reading", rows: [], missing: [], notes: [], removed: [], droppedTranslations: [], figuresChecked: 0 };
+    setExtraction({ ...state });
 
-    const next = {
-      ...prev,
-      fileId: result.fileId,
-      fileName: result.fileName,
-      fileMimeType: result.fileMimeType,
-    };
-
-    if (m) {
-      if (!prev.title.trim() && m.title) next.title = m.title;
-      if (!prev.description.trim() && m.description) next.description = m.description;
-
-      // File-derived facts: follow the file on a replacement.
-      if (m.isbn && (isReplacement || !prev.isbn.trim())) {
-        if (isReplacement && m.isbn !== prev.isbn) changed.push(`ISBN ${m.isbn}`);
-        next.isbn = m.isbn;
-      }
-      if (m.publicationYear) next.publicationYear = m.publicationYear;
-      if (m.pageCount && (isReplacement || !prev.pageCount)) {
-        if (isReplacement && m.pageCount !== prev.pageCount) {
-          changed.push(`${m.pageCount.toLocaleString()} pages`);
-        }
-        next.pageCount = m.pageCount;
-      }
-      if (
-        m.language &&
-        (isReplacement || !prev.language.trim() || prev.language === "English")
-      ) {
-        if (isReplacement && m.language !== prev.language) changed.push(m.language);
-        next.language = m.language;
-      }
-
-      if (!prev.keyInsights.trim() && m.keyInsights?.length)
-        next.keyInsights = m.keyInsights.join("\n");
-      if (!prev.category.trim() && m.category) next.category = m.category;
-      if (!prev.tags.trim() && m.tags?.length) next.tags = m.tags.join(", ");
+    // 1. Facts and cover, read from the file itself.
+    try {
+      const res = await fetch("/api/admin/books/analyse", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ fileId: result.fileId, wantCover: isReplacement || !start.coverImageId }),
+      });
+      const data = await readJson<{ facts: FileFacts; cover: FoundCover | null }>(res, "Reading the file failed");
+      if (run !== extractionRun.current) return;
+      const protect = new Set<keyof ListingForm>(editingId ? (Object.keys(start) as (keyof ListingForm)[]) : touched.current);
+      const applied = applyFacts(formRef.current, data.facts, data.cover, { isReplacement, protect });
+      setForm({ ...formRef.current, ...applied.form });
+      formRef.current = { ...formRef.current, ...applied.form };
+      state.rows = applied.rows;
+      state.missing = applied.missing;
+      applied.filled.forEach((k) => fromFile.add(k));
+      state.notes = data.facts.notes;
+    } catch (err) {
+      state.error = `${err instanceof Error ? err.message : "Reading the file failed"} — the file itself uploaded fine; fill the fields by hand.`;
     }
 
-    // A new file means a new first page, so the old rasterised cover no longer
-    // represents it.
-    if (result.coverImageId && (isReplacement || !prev.coverImageId)) {
-      if (isReplacement && result.coverImageId !== prev.coverImageId) changed.push("cover");
-      next.coverImageId = result.coverImageId;
+    // 2. The prose, drafted from the text and checked against it.
+    if (result.aiAvailable) {
+      state.phase = "drafting";
+      setExtraction({ ...state });
+      const draft = await requestDraft(formRef.current);
+      if (run !== extractionRun.current) return;
+      if ("error" in draft) state.aiError = `${draft.error} The facts above are unaffected.`;
+      else {
+        const applied = applyDraft(formRef.current, draft, { replace: isReplacement, fromFile });
+        setForm({ ...formRef.current, ...applied.form });
+        formRef.current = { ...formRef.current, ...applied.form };
+        state.rows = [...state.rows, ...applied.rows];
+        state.removed = [...draft.report.removedSentences, ...draft.report.droppedInsights];
+        state.droppedTranslations = draft.report.droppedTranslations;
+        state.figuresChecked = draft.report.figuresChecked;
+      }
     }
-
-    setForm(next);
-    setRefreshNote(
-      isReplacement
-        ? changed.length
-          ? `Updated from the new file: ${changed.join(", ")}.` +
-            (result.aiPending ? " Redrafting the listing…" : "")
-          : "File replaced. Nothing else changed."
-        : null
-    );
-
-    // AI drafting is a SEPARATE request on purpose. Doing it inside the upload
-    // used to push that one request past the proxy's origin timeout on a big
-    // PDF, and the browser got an HTML error page instead of JSON.
-    if (result.aiPending) {
-      void autoDraftWithAI(result, { overwrite: isReplacement });
-    }
+    state.phase = "done";
+    setExtraction({ ...state });
   };
 
-  /**
-   * Draft the description / insights / category / tags from AI right after an
-   * upload. Never blocks the editor if it fails.
-   *
-   * `overwrite` is set when replacing an existing book's file: the prose
-   * describes content that has just changed, so leaving the old text in place
-   * would leave the listing describing a file that is no longer there.
-   */
-  const autoDraftWithAI = async (
-    result: BookUploadResult,
-    { overwrite = false }: { overwrite?: boolean } = {}
-  ) => {
-    setAiBusy(true);
-    setAiError(null);
+  const requestDraft = async (f: typeof emptyForm): Promise<Draft | { error: string }> => {
     try {
       const res = await fetch("/api/admin/books/enrich", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          fileId: result.fileId,
-          title: result.metadata?.title,
-          author: result.metadata?.author,
+          fileId: f.fileId,
+          title: f.title,
+          subtitle: f.subtitle,
+          titleFr: f.titleFr,
+          subtitleFr: f.subtitleFr,
+          author: f.author,
+          description: f.description,
         }),
       });
-      const data = await readJson<{
-        description?: string;
-        keyInsights?: string[];
-        category?: string;
-        tags?: string[];
-      }>(res, "AI drafting failed");
-
-      const take = (hasValue: boolean) => overwrite || !hasValue;
-      setForm((prev) => ({
-        ...prev,
-        description:
-          data.description && take(Boolean(prev.description.trim()))
-            ? data.description
-            : prev.description,
-        keyInsights:
-          data.keyInsights?.length && take(Boolean(prev.keyInsights.trim()))
-            ? data.keyInsights.join("\n")
-            : prev.keyInsights,
-        category:
-          data.category && take(Boolean(prev.category.trim())) ? data.category : prev.category,
-        tags:
-          data.tags?.length && take(Boolean(prev.tags.trim()))
-            ? data.tags.join(", ")
-            : prev.tags,
-      }));
-      if (overwrite) {
-        setRefreshNote((note) =>
-          note
-            ? note.replace("Redrafting the listing…", "Listing redrafted from the new file.")
-            : "Listing redrafted from the new file."
-        );
-      }
+      return await readJson<Draft>(res, "AI drafting failed");
     } catch (err) {
-      // The file is already saved; a failed draft is not a failed upload.
-      setAiError(
-        `${err instanceof Error ? err.message : "AI drafting failed"} — the file uploaded fine; ` +
-          `write the description yourself or press "Draft with AI".`
-      );
-    } finally {
-      setAiBusy(false);
+      return { error: err instanceof Error ? err.message : "AI drafting failed" };
     }
   };
 
   const handleDraftWithAI = async () => {
-    if (!form.fileId) {
+    const f = formRef.current;
+    if (!f.fileId) {
       setAiError("Upload the book file first, then draft with AI.");
       return;
     }
     if (
-      (form.description.trim() || form.keyInsights.trim()) &&
-      !confirm("Replace the current description and key insights with an AI draft?")
+      (f.description.trim() || f.keyInsights.trim() || f.descriptionFr.trim() || f.keyInsightsFr.trim()) &&
+      !confirm("Replace the current description and key insights (English and French) with an AI draft checked against the file?")
     ) {
       return;
     }
     setAiBusy(true);
     setAiError(null);
-    try {
-      const res = await fetch("/api/admin/books/enrich", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          fileId: form.fileId,
-          title: form.title,
-          author: form.author,
-          description: form.description,
-        }),
-      });
-      const data = await readJson<{
-        description?: string;
-        keyInsights?: string[];
-        category?: string;
-        tags?: string[];
-      }>(res, "AI drafting failed");
-      setForm((prev) => ({
-        ...prev,
-        description: data.description || prev.description,
-        keyInsights: data.keyInsights?.length
-          ? data.keyInsights.join("\n")
-          : prev.keyInsights,
-        category: !prev.category.trim() && data.category ? data.category : prev.category,
-        tags:
-          !prev.tags.trim() && data.tags?.length ? data.tags.join(", ") : prev.tags,
-      }));
-    } catch (err) {
-      setAiError(err instanceof Error ? err.message : "AI drafting failed");
-    } finally {
-      setAiBusy(false);
+    const draft = await requestDraft(f);
+    setAiBusy(false);
+    if ("error" in draft) {
+      setAiError(draft.error);
+      return;
     }
+    // Replace the prose; category and tags only when empty.
+    const before = formRef.current;
+    const applied = applyDraft(before, draft, { replace: true });
+    const keepCategory = Boolean(before.category.trim());
+    const keepTags = Boolean(before.tags.trim());
+    const next = {
+      ...before,
+      ...applied.form,
+      category: keepCategory ? before.category : applied.form.category,
+      tags: keepTags ? before.tags : applied.form.tags,
+    };
+    setForm(next);
+    formRef.current = next;
+    setExtraction({
+      phase: "done",
+      rows: applied.rows.map((r) =>
+        (r.field === "Category" && keepCategory) || (r.field === "Tags" && keepTags) ? { ...r, status: "kept" as const } : r
+      ),
+      missing: [],
+      notes: [],
+      removed: [...draft.report.removedSentences, ...draft.report.droppedInsights],
+      droppedTranslations: draft.report.droppedTranslations,
+      figuresChecked: draft.report.figuresChecked,
+    });
   };
 
-  /**
-   * Draft catalogue copy for every book, one request per book.
-   *
-   * Sequential on purpose: each book means extracting its text and waiting on
-   * the model, so a single request for the whole catalogue would run past the
-   * proxy's ~100s limit and come back as an HTML error page. Doing one at a
-   * time also keeps it resumable — stopping or a failure part-way leaves every
-   * book already processed saved.
-   */
-  const runBulkEnrich = async (overwrite: boolean) => {
-    const targets = books.map((b) => ({ id: b.id, title: b.title }));
+  const runBulkEnrich = async (overwrite: boolean, only?: { id: string; title: string }[]) => {
+    const targets = only ?? books.map((b) => ({ id: b.id, title: b.title }));
     if (targets.length === 0) return;
 
     cancelEnrich.current = false;
@@ -604,18 +546,29 @@ export default function AdminStorePage() {
       const fd = new FormData();
       Array.from(fileList).forEach((f) => fd.append("files", f));
       const res = await fetch("/api/admin/books/bulk", { method: "POST", body: fd });
-      const data = await readJson<{ created?: unknown[]; failed?: unknown[] }>(
-        res,
-        "Import failed"
-      );
+      const data = await readJson<{
+        created?: { id: string; title: string; notes?: string[] }[];
+        failed?: { name: string; error: string }[];
+        aiAvailable?: boolean;
+      }>(res, "Import failed");
       const okCount = data.created?.length || 0;
       const failCount = data.failed?.length || 0;
       setBulkResult(
-        `Imported ${okCount} book${okCount === 1 ? "" : "s"} as drafts` +
-          (failCount ? ` · ${failCount} failed` : "") +
-          ". Set prices and publish them below."
+        `Imported ${okCount} book${okCount === 1 ? "" : "s"} as drafts, with title, author, year, pages, ISBN, ` +
+          `language and cover read from each file.` +
+          (data.created ?? [])
+            .filter((c) => c.notes?.length)
+            .map((c) => `\n! ${c.title}: ${c.notes!.join("; ")}`)
+            .join("") +
+          (failCount ? `\n${failCount} failed:\n${data.failed!.map((f) => `✗ ${f.name} — ${f.error}`).join("\n")}` : "")
       );
       fetchBooks();
+      // Then draft each new book's description and insights from its text,
+      // one request per book, every claim checked against the book.
+      if (data.aiAvailable && data.created?.length) {
+        setBulkBusy(false);
+        await runBulkEnrich(false, data.created);
+      }
     } catch (err) {
       setBulkResult(err instanceof Error ? err.message : "Import failed");
     } finally {
@@ -795,7 +748,7 @@ export default function AdminStorePage() {
           <input
             ref={bulkInputRef}
             type="file"
-            accept=".pdf,.epub,application/pdf,application/epub+zip"
+            accept=".pdf,.epub,.docx,.pptx"
             multiple
             className="hidden"
             onChange={(e) => {
@@ -1268,9 +1221,10 @@ export default function AdminStorePage() {
                     type="number"
                     className={INPUT_CLASS}
                     value={form.publicationYear}
-                    onChange={(e) =>
-                      setForm({ ...form, publicationYear: Number(e.target.value) })
-                    }
+                    onChange={(e) => {
+                      touched.current.add("publicationYear");
+                      setForm({ ...form, publicationYear: Number(e.target.value) });
+                    }}
                     required
                   />
                 </div>
@@ -1315,7 +1269,10 @@ export default function AdminStorePage() {
                   <input
                     className={INPUT_CLASS}
                     value={form.language}
-                    onChange={(e) => setForm({ ...form, language: e.target.value })}
+                    onChange={(e) => {
+                      touched.current.add("language");
+                      setForm({ ...form, language: e.target.value });
+                    }}
                   />
                 </div>
                 <div>
@@ -1414,6 +1371,9 @@ export default function AdminStorePage() {
 
               <div className="grid sm:grid-cols-2 gap-4">
                 <FileUpload
+                  // Remount when the cover changes (e.g. taken from the
+                  // uploaded file): the widget reads its preview only once.
+                  key={form.coverImageId || "no-cover"}
                   accept="image/*"
                   label="Cover image"
                   currentUrl={form.coverImageId ? `/api/uploads/${form.coverImageId}` : undefined}
@@ -1427,19 +1387,16 @@ export default function AdminStorePage() {
                   onClear={() => setForm({ ...form, fileId: "", fileName: "", fileMimeType: "" })}
                 />
               </div>
-              {refreshNote && (
-                <p className="text-xs text-gold -mt-2 flex items-start gap-1.5">
-                  <Sparkles className="w-3.5 h-3.5 mt-0.5 shrink-0" />
-                  <span>{refreshNote}</span>
+              {extraction ? (
+                <ExtractionReport state={extraction} />
+              ) : (
+                <p className="text-xs text-text-secondary -mt-2">
+                  Uploading a PDF, EPUB, Word or PowerPoint file reads its title, subtitle, author, year, pages, ISBN,
+                  language and cover from the file itself, and fills only the fields that are still empty. The
+                  description and key insights (English and French) are then drafted from its text, and every figure
+                  and name in them is checked against it. Nothing is saved until you press Save.
                 </p>
               )}
-              <p className="text-xs text-text-secondary -mt-2">
-                A first upload fills whatever is still empty (title, author, year, pages, ISBN,
-                language, description) and sets the cover. <strong>Replacing</strong> the file
-                refreshes everything that describes it — pages, ISBN, language, cover — and
-                redrafts the listing, since those would otherwise describe the old file. The title
-                and subtitle are never changed. Nothing is saved until you press Save.
-              </p>
 
               <div className="grid sm:grid-cols-3 gap-4 items-end">
                 <div>

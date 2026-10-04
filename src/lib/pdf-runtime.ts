@@ -10,8 +10,17 @@
  * white page. That silent failure is worse than a crash, so we install minimal
  * equivalents instead of pinning the deployment to a Node minor version.
  *
- * Both shims are no-ops on runtimes that already provide the API.
+ *   - `process.getBuiltinModule` (Node 22.3+), which pdf.js uses to load some
+ *     embedded fonts; without it those PDFs can't be read at all.
+ *
+ * All shims are no-ops on runtimes that already provide the API.
  */
+import * as nodeFs from "node:fs";
+import * as nodeModule from "node:module";
+import * as nodeStream from "node:stream";
+import * as nodeUrl from "node:url";
+
+const BUILTINS: Record<string, unknown> = { fs: nodeFs, module: nodeModule, stream: nodeStream, url: nodeUrl };
 
 // Deliberately not `extends ArrayBuffer`: newer lib.dom typings declare
 // `transfer` as required, which we cannot satisfy while probing for it.
@@ -37,6 +46,11 @@ export function ensurePdfRuntimePolyfills(): void {
         return null;
       }
     };
+  }
+
+  const proc = process as unknown as { getBuiltinModule?: (id: string) => unknown };
+  if (typeof proc.getBuiltinModule !== "function") {
+    proc.getBuiltinModule = (id: string) => BUILTINS[id.replace(/^node:/, "")];
   }
 
   // A copy rather than a true detaching transfer. pdf.js only reads the result,

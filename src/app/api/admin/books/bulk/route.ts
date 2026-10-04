@@ -2,15 +2,19 @@ import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { randomUUID } from "crypto";
-import { parseBookFile, extractBookText } from "@/lib/book-parser";
-import { enrichBookMetadata } from "@/lib/ai-enrich";
-import { processCoverImage, renderPdfCover, MAX_PDF_PROCESS_BYTES } from "@/lib/cover-image";
+import { analyseDocument } from "@/lib/doc-facts";
+import { storeDocumentCover } from "@/lib/book-analysis";
+import { isAiEnrichConfigured } from "@/lib/ai-enrich";
 import { sanitizeInput } from "@/lib/sanitize";
 
 const DEFAULT_PRICE_CENTS = 5000; // $50
 
-const ALLOWED_TYPES = ["application/pdf", "application/epub+zip"];
-const ALLOWED_EXTENSIONS = ["pdf", "epub"];
+const ALLOWED_EXTENSIONS: Record<string, string> = {
+  pdf: "application/pdf",
+  epub: "application/epub+zip",
+  docx: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+  pptx: "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+};
 const MAX_SIZE = 50 * 1024 * 1024; // 50MB per file
 const MAX_FILES = 20;
 
@@ -47,9 +51,10 @@ async function uniqueSlug(base: string): Promise<string> {
 }
 
 /**
- * Bulk-import one or many PDF/EPUB files. Each file is parsed and a DRAFT book is
- * created with the extracted metadata (and cover, for EPUB). The admin then sets
- * the price and publishes.
+ * Bulk-import one or many PDF/EPUB files. Each file is read for its facts and
+ * cover (no AI, so this stays fast) and a DRAFT book is created. The editor
+ * then runs the grounded AI draft per book (/api/admin/books/[id]/enrich),
+ * one request each, so no single request outlives the proxy timeout.
  */
 export async function POST(request: Request) {
   try {
@@ -71,7 +76,7 @@ export async function POST(request: Request) {
       );
     }
 
-    const created: { id: string; title: string; slug: string }[] = [];
+    const created: { id: string; title: string; slug: string; notes: string[] }[] = [];
     const failed: { name: string; error: string }[] = [];
     const startedAt = Date.now();
 
@@ -85,8 +90,10 @@ export async function POST(request: Request) {
       }
 
       const ext = file.name.split(".").pop()?.toLowerCase() || "";
-      if (!ALLOWED_TYPES.includes(file.type) && !ALLOWED_EXTENSIONS.includes(ext)) {
-        failed.push({ name: file.name, error: "Unsupported type (PDF/EPUB only)" });
+      // The stored type comes from the extension, never from the browser.
+      const mimeType = ALLOWED_EXTENSIONS[ext];
+      if (!mimeType) {
+        failed.push({ name: file.name, error: "Unsupported type (PDF, EPUB, Word or PowerPoint only)" });
         continue;
       }
       if (file.size > MAX_SIZE) {
@@ -99,73 +106,41 @@ export async function POST(request: Request) {
 
         const asset = await prisma.bookAsset.create({
           data: {
-            filename: `${randomUUID()}.${ext || "bin"}`,
-            mimeType: file.type || "application/octet-stream",
+            filename: `${randomUUID()}.${ext}`,
+            mimeType,
             size: file.size,
             data: buffer,
           },
         });
 
-        const meta = await parseBookFile(buffer, file.name, file.type);
-        let aiCategory: string | null = null;
-        let aiTags: string[] = [];
-
-        // AI enrichment (skip very large files to protect memory).
-        if (file.size <= MAX_PDF_PROCESS_BYTES) {
-          try {
-            const sampleText = await extractBookText(buffer, file.name, file.type);
-            const ai = await enrichBookMetadata({
-              title: meta.title,
-              author: meta.author,
-              existingDescription: meta.description,
-              sampleText,
-            });
-            if (ai?.description) meta.description = ai.description;
-            if (ai?.keyInsights.length) meta.keyInsights = ai.keyInsights;
-            if (ai?.category) aiCategory = ai.category;
-            if (ai?.tags?.length) aiTags = ai.tags;
-          } catch (err) {
-            console.error(`AI enrichment (bulk) failed for ${file.name}:`, err);
-          }
-        }
-
-        // Cover: EPUB embedded cover, else PDF first page — always downscaled.
+        const { facts, cover } = await analyseDocument(buffer, file.name, mimeType);
         let coverImageId: string | null = null;
-        const cover = meta.cover
-          ? await processCoverImage(meta.cover.data)
-          : ext === "pdf" || file.type === "application/pdf"
-            ? await renderPdfCover(buffer)
-            : null;
         if (cover) {
-          const created = await prisma.upload.create({
-            data: {
-              filename: `${randomUUID()}-cover.jpg`,
-              mimeType: cover.mimeType,
-              data: Buffer.from(cover.data),
-            },
-          });
-          coverImageId = created.id;
+          const stored = await storeDocumentCover(cover);
+          if (!("refused" in stored)) coverImageId = stored.coverImageId;
         }
 
-        const title = sanitizeInput(meta.title || file.name.replace(/\.[^.]+$/, ""));
+        // A draft needs a title; when the file has none, its name stands in
+        // until the admin edits it.
+        const title = sanitizeInput(facts.title?.value || file.name.replace(/\.[^.]+$/, ""));
         const slug = await uniqueSlug(slugify(title));
 
         const book = await prisma.book.create({
           data: {
             title,
             slug,
-            description: meta.description
-              ? sanitizeInput(meta.description)
+            subtitle: facts.subtitle ? sanitizeInput(facts.subtitle.value) : null,
+            description: facts.description
+              ? sanitizeInput(facts.description.value)
               : `${title} — description pending.`,
-            keyInsights: (meta.keyInsights || []).map(sanitizeInput),
+            keyInsights: [],
             keyInsightsFr: [],
-            author: meta.author ? sanitizeInput(meta.author) : undefined,
-            publicationYear: meta.publicationYear || new Date().getFullYear(),
-            isbn: meta.isbn || null,
-            language: meta.language ? sanitizeInput(meta.language) : undefined,
-            pageCount: meta.pageCount ?? null,
-            category: aiCategory ? sanitizeInput(aiCategory) : null,
-            tags: aiTags.map(sanitizeInput),
+            author: facts.author ? sanitizeInput(facts.author.value) : undefined,
+            publicationYear: facts.publicationYear?.value || new Date().getFullYear(),
+            isbn: facts.isbn?.value || null,
+            language: facts.language ? sanitizeInput(facts.language.value) : undefined,
+            pageCount: facts.pageCount?.value ?? null,
+            tags: (facts.tags?.value ?? []).map(sanitizeInput),
             priceCents: DEFAULT_PRICE_CENTS,
             currency: "USD",
             coverImageId,
@@ -176,14 +151,19 @@ export async function POST(request: Request) {
           },
         });
 
-        created.push({ id: book.id, title: book.title, slug: book.slug });
+        // Say plainly which values are stand-ins rather than read from the file.
+        const notes: string[] = [];
+        if (!facts.title) notes.push("no title found in the file — its file name was used");
+        if (!facts.publicationYear) notes.push(`no publication year found — set to ${book.publicationYear} as a placeholder`);
+        if (!coverImageId) notes.push("no usable cover found — upload one");
+        created.push({ id: book.id, title: book.title, slug: book.slug, notes });
       } catch (err) {
         console.error(`Bulk import failed for ${file.name}:`, err);
         failed.push({ name: file.name, error: "Processing failed" });
       }
     }
 
-    return NextResponse.json({ created, failed });
+    return NextResponse.json({ created, failed, aiAvailable: isAiEnrichConfigured() });
   } catch (error) {
     console.error("Bulk book import error:", error);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });

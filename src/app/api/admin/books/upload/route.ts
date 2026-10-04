@@ -2,13 +2,8 @@ import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { randomUUID } from "crypto";
-import { parseBookFile } from "@/lib/book-parser";
 import { isAiEnrichConfigured } from "@/lib/ai-enrich";
-import {
-  processCoverImage,
-  renderPdfCover,
-  type ProcessedImage,
-} from "@/lib/cover-image";
+import { docKind } from "@/lib/doc-facts";
 
 // The downloadable product file: books and reports, but also datasets,
 // templates and toolkits. The stored MIME type comes from this map, never from
@@ -39,9 +34,10 @@ const MAX_SIZE = 50 * 1024 * 1024; // 50MB
 
 export const runtime = "nodejs";
 
-// Parsing + rasterising a cover has to finish well inside the proxy's 100s
-// origin timeout; a timeout there is returned as HTML, not JSON. AI drafting is
-// deliberately NOT done here — the client calls /api/admin/books/enrich next.
+// Storing only. Reading the file (facts, cover) and AI drafting are separate
+// requests — /api/admin/books/analyse and /api/admin/books/enrich — so each
+// stays well inside the proxy's 100s origin timeout and a big upload never
+// shares its memory peak with pdf.js.
 export const maxDuration = 60;
 
 export async function POST(request: Request) {
@@ -62,7 +58,6 @@ export async function POST(request: Request) {
     if (!mimeType) {
       return NextResponse.json({ error: `Invalid file type. Allowed: ${ALLOWED_LABEL}` }, { status: 400 });
     }
-    const isDocument = ext === "pdf" || ext === "epub";
 
     if (file.size > MAX_SIZE) {
       return NextResponse.json(
@@ -83,52 +78,15 @@ export async function POST(request: Request) {
       },
     });
 
-    // Best-effort metadata extraction so the editor can auto-fill fields.
-    let metadata: Record<string, unknown> | null = null;
-    let coverImageId: string | null = null;
-    // Only books/reports (PDF, EPUB) have metadata and a cover to extract.
-    if (isDocument) {
-      try {
-        const parsed = await parseBookFile(buffer, file.name, mimeType);
-
-        // Cover: use the EPUB's embedded cover, else rasterize the PDF's first page.
-        // Always downscale to a small JPEG so serving it can't blow up memory.
-        let cover: ProcessedImage | null = null;
-        if (parsed.cover) {
-          cover = await processCoverImage(parsed.cover.data);
-        } else if (ext === "pdf") {
-          cover = await renderPdfCover(buffer);
-        }
-        if (cover) {
-          const created = await prisma.upload.create({
-            data: {
-              filename: `${randomUUID()}-cover.jpg`,
-              mimeType: cover.mimeType,
-              data: Buffer.from(cover.data),
-            },
-          });
-          coverImageId = created.id;
-        }
-
-        // Don't ship the raw cover buffer back to the client.
-        const { cover: _rawCover, ...rest } = parsed;
-        void _rawCover;
-        metadata = { ...rest };
-      } catch (err) {
-        console.error("Book metadata parse failed:", err);
-      }
-    }
-
     return NextResponse.json({
       fileId: asset.id,
       fileName: file.name,
       fileMimeType: asset.mimeType,
       size: asset.size,
-      coverImageId,
-      metadata,
-      // Tells the editor to follow up with an AI drafting request. Doing it in
-      // a second call keeps each request short enough to survive the proxy.
-      aiPending: isAiEnrichConfigured(),
+      // The editor follows up with /analyse when the file has facts or a
+      // cover to read, then with /enrich when AI drafting is available.
+      analysable: docKind(file.name, mimeType) !== "other",
+      aiAvailable: isAiEnrichConfigured(),
     });
   } catch (error) {
     console.error("Book upload error:", error);

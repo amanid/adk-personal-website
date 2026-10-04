@@ -4,28 +4,14 @@ import { useRef, useState } from "react";
 import { Upload, FileText, X } from "lucide-react";
 import { readJson } from "@/lib/api-response";
 
-export interface ParsedBookMeta {
-  title?: string;
-  subtitle?: string;
-  author?: string;
-  publicationYear?: number;
-  pageCount?: number;
-  language?: string;
-  isbn?: string;
-  description?: string;
-  keyInsights?: string[];
-  category?: string;
-  tags?: string[];
-}
-
 export interface BookUploadResult {
   fileId: string;
   fileName: string;
   fileMimeType: string;
-  coverImageId?: string | null;
-  metadata?: ParsedBookMeta | null;
-  /** The server stored the file; the editor should now request an AI draft. */
-  aiPending?: boolean;
+  /** The file has facts or a cover to read (PDF, EPUB, Word, PowerPoint, Excel). */
+  analysable: boolean;
+  /** AI drafting is configured on the server. */
+  aiAvailable: boolean;
 }
 
 interface BookFileUploadProps {
@@ -80,9 +66,8 @@ export default function BookFileUpload({
         fileId: data.fileId,
         fileName: data.fileName,
         fileMimeType: data.fileMimeType,
-        coverImageId: data.coverImageId ?? null,
-        metadata: data.metadata ?? null,
-        aiPending: data.aiPending ?? false,
+        analysable: data.analysable ?? false,
+        aiAvailable: data.aiAvailable ?? false,
       });
     } catch (err) {
       setError(err instanceof Error ? err.message : "Upload failed");
