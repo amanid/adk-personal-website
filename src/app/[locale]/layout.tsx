@@ -1,5 +1,5 @@
 import { NextIntlClientProvider, hasLocale } from "next-intl";
-import { Newsreader, Geist, Geist_Mono, Playfair_Display } from "next/font/google";
+import { Geist, Geist_Mono, Playfair_Display } from "next/font/google";
 import { notFound } from "next/navigation";
 import { routing } from "@/i18n/routing";
 import Providers from "@/components/Providers";
@@ -20,14 +20,9 @@ import "../globals.css";
 // Newsreader: an optically sized text serif for headings, set the way a
 // journal or annual report would be. Geist: a neutral grotesque for UI and
 // body text. Geist Mono: figures, dates and labels, with tabular digits.
-// latin-ext covers the accented French text.
-const newsreader = Newsreader({
-  subsets: ["latin", "latin-ext"],
-  weight: ["400", "500", "600", "700"],
-  style: ["normal", "italic"],
-  variable: "--font-newsreader",
-  display: "swap",
-});
+// latin-ext covers the accented French text. Newsreader is served from
+// public/fonts (declared in globals.css): on Render, Google returns font URLs
+// for it that next/font cannot parse, which fails the build.
 const geist = Geist({
   subsets: ["latin", "latin-ext"],
   variable: "--font-geist",
@@ -209,11 +204,12 @@ export default async function LocaleLayout({
   return (
     <html
       lang={locale}
-      className={`dark ${newsreader.variable} ${geist.variable} ${geistMono.variable} ${playfair.variable}`}
+      className={`dark ${geist.variable} ${geistMono.variable} ${playfair.variable}`}
       data-theme="ink-signal"
     >
       <head>
         <link rel="manifest" href="/manifest.json" />
+        <link rel="preload" href="/fonts/newsreader/newsreader-latin-wght-normal.woff2" as="font" type="font/woff2" crossOrigin="anonymous" />
         <meta name="theme-color" content="#0f0f0e" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
