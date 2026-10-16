@@ -1,109 +1,40 @@
-"use client";
-
-import { motion } from "framer-motion";
-import { Award, GraduationCap } from "lucide-react";
 import { useTranslations, useLocale } from "next-intl";
-import { education, certifications } from "@/data/skills";
+import { education } from "@/data/skills";
 
+// Formal degrees; everything else in the list is a certificate or programme.
+const DEGREE = /\b(Master|Ingénieur|Bachelor|Licence)\b/;
+import { Section } from "@/components/ui/Section";
+
+/** Degrees and certificates as a two-column register, newest first. */
 export default function CertificationsShowcase() {
   const t = useTranslations("certifications_showcase");
-  const locale = useLocale();
-
-  // Combine key credentials: select notable education entries and certifications
-  const keyEducation = education.filter((e) =>
-    ["MIT", "ENSEA", "Toulouse", "Johns Hopkins"].some((k) =>
-      e.institution.includes(k)
-    )
-  );
+  const tHome = useTranslations("homeV2");
+  const fr = useLocale() === "fr";
+  const columns = [
+    { title: t("education_title"), items: education.filter((e) => DEGREE.test(e.degree)) },
+    { title: t("certifications_title"), items: education.filter((e) => !DEGREE.test(e.degree)) },
+  ];
 
   return (
-    <section className="section-padding bg-navy/30">
-      <div className="max-w-6xl mx-auto">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="text-center mb-12"
-        >
-          <div className="inline-flex items-center gap-2 mb-4">
-            <Award className="w-6 h-6 text-gold" />
-            <h2 className="text-3xl md:text-4xl font-bold font-[family-name:var(--font-display)] gradient-text">
-              {t("title")}
-            </h2>
+    <Section eyebrow={tHome("creds_eyebrow")} title={t("title")} intro={t("subtitle")}>
+      <div className="grid md:grid-cols-2 gap-x-12 gap-y-12">
+        {columns.map((col) => (
+          <div key={col.title}>
+            <h3 className="eyebrow text-text-muted mb-2">{col.title}</h3>
+            <ul>
+              {col.items.map((e) => (
+                <li key={`${e.institution}-${e.year}-${e.degree}`} className="grid grid-cols-[4rem_1fr] gap-4 py-4 border-b border-glass-border">
+                  <span className="font-mono text-sm text-text-muted pt-0.5">{e.year}</span>
+                  <span>
+                    <span className="block text-text-primary leading-snug">{fr ? e.degreeFr : e.degree}</span>
+                    <span className="block text-sm text-text-muted mt-1">{e.institution}</span>
+                  </span>
+                </li>
+              ))}
+            </ul>
           </div>
-          <p className="text-text-secondary max-w-2xl mx-auto">
-            {t("subtitle")}
-          </p>
-        </motion.div>
-
-        {/* Education */}
-        <div className="mb-8">
-          <motion.div
-            initial={{ opacity: 0, x: -20 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
-            className="flex items-center gap-2 mb-6"
-          >
-            <GraduationCap className="w-5 h-5 text-gold" />
-            <h3 className="text-xl font-semibold">{t("education_title")}</h3>
-          </motion.div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {keyEducation.map((edu, index) => (
-              <motion.div
-                key={`${edu.institution}-${edu.year}-${index}`}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: index * 0.08 }}
-                className="glass rounded-xl p-5 hover:border-gold/30 transition-all duration-300"
-              >
-                <p className="text-sm font-semibold text-gold mb-1">
-                  {edu.institution}
-                </p>
-                <p className="text-sm text-text-primary mb-1">
-                  {locale === "fr" ? edu.degreeFr : edu.degree}
-                </p>
-                <div className="flex items-center gap-2 text-xs text-text-muted">
-                  <span>{edu.year}</span>
-                  <span>-</span>
-                  <span>{edu.location}</span>
-                </div>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-
-        {/* Certifications */}
-        <div>
-          <motion.div
-            initial={{ opacity: 0, x: -20 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
-            className="flex items-center gap-2 mb-6"
-          >
-            <Award className="w-5 h-5 text-gold" />
-            <h3 className="text-xl font-semibold">{t("certifications_title")}</h3>
-          </motion.div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {certifications.map((cert, index) => (
-              <motion.div
-                key={`${cert.issuer}-${cert.year}-${index}`}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: index * 0.08 }}
-                className="glass rounded-xl p-5 hover:border-gold/30 transition-all duration-300"
-              >
-                <p className="text-sm font-semibold text-gold mb-1">
-                  {cert.issuer}
-                </p>
-                <p className="text-sm text-text-primary mb-1">{cert.name}</p>
-                <p className="text-xs text-text-muted">{cert.year}</p>
-              </motion.div>
-            ))}
-          </div>
-        </div>
+        ))}
       </div>
-    </section>
+    </Section>
   );
 }

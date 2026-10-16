@@ -5,6 +5,8 @@ import { Link } from "@/i18n/routing";
 import { buildPageMetadata, normalizeLocale, BASE_URL } from "@/lib/seo";
 import { safeJsonLd } from "@/lib/utils";
 import { getTopic } from "@/lib/topics";
+import { Container } from "@/components/ui/Section";
+import { ButtonLink } from "@/components/ui/Button";
 
 export const revalidate = 3600;
 
@@ -59,50 +61,64 @@ export default async function TopicPage({ params }: Params) {
   ];
 
   return (
-    <div className="max-w-5xl mx-auto px-4 py-12 md:py-16">
+    <Container className="pt-16 md:pt-24 pb-24">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(jsonLd) }} />
-      <p className="eyebrow mb-3">
-        <Link href="/topics" className="hover:text-gold">{t("all_topics")}</Link>
-      </p>
-      <h1 className="text-3xl md:text-5xl font-semibold mb-8">{t("topic_title", { topic: topic.name })}</h1>
+      <header className="max-w-3xl mb-10">
+        <p className="eyebrow mb-4">
+          <Link href="/topics" className="inline-flex items-center min-h-11 hover:text-gold-light">
+            ← {t("all_topics")}
+          </Link>
+        </p>
+        <h1 className="font-display text-4xl md:text-6xl leading-[1.02] tracking-tight">{t("topic_title", { topic: topic.name })}</h1>
+      </header>
 
-      <dl className="grid grid-cols-3 gap-3 mb-12 max-w-xl">
+      <dl className="flex flex-wrap gap-x-10 gap-y-4 py-5 mb-14 border-y border-glass-border">
         {stats.map(([label, value]) => (
-          <div key={label} className="glass p-4 flex flex-col-reverse">
-            <dt className="text-xs text-text-muted mt-1">{label}</dt>
-            <dd className="figure text-2xl md:text-3xl">{value}</dd>
+          <div key={label} className="flex flex-row-reverse justify-end items-baseline gap-3">
+            <dt className="eyebrow text-text-muted">{label}</dt>
+            <dd className="font-mono text-2xl tabular-nums text-text-primary">{value}</dd>
           </div>
         ))}
       </dl>
 
-      <section className="mb-12">
-        <h2 className="text-xl font-semibold mb-4">{t("publications")}</h2>
-        <ul className="space-y-3">
+      <section aria-labelledby="topic-pubs" className="mb-16">
+        <h2 id="topic-pubs" className="h-section mb-6">{t("publications")}</h2>
+        <ol className="border-t border-glass-border">
           {publications.map((p) => {
             const abstract = (fr && p.abstractFr) || p.abstract;
             return (
-              <li key={p.slug} className="glass p-4">
-                <Link href={`/publications/${p.slug}`} className="font-medium hover:text-gold">{(fr && p.titleFr) || p.title}</Link>
-                <p className="text-xs text-text-muted mt-1">
-                  <span className="figure">{p.year}</span> · {p.access === "free" ? t("free") : t("subscription")}
-                </p>
-                <p className="text-sm text-text-secondary mt-2 line-clamp-2">{abstract}</p>
+              <li key={p.slug} className="border-b border-glass-border">
+                <Link
+                  href={`/publications/${p.slug}`}
+                  className="group grid grid-cols-[3.5rem_1fr] md:grid-cols-[5rem_1fr] gap-x-4 md:gap-x-8 py-6 px-2 -mx-2 rounded-[var(--radius-sm)] hover:bg-[var(--hover-wash)] transition-colors"
+                >
+                  <span className="font-mono text-sm tabular-nums text-text-muted pt-1">{p.year}</span>
+                  <span className="min-w-0">
+                    <span className="block font-display text-xl md:text-2xl leading-snug group-hover:text-gold transition-colors">
+                      {(fr && p.titleFr) || p.title}
+                    </span>
+                    <span className={`block mt-1.5 text-sm ${p.access === "free" ? "text-text-muted" : "text-gold"}`}>
+                      {p.access === "free" ? t("free") : t("subscription")}
+                    </span>
+                    <span className="block mt-2 text-text-secondary leading-relaxed line-clamp-2 max-w-3xl">{abstract}</span>
+                  </span>
+                </Link>
               </li>
             );
           })}
-        </ul>
+        </ol>
       </section>
 
       {products.length > 0 && (
-        <section className="mb-12">
-          <h2 className="text-xl font-semibold mb-4">{t("products")}</h2>
-          <ul className="grid sm:grid-cols-2 gap-3">
+        <section aria-labelledby="topic-products" className="mb-16">
+          <h2 id="topic-products" className="h-section mb-6">{t("products")}</h2>
+          <ul className="grid sm:grid-cols-2 gap-4">
             {products.map((b) => (
               <li key={b.slug}>
-                <Link href={`/store/${b.slug}`} className="glass block p-4 hover:border-gold/40 h-full">
-                  <span className="font-medium">{(fr && b.titleFr) || b.title}</span>
-                  <span className="block text-xs text-text-muted mt-1">
-                    {b.kind.toLowerCase()} · <span className="figure">{b.publicationYear}</span>
+                <Link href={`/store/${b.slug}`} className="card card-interactive block p-5 h-full">
+                  <span className="font-display text-lg leading-snug">{(fr && b.titleFr) || b.title}</span>
+                  <span className="block text-sm text-text-muted mt-1.5">
+                    {b.kind.toLowerCase()} · <span className="font-mono tabular-nums">{b.publicationYear}</span>
                   </span>
                 </Link>
               </li>
@@ -112,26 +128,28 @@ export default async function TopicPage({ params }: Params) {
       )}
 
       {posts.length > 0 && (
-        <section className="mb-12">
-          <h2 className="text-xl font-semibold mb-4">{t("posts")}</h2>
-          <ul className="space-y-2">
+        <section aria-labelledby="topic-posts" className="mb-16">
+          <h2 id="topic-posts" className="h-section mb-6">{t("posts")}</h2>
+          <ul className="border-t border-glass-border">
             {posts.map((p) => (
-              <li key={p.slug}>
-                <Link href={`/blog/${p.slug}`} className="hover:text-gold">{(fr && p.titleFr) || p.title}</Link>
+              <li key={p.slug} className="border-b border-glass-border">
+                <Link href={`/blog/${p.slug}`} className="flex items-center min-h-11 py-3 font-display text-lg hover:text-gold transition-colors">
+                  {(fr && p.titleFr) || p.title}
+                </Link>
               </li>
             ))}
           </ul>
         </section>
       )}
 
-      <section className="glass-strong p-6">
-        <h2 className="text-xl font-semibold mb-2">{t("cta_title", { topic: topic.name })}</h2>
-        <p className="text-sm text-text-secondary mb-4">{t("cta_body")}</p>
+      <section className="card card-feature p-6 md:p-8">
+        <h2 className="font-display text-2xl mb-2">{t("cta_title", { topic: topic.name })}</h2>
+        <p className="text-text-secondary mb-5">{t("cta_body")}</p>
         <div className="flex flex-wrap gap-3">
-          <Link href="/book" className="px-4 py-2 rounded-md bg-gold text-charcoal font-semibold text-sm">{t("cta_book")}</Link>
-          <Link href="/services" className="px-4 py-2 rounded-md border border-glass-border text-sm">{t("cta_quote")}</Link>
+          <ButtonLink href="/book">{t("cta_book")}</ButtonLink>
+          <ButtonLink href="/services" variant="secondary">{t("cta_quote")}</ButtonLink>
         </div>
       </section>
-    </div>
+    </Container>
   );
 }

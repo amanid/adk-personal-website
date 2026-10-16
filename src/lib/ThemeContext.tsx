@@ -13,9 +13,21 @@ const ThemeContext = createContext<ThemeContextType>({
   setTheme: () => {},
 });
 
+const LIGHT_THEMES = new Set(["light-professional"]);
+
+/** Same rules as the inline script in layout.tsx, applied on a live switch. */
+function applyTheme(id: string) {
+  const root = document.documentElement;
+  root.setAttribute("data-theme", id);
+  const light = LIGHT_THEMES.has(id);
+  root.classList.toggle("dark", !light);
+  document
+    .querySelector('meta[name="theme-color"]')
+    ?.setAttribute("content", light ? "#f6f4ef" : "#0f0f0e");
+}
+
 export function ThemeProvider({ children }: { children: ReactNode }) {
   const [theme, setThemeState] = useState(defaultThemeId);
-  const [mounted, setMounted] = useState(false);
 
   // One-time theme hydration from localStorage on mount.
   /* eslint-disable react-hooks/set-state-in-effect */
@@ -23,23 +35,20 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     const stored = localStorage.getItem("theme");
     if (stored) {
       setThemeState(stored);
-      document.documentElement.setAttribute("data-theme", stored);
+      applyTheme(stored);
     }
-    setMounted(true);
   }, []);
   /* eslint-enable react-hooks/set-state-in-effect */
 
   const setTheme = (id: string) => {
     setThemeState(id);
     localStorage.setItem("theme", id);
-    document.documentElement.setAttribute("data-theme", id);
+    applyTheme(id);
   };
 
-  // Prevent flash: apply theme attribute immediately on mount
-  if (!mounted) {
-    return <>{children}</>;
-  }
-
+  // Always render the Provider: swapping element types after mount would
+  // remount the whole app. The inline script in layout.tsx already applies the
+  // stored theme before paint, so there is no flash to guard against.
   return (
     <ThemeContext.Provider value={{ theme, setTheme }}>
       {children}

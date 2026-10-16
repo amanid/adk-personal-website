@@ -391,7 +391,7 @@ export default function AdminProjectsPage() {
                 </button>
                 <button
                   onClick={() => handleDelete(project.id)}
-                  className="p-1.5 text-text-secondary hover:text-red-400 transition-colors"
+                  className="p-1.5 text-text-secondary hover:text-danger transition-colors"
                   aria-label="Delete project"
                 >
                   <Trash2 className="w-4 h-4" />

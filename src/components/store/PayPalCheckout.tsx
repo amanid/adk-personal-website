@@ -148,7 +148,7 @@ export default function PayPalCheckout({
 
   if (!clientId) {
     return (
-      <p className="text-sm text-amber-400 border border-amber-400/30 rounded-lg p-3">
+      <p role="status" className="text-sm text-warning bg-warning/10 border border-warning/30 rounded-[var(--radius-md)] p-3">
         {t("paypalUnavailable")}
       </p>
     );
@@ -162,10 +162,10 @@ export default function PayPalCheckout({
         aria-busy={!ready}
       />
       {!ready && !error && (
-        <p className="text-sm text-text-secondary text-center py-2">{t("loadingCheckout")}</p>
+        <p role="status" className="text-sm text-text-secondary text-center py-2">{t("loadingCheckout")}</p>
       )}
       {error && (
-        <p className="text-sm text-red-400 border border-red-400/30 rounded-lg p-3 mt-2">{error}</p>
+        <p role="alert" className="text-sm text-danger bg-danger/10 border border-danger/30 rounded-[var(--radius-md)] p-3 mt-2">{error}</p>
       )}
     </div>
   );

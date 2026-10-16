@@ -5,6 +5,7 @@ export interface Organization {
   abbreviation: string;
   tier: "core" | "advisory";
   website: string;
+  /** Where the work was done (per the CV), not the organisation's head office. */
   location: string;
 }
 
@@ -35,7 +36,7 @@ export const organizations: Organization[] = [
     abbreviation: "Barry-Callebaut",
     tier: "core",
     website: "https://www.barry-callebaut.com",
-    location: "Zurich, Switzerland",
+    location: "Abidjan, Côte d'Ivoire",
   },
   {
     id: "fhi360",
@@ -44,16 +45,16 @@ export const organizations: Organization[] = [
     abbreviation: "FHI360",
     tier: "core",
     website: "https://www.fhi360.org",
-    location: "Durham, USA",
+    location: "Abidjan, Côte d'Ivoire",
   },
   {
     id: "icraf",
-    name: "World Agroforestry Centre",
+    name: "International Centre for Research in Agroforestry",
     nameFr: "Centre Mondial d'Agroforesterie",
     abbreviation: "ICRAF",
     tier: "core",
     website: "https://www.worldagroforestry.org",
-    location: "Nairobi, Kenya",
+    location: "Abidjan, Côte d'Ivoire",
   },
   {
     id: "pacci",
@@ -72,7 +73,7 @@ export const organizations: Organization[] = [
     abbreviation: "ITU",
     tier: "advisory",
     website: "https://www.itu.int",
-    location: "Geneva, Switzerland",
+    location: "Remote",
   },
   {
     id: "iom",
@@ -81,7 +82,7 @@ export const organizations: Organization[] = [
     abbreviation: "IOM",
     tier: "advisory",
     website: "https://www.iom.int",
-    location: "Geneva, Switzerland",
+    location: "Remote",
   },
   {
     id: "unhcr",
@@ -90,7 +91,7 @@ export const organizations: Organization[] = [
     abbreviation: "UNHCR",
     tier: "advisory",
     website: "https://www.unhcr.org",
-    location: "Geneva, Switzerland",
+    location: "Abidjan, Côte d'Ivoire",
   },
   {
     id: "unidir",
@@ -99,7 +100,7 @@ export const organizations: Organization[] = [
     abbreviation: "UNIDIR",
     tier: "advisory",
     website: "https://www.unidir.org",
-    location: "Geneva, Switzerland",
+    location: "Remote",
   },
   {
     id: "icrisat",
@@ -108,6 +109,6 @@ export const organizations: Organization[] = [
     abbreviation: "ICRISAT",
     tier: "advisory",
     website: "https://www.icrisat.org",
-    location: "Hyderabad, India",
+    location: "Mali",
   },
 ];

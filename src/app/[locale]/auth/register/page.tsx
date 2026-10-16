@@ -1,9 +1,9 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { motion } from "framer-motion";
 import { Link } from "@/i18n/routing";
 import { Mail, Lock, User, UserPlus } from "lucide-react";
+import { Button } from "@/components/ui/Button";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { registerSchema, RegisterInput } from "@/lib/validations";
@@ -47,115 +47,119 @@ export default function RegisterPage() {
     }
   };
 
+  const field =
+    "w-full min-h-11 pl-10 pr-4 rounded-[var(--radius-md)] bg-navy border border-glass-border text-text-primary focus:border-gold focus:outline-none transition-colors";
+
   return (
-    <div className="min-h-[80vh] flex items-center justify-center px-4">
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="w-full max-w-md"
-      >
-        <div className="glass rounded-2xl p-8">
-          <div className="text-center mb-8">
-            <h1 className="text-2xl font-bold font-[family-name:var(--font-display)] gradient-text mb-2">
-              {t("register_title")}
-            </h1>
-            <p className="text-text-secondary text-sm">{t("register_subtitle")}</p>
+    <div className="min-h-[80vh] flex items-center justify-center px-4 py-12">
+      <div className="w-full max-w-md">
+        <div className="card p-6 sm:p-8">
+          <div className="mb-8">
+            <h1 className="font-display text-3xl md:text-4xl leading-tight tracking-tight">{t("register_title")}</h1>
+            <p className="text-text-secondary mt-2">{t("register_subtitle")}</p>
           </div>
 
           {error && (
-            <div className="mb-4 p-3 rounded-lg bg-red-500/10 border border-red-500/30 text-red-400 text-sm">
+            <div role="alert" className="mb-5 p-3 rounded-[var(--radius-md)] bg-danger/10 border border-danger/30 text-danger text-sm">
               {error}
             </div>
           )}
 
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
             <div>
-              <label className="block text-sm text-text-secondary mb-1">
+              <label htmlFor="reg-name" className="block text-sm text-text-secondary mb-1.5">
                 {t("name")}
               </label>
               <div className="relative">
-                <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted" />
+                <User aria-hidden="true" className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted" />
                 <input
                   {...register("name")}
-                  className="w-full pl-10 pr-4 py-2.5 bg-navy/50 border border-glass-border rounded-lg text-text-primary focus:border-gold/50 focus:outline-none transition-colors"
+                  id="reg-name"
+                  autoComplete="name"
+                  aria-invalid={errors.name ? true : undefined}
+                  aria-describedby={errors.name ? "reg-name-error" : undefined}
+                  className={field}
                 />
               </div>
               {errors.name && (
-                <p className="text-red-400 text-xs mt-1">{errors.name.message}</p>
+                <p id="reg-name-error" className="text-danger text-sm mt-1.5">{errors.name.message}</p>
               )}
             </div>
-
             <div>
-              <label className="block text-sm text-text-secondary mb-1">
+              <label htmlFor="reg-email" className="block text-sm text-text-secondary mb-1.5">
                 {t("email")}
               </label>
               <div className="relative">
-                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted" />
+                <Mail aria-hidden="true" className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted" />
                 <input
                   {...register("email")}
+                  id="reg-email"
                   type="email"
-                  className="w-full pl-10 pr-4 py-2.5 bg-navy/50 border border-glass-border rounded-lg text-text-primary focus:border-gold/50 focus:outline-none transition-colors"
+                  autoComplete="email"
+                  aria-invalid={errors.email ? true : undefined}
+                  aria-describedby={errors.email ? "reg-email-error" : undefined}
+                  className={field}
                 />
               </div>
               {errors.email && (
-                <p className="text-red-400 text-xs mt-1">{errors.email.message}</p>
+                <p id="reg-email-error" className="text-danger text-sm mt-1.5">{errors.email.message}</p>
               )}
             </div>
-
             <div>
-              <label className="block text-sm text-text-secondary mb-1">
+              <label htmlFor="reg-password" className="block text-sm text-text-secondary mb-1.5">
                 {t("password")}
               </label>
               <div className="relative">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted" />
+                <Lock aria-hidden="true" className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted" />
                 <input
                   {...register("password")}
+                  id="reg-password"
                   type="password"
-                  className="w-full pl-10 pr-4 py-2.5 bg-navy/50 border border-glass-border rounded-lg text-text-primary focus:border-gold/50 focus:outline-none transition-colors"
+                  autoComplete="new-password"
+                  aria-invalid={errors.password ? true : undefined}
+                  aria-describedby={errors.password ? "reg-password-error" : undefined}
+                  className={field}
                 />
               </div>
               {errors.password && (
-                <p className="text-red-400 text-xs mt-1">{errors.password.message}</p>
+                <p id="reg-password-error" className="text-danger text-sm mt-1.5">{errors.password.message}</p>
               )}
             </div>
-
             <div>
-              <label className="block text-sm text-text-secondary mb-1">
+              <label htmlFor="reg-confirmPassword" className="block text-sm text-text-secondary mb-1.5">
                 {t("confirm_password")}
               </label>
               <div className="relative">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted" />
+                <Lock aria-hidden="true" className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted" />
                 <input
                   {...register("confirmPassword")}
+                  id="reg-confirmPassword"
                   type="password"
-                  className="w-full pl-10 pr-4 py-2.5 bg-navy/50 border border-glass-border rounded-lg text-text-primary focus:border-gold/50 focus:outline-none transition-colors"
+                  autoComplete="new-password"
+                  aria-invalid={errors.confirmPassword ? true : undefined}
+                  aria-describedby={errors.confirmPassword ? "reg-confirmPassword-error" : undefined}
+                  className={field}
                 />
               </div>
               {errors.confirmPassword && (
-                <p className="text-red-400 text-xs mt-1">
-                  {errors.confirmPassword.message}
-                </p>
+                <p id="reg-confirmPassword-error" className="text-danger text-sm mt-1.5">{errors.confirmPassword.message}</p>
               )}
             </div>
 
-            <button
-              type="submit"
-              disabled={isSubmitting}
-              className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-gold text-charcoal font-semibold rounded-lg hover:bg-gold-light transition-all disabled:opacity-50"
-            >
-              <UserPlus className="w-4 h-4" />
-              {isSubmitting ? "..." : t("register_button")}
-            </button>
+            <Button type="submit" size="lg" loading={isSubmitting} className="w-full">
+              {!isSubmitting && <UserPlus aria-hidden="true" className="w-4 h-4" />}
+              {t("register_button")}
+            </Button>
           </form>
 
-          <p className="mt-6 text-center text-text-secondary text-sm">
+          <p className="mt-8 text-center text-text-secondary text-sm">
             {t("has_account")}{" "}
-            <Link href="/auth/login" className="text-gold hover:text-gold-light">
+            <Link href="/auth/login" className="inline-flex items-center min-h-11 text-gold hover:text-gold-light underline-offset-4 hover:underline">
               {t("login_button")}
             </Link>
           </p>
         </div>
-      </motion.div>
+      </div>
     </div>
   );
 }

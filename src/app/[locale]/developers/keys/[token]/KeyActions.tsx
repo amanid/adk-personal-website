@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/routing";
 import PayPalSubscribeButton from "@/components/payments/PayPalSubscribeButton";
+import { Button } from "@/components/ui/Button";
 
 export default function KeyActions({
   token,
@@ -33,7 +34,16 @@ export default function KeyActions({
 
   return (
     <div className="space-y-4 border-t border-glass-border pt-5">
-      {flash && <p className={`text-sm rounded-md p-3 border ${flash.ok ? "text-green-400 border-green-400/30" : "text-red-400 border-red-400/30"}`}>{flash.text}</p>}
+      {flash && (
+        <p
+          role={flash.ok ? "status" : "alert"}
+          className={`text-sm rounded-[var(--radius-md)] p-3 border ${
+            flash.ok ? "text-success bg-success/10 border-success/30" : "text-danger bg-danger/10 border-danger/30"
+          }`}
+        >
+          {flash.text}
+        </p>
+      )}
       {!isPro && proPlanId && (
         <div>
           <p className="font-medium mb-2">{t("go_pro")}</p>
@@ -46,18 +56,23 @@ export default function KeyActions({
           />
         </div>
       )}
-      <div className="flex flex-wrap gap-2 text-sm">
-        <button onClick={() => confirm(t("rotate_confirm")) && call("/rotate", "POST", t("rotated"))} className="px-4 py-2 rounded-md border border-glass-border">
+      <div className="flex flex-wrap gap-2">
+        <Button type="button" variant="secondary" onClick={() => confirm(t("rotate_confirm")) && call("/rotate", "POST", t("rotated"))}>
           {t("rotate")}
-        </button>
+        </Button>
         {isPro && hasSubscription && (
-          <button onClick={() => confirm(t("cancel_pro_confirm")) && call("/pro", "DELETE", "OK")} className="px-4 py-2 rounded-md border border-glass-border">
+          <Button type="button" variant="secondary" onClick={() => confirm(t("cancel_pro_confirm")) && call("/pro", "DELETE", "OK")}>
             {t("cancel_pro")}
-          </button>
+          </Button>
         )}
-        <button onClick={() => confirm(t("revoke_confirm")) && call("/revoke", "POST", t("revoked"))} className="px-4 py-2 rounded-md border border-glass-border text-red-400">
+        <Button
+          type="button"
+          variant="secondary"
+          onClick={() => confirm(t("revoke_confirm")) && call("/revoke", "POST", t("revoked"))}
+          className="text-danger border-danger/40 hover:border-danger"
+        >
           {t("revoke")}
-        </button>
+        </Button>
       </div>
     </div>
   );

@@ -63,13 +63,13 @@ export default function AdminSubscriptionsPage() {
       </h1>
 
       {flash && (
-        <p className={`text-sm rounded-md p-3 border ${flash.ok ? "text-green-400 border-green-400/30" : "text-red-400 border-red-400/30"}`}>{flash.text}</p>
+        <p className={`text-sm rounded-md p-3 border ${flash.ok ? "text-success border-success/30" : "text-danger border-danger/30"}`}>{flash.text}</p>
       )}
 
       <div className="glass p-5 space-y-3">
         <p className="font-medium">Automatic billing with PayPal ({data.paypalEnv})</p>
         {!data.paypalConfigured ? (
-          <p className="text-sm text-amber-400">PayPal REST credentials (PAYPAL_CLIENT_ID / PAYPAL_CLIENT_SECRET) aren&apos;t set on the server.</p>
+          <p className="text-sm text-warning">PayPal REST credentials (PAYPAL_CLIENT_ID / PAYPAL_CLIENT_SECRET) aren&apos;t set on the server.</p>
         ) : (
           <>
             <p className="text-sm text-text-secondary">

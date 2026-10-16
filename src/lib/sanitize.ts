@@ -5,11 +5,13 @@ import sanitizeHtml from "sanitize-html";
  * Strips HTML tags and trims whitespace.
  */
 export function sanitizeInput(input: string): string {
+  // Never decode entities here: turning "&lt;img onerror=…" back into "<img"
+  // after stripping would create the very tag we just removed. Unclosed tag
+  // openers ("<img src=x onerror=…" with no ">") are dropped too; a plain
+  // "a < b" survives because "<" is followed by a space.
   return input
     .replace(/<[^>]*>/g, "")
-    .replace(/&lt;/g, "<")
-    .replace(/&gt;/g, ">")
-    .replace(/<[^>]*>/g, "")
+    .replace(/<(?=[a-zA-Z!/?])/g, "")
     .trim();
 }
 

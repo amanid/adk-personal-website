@@ -59,33 +59,41 @@ export default function StoreBrowser({ books }: { books: StoreBook[] }) {
   const hasFilters = query.trim() !== "" || category !== "" || kind !== "" || freeOnly;
 
   const chipBase =
-    "px-3 py-1.5 rounded-full text-sm border transition-all whitespace-nowrap";
-  const chipActive = "border-gold/60 bg-gold/15 text-gold";
-  const chipIdle = "border-glass-border text-text-secondary hover:border-gold/40";
+    "inline-flex items-center min-h-11 sm:min-h-9 px-3.5 rounded-full text-sm border transition-colors whitespace-nowrap";
+  const chipActive = "border-gold/60 bg-gold/15 text-text-primary";
+  const chipIdle = "border-glass-border text-text-secondary hover:text-text-primary hover:bg-[var(--hover-wash)]";
+  const field =
+    "w-full min-h-11 rounded-[var(--radius-md)] bg-navy border border-glass-border focus:border-gold outline-none text-sm";
 
   return (
     <div>
       {/* Controls */}
-      <div className="glass rounded-xl p-4 mb-6 space-y-4">
+      <div className="space-y-4 mb-8">
         <div className="flex flex-col sm:flex-row gap-3">
           <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted" />
+            <label htmlFor="store-search" className="sr-only">
+              {t("searchPlaceholder")}
+            </label>
+            <Search aria-hidden="true" className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted" />
             <input
+              id="store-search"
               type="search"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder={t("searchPlaceholder")}
-              aria-label={t("searchPlaceholder")}
-              className="w-full pl-9 pr-3 py-2.5 rounded-lg bg-navy/50 border border-glass-border focus:border-gold/50 outline-none text-sm"
+              className={`${field} pl-9 pr-3`}
             />
           </div>
-          <div className="flex items-center gap-2">
-            <SlidersHorizontal className="w-4 h-4 text-text-muted shrink-0" />
+          <div className="flex items-center gap-2 sm:w-56">
+            <label htmlFor="store-sort" className="sr-only">
+              {t("sortLabel")}
+            </label>
+            <SlidersHorizontal aria-hidden="true" className="w-4 h-4 text-text-muted shrink-0" />
             <select
+              id="store-sort"
               value={sort}
               onChange={(e) => setSort(e.target.value as SortKey)}
-              aria-label={t("sortLabel")}
-              className="flex-1 sm:flex-none px-3 py-2.5 rounded-lg bg-navy/50 border border-glass-border focus:border-gold/50 outline-none text-sm"
+              className={`${field} px-3`}
             >
               <option value="featured">{t("sortFeatured")}</option>
               <option value="priceLow">{t("sortPriceLow")}</option>
@@ -100,6 +108,8 @@ export default function StoreBrowser({ books }: { books: StoreBook[] }) {
             {kinds.map((k) => (
               <button
                 key={k}
+                type="button"
+                aria-pressed={kind === k}
                 onClick={() => setKind((cur) => (cur === k ? "" : k))}
                 className={`${chipBase} ${kind === k ? chipActive : chipIdle}`}
               >
@@ -112,6 +122,8 @@ export default function StoreBrowser({ books }: { books: StoreBook[] }) {
         {(categories.length > 0 || books.some((b) => b.priceCents === 0)) && (
           <div className="flex flex-wrap items-center gap-2">
             <button
+              type="button"
+              aria-pressed={!category && !freeOnly}
               onClick={() => {
                 setCategory("");
                 setFreeOnly(false);
@@ -122,6 +134,8 @@ export default function StoreBrowser({ books }: { books: StoreBook[] }) {
             </button>
             {books.some((b) => b.priceCents === 0) && (
               <button
+                type="button"
+                aria-pressed={freeOnly}
                 onClick={() => setFreeOnly((v) => !v)}
                 className={`${chipBase} ${freeOnly ? chipActive : chipIdle}`}
               >
@@ -131,6 +145,8 @@ export default function StoreBrowser({ books }: { books: StoreBook[] }) {
             {categories.map((c) => (
               <button
                 key={c}
+                type="button"
+                aria-pressed={category === c}
                 onClick={() => setCategory((cur) => (cur === c ? "" : c))}
                 className={`${chipBase} ${category === c ? chipActive : chipIdle}`}
               >
@@ -142,30 +158,34 @@ export default function StoreBrowser({ books }: { books: StoreBook[] }) {
       </div>
 
       {/* Result count + clear */}
-      <div className="flex items-center justify-between mb-4 text-sm text-text-secondary">
-        <span>{t("resultsCount", { count: filtered.length })}</span>
+      <div className="flex items-center justify-between gap-4 mb-6 pb-3 border-b border-glass-border text-sm text-text-secondary">
+        <span role="status" className="font-mono tabular-nums text-xs uppercase tracking-wider">
+          {t("resultsCount", { count: filtered.length })}
+        </span>
         {hasFilters && (
           <button
+            type="button"
             onClick={() => {
               setQuery("");
               setCategory("");
+              setKind("");
               setFreeOnly(false);
             }}
-            className="inline-flex items-center gap-1 hover:text-gold transition-colors"
+            className="inline-flex items-center gap-1 min-h-11 px-2 -mr-2 hover:text-text-primary transition-colors"
           >
-            <X className="w-3.5 h-3.5" />
+            <X aria-hidden="true" className="w-3.5 h-3.5" />
             {t("clearFilters")}
           </button>
         )}
       </div>
 
       {filtered.length === 0 ? (
-        <div className="glass rounded-xl p-12 text-center text-text-secondary">
-          <BookOpen className="w-12 h-12 mx-auto mb-4 text-gold/40" />
+        <div className="card p-12 text-center text-text-secondary">
+          <BookOpen aria-hidden="true" className="w-10 h-10 mx-auto mb-4 text-text-muted" />
           <p>{t("noResults")}</p>
         </div>
       ) : (
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-5 gap-y-12 sm:gap-x-8">
           {filtered.map((book) => (
             <BookCard key={book.id} book={book} />
           ))}

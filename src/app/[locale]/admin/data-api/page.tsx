@@ -80,7 +80,7 @@ export default function AdminDataApiPage() {
         {totalCalls.toLocaleString()} requests in {d.period}. Public portal:{" "}
         <a href="/en/developers" target="_blank" className="text-gold">/developers</a>
       </p>
-      {flash && <p className={`text-sm rounded-md p-3 border ${flash.ok ? "text-green-400 border-green-400/30" : "text-red-400 border-red-400/30"}`}>{flash.text}</p>}
+      {flash && <p className={`text-sm rounded-md p-3 border ${flash.ok ? "text-success border-success/30" : "text-danger border-danger/30"}`}>{flash.text}</p>}
 
       <div className="grid md:grid-cols-2 gap-4">
         <div className="glass p-5 space-y-3">
@@ -124,7 +124,7 @@ export default function AdminDataApiPage() {
               </button>
             </div>
           ) : (
-            <p className="text-sm text-amber-400">PayPal REST credentials aren&apos;t set on the server.</p>
+            <p className="text-sm text-warning">PayPal REST credentials aren&apos;t set on the server.</p>
           )}
         </div>
       </div>
@@ -150,7 +150,7 @@ export default function AdminDataApiPage() {
                   {k.useCase && <div className="text-xs text-text-secondary mt-1 max-w-xs">{k.useCase}</div>}
                 </td>
                 <td className="p-3 figure">
-                  {k.keyPrefix}… {k.status === "REVOKED" && <span className="text-red-400 text-xs">revoked</span>}
+                  {k.keyPrefix}… {k.status === "REVOKED" && <span className="text-danger text-xs">revoked</span>}
                 </td>
                 <td className="p-3">
                   {k.plan.toLowerCase()}
@@ -167,7 +167,7 @@ export default function AdminDataApiPage() {
                       ) : !k.paid ? (
                         <button onClick={() => keyAction(k.id, { action: "set_free" }, "Back to Free.")} className="text-xs text-text-secondary mr-3">Set Free</button>
                       ) : null}
-                      <button onClick={() => confirm("Revoke this key?") && keyAction(k.id, { action: "revoke" }, "Revoked.")} className="text-xs text-red-400">Revoke</button>
+                      <button onClick={() => confirm("Revoke this key?") && keyAction(k.id, { action: "revoke" }, "Revoked.")} className="text-xs text-danger">Revoke</button>
                     </>
                   )}
                 </td>

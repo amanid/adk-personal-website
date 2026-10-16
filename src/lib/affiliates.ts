@@ -115,7 +115,4 @@ export async function voidCommission(orderId: string): Promise<void> {
 }
 
 /** Only same-site paths may be redirect targets (no open redirect). */
-export function safeRedirectPath(to: string | null): string {
-  if (!to || !to.startsWith("/") || to.startsWith("//") || to.startsWith("/\\") || to.length > 300) return "/";
-  return to;
-}
+export { safeRedirectPath } from "./utils";

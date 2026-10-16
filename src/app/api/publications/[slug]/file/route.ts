@@ -1,14 +1,15 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { rateLimit } from "@/lib/rate-limit";
 import { isGated, viewerHasGatedAccess, STATIC_GATED_FILES, readPrivatePublication, type FileKind } from "@/lib/publication-access";
 
 /**
  * Serves a publication's file only to viewers allowed to open it.
  *
  * Gated PDFs live in /private/publications, outside /public, so they have no
- * static URL at all. Uploaded files (/api/uploads/<uuid>) and external links
- * are reached by redirect — only after the access check, so their address is
- * never handed to someone who hasn't paid.
+ * static URL at all. Uploaded files are streamed from here rather than by
+ * redirect: /api/uploads refuses gated ids, so a paying viewer never sees a
+ * reusable public address to share.
  */
 
 export const dynamic = "force-dynamic";
@@ -38,6 +39,9 @@ async function lookup(slug: string, kind: FileKind) {
 }
 
 export async function GET(request: Request, { params }: { params: Promise<{ slug: string }> }) {
+  const limited = rateLimit(request, { limit: 30, windowSeconds: 60 });
+  if (limited) return limited;
+
   const { slug } = await params;
   const kind = KINDS[new URL(request.url).searchParams.get("kind") ?? "pdf"];
   if (!kind || slug.length > 300) return NextResponse.json({ error: "Not found" }, { status: 404 });
@@ -45,7 +49,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ slug
   const found = await lookup(slug, kind);
   if (!found) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
-  if (isGated(slug, found.level) && !(await viewerHasGatedAccess())) {
+  if (isGated(slug, found.level) && !(await viewerHasGatedAccess(kind))) {
     return NextResponse.json({ error: "Subscription required" }, { status: 403 });
   }
 
@@ -72,7 +76,25 @@ export async function GET(request: Request, { params }: { params: Promise<{ slug
     return NextResponse.redirect(new URL(encodeURI(stored), request.url), 302);
   }
 
-  if (stored.startsWith("/api/uploads/") || /^https:\/\//i.test(stored)) {
+  if (stored.startsWith("/api/uploads/")) {
+    const upload = await prisma.upload.findUnique({
+      where: { id: stored.slice("/api/uploads/".length) },
+      select: { data: true, filename: true, mimeType: true },
+    });
+    if (!upload) return NextResponse.json({ error: "Not found" }, { status: 404 });
+    const isPdf = upload.mimeType === "application/pdf";
+    const name = upload.filename.replace(/[^\w.\- ]/g, "_");
+    return new NextResponse(upload.data, {
+      headers: {
+        "Content-Type": isPdf ? "application/pdf" : "application/octet-stream",
+        "Content-Disposition": `${isPdf ? "inline" : "attachment"}; filename="${name}"`,
+        "Cache-Control": "private, no-store",
+        "X-Content-Type-Options": "nosniff",
+      },
+    });
+  }
+
+  if (/^https:\/\//i.test(stored)) {
     const res = NextResponse.redirect(new URL(stored, request.url), 302);
     res.headers.set("Cache-Control", "private, no-store");
     return res;

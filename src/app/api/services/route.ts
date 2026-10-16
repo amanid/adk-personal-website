@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { serviceRequestSchema } from "@/lib/validations";
+import { serviceRequestSchema, SERVICE_EXTRA_TYPES } from "@/lib/validations";
 import { auth } from "@/lib/auth";
 import { rateLimit } from "@/lib/rate-limit";
 
@@ -22,9 +22,13 @@ export async function POST(request: Request) {
     const session = await auth();
     const userId = session?.user?.id as string | undefined;
 
+    const { serviceType, description, ...rest } = validation.data;
+    const extra = SERVICE_EXTRA_TYPES[serviceType];
     const serviceRequest = await prisma.serviceRequest.create({
       data: {
-        ...validation.data,
+        ...rest,
+        serviceType: extra ? "OTHER" : (serviceType as "CONSULTING" | "TRAINING" | "SPEAKING" | "AI_DEVELOPMENT" | "OTHER"),
+        description: extra ? `[Service requested: ${extra}]\n\n${description}` : description,
         userId: userId || null,
       },
     });

@@ -129,7 +129,7 @@ export default function FileUpload({
                 e.stopPropagation();
                 clear();
               }}
-              className="p-1 text-text-muted hover:text-red-400"
+              className="p-1 text-text-muted hover:text-danger"
               aria-label="Remove file"
             >
               <X className="w-4 h-4" />
@@ -150,7 +150,7 @@ export default function FileUpload({
         )}
       </div>
 
-      {error && <p className="text-sm text-red-400">{error}</p>}
+      {error && <p className="text-sm text-danger">{error}</p>}
     </div>
   );
 }

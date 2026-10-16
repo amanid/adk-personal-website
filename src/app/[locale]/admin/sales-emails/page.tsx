@@ -77,7 +77,7 @@ export default function SalesEmailsPage() {
       </p>
 
       {flash && (
-        <p className={`text-sm rounded-md p-3 border ${flash.ok ? "text-green-400 border-green-400/30" : "text-red-400 border-red-400/30"}`}>{flash.text}</p>
+        <p className={`text-sm rounded-md p-3 border ${flash.ok ? "text-success border-success/30" : "text-danger border-danger/30"}`}>{flash.text}</p>
       )}
 
       <div className="glass p-5 space-y-4">
@@ -111,7 +111,7 @@ export default function SalesEmailsPage() {
       </div>
 
       <div className="glass p-5 text-sm space-y-2">
-        <p className="font-medium">Schedule {cronConfigured ? <span className="text-green-400">(ready)</span> : <span className="text-amber-400">(not set up)</span>}</p>
+        <p className="font-medium">Schedule {cronConfigured ? <span className="text-success">(ready)</span> : <span className="text-warning">(not set up)</span>}</p>
         <p className="text-text-secondary">
           To run hourly without you, set a <code className="figure">CRON_SECRET</code> environment variable (at least 16 random
           characters) on Render, then have any scheduler call:

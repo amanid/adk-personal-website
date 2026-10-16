@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { Smartphone, Copy, Check } from "lucide-react";
 import { formatPrice } from "@/lib/utils";
+import { buttonClass } from "@/components/ui/Button";
 import { MOBILE_MONEY_NUMBER, MOBILE_MONEY_PROVIDERS } from "@/lib/mobile-money";
 
 interface MobileMoneyCheckoutProps {
@@ -56,16 +57,16 @@ export default function MobileMoneyCheckout({
   };
 
   return (
-    <div className="rounded-lg border border-glass-border p-4 space-y-4">
+    <div className="rounded-[var(--radius-md)] border border-glass-border p-4 sm:p-5 space-y-4">
       <div className="flex items-center gap-2 text-sm font-medium">
-        <Smartphone className="w-4 h-4 text-gold" />
+        <Smartphone aria-hidden="true" className="w-4 h-4 text-gold" />
         {t("mmTitle")}
       </div>
 
       {/* Provider */}
       <div>
-        <label className="block text-xs text-text-secondary mb-1">{t("mmProvider")}</label>
-        <div className="flex flex-wrap gap-2">
+        <p id="mm-provider-label" className="block text-sm text-text-secondary mb-1.5">{t("mmProvider")}</p>
+        <div className="flex flex-wrap gap-2" role="group" aria-labelledby="mm-provider-label">
           {MOBILE_MONEY_PROVIDERS.map((p) => {
             const active = provider === p.id;
             return (
@@ -79,11 +80,11 @@ export default function MobileMoneyCheckout({
                     ? { borderColor: p.color, backgroundColor: `${p.color}22`, color: p.color }
                     : undefined
                 }
-                className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm border font-medium transition-all ${
+                className={`inline-flex items-center gap-2 min-h-11 px-3.5 rounded-[var(--radius-md)] text-sm border font-medium transition-colors ${
                   active ? "" : "border-glass-border text-text-secondary hover:border-gold/50"
                 }`}
               >
-                <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: p.color }} />
+                <span aria-hidden="true" className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: p.color }} />
                 {p.label}
               </button>
             );
@@ -92,37 +93,37 @@ export default function MobileMoneyCheckout({
       </div>
 
       {/* Number + amount */}
-      <div className="grid grid-cols-2 gap-3">
-        <div className="rounded-lg bg-navy/50 border border-glass-border p-3">
-          <div className="text-[11px] text-text-secondary">{t("mmNumber")}</div>
-          <div className="flex items-center gap-2">
-            <span className="font-semibold">{MOBILE_MONEY_NUMBER}</span>
+      <div className="grid grid-cols-1 min-[420px]:grid-cols-2 gap-3">
+        <div className="rounded-[var(--radius-md)] bg-navy border border-glass-border p-3">
+          <div className="text-xs text-text-secondary">{t("mmNumber")}</div>
+          <div className="flex items-center justify-between gap-2 min-w-0">
+            <span className="font-mono tabular-nums font-medium break-all">{MOBILE_MONEY_NUMBER}</span>
             <button
               type="button"
               onClick={copyNumber}
-              className="text-text-muted hover:text-gold"
+              className="flex items-center justify-center min-h-11 min-w-11 -my-2 -mr-2 rounded-[var(--radius-md)] text-text-muted hover:text-text-primary hover:bg-[var(--hover-wash)] shrink-0"
               aria-label={t("mmCopyNumber")}
             >
               {copied ? (
-                <Check className="w-3.5 h-3.5 text-green-400" />
+                <Check aria-hidden="true" className="w-4 h-4 text-success" />
               ) : (
-                <Copy className="w-3.5 h-3.5" />
+                <Copy aria-hidden="true" className="w-4 h-4" />
               )}
             </button>
           </div>
         </div>
-        <div className="rounded-lg bg-navy/50 border border-glass-border p-3">
-          <div className="text-[11px] text-text-secondary">{t("mmAmount")}</div>
-          <div className="font-semibold text-gold">{formatPrice(amountCents, currency)}</div>
+        <div className="rounded-[var(--radius-md)] bg-navy border border-glass-border p-3">
+          <div className="text-xs text-text-secondary">{t("mmAmount")}</div>
+          <div className="font-mono tabular-nums font-medium">{formatPrice(amountCents, currency)}</div>
         </div>
       </div>
 
       {/* How it works */}
-      <p className="text-xs text-text-secondary">{t("mmFlowNote")}</p>
+      <p className="text-sm text-text-secondary">{t("mmFlowNote")}</p>
 
       {/* Optional reference */}
       <div>
-        <label htmlFor="mm-ref" className="block text-xs text-text-secondary mb-1">
+        <label htmlFor="mm-ref" className="block text-sm text-text-secondary mb-1.5">
           {t("mmReferenceOptional")}
         </label>
         <input
@@ -130,7 +131,7 @@ export default function MobileMoneyCheckout({
           value={reference}
           onChange={(e) => setReference(e.target.value)}
           placeholder={t("mmReferencePlaceholder")}
-          className="w-full px-3 py-2 rounded-lg bg-navy/50 border border-glass-border focus:border-gold/50 outline-none text-sm"
+          className="w-full min-h-11 px-3 rounded-[var(--radius-md)] bg-navy border border-glass-border focus:border-gold outline-none text-sm"
         />
       </div>
 
@@ -138,17 +139,18 @@ export default function MobileMoneyCheckout({
         type="button"
         onClick={placeOrder}
         disabled={placing}
-        className="w-full px-5 py-2.5 rounded-lg bg-gold text-charcoal font-semibold hover:bg-gold-light transition-all disabled:opacity-50"
+        className={buttonClass("primary", "lg", "w-full")}
+        aria-busy={placing || undefined}
       >
         {placing ? t("mmPlacing") : t("mmPlaceOrderBtn")}
       </button>
 
       {error && (
-        <p className="text-sm text-red-400 border border-red-400/30 rounded-lg p-3">{error}</p>
+        <p role="alert" className="text-sm text-danger bg-danger/10 border border-danger/30 rounded-[var(--radius-md)] p-3">{error}</p>
       )}
 
-      <p className="text-xs text-text-secondary flex items-start gap-1.5">
-        <Check className="w-3.5 h-3.5 text-green-400 mt-0.5 shrink-0" />
+      <p className="text-sm text-text-secondary flex items-start gap-2">
+        <Check aria-hidden="true" className="w-4 h-4 text-success mt-0.5 shrink-0" />
         {t("mmManualNote")}
       </p>
     </div>

@@ -1,91 +1,124 @@
-import { SkillCategory, Education, Certification } from "@/types";
+import { Education, Certification } from "@/types";
 
-export const skillCategories: SkillCategory[] = [
-  {
-    name: "AI & Machine Learning",
-    nameFr: "IA & Apprentissage Automatique",
-    skills: [
-      { name: "Python / PyTorch / TensorFlow", level: 95 },
-      { name: "Large Language Models (LLMs) / RAG", level: 90 },
-      { name: "NLP & Computer Vision", level: 88 },
-      { name: "MLOps / ML Pipelines", level: 92 },
-      { name: "Generative AI / LangChain", level: 90 },
-    ],
-  },
-  {
-    name: "Data Engineering",
-    nameFr: "Ingénierie des Données",
-    skills: [
-      { name: "Azure / Databricks / Spark", level: 93 },
-      { name: "SQL / PostgreSQL / Oracle", level: 95 },
-      { name: "ETL / ELT Data Pipelines", level: 94 },
-      { name: "Lakehouse / Medallion Architecture", level: 90 },
-      { name: "Power BI / Tableau", level: 88 },
-    ],
-  },
-  {
-    name: "Statistics & Econometrics",
-    nameFr: "Statistique & Économétrie",
-    skills: [
-      { name: "Statistical Inference & Modeling", level: 95 },
-      { name: "Econometrics (Panel, Time Series, IV)", level: 93 },
-      { name: "R / Stata / SAS / SPSS", level: 92 },
-      { name: "Survey Sampling & Design", level: 92 },
-      { name: "Causal Inference & Impact Evaluation", level: 90 },
-    ],
-  },
-  {
-    name: "Software & Cloud",
-    nameFr: "Logiciel & Cloud",
-    skills: [
-      { name: "Azure Cloud Services", level: 90 },
-      { name: "Docker / Kubernetes", level: 82 },
-      { name: "REST APIs / GraphQL", level: 88 },
-      { name: "Git / CI-CD / DevOps", level: 90 },
-      { name: "TypeScript / JavaScript / Next.js", level: 85 },
-    ],
-  },
-  {
-    name: "Strategy & Leadership",
-    nameFr: "Stratégie & Leadership",
-    skills: [
-      { name: "Data Strategy & Governance (DAMA-DMBOK)", level: 92 },
-      { name: "Project Management", level: 90 },
-      { name: "Team Leadership & Mentoring", level: 88 },
-      { name: "Stakeholder Communication", level: 92 },
-      { name: "M&E / Survey Design / KoboToolBox", level: 90 },
-    ],
-  },
+// Skills are listed by name only: no self-rated levels. Every entry appears in
+// the technical sections of the CVs in public/cv/ (CV1 "Technical
+// Proficiency" / "Core Competencies", CV2 "Competencies"). Add nothing the
+// CVs do not state.
+export interface SkillGroup {
+  name: string;
+  nameFr: string;
+  skills: { name: string }[];
+}
+
+const group = (name: string, nameFr: string, skills: string[]): SkillGroup => ({
+  name,
+  nameFr,
+  skills: skills.map((s) => ({ name: s })),
+});
+
+export const skillCategories: SkillGroup[] = [
+  group("Generative AI & Machine Learning", "IA générative & apprentissage automatique", [
+    "LLMs (OpenAI, Claude, LLaMA, Gemini)",
+    "LangChain",
+    "RAG pipelines",
+    "Vector databases (FAISS)",
+    "AI agents & Text-to-SQL",
+    "AWS Bedrock & SageMaker",
+    "NLP",
+    "MLflow",
+    "scikit-learn",
+    "Fraud & anomaly detection",
+    "Risk modelling & credit scoring",
+    "Churn prediction",
+  ]),
+  group("Data Engineering & Cloud", "Ingénierie des données & cloud", [
+    "Databricks (Spark, Delta Lake, Unity Catalog)",
+    "AWS (S3, Athena, Lambda, RDS, Redshift, Kinesis, EC2)",
+    "SAP Datasphere",
+    "ETL/ELT pipelines",
+    "Change Data Capture (CDC)",
+    "Real-time streaming pipelines",
+    "Medallion & lakehouse architecture",
+    "Data warehousing",
+    "CI/CD (GitHub Actions)",
+    "Docker (basic)",
+  ]),
+  group("Programming & Databases", "Programmation & bases de données", [
+    "Python (PySpark, pandas, FastAPI, Streamlit, Dash)",
+    "R",
+    "SQL",
+    "STATA",
+    "EViews",
+    "VBA",
+    "Oracle (Finacle)",
+    "PostgreSQL",
+    "SQL Server",
+    "MySQL",
+    "SQLite",
+    "Microsoft Access",
+  ]),
+  group("Statistics & Econometrics", "Statistique & économétrie", [
+    "Time series forecasting (ARIMA, VAR, VECM)",
+    "Panel data modelling",
+    "Causal inference & A/B testing",
+    "Interrupted time series",
+    "Structural break analysis",
+    "Impact evaluation",
+    "Survey design & sampling",
+    "GAMS",
+  ]),
+  group("Data Governance & Architecture", "Gouvernance & architecture des données", [
+    "DAMA-DMBOK",
+    "Master data management",
+    "Data quality frameworks",
+    "Data cataloguing (Ataccama)",
+    "Metadata management",
+    "Data models & ERDs",
+    "Role-based access control (RBAC)",
+  ]),
+  group("Visualisation & Field Data", "Visualisation & collecte de terrain", [
+    "Tableau",
+    "Power BI",
+    "R Shiny",
+    "QGIS",
+    "ArcGIS",
+    "SurveyCTO",
+    "ODK",
+    "KoboToolBox",
+    "CSPro",
+    "SPSS",
+    "Monitoring & evaluation frameworks",
+  ]),
 ];
 
 export const education: Education[] = [
   {
-    degree: "Professional Certificate in Data Engineering, AI & Data Science",
-    degreeFr: "Certificat Professionnel en Ingénierie des Données, IA & Science des Données",
+    degree: "Professional Certificate in Data Engineering",
+    degreeFr: "Certificat professionnel en ingénierie des données",
     institution: "Massachusetts Institute of Technology (MIT)",
     year: "2025",
-    location: "USA (Online)",
+    location: "",
   },
   {
     degree: "Applied AI and Data Science Program",
     degreeFr: "Programme Appliqué en IA et Science des Données",
     institution: "Massachusetts Institute of Technology (MIT)",
     year: "2025",
-    location: "USA (Online)",
+    location: "",
   },
   {
     degree: "MicroMasters in Data, Economics & Development Policy",
     degreeFr: "MicroMasters en Données, Économie & Politique de Développement",
     institution: "Massachusetts Institute of Technology (MIT)",
     year: "2021",
-    location: "USA (Online)",
+    location: "",
   },
   {
     degree: "Financial Modelling & Valuation Analyst (FMVA)",
     degreeFr: "Analyste en Modélisation Financière & Valorisation (FMVA)",
     institution: "Corporate Finance Institute (CFI)",
     year: "2020",
-    location: "Canada (Online)",
+    location: "",
   },
   {
     degree: "Master's in Statistics & Econometrics",
@@ -99,7 +132,7 @@ export const education: Education[] = [
     degreeFr: "Certificat de Spécialisation en Science des Données",
     institution: "Johns Hopkins University",
     year: "2015",
-    location: "USA (Online)",
+    location: "",
   },
   {
     degree: "Ingénieur Statisticien (Statistics & Information System Engineer)",
@@ -119,7 +152,7 @@ export const education: Education[] = [
 
 export const certifications: Certification[] = [
   {
-    name: "Professional Certificate in Data Engineering, AI & Data Science",
+    name: "Professional Certificate in Data Engineering",
     issuer: "MIT",
     year: "2025",
   },
@@ -146,6 +179,7 @@ export const certifications: Certification[] = [
 ];
 
 export const languages = [
-  { name: "French", nameFr: "Français", level: "Native", levelFr: "Natif" },
-  { name: "English", nameFr: "Anglais", level: "Fluent (C1)", levelFr: "Courant (C1)" },
+  { name: "French", nameFr: "Français", level: "Native", levelFr: "Langue maternelle" },
+  { name: "English", nameFr: "Anglais", level: "Full professional fluency", levelFr: "Maîtrise professionnelle complète" },
+  { name: "Spanish", nameFr: "Espagnol", level: "Basic", levelFr: "Notions" },
 ];

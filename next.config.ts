@@ -21,16 +21,23 @@ const securityHeaders = [
     key: "Content-Security-Policy",
     value: [
       "default-src 'self'",
-      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com https://www.google-analytics.com https://pagead2.googlesyndication.com https://www.paypal.com https://www.paypalobjects.com",
+      // 'unsafe-eval' only in development (React Refresh needs it); production
+      // Next.js, GA and the PayPal SDK run without it. 'unsafe-inline' stays:
+      // removing it needs per-request nonces, i.e. no static/ISR pages, which
+      // the 512MB host can't afford.
+      `script-src 'self' 'unsafe-inline'${process.env.NODE_ENV === "production" ? "" : " 'unsafe-eval'"} https://www.googletagmanager.com https://www.google-analytics.com https://pagead2.googlesyndication.com https://www.paypal.com https://*.paypal.com https://www.paypalobjects.com`,
       "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
       "font-src 'self' https://fonts.gstatic.com data:",
       "img-src 'self' https: data: blob:",
-      "connect-src 'self' https: https://www.google-analytics.com https://www.paypal.com https://api-m.paypal.com https://api-m.sandbox.paypal.com",
-      "frame-src 'self' https://googleads.g.doubleclick.net https://www.paypal.com https://www.sandbox.paypal.com",
+      // Only the hosts the browser code actually talks to (was "https:", any host).
+      "connect-src 'self' https://*.google-analytics.com https://*.analytics.google.com https://*.googletagmanager.com https://stats.g.doubleclick.net https://pagead2.googlesyndication.com https://*.paypal.com https://*.paypalobjects.com",
+      "frame-src 'self' https://googleads.g.doubleclick.net https://*.paypal.com",
       "frame-ancestors 'self'",
       "base-uri 'self'",
       "form-action 'self'",
       "object-src 'none'",
+      "worker-src 'self' blob:",
+      "manifest-src 'self'",
       // Production only: on http://localhost it would rewrite dev requests to https.
       ...(process.env.NODE_ENV === "production" ? ["upgrade-insecure-requests"] : []),
     ].join("; "),

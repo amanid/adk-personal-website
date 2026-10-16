@@ -129,7 +129,7 @@ export default function AdminQAPage() {
       </h1>
 
       {error && (
-        <div className="flex items-center gap-2 px-4 py-3 mb-4 bg-red-500/10 border border-red-500/30 rounded-lg text-red-400 text-sm">
+        <div className="flex items-center gap-2 px-4 py-3 mb-4 bg-danger/10 border border-danger/30 rounded-lg text-danger text-sm">
           <AlertCircle className="w-4 h-4 shrink-0" />
           {error}
         </div>
@@ -147,13 +147,13 @@ export default function AdminQAPage() {
             <div className="flex items-center justify-between gap-2 mb-2">
               <div className="flex items-center gap-2">
                 {q.isAnswered ? (
-                  <CheckCircle className="w-4 h-4 text-green-400" />
+                  <CheckCircle className="w-4 h-4 text-success" />
                 ) : (
                   <Clock className="w-4 h-4 text-gold" />
                 )}
                 <span
                   className={`text-xs ${
-                    q.isAnswered ? "text-green-400" : "text-gold"
+                    q.isAnswered ? "text-success" : "text-gold"
                   }`}
                 >
                   {q.isAnswered ? "Answered" : "Pending"}
@@ -168,7 +168,7 @@ export default function AdminQAPage() {
               </div>
               <button
                 onClick={() => deleteQuestion(q.id)}
-                className="p-1.5 text-text-muted hover:text-red-400 transition-colors"
+                className="p-1.5 text-text-muted hover:text-danger transition-colors"
                 title="Delete question"
               >
                 <Trash2 className="w-4 h-4" />
@@ -188,7 +188,7 @@ export default function AdminQAPage() {
                     key={a.id}
                     className={`bg-navy/50 rounded-lg p-3 ${
                       a.isBestAnswer
-                        ? "border-l-2 border-green-400"
+                        ? "border-l-2 border-success"
                         : "border-l-2 border-gold"
                     }`}
                   >
@@ -204,7 +204,7 @@ export default function AdminQAPage() {
                             {a.votes}
                           </span>
                           {a.isBestAnswer && (
-                            <span className="flex items-center gap-1 text-xs text-green-400">
+                            <span className="flex items-center gap-1 text-xs text-success">
                               <Award className="w-3 h-3" />
                               Best Answer
                             </span>
@@ -216,8 +216,8 @@ export default function AdminQAPage() {
                           onClick={() => markBestAnswer(q.id, a.id, a.isBestAnswer)}
                           className={`p-1.5 transition-colors ${
                             a.isBestAnswer
-                              ? "text-green-400 hover:text-text-muted"
-                              : "text-text-muted hover:text-green-400"
+                              ? "text-success hover:text-text-muted"
+                              : "text-text-muted hover:text-success"
                           }`}
                           title={a.isBestAnswer ? "Remove best answer" : "Mark as best answer"}
                         >
@@ -225,7 +225,7 @@ export default function AdminQAPage() {
                         </button>
                         <button
                           onClick={() => deleteAnswer(q.id, a.id)}
-                          className="p-1.5 text-text-muted hover:text-red-400 transition-colors"
+                          className="p-1.5 text-text-muted hover:text-danger transition-colors"
                           title="Delete answer"
                         >
                           <Trash2 className="w-3.5 h-3.5" />

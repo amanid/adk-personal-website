@@ -62,33 +62,38 @@ export default async function BundlePage({ params }: { params: Promise<{ locale:
   };
 
   return (
-    <div className="max-w-5xl mx-auto px-4 sm:px-6 py-10">
+    <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-10 md:py-14">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(jsonLd) }} />
-      <Link href="/store" className="inline-flex items-center gap-1 text-sm text-text-secondary hover:text-gold mb-6">
-        <ChevronLeft className="w-4 h-4" /> {l === "fr" ? "Retour à la boutique" : "Back to the store"}
+      <Link
+        href="/store"
+        className="inline-flex items-center gap-1 min-h-11 text-sm text-text-secondary hover:text-gold transition-colors mb-6"
+      >
+        <ChevronLeft aria-hidden="true" className="w-4 h-4" /> {l === "fr" ? "Retour à la librairie" : "Back to bookstore"}
       </Link>
-      <p className="eyebrow mb-2">{t("bundles_title")}</p>
-      <h1 className="text-3xl md:text-4xl font-semibold mb-4">{title}</h1>
-      <p className="text-text-secondary leading-relaxed max-w-3xl whitespace-pre-line mb-8">{description}</p>
+      <header className="max-w-3xl mb-10">
+        <p className="eyebrow mb-3">{t("bundles_title")}</p>
+        <h1 className="font-display text-4xl md:text-5xl leading-[1.05] tracking-tight">{title}</h1>
+        {description && <p className="lede mt-5 whitespace-pre-line">{description}</p>}
+      </header>
 
-      <div className="grid md:grid-cols-[1fr_20rem] gap-8 items-start">
-        <section>
-          <h2 className="text-lg font-semibold mb-4">{t("bundle_includes")}</h2>
-          <ul className="space-y-3">
+      <div className="grid md:grid-cols-[1fr_20rem] gap-10 items-start">
+        <section aria-labelledby="bundle-items">
+          <h2 id="bundle-items" className="eyebrow text-text-muted mb-2">{t("bundle_includes")}</h2>
+          <ul>
             {b.items.map(({ book }) => (
-              <li key={book.id} className="glass p-3 flex items-center gap-4">
-                <div className="relative w-12 h-16 shrink-0 rounded-sm overflow-hidden bg-navy">
+              <li key={book.id} className="py-4 border-b border-glass-border flex items-center gap-4">
+                <div className="relative w-12 h-16 shrink-0 rounded-[var(--radius-sm)] overflow-hidden bg-navy border border-glass-border">
                   {book.coverImageId && (
                     <Image src={`/api/uploads/${book.coverImageId}`} alt="" fill className="object-cover" sizes="48px" unoptimized />
                   )}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <Link href={`/store/${book.slug}`} className="font-medium hover:text-gold line-clamp-1">
+                  <Link href={`/store/${book.slug}`} className="font-display text-lg leading-snug hover:text-gold transition-colors line-clamp-2">
                     {l === "fr" && book.titleFr ? book.titleFr : book.title}
                   </Link>
-                  {book.kind !== "BOOK" && <p className="text-xs text-text-muted">{t(`kind_${book.kind}`)}</p>}
+                  {book.kind !== "BOOK" && <p className="text-xs text-text-muted mt-0.5">{t(`kind_${book.kind}`)}</p>}
                 </div>
-                <span className="figure text-sm text-text-secondary">
+                <span className="font-mono tabular-nums text-sm text-text-secondary shrink-0">
                   {formatPrice(effectivePrice(book).priceCents, book.currency)}
                 </span>
               </li>
@@ -96,20 +101,22 @@ export default async function BundlePage({ params }: { params: Promise<{ locale:
           </ul>
         </section>
 
-        <aside className="glass p-5 md:sticky md:top-24">
+        <aside className="card-feature card p-6 md:sticky md:top-24">
           {cover && (
-            <div className="relative aspect-[3/4] mb-4 rounded-md overflow-hidden bg-navy">
+            <div className="relative aspect-[3/4] mb-5 rounded-[var(--radius-sm)] overflow-hidden bg-navy border border-glass-border">
               <Image src={cover} alt="" fill className="object-cover" sizes="320px" unoptimized />
             </div>
           )}
-          <p className="text-2xl font-bold text-gold">{formatPrice(b.priceCents, b.currency)}</p>
+          <p className="font-mono tabular-nums text-3xl font-medium">{formatPrice(b.priceCents, b.currency)}</p>
           {b.savingCents > 0 && (
-            <p className="text-sm text-text-secondary mt-1">
-              {t("bundle_value", { amount: formatPrice(b.separateCents, b.currency) })} ·{" "}
-              <span className="text-gold font-medium">{t("bundle_save", { amount: formatPrice(b.savingCents, b.currency) })}</span>
+            <p className="text-sm text-text-secondary mt-2 flex flex-wrap items-center gap-2">
+              <span>{t("bundle_value", { amount: formatPrice(b.separateCents, b.currency) })}</span>
+              <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-success/15 text-success">
+                {t("bundle_save", { amount: formatPrice(b.savingCents, b.currency) })}
+              </span>
             </p>
           )}
-          <div className="mt-4">
+          <div className="mt-5">
             <AddToCartButton
               book={{
                 bookId: bundleCartId(b.id),
@@ -122,8 +129,8 @@ export default async function BundlePage({ params }: { params: Promise<{ locale:
               buyNow
             />
           </div>
-          <p className="text-xs text-text-secondary mt-4 flex items-start gap-1.5">
-            <Check className="w-3.5 h-3.5 text-green-400 mt-0.5 shrink-0" />
+          <p className="text-sm text-text-secondary mt-5 pt-4 border-t border-glass-border flex items-start gap-2">
+            <Check aria-hidden="true" className="w-4 h-4 text-success mt-0.5 shrink-0" />
             {l === "fr"
               ? "Un lien de téléchargement sécurisé par titre, envoyé après paiement."
               : "One secure download link per title, sent after payment."}

@@ -28,16 +28,16 @@ export default async function QuotePage({ params }: { params: Promise<{ locale: 
   const balanceCents = q.totalCents - q.depositCents;
 
   return (
-    <div className="max-w-3xl mx-auto px-4 py-12 md:py-16">
-      <p className="eyebrow mb-3">{t("eyebrow")}</p>
-      <h1 className="text-3xl md:text-4xl font-semibold mb-2">{q.title}</h1>
-      <p className="text-text-secondary mb-8">{expired ? t("status_EXPIRED") : t(`status_${q.status}`)}</p>
+    <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 pt-14 pb-20 md:pt-20">
+      <p className="eyebrow mb-4">{t("eyebrow")}</p>
+      <h1 className="font-display text-4xl md:text-5xl leading-[1.05] tracking-tight mb-3">{q.title}</h1>
+      <p className="lede mb-10">{expired ? t("status_EXPIRED") : t(`status_${q.status}`)}</p>
 
-      <div className="glass p-6 md:p-8 space-y-8">
+      <div className="card p-6 md:p-8 space-y-8">
         <dl className="grid sm:grid-cols-3 gap-4 text-sm">
           <div>
             <dt className="text-text-muted">{t("reference")}</dt>
-            <dd className="figure">{q.number}</dd>
+            <dd className="font-mono tabular-nums">{q.number}</dd>
           </div>
           <div>
             <dt className="text-text-muted">{t("prepared_for")}</dt>
@@ -55,42 +55,42 @@ export default async function QuotePage({ params }: { params: Promise<{ locale: 
         </dl>
 
         <section>
-          <h2 className="text-lg font-semibold mb-3">{t("scope")}</h2>
+          <h2 className="font-display text-2xl mb-3">{t("scope")}</h2>
           {/* Plain text from the admin, rendered as text (never as HTML). */}
           <p className="text-text-secondary leading-relaxed whitespace-pre-line">{q.scope}</p>
         </section>
 
         <section>
-          <h2 className="text-lg font-semibold mb-3">{t("items")}</h2>
+          <h2 className="font-display text-2xl mb-3">{t("items")}</h2>
           <table className="w-full text-sm">
             <tbody>
               {items.map((i, n) => (
                 <tr key={n} className="border-b border-glass-border">
                   <td className="py-2.5 pr-4 text-text-secondary">{i.description}</td>
-                  <td className="py-2.5 text-right figure whitespace-nowrap">{formatPrice(i.amountCents, q.currency)}</td>
+                  <td className="py-2.5 text-right font-mono tabular-nums whitespace-nowrap">{formatPrice(i.amountCents, q.currency)}</td>
                 </tr>
               ))}
             </tbody>
             <tfoot>
               <tr>
                 <td className="pt-3 pr-4 font-semibold">{t("total")}</td>
-                <td className="pt-3 text-right figure font-semibold">{formatPrice(q.totalCents, q.currency)}</td>
+                <td className="pt-3 text-right font-mono tabular-nums font-semibold">{formatPrice(q.totalCents, q.currency)}</td>
               </tr>
               {q.depositCents > 0 && q.depositCents < q.totalCents && (
                 <>
                   <tr>
                     <td className="pt-1 pr-4 text-text-secondary">
                       {t("deposit", { pct: q.depositPercent })}
-                      {q.depositPaidAt && <span className="text-green-400"> · {t("paid")}</span>}
+                      {q.depositPaidAt && <span className="text-success"> · {t("paid")}</span>}
                     </td>
-                    <td className="pt-1 text-right figure text-text-secondary">{formatPrice(q.depositCents, q.currency)}</td>
+                    <td className="pt-1 text-right font-mono tabular-nums text-text-secondary">{formatPrice(q.depositCents, q.currency)}</td>
                   </tr>
                   <tr>
                     <td className="pt-1 pr-4 text-text-secondary">
                       {t("balance")}
-                      {q.status === "PAID" && <span className="text-green-400"> · {t("paid")}</span>}
+                      {q.status === "PAID" && <span className="text-success"> · {t("paid")}</span>}
                     </td>
-                    <td className="pt-1 text-right figure text-text-secondary">{formatPrice(balanceCents, q.currency)}</td>
+                    <td className="pt-1 text-right font-mono tabular-nums text-text-secondary">{formatPrice(balanceCents, q.currency)}</td>
                   </tr>
                 </>
               )}
@@ -99,9 +99,9 @@ export default async function QuotePage({ params }: { params: Promise<{ locale: 
         </section>
 
         {q.acceptedAt && q.acceptedName && (
-          <p className="text-xs text-text-muted">{t("accepted_on", { name: q.acceptedName, date: date(q.acceptedAt) })}</p>
+          <p className="text-sm text-text-muted">{t("accepted_on", { name: q.acceptedName, date: date(q.acceptedAt) })}</p>
         )}
-        {expired && <p className="text-sm text-amber-400">{t("expired_help")}</p>}
+        {expired && <p className="text-sm text-warning">{t("expired_help")}</p>}
       </div>
 
       <QuoteActions
@@ -111,7 +111,7 @@ export default async function QuotePage({ params }: { params: Promise<{ locale: 
         currency={q.currency}
       />
 
-      <p className="text-xs text-text-muted mt-8">{t("questions")}</p>
+      <p className="text-sm text-text-muted mt-8">{t("questions")}</p>
     </div>
   );
 }

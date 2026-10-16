@@ -158,7 +158,7 @@ export default function FinancePage() {
           label="Trending Up"
           value={trendingUp}
           icon={TrendingUp}
-          color="text-green-400"
+          color="text-success"
         />
         <StatCard
           label="Avg Change %"
@@ -196,7 +196,7 @@ export default function FinancePage() {
               {hasData && c.change !== null && c.changePercent !== null ? (
                 <div
                   className={`flex items-center gap-1 text-sm ${
-                    isPositive ? "text-green-400" : "text-red-400"
+                    isPositive ? "text-success" : "text-danger"
                   }`}
                 >
                   {isPositive ? (
@@ -210,7 +210,7 @@ export default function FinancePage() {
                   </span>
                 </div>
               ) : !hasData ? (
-                <p className="text-xs text-yellow-400">Unavailable</p>
+                <p className="text-xs text-warning">Unavailable</p>
               ) : null}
               {hasData && sparkData.length >= 2 && (
                 <div className="mt-3 -mx-1">
@@ -260,7 +260,7 @@ export default function FinancePage() {
               {idx.change && (
                 <p
                   className={`text-sm ${
-                    idx.change.startsWith("-") ? "text-red-400" : "text-green-400"
+                    idx.change.startsWith("-") ? "text-danger" : "text-success"
                   }`}
                 >
                   {idx.change}
@@ -296,7 +296,7 @@ export default function FinancePage() {
                     <td className="p-3 text-right">{stock.price}</td>
                     <td
                       className={`p-3 text-right ${
-                        stock.change.startsWith("-") ? "text-red-400" : stock.change === "+0" ? "text-text-secondary" : "text-green-400"
+                        stock.change.startsWith("-") ? "text-danger" : stock.change === "+0" ? "text-text-secondary" : "text-success"
                       }`}
                     >
                       {stock.change}

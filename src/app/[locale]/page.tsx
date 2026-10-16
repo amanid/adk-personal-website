@@ -109,6 +109,8 @@ export default async function HomePage() {
 
   const visibility = settings.sectionVisibility as Record<string, boolean>;
   const cvUrl = typeof settings.cvFileUrl === "string" ? settings.cvFileUrl : "";
+  const photo = typeof settings.profilePhoto === "string" && settings.profilePhoto ? settings.profilePhoto : "";
+  const profilePhoto = photo ? (photo.includes("?") ? photo : `${photo}?v2`) : undefined;
 
   return (
     <HomeClient
@@ -117,6 +119,7 @@ export default async function HomePage() {
       initialPublications={publications.map((p) => protectFiles(p))}
       initialVisibility={visibility}
       initialCvUrl={cvUrl}
+      profilePhoto={profilePhoto}
       capabilities={capabilities}
     />
   );

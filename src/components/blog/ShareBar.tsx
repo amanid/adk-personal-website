@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useLocale } from "next-intl";
 import { Share2, Copy, Check, Linkedin } from "lucide-react";
 
 interface ShareBarProps {
@@ -10,6 +11,7 @@ interface ShareBarProps {
 
 export default function ShareBar({ title, slug }: ShareBarProps) {
   const [copied, setCopied] = useState(false);
+  const fr = useLocale() === "fr";
   const url = typeof window !== "undefined"
     ? window.location.href
     : `https://www.konanamanidieudonne.org/en/blog/${slug}`;
@@ -33,29 +35,32 @@ export default function ShareBar({ title, slug }: ShareBarProps) {
     },
   ];
 
+  const cls =
+    "w-11 h-11 rounded-[var(--radius-sm)] border border-glass-border flex items-center justify-center text-text-secondary hover:text-gold hover:bg-[var(--hover-wash)] transition-colors";
+
   return (
-    <div className="flex items-center gap-2 py-4 border-t border-glass-border">
-      <span className="text-text-muted text-xs mr-1">Share:</span>
+    <div className="flex items-center gap-2 py-5 border-t border-glass-border">
+      <span className="eyebrow text-text-muted mr-2">{fr ? "Partager" : "Share"}</span>
       {links.map((link) => (
         <a
           key={link.label}
           href={link.href}
           target="_blank"
           rel="noopener noreferrer"
-          className="w-8 h-8 rounded-lg glass flex items-center justify-center text-text-muted hover:text-gold transition-colors"
+          className={cls}
           title={link.label}
-          aria-label={`Share on ${link.label}`}
+          aria-label={fr ? `Partager sur ${link.label}` : `Share on ${link.label}`}
         >
-          <link.icon className="w-3.5 h-3.5" />
+          <link.icon aria-hidden className="w-4 h-4" />
         </a>
       ))}
       <button
+        type="button"
         onClick={handleCopy}
-        className="w-8 h-8 rounded-lg glass flex items-center justify-center text-text-muted hover:text-gold transition-colors"
-        title="Copy link"
-        aria-label="Copy link"
+        className={cls}
+        aria-label={copied ? (fr ? "Lien copié" : "Link copied") : fr ? "Copier le lien" : "Copy link"}
       >
-        {copied ? <Check className="w-3.5 h-3.5 text-green-400" /> : <Copy className="w-3.5 h-3.5" />}
+        {copied ? <Check aria-hidden className="w-4 h-4 text-success" /> : <Copy aria-hidden className="w-4 h-4" />}
       </button>
     </div>
   );

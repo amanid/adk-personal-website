@@ -1,48 +1,30 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { motion } from "framer-motion";
-import {
-  Calendar,
-  MapPin,
-  ExternalLink,
-  Award,
-  Mic,
-  BookOpen,
-  Users,
-  Target,
-  Lightbulb,
-  MoreHorizontal,
-  FileText,
-  Database,
-  GraduationCap,
-  Handshake,
-  Code,
-  ShieldCheck,
-} from "lucide-react";
+import { ExternalLink, MapPin } from "lucide-react";
 import type { ResearchActivityData, ResearchActivityType } from "@/types";
 
-const TYPE_CONFIG: Record<ResearchActivityType, { icon: typeof Calendar; color: string; label: string }> = {
-  RESEARCH_PAPER: { icon: FileText, color: "text-blue-400", label: "Research Paper" },
-  JOURNAL_ARTICLE: { icon: BookOpen, color: "text-indigo-400", label: "Journal Article" },
-  CONFERENCE_PAPER: { icon: FileText, color: "text-violet-400", label: "Conference Paper" },
-  WORKING_PAPER: { icon: FileText, color: "text-slate-400", label: "Working Paper" },
-  TECHNICAL_REPORT: { icon: FileText, color: "text-teal-400", label: "Technical Report" },
-  BOOK_CHAPTER: { icon: BookOpen, color: "text-rose-400", label: "Book Chapter" },
-  DATASET_RELEASE: { icon: Database, color: "text-emerald-400", label: "Dataset" },
-  CONFERENCE_ATTENDED: { icon: Users, color: "text-blue-400", label: "Conference" },
-  TALK_GIVEN: { icon: Mic, color: "text-purple-400", label: "Talk" },
-  PEER_REVIEW: { icon: BookOpen, color: "text-green-400", label: "Peer Review" },
-  GRANT_RECEIVED: { icon: Target, color: "text-gold", label: "Grant" },
-  MILESTONE: { icon: Lightbulb, color: "text-cyan-400", label: "Milestone" },
-  WORKSHOP: { icon: Users, color: "text-amber-400", label: "Workshop" },
-  AWARD: { icon: Award, color: "text-yellow-400", label: "Award" },
-  TEACHING: { icon: GraduationCap, color: "text-orange-400", label: "Teaching" },
-  SUPERVISION: { icon: GraduationCap, color: "text-pink-400", label: "Supervision" },
-  COLLABORATION: { icon: Handshake, color: "text-sky-400", label: "Collaboration" },
-  PATENT: { icon: ShieldCheck, color: "text-amber-300", label: "Patent" },
-  SOFTWARE_RELEASE: { icon: Code, color: "text-lime-400", label: "Software" },
-  OTHER: { icon: MoreHorizontal, color: "text-text-secondary", label: "Other" },
+const TYPE_LABEL: Record<ResearchActivityType, { en: string; fr: string }> = {
+  RESEARCH_PAPER: { en: "Research paper", fr: "Article de recherche" },
+  JOURNAL_ARTICLE: { en: "Journal article", fr: "Article de revue" },
+  CONFERENCE_PAPER: { en: "Conference paper", fr: "Communication" },
+  WORKING_PAPER: { en: "Working paper", fr: "Document de travail" },
+  TECHNICAL_REPORT: { en: "Technical report", fr: "Rapport technique" },
+  BOOK_CHAPTER: { en: "Book chapter", fr: "Chapitre de livre" },
+  DATASET_RELEASE: { en: "Dataset", fr: "Jeu de données" },
+  CONFERENCE_ATTENDED: { en: "Conference", fr: "Conférence" },
+  TALK_GIVEN: { en: "Talk", fr: "Intervention" },
+  PEER_REVIEW: { en: "Peer review", fr: "Relecture" },
+  GRANT_RECEIVED: { en: "Grant", fr: "Financement" },
+  MILESTONE: { en: "Milestone", fr: "Étape" },
+  WORKSHOP: { en: "Workshop", fr: "Atelier" },
+  AWARD: { en: "Award", fr: "Distinction" },
+  TEACHING: { en: "Teaching", fr: "Enseignement" },
+  SUPERVISION: { en: "Supervision", fr: "Encadrement" },
+  COLLABORATION: { en: "Collaboration", fr: "Collaboration" },
+  PATENT: { en: "Patent", fr: "Brevet" },
+  SOFTWARE_RELEASE: { en: "Software", fr: "Logiciel" },
+  OTHER: { en: "Other", fr: "Autre" },
 };
 
 interface ResearchTimelineProps {
@@ -61,86 +43,60 @@ export default function ResearchTimeline({ locale = "en" }: ResearchTimelineProp
       .finally(() => setLoading(false));
   }, []);
 
+  const fr = locale === "fr";
+
   if (loading) {
     return (
-      <div className="flex justify-center py-12">
-        <div className="animate-spin w-6 h-6 border-2 border-gold border-t-transparent rounded-full" />
-      </div>
+      <p role="status" className="flex items-center gap-3 py-8 text-text-secondary">
+        <span aria-hidden className="animate-spin w-4 h-4 border-2 border-gold border-t-transparent rounded-full" />
+        {fr ? "Chargement…" : "Loading…"}
+      </p>
     );
   }
 
   if (activities.length === 0) {
-    return (
-      <div className="glass rounded-xl p-8 text-center">
-        <Calendar className="w-8 h-8 text-text-secondary mx-auto mb-3" />
-        <p className="text-text-secondary">No research activities yet.</p>
-      </div>
-    );
+    return <p className="py-8 text-text-secondary">{fr ? "Aucune activité pour le moment." : "No research activities yet."}</p>;
   }
 
   return (
-    <div className="relative">
-      <div className="absolute left-4 top-0 bottom-0 w-px bg-glass-border" />
-      <div className="space-y-6">
-        {activities.map((activity, i) => {
-          const config = TYPE_CONFIG[activity.type];
-          const Icon = config.icon;
-          const title = locale === "fr" && activity.titleFr ? activity.titleFr : activity.title;
-          const description = locale === "fr" && activity.descriptionFr ? activity.descriptionFr : activity.description;
-          const location = locale === "fr" && activity.locationFr ? activity.locationFr : activity.location;
+    <ol className="border-t border-glass-border">
+      {activities.map((activity) => {
+        const label = TYPE_LABEL[activity.type] ?? TYPE_LABEL.OTHER;
+        const title = fr && activity.titleFr ? activity.titleFr : activity.title;
+        const description = fr && activity.descriptionFr ? activity.descriptionFr : activity.description;
+        const location = fr && activity.locationFr ? activity.locationFr : activity.location;
+        const date = new Date(activity.date);
 
-          return (
-            <motion.div
-              key={activity.id}
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: i * 0.1 }}
-              className="relative pl-10"
-            >
-              <div className={`absolute left-2 top-1 w-5 h-5 rounded-full glass flex items-center justify-center ${config.color}`}>
-                <Icon className="w-3 h-3" />
-              </div>
-              <div className="glass rounded-xl p-4">
-                <div className="flex items-start justify-between gap-2 mb-1">
-                  <h3 className="font-medium">{title}</h3>
-                  <span className={`text-xs px-2 py-0.5 rounded-full glass ${config.color}`}>
-                    {config.label}
-                  </span>
-                </div>
-                <div className="flex flex-wrap items-center gap-3 text-xs text-text-secondary mb-2">
-                  <span className="flex items-center gap-1">
-                    <Calendar className="w-3 h-3" />
-                    {new Date(activity.date).toLocaleDateString(locale === "fr" ? "fr-FR" : "en-US", {
-                      year: "numeric",
-                      month: "long",
-                      day: "numeric",
-                    })}
-                  </span>
-                  {location && (
-                    <span className="flex items-center gap-1">
-                      <MapPin className="w-3 h-3" />
-                      {location}
-                    </span>
-                  )}
-                </div>
-                {description && (
-                  <p className="text-sm text-text-secondary">{description}</p>
-                )}
-                {activity.url && (
-                  <a
-                    href={activity.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1 text-xs text-gold hover:text-gold/80 mt-2 transition-colors"
-                  >
-                    View More <ExternalLink className="w-3 h-3" />
-                  </a>
-                )}
-              </div>
-            </motion.div>
-          );
-        })}
-      </div>
-    </div>
+        return (
+          <li key={activity.id} className="grid grid-cols-[5.5rem_1fr] sm:grid-cols-[7.5rem_1fr] gap-x-4 sm:gap-x-6 py-6 border-b border-glass-border">
+            <time dateTime={date.toISOString()} className="font-mono text-sm tabular-nums text-text-muted pt-1">
+              {date.toLocaleDateString(fr ? "fr-FR" : "en-US", { year: "numeric", month: "short" })}
+            </time>
+            <div className="min-w-0">
+              <p className="eyebrow text-text-muted mb-1.5">{fr ? label.fr : label.en}</p>
+              <h3 className="font-display text-xl leading-snug">{title}</h3>
+              {location && (
+                <p className="mt-1.5 text-sm text-text-muted flex items-center gap-1.5">
+                  <MapPin aria-hidden className="w-3.5 h-3.5" />
+                  {location}
+                </p>
+              )}
+              {description && <p className="mt-3 text-text-secondary leading-relaxed">{description}</p>}
+              {activity.url && (
+                <a
+                  href={activity.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1.5 min-h-11 text-sm text-gold hover:text-gold-light transition-colors"
+                >
+                  {fr ? "En savoir plus" : "More details"}
+                  <ExternalLink aria-hidden className="w-3.5 h-3.5" />
+                </a>
+              )}
+            </div>
+          </li>
+        );
+      })}
+    </ol>
   );
 }

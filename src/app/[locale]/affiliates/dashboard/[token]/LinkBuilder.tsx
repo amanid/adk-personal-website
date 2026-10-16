@@ -3,13 +3,18 @@
 import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { Copy, Check } from "lucide-react";
+import { Button } from "@/components/ui/Button";
 
 function CopyRow({
+  id,
+  ariaLabel,
   value,
   copied,
   onCopy,
   labels,
 }: {
+  id: string;
+  ariaLabel?: string;
   value: string;
   copied: boolean;
   onCopy: (v: string) => void;
@@ -18,15 +23,17 @@ function CopyRow({
   return (
     <div className="flex gap-2">
       <input
+        id={id}
+        aria-label={ariaLabel}
         readOnly
         value={value}
-        className="flex-1 min-w-0 px-3 py-2 rounded-md bg-navy/50 border border-glass-border text-sm figure"
+        className="flex-1 min-w-0 min-h-11 px-4 rounded-[var(--radius-md)] bg-navy border border-glass-border text-sm font-mono focus:border-gold focus:outline-none"
         onFocus={(e) => e.target.select()}
       />
-      <button type="button" onClick={() => onCopy(value)} className="px-3 py-2 rounded-md border border-glass-border text-sm inline-flex items-center gap-1 shrink-0">
-        {copied ? <Check className="w-4 h-4 text-green-400" /> : <Copy className="w-4 h-4" />}
-        {copied ? labels[1] : labels[0]}
-      </button>
+      <Button type="button" variant="secondary" onClick={() => onCopy(value)} className="shrink-0">
+        {copied ? <Check className="w-4 h-4 text-success" aria-hidden /> : <Copy className="w-4 h-4" aria-hidden />}
+        <span aria-live="polite">{copied ? labels[1] : labels[0]}</span>
+      </Button>
     </div>
   );
 }
@@ -58,22 +65,32 @@ export default function LinkBuilder({
     }
   };
   return (
-    <div className="glass p-5 space-y-4">
+    <div className="card p-5 md:p-6 space-y-6">
       <div>
-        <p className="text-sm font-medium mb-2">{t("your_link")}</p>
-        <CopyRow value={home} copied={copied === home} onCopy={copy} labels={[t("copy"), t("copied")]} />
+        <label htmlFor="aff-link-home" className="block text-sm font-medium mb-2">
+          {t("your_link")}
+        </label>
+        <CopyRow id="aff-link-home" value={home} copied={copied === home} onCopy={copy} labels={[t("copy"), t("copied")]} />
       </div>
       <div>
-        <p className="text-sm font-medium mb-1">{t("link_builder")}</p>
-        <p className="text-xs text-text-muted mb-2">{t("link_builder_help")}</p>
-        <select value={path} onChange={(e) => setPath(e.target.value)} className="w-full mb-2 px-3 py-2 rounded-md bg-navy/50 border border-glass-border text-sm">
+        <label htmlFor="aff-link-target" className="block text-sm font-medium mb-1">
+          {t("link_builder")}
+        </label>
+        <p id="aff-link-help" className="text-sm text-text-muted mb-2">{t("link_builder_help")}</p>
+        <select
+          id="aff-link-target"
+          aria-describedby="aff-link-help"
+          value={path}
+          onChange={(e) => setPath(e.target.value)}
+          className="w-full mb-2 min-h-11 px-4 rounded-[var(--radius-md)] bg-navy border border-glass-border text-sm focus:border-gold focus:outline-none"
+        >
           {targets.map((x) => (
             <option key={x.path} value={x.path}>
               {x.label}
             </option>
           ))}
         </select>
-        <CopyRow value={deep} copied={copied === deep} onCopy={copy} labels={[t("copy"), t("copied")]} />
+        <CopyRow id="aff-link-deep" ariaLabel={t("link_builder")} value={deep} copied={copied === deep} onCopy={copy} labels={[t("copy"), t("copied")]} />
       </div>
     </div>
   );

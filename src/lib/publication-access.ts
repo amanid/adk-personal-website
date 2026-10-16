@@ -1,6 +1,7 @@
 import path from "node:path";
 import { readFile } from "node:fs/promises";
 import { auth } from "./auth";
+import { prisma } from "./prisma";
 import { checkPublicationAccess } from "./subscription";
 import { publications as staticPublications } from "@/data/publications";
 
@@ -40,14 +41,18 @@ export function gatedFileUrl(slug: string, kind: FileKind): string {
   return `/api/publications/${encodeURIComponent(slug)}/file?kind=${kind}`;
 }
 
-/** Whether the current viewer may open gated documents. */
-export async function viewerHasGatedAccess(): Promise<boolean> {
+/**
+ * Whether the current viewer may open a gated file of this kind. Reports need
+ * a document plan; datasets and supplementary material need a data plan.
+ */
+export async function viewerHasGatedAccess(kind: FileKind = "pdf"): Promise<boolean> {
   try {
     const session = await auth();
     const userId = (session?.user as { id?: string } | undefined)?.id ?? null;
     if (!userId) return false;
     if ((session?.user as { role?: string } | undefined)?.role === "ADMIN") return true;
-    return (await checkPublicationAccess(userId, "GATED")).hasDocumentAccess;
+    const access = await checkPublicationAccess(userId, "GATED");
+    return kind === "pdf" ? access.hasDocumentAccess : access.hasDataAccess;
   } catch {
     return false;
   }
@@ -89,4 +94,25 @@ export async function readPrivatePublication(fileName: string): Promise<Buffer |
     }
   }
   return null;
+}
+
+const UPLOAD_PREFIX = "/api/uploads/";
+
+/**
+ * Whether an upload is the file behind a gated publication or research
+ * activity. Such uploads must never be served by the public /api/uploads
+ * route, only through the access-checked file route.
+ */
+export async function isGatedUpload(id: string): Promise<boolean> {
+  const url = `${UPLOAD_PREFIX}${id}`;
+  const fileMatch = [{ dataUrl: url }, { supplementaryUrl: url }];
+  const [pubs, activities] = await Promise.all([
+    prisma.publication.count({
+      where: { accessLevel: "GATED", OR: [{ pdfUrl: url }, ...fileMatch] },
+    }),
+    prisma.researchActivity.count({
+      where: { accessLevel: "GATED", OR: [{ paperUrl: url }, ...fileMatch] },
+    }),
+  ]);
+  return pubs + activities > 0;
 }

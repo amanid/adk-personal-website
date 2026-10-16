@@ -2,8 +2,10 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
-import { Link, useRouter } from "@/i18n/routing";
-import { Clock, Check, ChevronRight, Loader2 } from "lucide-react";
+import { useRouter } from "@/i18n/routing";
+import { Clock, Check, Loader2 } from "lucide-react";
+import { Button, ButtonLink } from "@/components/ui/Button";
+import { cn } from "@/lib/utils";
 import { formatPrice } from "@/lib/utils";
 import PaymentPanel, { postJson } from "@/components/payments/PaymentPanel";
 import type { StartedCheckout } from "@/components/store/PayPalCheckout";
@@ -25,12 +27,16 @@ function StepHeader({ n, title, done, onChange }: { n: number; title: string; do
   const t = useTranslations("booking");
   return (
     <div className="flex items-baseline justify-between gap-4 mb-4">
-      <h2 className="text-lg font-semibold flex items-baseline gap-3">
-        <span className="figure text-sm text-text-muted">{String(n).padStart(2, "0")}</span>
+      <h2 className="font-display text-2xl leading-tight flex items-baseline gap-3">
+        <span className="font-mono tabular-nums text-sm text-gold">{String(n).padStart(2, "0")}</span>
         {title}
       </h2>
       {done && onChange && (
-        <button type="button" onClick={onChange} className="text-sm text-gold hover:text-gold-light shrink-0">
+        <button
+          type="button"
+          onClick={onChange}
+          className="min-h-11 px-3 -mr-3 text-sm text-gold hover:text-gold-light shrink-0 rounded-[var(--radius-md)] hover:bg-[var(--hover-wash)]"
+        >
           {t("change")}
         </button>
       )}
@@ -183,29 +189,35 @@ export default function BookingClient({ packages, preselect }: { packages: Packa
   };
 
   const inputClass =
-    "w-full px-3 py-2.5 rounded-md bg-navy/50 border border-glass-border focus:border-gold/50 outline-none text-sm";
+    "w-full min-h-11 px-4 py-2.5 rounded-[var(--radius-md)] bg-navy border border-glass-border text-text-primary text-sm " +
+    "placeholder:text-text-muted focus:border-gold focus:outline-none transition-colors";
+  const labelClass = "block text-sm text-text-secondary mb-1.5";
+  const nameInvalid = detailsTouched && name.trim().length < 2;
+  const emailInvalid = detailsTouched && !EMAIL_RE.test(email.trim());
+  const errorBox = "text-sm text-danger bg-danger/10 border border-danger/30 rounded-[var(--radius-md)] p-3";
 
   if (packages.length === 0) {
     return (
-      <div className="max-w-3xl mx-auto px-4 py-20 text-center">
-        <h1 className="text-3xl font-semibold mb-4">{t("title")}</h1>
-        <p className="text-text-secondary mb-6">{t("no_packages")}</p>
-        <Link href="/contact" className="inline-block px-5 py-2.5 rounded-md bg-gold text-charcoal font-semibold">
+      <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 pt-14 pb-20 md:pt-20">
+        <p className="eyebrow mb-4">{t("eyebrow")}</p>
+        <h1 className="font-display text-4xl md:text-6xl leading-[1.02] tracking-tight mb-5">{t("title")}</h1>
+        <p className="lede mb-8">{t("no_packages")}</p>
+        <ButtonLink href="/contact" size="lg">
           {t("contact")}
-        </Link>
+        </ButtonLink>
       </div>
     );
   }
 
   return (
-    <div className="max-w-4xl mx-auto px-4 py-12 md:py-16">
-      <p className="eyebrow mb-3">{t("eyebrow")}</p>
-      <h1 className="text-3xl md:text-5xl font-semibold mb-4">{t("title")}</h1>
-      <p className="text-text-secondary max-w-2xl mb-10">{t("subtitle")}</p>
+    <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pt-14 pb-20 md:pt-20 md:pb-28">
+      <p className="eyebrow mb-4">{t("eyebrow")}</p>
+      <h1 className="font-display text-4xl md:text-6xl leading-[1.02] tracking-tight mb-5">{t("title")}</h1>
+      <p className="lede max-w-2xl mb-12">{t("subtitle")}</p>
 
       <div className="space-y-6">
         {/* 1 · Package */}
-        <section className="glass p-5 md:p-7">
+        <section className="card p-5 md:p-7">
           <StepHeader
             n={1}
             title={t("step_package")}
@@ -217,7 +229,7 @@ export default function BookingClient({ packages, preselect }: { packages: Packa
               <p className="font-medium">{fr && pkg.titleFr ? pkg.titleFr : pkg.title}</p>
               <p className="text-sm text-text-secondary">
                 {t("minutes", { n: pkg.durationMinutes })} ·{" "}
-                <span className="text-text-primary font-medium">
+                <span className="font-mono tabular-nums text-text-primary">
                   {pkg.priceCents === 0 ? t("free") : formatPrice(pkg.priceCents, pkg.currency)}
                 </span>
               </p>
@@ -229,19 +241,19 @@ export default function BookingClient({ packages, preselect }: { packages: Packa
                   key={p.slug}
                   type="button"
                   onClick={() => setPkgSlug(p.slug)}
-                  className="text-left rounded-md border border-glass-border hover:border-gold/50 p-4 transition-colors"
+                  className="card card-interactive text-left p-5"
                 >
                   <div className="flex items-baseline justify-between gap-3 mb-2">
-                    <span className="font-semibold">{fr && p.titleFr ? p.titleFr : p.title}</span>
-                    <span className="figure text-gold shrink-0">
+                    <span className="font-display text-xl leading-tight">{fr && p.titleFr ? p.titleFr : p.title}</span>
+                    <span className="font-mono tabular-nums text-gold shrink-0">
                       {p.priceCents === 0 ? t("free") : formatPrice(p.priceCents, p.currency)}
                     </span>
                   </div>
                   <p className="text-sm text-text-secondary leading-relaxed mb-3">
                     {fr && p.descriptionFr ? p.descriptionFr : p.description}
                   </p>
-                  <p className="text-xs text-text-muted flex items-center gap-1.5">
-                    <Clock className="w-3.5 h-3.5" />
+                  <p className="font-mono text-xs text-text-muted flex items-center gap-1.5">
+                    <Clock className="w-3.5 h-3.5" aria-hidden />
                     {t("minutes", { n: p.durationMinutes })}
                   </p>
                 </button>
@@ -252,7 +264,7 @@ export default function BookingClient({ packages, preselect }: { packages: Packa
 
         {/* 2 · Time */}
         {pkg && (
-          <section className="glass p-5 md:p-7">
+          <section className="card p-5 md:p-7">
             <StepHeader
               n={2}
               title={t("step_time")}
@@ -260,26 +272,30 @@ export default function BookingClient({ packages, preselect }: { packages: Packa
               onChange={() => setStartsAt(null)}
             />
             {error && !startsAt && (
-              <p className="text-sm text-red-400 border border-red-400/30 rounded-md p-3 mb-4">{error}</p>
+              <p role="alert" className={cn(errorBox, "mb-4")}>
+                {error}
+              </p>
             )}
             {startsAt ? (
               <p className="font-medium">{fullLabel.format(new Date(startsAt))}</p>
             ) : slotError ? (
-              <p className="text-sm text-red-400">{slotError}</p>
+              <p role="alert" className="text-sm text-danger">
+                {slotError}
+              </p>
             ) : slots === null ? (
-              <p className="text-sm text-text-secondary flex items-center gap-2">
-                <Loader2 className="w-4 h-4 animate-spin" /> {t("loading_slots")}
+              <p role="status" className="text-sm text-text-secondary flex items-center gap-2">
+                <Loader2 className="w-4 h-4 animate-spin" aria-hidden /> {t("loading_slots")}
               </p>
             ) : slots.length === 0 ? (
               <div>
                 <p className="text-sm text-text-secondary mb-4">{t("no_slots")}</p>
-                <Link href="/contact" className="text-gold text-sm">
-                  {t("contact")} →
-                </Link>
+                <ButtonLink href="/contact" variant="secondary">
+                  {t("contact")}
+                </ButtonLink>
               </div>
             ) : (
               <>
-                <p className="text-xs text-text-muted mb-4">{t("tz_note", { tz })}</p>
+                <p className="text-sm text-text-muted mb-4">{t("tz_note", { tz })}</p>
                 <div className="flex flex-wrap gap-2 mb-5">
                   {visibleDays.map(([k, list]) => (
                     <button
@@ -287,15 +303,22 @@ export default function BookingClient({ packages, preselect }: { packages: Packa
                       type="button"
                       onClick={() => setDay(k)}
                       aria-pressed={day === k}
-                      className={`px-3 py-2 rounded-md border text-sm transition-colors ${
-                        day === k ? "border-gold bg-gold/10 text-text-primary" : "border-glass-border hover:border-gold/40 text-text-secondary"
-                      }`}
+                      className={cn(
+                        "min-h-11 px-3.5 rounded-[var(--radius-md)] border text-sm transition-colors",
+                        day === k
+                          ? "border-gold bg-gold/10 text-text-primary"
+                          : "border-glass-border hover:border-text-muted hover:bg-[var(--hover-wash)] text-text-secondary"
+                      )}
                     >
                       {dayLabel.format(new Date(list[0]))}
                     </button>
                   ))}
                   {!showAllDays && byDay.length > visibleDays.length && (
-                    <button type="button" onClick={() => setShowAllDays(true)} className="px-3 py-2 text-sm text-gold">
+                    <button
+                      type="button"
+                      onClick={() => setShowAllDays(true)}
+                      className="min-h-11 px-3.5 text-sm text-gold rounded-[var(--radius-md)] hover:bg-[var(--hover-wash)]"
+                    >
                       {t("more_dates")}
                     </button>
                   )}
@@ -310,7 +333,7 @@ export default function BookingClient({ packages, preselect }: { packages: Packa
                           setStartsAt(s);
                           setError(null);
                         }}
-                        className="figure px-2 py-2 rounded-md border border-glass-border hover:border-gold hover:bg-gold/10 text-sm transition-colors"
+                        className="font-mono tabular-nums min-h-11 px-2 rounded-[var(--radius-md)] border border-glass-border hover:border-gold hover:bg-gold/10 text-sm transition-colors"
                       >
                         {timeLabel.format(new Date(s))}
                       </button>
@@ -324,47 +347,79 @@ export default function BookingClient({ packages, preselect }: { packages: Packa
 
         {/* 3 · Details */}
         {pkg && startsAt && (
-          <section className="glass p-5 md:p-7">
+          <section className="card p-5 md:p-7">
             <StepHeader n={3} title={t("step_details")} />
             <div className="grid sm:grid-cols-2 gap-4">
-              <label className="block">
-                <span className="block text-xs text-text-secondary mb-1">{t("name")} *</span>
-                <input value={name} onChange={(e) => setName(e.target.value)} autoComplete="name" className={inputClass} />
-              </label>
-              <label className="block">
-                <span className="block text-xs text-text-secondary mb-1">{t("email")} *</span>
+              <div>
+                <label htmlFor="book-name" className={labelClass}>
+                  {t("name")} <span aria-hidden>*</span>
+                </label>
                 <input
+                  id="book-name"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  autoComplete="name"
+                  required
+                  aria-invalid={nameInvalid || undefined}
+                  aria-describedby={nameInvalid ? "book-details-error" : undefined}
+                  className={inputClass}
+                />
+              </div>
+              <div>
+                <label htmlFor="book-email" className={labelClass}>
+                  {t("email")} <span aria-hidden>*</span>
+                </label>
+                <input
+                  id="book-email"
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   autoComplete="email"
+                  required
+                  aria-invalid={emailInvalid || undefined}
+                  aria-describedby={emailInvalid ? "book-details-error" : undefined}
                   className={inputClass}
                 />
-              </label>
-              <label className="block sm:col-span-2">
-                <span className="block text-xs text-text-secondary mb-1">{t("company")}</span>
-                <input value={company} onChange={(e) => setCompany(e.target.value)} autoComplete="organization" className={inputClass} />
-              </label>
-              <label className="block sm:col-span-2">
-                <span className="block text-xs text-text-secondary mb-1">{t("notes")}</span>
+              </div>
+              <div className="sm:col-span-2">
+                <label htmlFor="book-company" className={labelClass}>
+                  {t("company")}
+                </label>
+                <input
+                  id="book-company"
+                  value={company}
+                  onChange={(e) => setCompany(e.target.value)}
+                  autoComplete="organization"
+                  className={inputClass}
+                />
+              </div>
+              <div className="sm:col-span-2">
+                <label htmlFor="book-notes" className={labelClass}>
+                  {t("notes")}
+                </label>
                 <textarea
+                  id="book-notes"
                   value={notes}
                   onChange={(e) => setNotes(e.target.value)}
                   rows={4}
                   maxLength={4000}
                   placeholder={t("notes_placeholder")}
-                  className={inputClass}
+                  className={cn(inputClass, "resize-y")}
                 />
-              </label>
+              </div>
             </div>
-            {detailsTouched && !detailsValid && <p className="text-sm text-red-400 mt-3">{t("details_invalid")}</p>}
+            {detailsTouched && !detailsValid && (
+              <p id="book-details-error" role="alert" className="text-sm text-danger mt-3">
+                {t("details_invalid")}
+              </p>
+            )}
           </section>
         )}
 
         {/* 4 · Confirm / pay */}
         {pkg && startsAt && (
           <section className="space-y-4">
-            <div className="glass p-5 md:p-7">
+            <div className="card p-5 md:p-7">
               <StepHeader n={4} title={t("summary")} />
               <dl className="grid grid-cols-[auto_1fr] gap-x-6 gap-y-2 text-sm">
                 <dt className="text-text-muted">{t("session")}</dt>
@@ -374,22 +429,21 @@ export default function BookingClient({ packages, preselect }: { packages: Packa
                 <dt className="text-text-muted">{t("duration")}</dt>
                 <dd>{t("minutes", { n: pkg.durationMinutes })}</dd>
                 <dt className="text-text-muted">{t("price")}</dt>
-                <dd className="figure font-semibold">
+                <dd className="font-mono tabular-nums font-semibold">
                   {pkg.priceCents === 0 ? t("free") : formatPrice(pkg.priceCents, pkg.currency)}
                 </dd>
               </dl>
               {pkg.priceCents === 0 && (
-                <button
-                  type="button"
-                  onClick={confirmFree}
-                  disabled={submitting}
-                  className="mt-6 inline-flex items-center gap-2 px-6 py-3 rounded-md bg-gold text-charcoal font-semibold hover:bg-gold-light disabled:opacity-50"
-                >
-                  {submitting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
+                <Button type="button" size="lg" onClick={confirmFree} loading={submitting} className="mt-6">
+                  {!submitting && <Check className="w-4 h-4" aria-hidden />}
                   {submitting ? t("confirming") : t("confirm_free")}
-                </button>
+                </Button>
               )}
-              {error && <p className="text-sm text-red-400 border border-red-400/30 rounded-md p-3 mt-4">{error}</p>}
+              {error && (
+                <p role="alert" className={cn(errorBox, "mt-4")}>
+                  {error}
+                </p>
+              )}
             </div>
 
             {pkg.priceCents > 0 && (
@@ -426,10 +480,7 @@ export default function BookingClient({ packages, preselect }: { packages: Packa
         )}
       </div>
 
-      <p className="text-xs text-text-muted mt-10 flex items-center gap-1">
-        <ChevronRight className="w-3 h-3" />
-        {t("reschedule_help")}
-      </p>
+      <p className="text-sm text-text-muted mt-10">{t("reschedule_help")}</p>
     </div>
   );
 }

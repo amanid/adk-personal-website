@@ -1,5 +1,5 @@
 import { NextIntlClientProvider, hasLocale } from "next-intl";
-import { Figtree, Playfair_Display } from "next/font/google";
+import { Newsreader, Geist, Geist_Mono, Playfair_Display } from "next/font/google";
 import { notFound } from "next/navigation";
 import { routing } from "@/i18n/routing";
 import Providers from "@/components/Providers";
@@ -15,16 +15,29 @@ import Breadcrumbs from "@/components/Breadcrumbs";
 import { safeJsonLd } from "@/lib/utils";
 import "../globals.css";
 
-// Self-hosted, preloaded fonts (replaces the render-blocking CSS @import).
-// Exposed as CSS variables that globals.css maps onto --font-sans/--font-display.
-// Figtree: open, rounded letterforms that stay readable at small sizes —
-// approachable without losing the professional register. latin-ext covers
-// the accented French text.
-const figtree = Figtree({
+// Self-hosted, preloaded fonts, exposed as CSS variables that globals.css maps
+// onto --font-sans / --font-display / --font-mono.
+// Newsreader: an optically sized text serif for headings, set the way a
+// journal or annual report would be. Geist: a neutral grotesque for UI and
+// body text. Geist Mono: figures, dates and labels, with tabular digits.
+// latin-ext covers the accented French text.
+const newsreader = Newsreader({
   subsets: ["latin", "latin-ext"],
   weight: ["400", "500", "600", "700"],
-  variable: "--font-figtree",
+  style: ["normal", "italic"],
+  variable: "--font-newsreader",
   display: "swap",
+});
+const geist = Geist({
+  subsets: ["latin", "latin-ext"],
+  variable: "--font-geist",
+  display: "swap",
+});
+const geistMono = Geist_Mono({
+  subsets: ["latin"],
+  variable: "--font-geist-mono",
+  display: "swap",
+  preload: false,
 });
 // Only the legacy themes use the serif, so it isn't preloaded on every page.
 const playfair = Playfair_Display({
@@ -38,11 +51,11 @@ const playfair = Playfair_Display({
 export const metadata = {
   metadataBase: new URL("https://www.konanamanidieudonne.org"),
   title: {
-    default: "KONAN Amani Dieudonné | Global Statistician, Data, ML & AI Professional",
+    default: "KONAN Amani Dieudonné | Senior Statistician & Data Scientist",
     template: "%s | KONAN Amani Dieudonné",
   },
   description:
-    "MIT-certified Global Statistician, Data Scientist, Machine Learning & AI Professional with 13+ years of experience across the UN system, development finance, and international organizations. Expert in Statistics, Econometrics, Data Science, AI/ML Engineering, Data Architecture, Full-Stack Development, and Strategic Advisory.",
+    "Statistician and data scientist with 13+ years of work for Afreximbank, the International Cocoa Organization, UN agencies and research centres. Statistics, econometrics, data architecture and AI systems.",
   keywords: [
     "Full-Stack Statistician",
     "Senior Data Scientist",
@@ -55,7 +68,6 @@ export const metadata = {
     "MLOps Engineer",
     "Data Engineering",
     "Predictive Analytics",
-    "Deep Learning",
     "NLP",
     "LLM",
     "RAG Systems",
@@ -83,23 +95,23 @@ export const metadata = {
     locale: "en_US",
     url: "https://www.konanamanidieudonne.org",
     siteName: "KONAN Amani Dieudonné",
-    title: "KONAN Amani Dieudonné | Global Statistician, Data, ML & AI Professional",
+    title: "KONAN Amani Dieudonné | Senior Statistician & Data Scientist",
     description:
-      "MIT-certified Global Statistician, Data Scientist, ML & AI Professional with 13+ years of experience across the UN system, development finance, and global organizations.",
+      "Statistician and data scientist with 13+ years of work for Afreximbank, the International Cocoa Organization, UN agencies and research centres.",
     images: [
       {
         url: "/images/profile.jpg",
         width: 800,
         height: 800,
-        alt: "KONAN Amani Dieudonné - Global Statistician, Data, ML & AI Professional",
+        alt: "KONAN Amani Dieudonné, Senior Statistician & Data Scientist",
       },
     ],
   },
   twitter: {
     card: "summary",
-    title: "KONAN Amani Dieudonné | Global Statistician, Data, ML & AI Professional",
+    title: "KONAN Amani Dieudonné | Senior Statistician & Data Scientist",
     description:
-      "Global Statistician, Data Scientist, ML & AI Professional with 13+ years of international experience.",
+      "Statistician and data scientist with 13+ years of international experience.",
     images: ["/images/profile.jpg"],
   },
 };
@@ -124,7 +136,7 @@ export default async function LocaleLayout({
     name: "KONAN Amani Dieudonné",
     url: "https://www.konanamanidieudonne.org",
     image: "https://www.konanamanidieudonne.org/images/profile.jpg",
-    jobTitle: "Global Statistician, Data, ML & AI Professional",
+    jobTitle: "Manager, Data Scientist / Architect",
     worksFor: {
       "@type": "Organization",
       name: "African Export-Import Bank (Afreximbank)",
@@ -151,7 +163,7 @@ export default async function LocaleLayout({
       "Statistics & Econometrics",
       "Data Science & Analytics",
       "Artificial Intelligence",
-      "Machine Learning & Deep Learning",
+      "Machine Learning",
       "Natural Language Processing",
       "Large Language Models (LLMs)",
       "Data Engineering & Architecture",
@@ -170,8 +182,8 @@ export default async function LocaleLayout({
       },
       {
         "@type": "EducationalOccupationalCredential",
-        name: "Professional Certificate in AI & Data Science",
-        credentialCategory: "Professional Certificate",
+        name: "Applied AI and Data Science Program",
+        credentialCategory: "Certificate",
         recognizedBy: { "@type": "Organization", name: "MIT" },
       },
     ],
@@ -197,12 +209,12 @@ export default async function LocaleLayout({
   return (
     <html
       lang={locale}
-      className={`dark ${figtree.variable} ${playfair.variable}`}
+      className={`dark ${newsreader.variable} ${geist.variable} ${geistMono.variable} ${playfair.variable}`}
       data-theme="ink-signal"
     >
       <head>
         <link rel="manifest" href="/manifest.json" />
-        <meta name="theme-color" content="#111110" />
+        <meta name="theme-color" content="#0f0f0e" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
         <link rel="alternate" type="application/rss+xml" title="Blog RSS Feed" href="/feed.xml" />
@@ -211,7 +223,7 @@ export default async function LocaleLayout({
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <script
           dangerouslySetInnerHTML={{
-            __html: `(function(){try{var t=localStorage.getItem("theme");if(t)document.documentElement.setAttribute("data-theme",t)}catch(e){}})();`,
+            __html: `(function(){try{var t=localStorage.getItem("theme");if(t){var h=document.documentElement;h.setAttribute("data-theme",t);if(t==="light-professional"){h.classList.remove("dark");var m=document.querySelector('meta[name="theme-color"]');if(m)m.setAttribute("content","#f6f4ef")}}}catch(e){}})();`,
           }}
         />
         <script
@@ -239,8 +251,8 @@ export default async function LocaleLayout({
               {locale === "fr" ? "Aller au contenu" : "Skip to content"}
             </a>
             <Navbar />
-            <Breadcrumbs />
             <main id="main-content" className="flex-1 pt-16">
+              <Breadcrumbs />
               <PageTransition>{children}</PageTransition>
             </main>
             <Footer />

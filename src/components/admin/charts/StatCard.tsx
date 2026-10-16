@@ -18,7 +18,7 @@ export default function StatCard({ label, value, icon: Icon, color, trend }: Sta
         {trend !== undefined && trend !== null && (
           <div
             className={`flex items-center gap-1 text-xs font-medium ${
-              trend >= 0 ? "text-green-400" : "text-red-400"
+              trend >= 0 ? "text-success" : "text-danger"
             }`}
           >
             {trend >= 0 ? (

@@ -1,10 +1,11 @@
 "use client";
 
 import { useTranslations, useLocale } from "next-intl";
-import { motion } from "framer-motion";
-import { ExternalLink, Github, Star } from "lucide-react";
+import { ExternalLink, Github } from "lucide-react";
 import { useState } from "react";
 import { projects as staticProjects } from "@/data/projects";
+import { Container } from "@/components/ui/Section";
+import { cn } from "@/lib/utils";
 
 const categories = ["All", "AI/ML", "Data Engineering", "Analytics", "Data Governance"];
 
@@ -28,7 +29,7 @@ export default function ProjectsClient({
   initialProjects: ProjectEntry[];
 }) {
   const t = useTranslations("projects");
-  const locale = useLocale();
+  const fr = useLocale() === "fr";
   const [activeCategory, setActiveCategory] = useState("All");
   // Server provides DB projects; fall back to the static seed if empty.
   const projects: ProjectEntry[] = initialProjects.length ? initialProjects : staticProjects;
@@ -39,116 +40,107 @@ export default function ProjectsClient({
       : projects.filter((p) => p.category === activeCategory);
 
   return (
-    <div className="section-padding">
-      <div className="max-w-6xl mx-auto">
-        {/* Header */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="text-center mb-12"
-        >
-          <h1 className="text-4xl md:text-5xl font-bold font-[family-name:var(--font-display)] gradient-text mb-4">
-            {t("title")}
+    <>
+      <header className="pt-10 pb-10 md:pt-16 md:pb-12">
+        <Container>
+          <p className="eyebrow mb-5">{t("title")}</p>
+          <h1 className="font-display text-4xl md:text-6xl leading-[1.02] tracking-tight max-w-3xl">
+            {t("subtitle")}
           </h1>
-          <p className="text-text-secondary text-lg">{t("subtitle")}</p>
-        </motion.div>
+        </Container>
+      </header>
 
-        {/* Filters */}
-        <div className="flex flex-wrap justify-center gap-2 mb-10">
-          {categories.map((cat) => (
-            <button
-              key={cat}
-              onClick={() => setActiveCategory(cat)}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-                activeCategory === cat
-                  ? "bg-gold text-charcoal"
-                  : "glass text-text-secondary hover:text-gold hover:border-gold/30"
-              }`}
-            >
-              {cat === "All" ? t("all") : cat}
-            </button>
-          ))}
-        </div>
+      <section className="pb-20 md:pb-28">
+        <Container>
+          {/* Filters */}
+          <div role="group" aria-label={t("filter_label")} className="flex flex-wrap gap-2 mb-10">
+            {categories.map((cat) => {
+              const active = activeCategory === cat;
+              return (
+                <button
+                  key={cat}
+                  type="button"
+                  aria-pressed={active}
+                  onClick={() => setActiveCategory(cat)}
+                  className={cn(
+                    "min-h-11 px-4 rounded-[var(--radius-md)] text-sm font-medium border transition-colors",
+                    active
+                      ? "bg-gold text-charcoal border-gold"
+                      : "border-glass-border text-text-secondary hover:text-text-primary hover:bg-[var(--hover-wash)]",
+                  )}
+                >
+                  {cat === "All" ? t("all") : cat}
+                </button>
+              );
+            })}
+          </div>
 
-        {/* Projects Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredProjects.map((project, index) => (
-            <motion.div
-              key={project.id}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: index * 0.05 }}
-              layout
-              className="glass rounded-xl overflow-hidden group hover:border-gold/30 transition-all duration-300"
-            >
-              {/* Project image placeholder */}
-              <div className="h-40 bg-gradient-to-br from-navy to-navy-light flex items-center justify-center relative overflow-hidden">
-                <div className="absolute inset-0 bg-gradient-to-br from-gold/5 to-transparent" />
-                {project.featured && (
-                  <div className="absolute top-3 right-3 flex items-center gap-1 px-2 py-1 rounded-full bg-gold/20 text-gold text-xs">
-                    <Star className="w-3 h-3" />
-                    {t("featured")}
-                  </div>
-                )}
-                <span className="text-3xl font-bold text-gold/20 font-[family-name:var(--font-display)]">
-                  {project.title.charAt(0)}
-                </span>
-              </div>
-
-              <div className="p-5">
-                <div className="flex items-center gap-2 mb-2">
-                  <span className="text-xs px-2 py-0.5 rounded-full bg-gold/10 text-gold">
-                    {project.category}
-                  </span>
+          {/* Projects grid. Cards are plain surfaces: only their links are interactive. */}
+          <ul className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5" aria-live="polite">
+            {filteredProjects.map((project) => (
+              <li
+                key={project.id}
+                className={cn("card flex flex-col p-6", project.featured && "border-gold/30")}
+              >
+                <div className="flex items-center justify-between gap-3 mb-4">
+                  {project.category && (
+                    <span className="font-mono text-xs uppercase tracking-[0.1em] text-gold">
+                      {project.category}
+                    </span>
+                  )}
+                  {project.featured && (
+                    <span className="font-mono text-xs uppercase tracking-[0.1em] text-text-muted">
+                      {t("featured")}
+                    </span>
+                  )}
                 </div>
-                <h3 className="text-lg font-semibold mb-2 group-hover:text-gold transition-colors">
-                  {locale === "fr" ? project.titleFr : project.title}
-                </h3>
-                <p className="text-text-secondary text-sm leading-relaxed mb-4 line-clamp-3">
-                  {locale === "fr"
-                    ? project.descriptionFr
-                    : project.description}
+                <h2 className="font-display text-2xl leading-tight mb-3">
+                  {fr && project.titleFr ? project.titleFr : project.title}
+                </h2>
+                <p className="text-sm text-text-secondary leading-relaxed mb-6">
+                  {fr && project.descriptionFr ? project.descriptionFr : project.description}
                 </p>
-                <div className="flex flex-wrap gap-1.5 mb-4">
+                <ul className="mt-auto flex flex-wrap gap-1.5" aria-label={t("technologies")}>
                   {project.technologies.map((tech) => (
-                    <span
+                    <li
                       key={tech}
-                      className="text-xs px-2 py-0.5 rounded bg-navy-light text-text-muted"
+                      className="text-xs px-2 py-1 rounded-[var(--radius-sm)] bg-surface-2 text-text-secondary"
                     >
                       {tech}
-                    </span>
+                    </li>
                   ))}
-                </div>
-                <div className="flex items-center gap-3">
-                  {project.liveUrl && (
-                    <a
-                      href={project.liveUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex items-center gap-1 text-sm text-gold hover:text-gold-light transition-colors"
-                    >
-                      <ExternalLink className="w-3.5 h-3.5" />
-                      {t("live")}
-                    </a>
-                  )}
-                  {project.githubUrl && (
-                    <a
-                      href={project.githubUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex items-center gap-1 text-sm text-text-secondary hover:text-gold transition-colors"
-                    >
-                      <Github className="w-3.5 h-3.5" />
-                      {t("code")}
-                    </a>
-                  )}
-                </div>
-              </div>
-            </motion.div>
-          ))}
-        </div>
-      </div>
-    </div>
+                </ul>
+                {(project.liveUrl || project.githubUrl) && (
+                  <div className="flex items-center gap-1 mt-5 -mx-2">
+                    {project.liveUrl && (
+                      <a
+                        href={project.liveUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1.5 min-h-11 px-2 text-sm text-gold hover:text-gold-light transition-colors"
+                      >
+                        <ExternalLink className="w-4 h-4" />
+                        {t("live")}
+                      </a>
+                    )}
+                    {project.githubUrl && (
+                      <a
+                        href={project.githubUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1.5 min-h-11 px-2 text-sm text-text-secondary hover:text-gold transition-colors"
+                      >
+                        <Github className="w-4 h-4" />
+                        {t("code")}
+                      </a>
+                    )}
+                  </div>
+                )}
+              </li>
+            ))}
+          </ul>
+        </Container>
+      </section>
+    </>
   );
 }

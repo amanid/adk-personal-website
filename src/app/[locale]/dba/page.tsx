@@ -6,12 +6,12 @@ const META = {
   en: {
     title: "DBA — Renting Intelligence",
     description:
-      "Doctor of Business Administration (AI) at IIBM Institute of Business Management. \"Renting Intelligence\": a quasi-experimental, public-data analysis of AI sourcing choices and institutional performance in international development by KONAN Amani Dieudonné.",
+      "\"Renting Intelligence\", a DBA thesis in AI submitted in June 2026 to the IIBM Institute of Business Management by KONAN Amani Dieudonné. It uses public data to study how development institutions source AI and whether it changes their performance.",
   },
   fr: {
     title: "DBA — Louer l'Intelligence",
     description:
-      "Doctorat en Administration des Affaires (IA) à l'IIBM Institute of Business Management. « Louer l'Intelligence » : une analyse quasi-expérimentale sur données publiques des choix d'approvisionnement en IA et de la performance institutionnelle dans le développement international, par KONAN Amani Dieudonné.",
+      "« Louer l'Intelligence », thèse de DBA en IA soumise en juin 2026 à l'IIBM Institute of Business Management par KONAN Amani Dieudonné. Elle s'appuie sur des données publiques pour étudier comment les institutions de développement s'approvisionnent en IA et si cela change leur performance.",
   },
 } as const;
 
@@ -29,7 +29,7 @@ export async function generateMetadata({
     title: meta.title,
     description: meta.description,
     ogTitle: "Renting Intelligence",
-    ogSubtitle: "Doctor of Business Administration · AI",
+    ogSubtitle: "DBA thesis · submitted June 2026",
     ogType: "publication",
   });
 }

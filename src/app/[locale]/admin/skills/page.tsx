@@ -620,7 +620,7 @@ export default function AdminSkillsPage() {
                       </button>
                       <button
                         onClick={() => handleDeleteCategory(cat.id)}
-                        className="p-2 text-text-muted hover:text-red-400 transition-colors"
+                        className="p-2 text-text-muted hover:text-danger transition-colors"
                         aria-label="Delete category"
                       >
                         <Trash2 className="w-4 h-4" />
@@ -664,7 +664,7 @@ export default function AdminSkillsPage() {
                                   onClick={() =>
                                     handleDeleteSkill(skill.id, cat.id)
                                   }
-                                  className="p-1.5 text-text-muted hover:text-red-400 transition-colors"
+                                  className="p-1.5 text-text-muted hover:text-danger transition-colors"
                                   aria-label="Delete skill"
                                 >
                                   <Trash2 className="w-3.5 h-3.5" />
@@ -941,7 +941,7 @@ export default function AdminSkillsPage() {
                     </button>
                     <button
                       onClick={() => handleDeleteEducation(edu.id)}
-                      className="p-2 text-text-muted hover:text-red-400 transition-colors"
+                      className="p-2 text-text-muted hover:text-danger transition-colors"
                       aria-label="Delete education"
                     >
                       <Trash2 className="w-4 h-4" />
@@ -1108,7 +1108,7 @@ export default function AdminSkillsPage() {
                     </button>
                     <button
                       onClick={() => handleDeleteCertification(cert.id)}
-                      className="p-2 text-text-muted hover:text-red-400 transition-colors"
+                      className="p-2 text-text-muted hover:text-danger transition-colors"
                       aria-label="Delete certification"
                     >
                       <Trash2 className="w-4 h-4" />

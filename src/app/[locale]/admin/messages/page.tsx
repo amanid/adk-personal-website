@@ -75,7 +75,7 @@ export default function AdminMessagesPage() {
                     e.stopPropagation();
                     deleteMessage(msg.id);
                   }}
-                  className="text-text-muted hover:text-red-400 transition-colors"
+                  className="text-text-muted hover:text-danger transition-colors"
                 >
                   <Trash2 className="w-3 h-3" />
                 </button>

@@ -1,15 +1,15 @@
 "use client";
 
 import { useTranslations, useLocale } from "next-intl";
-import { motion } from "framer-motion";
 import { Link } from "@/i18n/routing";
-import { Calendar, Eye, ArrowLeft, User, Send, Clock, Share2, Check, List } from "lucide-react";
+import { ArrowLeft, Share2, Check, ChevronDown } from "lucide-react";
+import { Container } from "@/components/ui/Section";
+import { Button, ButtonLink } from "@/components/ui/Button";
 import { useState, use, useMemo } from "react";
 import { formatDate } from "@/lib/utils";
 import { useSession } from "next-auth/react";
 import BlogJsonLd from "@/components/blog/BlogJsonLd";
 import ShareBar from "@/components/blog/ShareBar";
-import ReadingProgress from "@/components/blog/ReadingProgress";
 import CTABanner from "@/components/CTABanner";
 
 interface BlogPostFull {
@@ -59,9 +59,11 @@ export default function BlogDetailClient({
   const [copied, setCopied] = useState(false);
   const [relatedPosts] = useState<RelatedPost[]>(initialRelated);
   const [showToc, setShowToc] = useState(false);
+  const [sending, setSending] = useState(false);
 
   const submitComment = async () => {
     if (!comment.trim() || !post) return;
+    setSending(true);
     try {
       const res = await fetch(`/api/blog/${slug}/comments`, {
         method: "POST",
@@ -78,6 +80,8 @@ export default function BlogDetailClient({
       }
     } catch {
       // handle silently
+    } finally {
+      setSending(false);
     }
   };
 
@@ -123,22 +127,21 @@ export default function BlogDetailClient({
 
   if (loading) {
     return (
-      <div className="section-padding text-center text-text-secondary">
-        <div className="inline-block w-5 h-5 border-2 border-gold/30 border-t-gold rounded-full animate-spin mb-3" />
-        <p>{t("loading") || "Loading..."}</p>
-      </div>
+      <Container size="prose" className="pt-16 md:pt-24 pb-24">
+        <p role="status" className="text-text-secondary">{t("loading")}</p>
+      </Container>
     );
   }
 
   if (!post) {
     return (
-      <div className="section-padding text-center">
-        <h1 className="text-2xl font-bold mb-4">{t("not_found") || "Post not found"}</h1>
-        <Link href="/blog" className="text-gold hover:text-gold-light">
-          <ArrowLeft className="w-4 h-4 inline mr-1" />
+      <Container size="prose" className="pt-16 md:pt-24 pb-24">
+        <h1 className="font-display text-3xl md:text-4xl mb-6">{t("not_found")}</h1>
+        <ButtonLink href="/blog" variant="secondary">
+          <ArrowLeft aria-hidden className="w-4 h-4" />
           {t("title")}
-        </Link>
-      </div>
+        </ButtonLink>
+      </Container>
     );
   }
 
@@ -149,8 +152,7 @@ export default function BlogDetailClient({
   };
 
   return (
-    <div className="section-padding">
-      <ReadingProgress />
+    <div className="pt-12 md:pt-20 pb-24">
       <BlogJsonLd
         title={title}
         description={post.excerpt || title}
@@ -159,176 +161,157 @@ export default function BlogDetailClient({
         authorName={post.author.name || "KONAN Amani Dieudonné"}
         tags={post.tags}
       />
-      <div className="max-w-3xl mx-auto">
+      <Container size="prose">
         <Link
           href="/blog"
-          className="inline-flex items-center gap-1 text-text-secondary hover:text-gold mb-8 transition-colors"
+          className="inline-flex items-center gap-2 min-h-11 text-sm text-text-secondary hover:text-gold mb-8 transition-colors"
         >
-          <ArrowLeft className="w-4 h-4" />
+          <ArrowLeft aria-hidden className="w-4 h-4" />
           {t("title")}
         </Link>
 
-        <motion.article
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-        >
-          {post.category && (
-            <span className="text-xs px-2 py-1 rounded-full bg-gold/10 text-gold">
-              {post.category}
-            </span>
-          )}
-          <h1 className="text-3xl md:text-4xl font-bold font-[family-name:var(--font-display)] mt-4 mb-4">
-            {title}
-          </h1>
-          <div className="flex items-center flex-wrap gap-4 text-text-muted text-sm mb-4">
-            <span className="flex items-center gap-1">
-              <User className="w-3 h-3" />
-              {post.author.name}
-            </span>
-            <span className="flex items-center gap-1">
-              <Calendar className="w-3 h-3" />
-              {formatDate(post.createdAt, locale)}
-            </span>
-            <span className="flex items-center gap-1">
-              <Eye className="w-3 h-3" />
-              {post.views}
-            </span>
-            <span className="flex items-center gap-1">
-              <Clock className="w-3 h-3" />
-              {readingTime} {t("reading_time")}
-            </span>
-            <button
-              onClick={shareUrl}
-              className="flex items-center gap-1 hover:text-gold transition-colors ml-auto"
-            >
-              {copied ? <Check className="w-3 h-3 text-green-400" /> : <Share2 className="w-3 h-3" />}
-              {copied ? t("copied") || "Copied!" : t("share") || "Share"}
-            </button>
-          </div>
-
-          {/* Table of Contents */}
-          {tocItems.length > 0 && (
-            <div className="glass rounded-lg p-4 mb-8">
+        <article>
+          <header className="mb-10">
+            {post.category && <p className="eyebrow mb-4">{post.category}</p>}
+            <h1 className="font-display text-4xl md:text-5xl leading-[1.05] tracking-tight mb-6">{title}</h1>
+            <div className="flex items-center flex-wrap gap-x-3 gap-y-2 text-text-muted text-sm">
+              {post.author.name && <span className="text-text-secondary">{post.author.name}</span>}
+              <span aria-hidden>·</span>
+              <time dateTime={post.createdAt} className="font-mono tabular-nums">
+                {formatDate(post.createdAt, locale)}
+              </time>
+              <span aria-hidden>·</span>
+              <span className="font-mono tabular-nums">
+                {readingTime} {t("reading_time")}
+              </span>
               <button
-                onClick={() => setShowToc(!showToc)}
-                className="flex items-center gap-2 text-sm font-medium text-text-primary w-full"
+                type="button"
+                onClick={shareUrl}
+                className="inline-flex items-center gap-1.5 min-h-11 px-2 -mr-2 ml-auto hover:text-gold transition-colors"
               >
-                <List className="w-4 h-4 text-gold" />
-                {t("toc") || "Table of Contents"}
-                <span className="text-text-muted text-xs ml-auto">
-                  {showToc ? "−" : "+"}
-                </span>
+                {copied ? <Check aria-hidden className="w-4 h-4 text-success" /> : <Share2 aria-hidden className="w-4 h-4" />}
+                <span role="status">{copied ? t("copied") : t("share")}</span>
+              </button>
+            </div>
+          </header>
+
+          {/* Table of contents */}
+          {tocItems.length > 0 && (
+            <nav aria-label={t("toc")} className="border-y border-glass-border mb-10">
+              <button
+                type="button"
+                onClick={() => setShowToc(!showToc)}
+                aria-expanded={showToc}
+                className="flex items-center gap-2 min-h-11 py-2 w-full text-left"
+              >
+                <span className="eyebrow">{t("toc")}</span>
+                <ChevronDown
+                  aria-hidden
+                  className={`w-4 h-4 ml-auto text-text-muted transition-transform ${showToc ? "rotate-180" : ""}`}
+                />
               </button>
               {showToc && (
-                <nav className="mt-3 space-y-1">
+                <ol className="pb-4 space-y-1">
                   {tocItems.map((item) => (
-                    <a
-                      key={item.id}
-                      href={`#${item.id}`}
-                      className={`block text-sm hover:text-gold transition-colors ${
-                        item.level === 3 ? "pl-4 text-text-muted" : "text-text-secondary"
-                      }`}
-                    >
-                      {item.text}
-                    </a>
+                    <li key={item.id}>
+                      <a
+                        href={`#${item.id}`}
+                        className={`block py-1 hover:text-gold transition-colors ${
+                          item.level === 3 ? "pl-5 text-sm text-text-muted" : "text-text-secondary"
+                        }`}
+                      >
+                        {item.text}
+                      </a>
+                    </li>
                   ))}
-                </nav>
+                </ol>
               )}
-            </div>
+            </nav>
           )}
 
           <div
-            className="prose prose-invert prose-gold max-w-none mb-12 text-text-secondary leading-relaxed"
+            className="prose max-w-none mb-12 text-text-secondary text-[1.0625rem] leading-[1.75]"
             dangerouslySetInnerHTML={{ __html: contentWithIds }}
           />
 
-          {/* Tags */}
           {post.tags.length > 0 && (
-            <div className="flex flex-wrap gap-2 mb-8 border-t border-glass-border pt-6">
+            <ul className="flex flex-wrap gap-x-4 gap-y-2 mb-10 pt-6 border-t border-glass-border font-mono text-sm text-text-muted">
               {post.tags.map((tag) => (
-                <span
-                  key={tag}
-                  className="text-xs px-3 py-1 rounded-full glass text-text-secondary"
-                >
-                  #{tag}
-                </span>
+                <li key={tag}>#{tag}</li>
               ))}
-            </div>
+            </ul>
           )}
 
-          {/* CTA */}
-          <CTABanner variant="consulting" />
-
-          {/* Share Bar */}
           <ShareBar title={title} slug={post.slug} />
 
-          {/* Comments */}
-          <div className="border-t border-glass-border pt-8">
-            <h3 className="text-xl font-semibold mb-6">
-              {t("comments")} ({post.comments.length})
-            </h3>
+          <CTABanner variant="consulting" />
 
-            {post.comments.map((c) => (
-              <div key={c.id} className="glass rounded-lg p-4 mb-4">
-                <div className="flex items-center gap-2 mb-2">
-                  <User className="w-4 h-4 text-gold" />
-                  <span className="text-sm font-medium">{c.author.name}</span>
-                  <span className="text-text-muted text-xs">
-                    {formatDate(c.createdAt, locale)}
-                  </span>
-                </div>
-                <p className="text-text-secondary text-sm">{c.content}</p>
-              </div>
-            ))}
+          {/* Comments */}
+          <section aria-labelledby="blog-comments" className="hairline pt-10 mt-4">
+            <h2 id="blog-comments" className="font-display text-2xl mb-6">
+              {t("comments")} <span className="font-mono text-base text-text-muted tabular-nums">({post.comments.length})</span>
+            </h2>
+
+            {post.comments.length > 0 && (
+              <ul className="mb-8 border-t border-glass-border">
+                {post.comments.map((c) => (
+                  <li key={c.id} className="py-4 border-b border-glass-border">
+                    <p className="text-sm mb-1.5">
+                      <span className="font-medium text-text-primary">{c.author.name}</span>
+                      <span className="font-mono text-xs text-text-muted ml-3">{formatDate(c.createdAt, locale)}</span>
+                    </p>
+                    <p className="text-text-secondary">{c.content}</p>
+                  </li>
+                ))}
+              </ul>
+            )}
 
             {session ? (
-              <div className="mt-6">
+              <div>
+                <label htmlFor="blog-comment" className="block text-sm text-text-secondary mb-2">
+                  {t("leave_comment")}
+                </label>
                 <textarea
+                  id="blog-comment"
                   value={comment}
                   onChange={(e) => setComment(e.target.value)}
-                  placeholder={t("leave_comment")}
-                  rows={3}
-                  className="w-full px-4 py-2.5 bg-navy/50 border border-glass-border rounded-lg text-text-primary focus:border-gold/50 focus:outline-none transition-colors resize-none mb-3"
+                  rows={4}
+                  className="w-full min-h-11 px-4 py-3 bg-navy border border-glass-border rounded-[var(--radius-md)] text-text-primary focus:border-gold focus:outline-none transition-colors resize-y mb-3"
                 />
-                <button
-                  onClick={submitComment}
-                  disabled={!comment.trim()}
-                  className="flex items-center gap-2 px-4 py-2 bg-gold text-charcoal font-medium rounded-lg hover:bg-gold-light transition-all disabled:opacity-50 text-sm"
-                >
-                  <Send className="w-3 h-3" />
+                <Button type="button" onClick={submitComment} loading={sending} disabled={!comment.trim()}>
                   {t("post_comment")}
-                </button>
+                </Button>
               </div>
             ) : (
-              <p className="text-text-muted text-sm mt-4">
-                <Link href="/auth/login" className="text-gold hover:text-gold-light">
+              <p className="text-text-secondary">
+                <Link href="/auth/login" className="text-gold hover:text-gold-light underline underline-offset-4">
                   {t("login_to_comment")}
                 </Link>
               </p>
             )}
-          </div>
+          </section>
 
-          {/* Related Posts */}
           {relatedPosts.length > 0 && (
-            <div className="border-t border-glass-border pt-8 mt-8">
-              <h3 className="text-xl font-semibold mb-4">{t("related") || "Related Posts"}</h3>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <section aria-labelledby="blog-related" className="hairline pt-10 mt-12">
+              <h2 id="blog-related" className="font-display text-2xl mb-4">
+                {t("related")}
+              </h2>
+              <ul className="border-t border-glass-border">
                 {relatedPosts.map((rp) => (
-                  <Link
-                    key={rp.slug}
-                    href={`/blog/${rp.slug}`}
-                    className="glass rounded-lg p-4 hover:border-gold/30 transition-all group"
-                  >
-                    <h4 className="text-sm font-medium group-hover:text-gold transition-colors line-clamp-2">
+                  <li key={rp.slug} className="border-b border-glass-border">
+                    <Link
+                      href={`/blog/${rp.slug}`}
+                      className="flex items-center min-h-11 py-3 font-display text-lg leading-snug hover:text-gold transition-colors"
+                    >
                       {locale === "fr" && rp.titleFr ? rp.titleFr : rp.title}
-                    </h4>
-                  </Link>
+                    </Link>
+                  </li>
                 ))}
-              </div>
-            </div>
+              </ul>
+            </section>
           )}
-        </motion.article>
-      </div>
+        </article>
+      </Container>
     </div>
   );
 }

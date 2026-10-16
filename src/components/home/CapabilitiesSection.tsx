@@ -5,6 +5,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { motion, useReducedMotion } from "framer-motion";
 import type { CapabilityData, CategoryCount, TimelineBar } from "@/lib/capabilities";
 import { UNCATEGORISED } from "@/lib/capabilities";
+import Reveal from "@/components/ui/Reveal";
 
 /*
  * Every number on this section is derived from the site's own records in
@@ -311,22 +312,17 @@ export default function CapabilitiesSection({ data }: { data: CapabilityData }) 
     : "";
 
   return (
-    <section className="section-padding" aria-labelledby="capabilities-title">
-      <div className="max-w-6xl mx-auto">
-        <motion.div
-          initial={{ opacity: 0, y: 16 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="mb-10 md:mb-14"
-        >
+    <section className="py-20 md:py-28 hairline" aria-labelledby="capabilities-title">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        <Reveal className="mb-12 md:mb-14">
           <div>
-            <p className="eyebrow mb-3">{t("eyebrow")}</p>
-            <h2 id="capabilities-title" className="text-3xl md:text-5xl font-semibold font-[family-name:var(--font-display)] max-w-3xl">
+            <p className="eyebrow mb-4">{t("eyebrow")}</p>
+            <h2 id="capabilities-title" className="h-section max-w-3xl">
               {data.facts.years !== null ? t("title", { years: data.facts.years }) : t("title_plain")}
             </h2>
-            <p className="text-text-secondary mt-4 max-w-2xl leading-relaxed">{t("subtitle")}</p>
+            <p className="lede mt-4 max-w-2xl">{t("subtitle")}</p>
           </div>
-        </motion.div>
+        </Reveal>
 
         <div className="grid gap-5 md:gap-6 lg:grid-cols-2">
           {data.timeline.length > 0 && (

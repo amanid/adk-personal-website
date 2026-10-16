@@ -9,6 +9,7 @@ import { PAYPAL_ME_HANDLE, PAYPAL_RECEIVE_EMAIL, paypalMeLink } from "@/lib/payp
 import { Link } from "@/i18n/routing";
 import PrintReceiptButton from "@/components/store/PrintReceiptButton";
 import { Download, CheckCircle2, Clock, AlertCircle, ExternalLink } from "lucide-react";
+import { buttonClass } from "@/components/ui/Button";
 
 export const dynamic = "force-dynamic";
 
@@ -55,14 +56,14 @@ export default async function ReceiptPage({
   const now = Date.now();
 
   return (
-    <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-      <div className="glass rounded-2xl p-8 print:shadow-none">
+    <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-10 md:py-14">
+      <div className="card p-6 sm:p-8 print:shadow-none">
         {/* Status header */}
         {isPaid ? (
           <div className="flex items-center gap-3 mb-6">
-            <CheckCircle2 className="w-8 h-8 text-green-400 shrink-0" />
+            <CheckCircle2 aria-hidden="true" className="w-8 h-8 text-success shrink-0" />
             <div>
-              <h1 className="text-2xl font-bold">
+              <h1 className="font-display text-3xl leading-tight">
                 {l === "fr" ? "Paiement confirmé" : "Payment confirmed"}
               </h1>
               <p className="text-text-secondary text-sm">
@@ -72,9 +73,9 @@ export default async function ReceiptPage({
           </div>
         ) : order.status === "PENDING" ? (
           <div className="flex items-center gap-3 mb-6">
-            <Clock className="w-8 h-8 text-amber-400 shrink-0" />
+            <Clock aria-hidden="true" className="w-8 h-8 text-warning shrink-0" />
             <div>
-              <h1 className="text-2xl font-bold">
+              <h1 className="font-display text-3xl leading-tight">
                 {isMobileMoney
                   ? t("mmPendingTitle")
                   : isPaypalDirect
@@ -96,62 +97,62 @@ export default async function ReceiptPage({
           </div>
         ) : (
           <div className="flex items-center gap-3 mb-6">
-            <AlertCircle className="w-8 h-8 text-red-400 shrink-0" />
+            <AlertCircle aria-hidden="true" className="w-8 h-8 text-danger shrink-0" />
             <div>
-              <h1 className="text-2xl font-bold">
+              <h1 className="font-display text-3xl leading-tight">
                 {l === "fr" ? "Commande non payée" : "Order not paid"}
               </h1>
-              <p className="text-text-secondary text-sm">Status: {order.status}</p>
+              <p className="text-text-secondary text-sm">{l === "fr" ? "Statut" : "Status"}: <span className="font-mono">{order.status}</span></p>
             </div>
           </div>
         )}
 
         {/* Payment instructions for pending mobile-money orders */}
         {order.status === "PENDING" && isMobileMoney && (
-          <div className="rounded-xl border border-gold/25 bg-gold/5 p-5 mb-6">
+          <div className="rounded-[var(--radius-md)] border border-gold/25 bg-gold/5 p-5 mb-6">
             <p className="text-sm text-text-secondary mb-3">{t("invoicePayInstruction")}</p>
             {/* Amount, destination and reference together: a mobile-money transfer
                 carries only a phone number, so without the order number there is
                 nothing tying the payment that arrives to this order. */}
             <div className="grid sm:grid-cols-3 gap-3 mb-4">
-              <div className="rounded-lg bg-navy/50 border border-glass-border p-3">
-                <div className="text-[11px] text-text-secondary">{t("mmAmount")}</div>
-                <div className="font-bold text-gold text-lg">
+              <div className="rounded-[var(--radius-md)] bg-navy border border-glass-border p-3">
+                <div className="text-xs text-text-secondary">{t("mmAmount")}</div>
+                <div className="font-mono tabular-nums font-medium text-lg">
                   {formatPrice(order.totalCents, order.currency)}
                 </div>
               </div>
-              <div className="rounded-lg bg-navy/50 border border-glass-border p-3 min-w-0">
-                <div className="text-[11px] text-text-secondary">
+              <div className="rounded-[var(--radius-md)] bg-navy border border-glass-border p-3 min-w-0">
+                <div className="text-xs text-text-secondary">
                   {t("mmNumber")} · {mobileMoneyLabel(order.paymentMethod)}
                 </div>
-                <div className="font-bold text-lg">{MOBILE_MONEY_NUMBER}</div>
+                <div className="font-mono tabular-nums font-medium text-lg break-all">{MOBILE_MONEY_NUMBER}</div>
               </div>
-              <div className="rounded-lg bg-navy/50 border border-glass-border p-3">
-                <div className="text-[11px] text-text-secondary">{t("mmOrderReference")}</div>
-                <div className="font-semibold text-lg tracking-wide">{order.orderNumber}</div>
+              <div className="rounded-[var(--radius-md)] bg-navy border border-glass-border p-3">
+                <div className="text-xs text-text-secondary">{t("mmOrderReference")}</div>
+                <div className="font-mono font-medium text-lg tracking-wide break-all">{order.orderNumber}</div>
               </div>
             </div>
-            <p className="text-xs text-text-secondary">{t("invoiceThenProof")}</p>
+            <p className="text-sm text-text-secondary">{t("invoiceThenProof")}</p>
           </div>
         )}
 
         {/* Payment instructions for a pending direct-PayPal order */}
         {order.status === "PENDING" && isPaypalDirect && (
-          <div className="rounded-xl border border-gold/25 bg-gold/5 p-5 mb-6">
+          <div className="rounded-[var(--radius-md)] border border-gold/25 bg-gold/5 p-5 mb-6">
             <div className="grid sm:grid-cols-3 gap-3 mb-4">
-              <div className="rounded-lg bg-navy/50 border border-glass-border p-3">
-                <div className="text-[11px] text-text-secondary">{t("ppdAmount")}</div>
-                <div className="font-bold text-gold text-lg">
+              <div className="rounded-[var(--radius-md)] bg-navy border border-glass-border p-3">
+                <div className="text-xs text-text-secondary">{t("ppdAmount")}</div>
+                <div className="font-mono tabular-nums font-medium text-lg">
                   {formatPrice(order.totalCents, order.currency)}
                 </div>
               </div>
-              <div className="rounded-lg bg-navy/50 border border-glass-border p-3 min-w-0">
-                <div className="text-[11px] text-text-secondary">{t("ppdAccount")}</div>
+              <div className="rounded-[var(--radius-md)] bg-navy border border-glass-border p-3 min-w-0">
+                <div className="text-xs text-text-secondary">{t("ppdAccount")}</div>
                 <div className="font-semibold truncate">{paypalAccount}</div>
               </div>
-              <div className="rounded-lg bg-navy/50 border border-glass-border p-3">
-                <div className="text-[11px] text-text-secondary">{t("ppdOrderNumber")}</div>
-                <div className="font-semibold">{order.orderNumber}</div>
+              <div className="rounded-[var(--radius-md)] bg-navy border border-glass-border p-3">
+                <div className="text-xs text-text-secondary">{t("ppdOrderNumber")}</div>
+                <div className="font-mono font-medium break-all">{order.orderNumber}</div>
               </div>
             </div>
 
@@ -160,17 +161,17 @@ export default async function ReceiptPage({
                 href={paypalPayUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-full inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-lg bg-[#0070ba] text-white font-semibold hover:bg-[#005ea6] transition-all mb-3 print:hidden"
+                className="w-full inline-flex items-center justify-center gap-2 min-h-11 px-5 rounded-[var(--radius-md)] bg-[#0070ba] text-white font-semibold hover:bg-[#005ea6] transition-colors mb-3 print:hidden"
               >
                 {t("ppdPayButton", {
                   amount: formatPrice(order.totalCents, order.currency),
                 })}
-                <ExternalLink className="w-4 h-4" />
+                <ExternalLink aria-hidden="true" className="w-4 h-4" />
               </a>
             )}
 
-            <p className="text-xs text-text-secondary mb-1.5">{t("ppdGoodsServices")}</p>
-            <p className="text-xs text-text-secondary">{t("ppdQuoteOrder")}</p>
+            <p className="text-sm text-text-secondary mb-1.5">{t("ppdGoodsServices")}</p>
+            <p className="text-sm text-text-secondary">{t("ppdQuoteOrder")}</p>
           </div>
         )}
 
@@ -178,10 +179,10 @@ export default async function ReceiptPage({
         {order.booking && (
           <Link
             href={`/book/manage/${order.booking.manageToken}`}
-            className="mb-6 flex items-center justify-between gap-3 rounded-lg border border-gold/40 bg-gold/10 px-4 py-3 text-sm font-medium text-text-primary hover:bg-gold/15 transition-colors"
+            className="mb-6 flex items-center justify-between gap-3 min-h-11 rounded-[var(--radius-md)] border border-gold/40 bg-gold/10 px-4 py-3 text-sm font-medium text-text-primary hover:bg-gold/15 transition-colors"
           >
             {l === "fr" ? "Voir votre réservation" : "View your booking"}
-            <ExternalLink className="w-4 h-4 text-gold shrink-0" />
+            <ExternalLink aria-hidden="true" className="w-4 h-4 text-gold shrink-0" />
           </Link>
         )}
 
@@ -191,11 +192,11 @@ export default async function ReceiptPage({
             <span className="text-text-secondary block">
               {l === "fr" ? "N° de commande" : "Order number"}
             </span>
-            <span className="font-medium">{order.orderNumber}</span>
+            <span className="font-mono font-medium break-all">{order.orderNumber}</span>
           </div>
           <div>
             <span className="text-text-secondary block">{l === "fr" ? "Date" : "Date"}</span>
-            <span className="font-medium">
+            <span className="font-mono tabular-nums font-medium">
               {(order.paidAt ?? order.createdAt).toLocaleString(l === "fr" ? "fr-FR" : "en-US")}
             </span>
           </div>
@@ -206,7 +207,7 @@ export default async function ReceiptPage({
           {order.paypalCaptureId && (
             <div>
               <span className="text-text-secondary block">PayPal ID</span>
-              <span className="font-medium break-all">{order.paypalCaptureId}</span>
+              <span className="font-mono font-medium break-all">{order.paypalCaptureId}</span>
             </div>
           )}
           {isMobileMoney && (
@@ -218,7 +219,7 @@ export default async function ReceiptPage({
           {isMobileMoney && order.paymentReference && (
             <div>
               <span className="text-text-secondary block">{t("reference")}</span>
-              <span className="font-medium break-all">{order.paymentReference}</span>
+              <span className="font-mono font-medium break-all">{order.paymentReference}</span>
             </div>
           )}
         </div>
@@ -236,8 +237,8 @@ export default async function ReceiptPage({
             {order.items.map((item) => (
               <tr key={item.id} className="border-b border-glass-border/50">
                 <td className="py-2">{item.titleSnapshot}</td>
-                <td className="py-2 text-center">{item.quantity}</td>
-                <td className="py-2 text-right">
+                <td className="py-2 text-center font-mono tabular-nums">{item.quantity}</td>
+                <td className="py-2 text-right font-mono tabular-nums">
                   {formatPrice(item.unitPriceCents * item.quantity, order.currency)}
                 </td>
               </tr>
@@ -248,26 +249,26 @@ export default async function ReceiptPage({
                   <td className="pt-3 text-text-secondary" colSpan={2}>
                     {l === "fr" ? "Sous-total" : "Subtotal"}
                   </td>
-                  <td className="pt-3 text-right">
+                  <td className="pt-3 text-right font-mono tabular-nums">
                     {formatPrice(order.subtotalCents, order.currency)}
                   </td>
                 </tr>
                 <tr>
-                  <td className="py-1 text-green-500" colSpan={2}>
+                  <td className="py-1 text-success" colSpan={2}>
                     {l === "fr" ? "Réduction" : "Discount"}
                     {order.couponCode ? ` (${order.couponCode})` : ""}
                   </td>
-                  <td className="py-1 text-right text-green-500">
+                  <td className="py-1 text-right font-mono tabular-nums text-success">
                     −{formatPrice(order.discountCents, order.currency)}
                   </td>
                 </tr>
               </>
             )}
             <tr>
-              <td className="pt-3 font-bold" colSpan={2}>
+              <td className="pt-3 font-medium" colSpan={2}>
                 {l === "fr" ? "Total payé" : "Total paid"}
               </td>
-              <td className="pt-3 font-bold text-right text-gold">
+              <td className="pt-3 font-medium text-lg text-right font-mono tabular-nums">
                 {formatPrice(order.totalCents, order.currency)}
               </td>
             </tr>
@@ -277,7 +278,7 @@ export default async function ReceiptPage({
         {/* Downloads */}
         {isPaid && (
           <div className="mb-6 print:hidden">
-            <h2 className="text-lg font-semibold mb-3">
+            <h2 className="font-display text-xl mb-3">
               {l === "fr" ? "Vos téléchargements" : "Your downloads"}
             </h2>
             <div className="space-y-2">
@@ -288,13 +289,13 @@ export default async function ReceiptPage({
                 return (
                   <div
                     key={grant.id}
-                    className="flex items-center justify-between gap-3 rounded-lg border border-glass-border p-3"
+                    className="flex items-center justify-between gap-3 rounded-[var(--radius-md)] border border-glass-border p-3"
                   >
                     <div className="min-w-0">
                       <p className="font-medium truncate">
                         {titles.get(grant.bookId) || "Your file"}
                       </p>
-                      <p className="text-xs text-text-secondary">
+                      <p className="text-sm text-text-secondary">
                         {expired
                           ? l === "fr"
                             ? "Lien expiré"
@@ -309,15 +310,15 @@ export default async function ReceiptPage({
                       </p>
                     </div>
                     {disabled ? (
-                      <span className="text-xs text-text-secondary px-4 py-2">
+                      <span className="text-sm text-text-secondary px-4 py-2">
                         {l === "fr" ? "Indisponible" : "Unavailable"}
                       </span>
                     ) : (
                       <a
                         href={`/api/store/download/${grant.token}`}
-                        className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-gold text-charcoal font-semibold text-sm hover:bg-gold-light transition-all shrink-0"
+                        className={buttonClass("primary", "md", "shrink-0")}
                       >
-                        <Download className="w-4 h-4" />
+                        <Download aria-hidden="true" className="w-4 h-4" />
                         {l === "fr" ? "Télécharger" : "Download"}
                       </a>
                     )}
@@ -327,7 +328,7 @@ export default async function ReceiptPage({
             </div>
             {/* Only claim the email was sent if it actually was — a receipt that
                 promises a copy that never arrived sends buyers hunting for it. */}
-            <p className="text-xs text-text-secondary mt-3">
+            <p className="text-sm text-text-secondary mt-3">
               {l === "fr"
                 ? order.receiptEmailedAt
                   ? "Ces liens sont privés et expirent après 7 jours. Une copie vous a été envoyée par email."
@@ -343,7 +344,7 @@ export default async function ReceiptPage({
           <PrintReceiptButton label={l === "fr" ? "Imprimer / Enregistrer en PDF" : "Print / Save as PDF"} />
           <Link
             href="/store"
-            className="text-sm text-text-secondary hover:text-gold transition-colors"
+            className={buttonClass("ghost", "md")}
           >
             {l === "fr" ? "Continuer les achats" : "Continue shopping"}
           </Link>

@@ -198,7 +198,7 @@ export default function PositionTracker() {
       )}
 
       {totals?.mixedCurrency && (
-        <p className="text-xs text-amber-400 mb-3">
+        <p className="text-xs text-warning mb-3">
           Positions are quoted in {totals.currencies.join(", ")}. Totals above add the numbers
           without converting between currencies, so treat them as indicative only.
         </p>
@@ -270,7 +270,7 @@ export default function PositionTracker() {
       )}
 
       {error && (
-        <p className="text-sm text-red-400 mb-3 flex items-start gap-2">
+        <p className="text-sm text-danger mb-3 flex items-start gap-2">
           <span className="flex-1">{error}</span>
           <button onClick={() => setError(null)} aria-label="Dismiss">
             <X className="w-4 h-4" />
@@ -324,7 +324,7 @@ export default function PositionTracker() {
                     </td>
                     <td
                       className={`py-2.5 text-right tabular-nums ${
-                        pl >= 0 ? "text-green-400" : "text-red-400"
+                        pl >= 0 ? "text-success" : "text-danger"
                       }`}
                     >
                       {signed(r.valuation?.profitLoss, r.currency)}
@@ -344,7 +344,7 @@ export default function PositionTracker() {
                       </button>
                       <button
                         onClick={() => remove(r)}
-                        className="ml-1.5 text-text-muted hover:text-red-400 transition-colors align-middle"
+                        className="ml-1.5 text-text-muted hover:text-danger transition-colors align-middle"
                         aria-label={`Delete ${r.name}`}
                       >
                         <Trash2 className="w-3.5 h-3.5" />
@@ -380,7 +380,7 @@ function Tile({
       <div className="text-[11px] text-text-muted">{label}</div>
       <div
         className={`font-semibold mt-0.5 tabular-nums ${
-          tone === "up" ? "text-green-400" : tone === "down" ? "text-red-400" : ""
+          tone === "up" ? "text-success" : tone === "down" ? "text-danger" : ""
         }`}
       >
         {value}

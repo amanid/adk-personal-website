@@ -1,60 +1,52 @@
 "use client";
 
-import { motion } from "framer-motion";
 import { Link } from "@/i18n/routing";
-import { ArrowRight, Sparkles } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { useLocale } from "next-intl";
+import { buttonClass } from "@/components/ui/Button";
 
 interface CTABannerProps {
   variant?: "consulting" | "newsletter" | "services" | "premium";
 }
 
 export default function CTABanner({ variant = "consulting" }: CTABannerProps) {
-  const locale = useLocale();
+  const fr = useLocale() === "fr";
 
   const content = {
     consulting: {
-      badge: locale === "fr" ? "Services de Conseil" : "Consulting Services",
-      title: locale === "fr"
-        ? "Besoin d'Expertise en Donn\u00e9es & IA ?"
-        : "Need Expert Data & AI Guidance?",
-      description: locale === "fr"
-        ? "13+ ans d'exp\u00e9rience internationale. De la strat\u00e9gie \u00e0 l'impl\u00e9mentation."
-        : "13+ years of international experience. From strategy to implementation.",
-      cta: locale === "fr" ? "Voir les Forfaits" : "View Packages",
+      badge: fr ? "Conseil" : "Consulting",
+      title: fr ? "Besoin d'aide sur un projet de données ou d'IA ?" : "Need help with a data or AI project?",
+      description: fr
+        ? "Plus de 13 ans d'expérience internationale en statistique, science des données et IA, de la stratégie à la mise en œuvre."
+        : "13+ years of international experience in statistics, data science and AI, from strategy to implementation.",
+      cta: fr ? "Voir les formules" : "View packages",
       href: "/consulting",
     },
     newsletter: {
-      badge: locale === "fr" ? "Restez Inform\u00e9" : "Stay Updated",
-      title: locale === "fr"
-        ? "Recevez les Derni\u00e8res Publications & Analyses"
-        : "Get Latest Publications & Insights",
-      description: locale === "fr"
-        ? "Rejoignez la communaut\u00e9 de professionnels data et IA."
-        : "Join the community of data and AI professionals.",
-      cta: locale === "fr" ? "S'abonner" : "Subscribe",
+      badge: fr ? "Newsletter" : "Newsletter",
+      title: fr ? "Les nouvelles publications par email" : "New publications by email",
+      description: fr
+        ? "Recevez un email quand je publie une nouvelle analyse."
+        : "Get an email when I publish new research.",
+      cta: fr ? "S'abonner" : "Subscribe",
       href: "/contact",
     },
     services: {
-      badge: locale === "fr" ? "Services Professionnels" : "Professional Services",
-      title: locale === "fr"
-        ? "Transformez Vos Donn\u00e9es en R\u00e9sultats"
-        : "Transform Your Data Into Results",
-      description: locale === "fr"
-        ? "Statistique, IA, ing\u00e9nierie de donn\u00e9es et d\u00e9veloppement full-stack."
-        : "Statistics, AI, data engineering, and full-stack development.",
-      cta: locale === "fr" ? "Demander un Devis" : "Request a Quote",
+      badge: fr ? "Services" : "Services",
+      title: fr ? "Un projet en statistique, IA ou données ?" : "A statistics, AI or data project?",
+      description: fr
+        ? "Statistique, IA, ingénierie de données et développement full-stack."
+        : "Statistics, AI, data engineering and full-stack development.",
+      cta: fr ? "Demander un devis" : "Request a quote",
       href: "/services",
     },
     premium: {
-      badge: locale === "fr" ? "Acc\u00e8s Premium" : "Premium Access",
-      title: locale === "fr"
-        ? "Acc\u00e9dez aux Donn\u00e9es & Analyses Compl\u00e8tes"
-        : "Access Full Data & Analytics",
-      description: locale === "fr"
-        ? "D\u00e9bloquez les rapports complets, les jeux de donn\u00e9es et les analyses approfondies."
-        : "Unlock full reports, datasets, and in-depth analytics behind our publications.",
-      cta: locale === "fr" ? "En Savoir Plus" : "Learn More",
+      badge: fr ? "Premium" : "Premium",
+      title: fr ? "Rapports complets et jeux de données" : "Full reports and datasets",
+      description: fr
+        ? "Le rapport complet, et les fichiers de données qui l'accompagnent, sont disponibles avec un abonnement."
+        : "The full report, and any data files attached to it, are available with a subscription.",
+      cta: fr ? "Voir les abonnements" : "See plans",
       href: "/subscribe",
     },
   };
@@ -62,29 +54,14 @@ export default function CTABanner({ variant = "consulting" }: CTABannerProps) {
   const c = content[variant];
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 10 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true }}
-      className="my-8 glass rounded-2xl p-6 md:p-8 relative overflow-hidden"
-    >
-      <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-gold/10 text-gold text-xs font-medium mb-3">
-        <Sparkles className="w-3 h-3" />
-        {c.badge}
-      </span>
-      <h3 className="text-xl md:text-2xl font-bold font-[family-name:var(--font-display)] mb-2">
-        {c.title}
-      </h3>
-      <p className="text-text-secondary text-sm mb-4 max-w-xl">
-        {c.description}
-      </p>
-      <Link
-        href={c.href}
-        className="inline-flex items-center gap-2 px-5 py-2.5 bg-gold text-charcoal font-semibold text-sm rounded-lg hover:bg-gold-light transition-colors"
-      >
+    <aside className="my-8 card p-6 md:p-8" aria-label={c.badge}>
+      <p className="eyebrow mb-3">{c.badge}</p>
+      <h2 className="font-display text-2xl md:text-3xl leading-tight mb-2">{c.title}</h2>
+      <p className="text-text-secondary mb-5 max-w-xl">{c.description}</p>
+      <Link href={c.href} className={buttonClass("primary", "md", "group")}>
         {c.cta}
-        <ArrowRight className="w-4 h-4" />
+        <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" aria-hidden />
       </Link>
-    </motion.div>
+    </aside>
   );
 }

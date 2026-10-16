@@ -153,15 +153,15 @@ export default function DashboardClient({
           trend={analytics?.summary.viewsTrend}
         />
         <StatCard label="Users" value={usersCount} icon={Users} color="text-blue-400" />
-        <StatCard label="Blog Posts" value={postsCount} icon={FileText} color="text-green-400" />
-        <StatCard label="Publications" value={publicationsCount} icon={BookOpen} color="text-amber-400" />
+        <StatCard label="Blog Posts" value={postsCount} icon={FileText} color="text-success" />
+        <StatCard label="Publications" value={publicationsCount} icon={BookOpen} color="text-warning" />
         <StatCard
           label="Service Requests"
           value={serviceRequestsCount}
           icon={Briefcase}
           color="text-purple-400"
         />
-        <StatCard label="Unread Messages" value={messagesCount} icon={Mail} color="text-red-400" />
+        <StatCard label="Unread Messages" value={messagesCount} icon={Mail} color="text-danger" />
         <StatCard label="Questions" value={questionsCount} icon={MessageSquare} color="text-gold" />
         <StatCard
           label="Unique Pages"
@@ -244,7 +244,7 @@ export default function DashboardClient({
                       {hasData && c.changePercent !== null ? (
                         <div
                           className={`flex items-center gap-1 text-xs ${
-                            isPositive ? "text-green-400" : "text-red-400"
+                            isPositive ? "text-success" : "text-danger"
                           }`}
                         >
                           {isPositive ? (
@@ -255,7 +255,7 @@ export default function DashboardClient({
                           <span>{c.changePercent.toFixed(2)}%</span>
                         </div>
                       ) : (
-                        <p className="text-xs text-yellow-400">Unavailable</p>
+                        <p className="text-xs text-warning">Unavailable</p>
                       )}
                       {hasData && sparkData.length >= 2 && (
                         <div className="mt-2 -mx-1">
@@ -299,8 +299,8 @@ export default function DashboardClient({
                         : req.status === "IN_PROGRESS"
                         ? "bg-blue-500/10 text-blue-400"
                         : req.status === "COMPLETED"
-                        ? "bg-green-500/10 text-green-400"
-                        : "bg-red-500/10 text-red-400"
+                        ? "bg-success/10 text-success"
+                        : "bg-danger/10 text-danger"
                     }`}
                   >
                     {req.status}

@@ -40,10 +40,10 @@ interface Settings {
 }
 
 const CHIP: Record<string, string> = {
-  PENDING: "bg-amber-500/15 text-amber-400",
-  APPROVED: "bg-green-500/15 text-green-400",
+  PENDING: "bg-warning/15 text-warning",
+  APPROVED: "bg-success/15 text-success",
   PAID: "bg-signal/15 text-signal",
-  SUSPENDED: "bg-red-500/15 text-red-400",
+  SUSPENDED: "bg-danger/15 text-danger",
   REJECTED: "bg-navy-light text-text-muted",
   VOID: "bg-navy-light text-text-muted",
 };
@@ -134,7 +134,7 @@ export default function AdminAffiliatesPage() {
       </div>
 
       {flash && (
-        <p className={`text-sm rounded-md p-3 border ${flash.ok ? "text-green-400 border-green-400/30" : "text-red-400 border-red-400/30"}`}>{flash.text}</p>
+        <p className={`text-sm rounded-md p-3 border ${flash.ok ? "text-success border-success/30" : "text-danger border-danger/30"}`}>{flash.text}</p>
       )}
 
       {tab === "affiliates" &&
@@ -170,7 +170,7 @@ export default function AdminAffiliatesPage() {
                   </button>
                 )}
                 {a.status === "APPROVED" && (
-                  <button onClick={() => act(() => send(`/api/admin/affiliates/${a.id}`, "PATCH", { status: "SUSPENDED" }))} className="px-3 py-1.5 rounded-md border border-glass-border text-red-400">
+                  <button onClick={() => act(() => send(`/api/admin/affiliates/${a.id}`, "PATCH", { status: "SUSPENDED" }))} className="px-3 py-1.5 rounded-md border border-glass-border text-danger">
                     Suspend
                   </button>
                 )}
@@ -220,7 +220,7 @@ export default function AdminAffiliatesPage() {
               onClick={() => {
                 if (confirm("Void the selected commissions?")) act(() => send("/api/admin/affiliates/commissions", "POST", { action: "void", ids: [...selected] }));
               }}
-              className="px-3 py-1.5 rounded-md border border-glass-border text-sm text-red-400 disabled:opacity-40"
+              className="px-3 py-1.5 rounded-md border border-glass-border text-sm text-danger disabled:opacity-40"
             >
               Void selected
             </button>

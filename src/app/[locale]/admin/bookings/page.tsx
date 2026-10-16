@@ -60,9 +60,9 @@ interface Settings {
 }
 
 const STATUS_CHIP: Record<string, string> = {
-  PENDING_PAYMENT: "bg-amber-500/15 text-amber-400",
-  CONFIRMED: "bg-green-500/15 text-green-400",
-  RESCHEDULE_NEEDED: "bg-red-500/15 text-red-400",
+  PENDING_PAYMENT: "bg-warning/15 text-warning",
+  CONFIRMED: "bg-success/15 text-success",
+  RESCHEDULE_NEEDED: "bg-danger/15 text-danger",
   COMPLETED: "bg-navy-light text-text-secondary",
   CANCELLED: "bg-navy-light text-text-muted",
   EXPIRED: "bg-navy-light text-text-muted",
@@ -214,7 +214,7 @@ export default function AdminBookingsPage() {
       </div>
 
       {packages.length === 0 || rules.length === 0 ? (
-        <div className="glass p-4 text-sm text-amber-400">
+        <div className="glass p-4 text-sm text-warning">
           Clients can&apos;t book yet: {packages.length === 0 ? "add at least one session" : ""}
           {packages.length === 0 && rules.length === 0 ? " and " : ""}
           {rules.length === 0 ? "set your weekly hours" : ""}.
@@ -241,7 +241,7 @@ export default function AdminBookingsPage() {
       </div>
 
       {flash && (
-        <p className={`text-sm rounded-md p-3 border ${flash.ok ? "text-green-400 border-green-400/30" : "text-red-400 border-red-400/30"}`}>
+        <p className={`text-sm rounded-md p-3 border ${flash.ok ? "text-success border-success/30" : "text-danger border-danger/30"}`}>
           {flash.text}
         </p>
       )}
@@ -315,7 +315,7 @@ export default function AdminBookingsPage() {
                   onClick={() => {
                     if (confirm(`Delete "${p.title}"?`)) act(() => send(`/api/admin/bookings/packages/${p.id}`, "DELETE"), "Session deleted.");
                   }}
-                  className="px-3 py-1.5 text-sm rounded-md border border-glass-border text-red-400"
+                  className="px-3 py-1.5 text-sm rounded-md border border-glass-border text-danger"
                   aria-label="Delete"
                 >
                   <Trash2 className="w-4 h-4" />
@@ -400,7 +400,7 @@ export default function AdminBookingsPage() {
                         <input type="time" className={`${INPUT} w-32`} value={toHHMM(r.startMinute)} onChange={(e) => setRules(rules.map((x, j) => (j === i ? { ...x, startMinute: fromHHMM(e.target.value) } : x)))} />
                         <span className="text-text-muted">–</span>
                         <input type="time" className={`${INPUT} w-32`} value={toHHMM(r.endMinute === 1440 ? 1439 : r.endMinute)} onChange={(e) => setRules(rules.map((x, j) => (j === i ? { ...x, endMinute: fromHHMM(e.target.value) } : x)))} />
-                        <button onClick={() => setRules(rules.filter((_, j) => j !== i))} className="text-text-muted hover:text-red-400" aria-label="Remove window">
+                        <button onClick={() => setRules(rules.filter((_, j) => j !== i))} className="text-text-muted hover:text-danger" aria-label="Remove window">
                           <X className="w-4 h-4" />
                         </button>
                       </div>
@@ -483,7 +483,7 @@ export default function AdminBookingsPage() {
                 {fmt(b.startsAt)} → {fmt(b.endsAt)}
                 {b.reason && <span className="text-text-muted"> · {b.reason}</span>}
               </span>
-              <button onClick={() => act(() => send(`/api/admin/bookings/blocked/${b.id}`, "DELETE"), "Removed.")} className="text-text-muted hover:text-red-400" aria-label="Remove">
+              <button onClick={() => act(() => send(`/api/admin/bookings/blocked/${b.id}`, "DELETE"), "Removed.")} className="text-text-muted hover:text-danger" aria-label="Remove">
                 <Trash2 className="w-4 h-4" />
               </button>
             </div>
@@ -522,7 +522,7 @@ function BookingRow({
           {b.order && (
             <p className="text-xs text-text-muted mt-1">
               Order {b.order.orderNumber} · {formatPrice(b.order.totalCents, b.order.currency)} · {b.order.paymentMethod} ·{" "}
-              <span className={b.order.status === "PAID" ? "text-green-400" : "text-amber-400"}>{b.order.status}</span>
+              <span className={b.order.status === "PAID" ? "text-success" : "text-warning"}>{b.order.status}</span>
               {b.order.status === "PENDING" && (
                 <>
                   {" "}— <Link href="/admin/store/orders" className="text-gold">confirm payment in Orders</Link>
@@ -571,7 +571,7 @@ function BookingRow({
                   if (confirm("Cancel this booking? Refund any payment separately in PayPal / mobile money."))
                     act(() => send(`/api/admin/bookings/${b.id}`, "PATCH", { status: "CANCELLED" }), "Booking cancelled.");
                 }}
-                className="px-3 py-1.5 rounded-md border border-glass-border text-sm text-red-400"
+                className="px-3 py-1.5 rounded-md border border-glass-border text-sm text-danger"
               >
                 Cancel booking
               </button>

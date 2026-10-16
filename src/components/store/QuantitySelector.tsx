@@ -21,17 +21,17 @@ export default function QuantitySelector({
   const t = useTranslations("store");
   const btn =
     size === "sm"
-      ? "w-7 h-7"
-      : "w-9 h-9";
+      ? "w-11 h-11 sm:w-9 sm:h-9"
+      : "w-11 h-11";
 
   return (
-    <div className="inline-flex items-center rounded-lg border border-glass-border overflow-hidden">
+    <div className="inline-flex items-center rounded-[var(--radius-md)] border border-glass-border overflow-hidden">
       <button
         type="button"
         aria-label={t("decreaseQuantity")}
         onClick={() => onChange(Math.max(min, value - 1))}
         disabled={value <= min}
-        className={`${btn} flex items-center justify-center text-text-secondary hover:text-gold hover:bg-gold/10 disabled:opacity-40 disabled:cursor-not-allowed transition-colors`}
+        className={`${btn} flex items-center justify-center text-text-secondary hover:text-text-primary hover:bg-[var(--hover-wash)] disabled:opacity-40 disabled:cursor-not-allowed transition-colors`}
       >
         <Minus className="w-4 h-4" />
       </button>
@@ -47,14 +47,14 @@ export default function QuantitySelector({
           if (Number.isNaN(n)) return;
           onChange(Math.min(max, Math.max(min, n)));
         }}
-        className="w-12 text-center bg-transparent text-sm font-medium outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+        className="w-12 text-center bg-transparent font-mono tabular-nums text-sm font-medium outline-none focus-visible:bg-[var(--hover-wash)] [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
       />
       <button
         type="button"
         aria-label={t("increaseQuantity")}
         onClick={() => onChange(Math.min(max, value + 1))}
         disabled={value >= max}
-        className={`${btn} flex items-center justify-center text-text-secondary hover:text-gold hover:bg-gold/10 disabled:opacity-40 disabled:cursor-not-allowed transition-colors`}
+        className={`${btn} flex items-center justify-center text-text-secondary hover:text-text-primary hover:bg-[var(--hover-wash)] disabled:opacity-40 disabled:cursor-not-allowed transition-colors`}
       >
         <Plus className="w-4 h-4" />
       </button>

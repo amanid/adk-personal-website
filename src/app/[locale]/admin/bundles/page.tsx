@@ -130,7 +130,7 @@ export default function AdminBundlesPage() {
       </div>
 
       {flash && (
-        <p className={`text-sm rounded-md p-3 border ${flash.ok ? "text-green-400 border-green-400/30" : "text-red-400 border-red-400/30"}`}>
+        <p className={`text-sm rounded-md p-3 border ${flash.ok ? "text-success border-success/30" : "text-danger border-danger/30"}`}>
           {flash.text}
         </p>
       )}
@@ -176,7 +176,7 @@ export default function AdminBundlesPage() {
                     />
                     <span className="flex-1 truncate">
                       {b.title}
-                      {b.status !== "PUBLISHED" && <span className="text-xs text-amber-400"> (not published)</span>}
+                      {b.status !== "PUBLISHED" && <span className="text-xs text-warning"> (not published)</span>}
                     </span>
                     <span className="figure text-text-muted">{formatPrice(effectivePrice(b).priceCents, b.currency)}</span>
                   </label>
@@ -209,7 +209,7 @@ export default function AdminBundlesPage() {
               <p className="text-text-secondary">
                 Bought separately: <span className="figure">{formatPrice(separate, form.currency)}</span>
               </p>
-              <p className={priceCents > 0 && priceCents < separate ? "text-green-400" : "text-amber-400"}>
+              <p className={priceCents > 0 && priceCents < separate ? "text-success" : "text-warning"}>
                 {priceCents > 0 && priceCents < separate
                   ? `Buyer saves ${formatPrice(separate - priceCents, form.currency)} (${Math.round(((separate - priceCents) / separate) * 100)}%)`
                   : "Price it below the separate total"}
@@ -296,7 +296,7 @@ export default function AdminBundlesPage() {
                       setFlash({ ok: false, text: (e as Error).message });
                     }
                   }}
-                  className="px-3 py-1.5 text-sm rounded-md border border-glass-border text-red-400"
+                  className="px-3 py-1.5 text-sm rounded-md border border-glass-border text-danger"
                   aria-label="Delete"
                 >
                   <Trash2 className="w-4 h-4" />

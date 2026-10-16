@@ -111,9 +111,15 @@ export default function PayPalSubscribeButton({
   return (
     <div>
       <div ref={ref} className={state === "verifying" ? "opacity-40 pointer-events-none" : ""} />
-      {state === "loading" && <p className="text-sm text-text-secondary text-center py-2">{labels.loading}</p>}
-      {state === "verifying" && <p className="text-sm text-text-secondary text-center py-2">{labels.verifying}</p>}
-      {message && <p className="text-sm text-red-400 border border-red-400/30 rounded-md p-3 mt-2">{message}</p>}
+      <div role="status">
+        {state === "loading" && <p className="text-sm text-text-secondary text-center py-2">{labels.loading}</p>}
+        {state === "verifying" && <p className="text-sm text-text-secondary text-center py-2">{labels.verifying}</p>}
+      </div>
+      {message && (
+        <p role="alert" className="text-sm text-danger bg-danger/10 border border-danger/30 rounded-[var(--radius-md)] p-3 mt-2">
+          {message}
+        </p>
+      )}
     </div>
   );
 }

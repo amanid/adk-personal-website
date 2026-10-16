@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { findAsset, streamAsset } from "@/lib/asset-store";
+import { findAsset, readAssetRange, streamAsset } from "@/lib/asset-store";
+import { buildLicenceUpdate } from "@/lib/pdf-license";
 import { rateLimit } from "@/lib/rate-limit";
 
 export const runtime = "nodejs";
@@ -29,7 +30,7 @@ export async function GET(
 
     const grant = await prisma.downloadGrant.findUnique({
       where: { token },
-      include: { order: { select: { status: true } } },
+      include: { order: { select: { status: true, email: true, name: true, orderNumber: true } } },
     });
 
     if (!grant) return notFound();
@@ -65,12 +66,27 @@ export async function GET(
       "_"
     );
 
+    // PDFs carry the buyer's name, email and order number in their document
+    // properties (see lib/pdf-license), so a shared copy names its source.
+    const mimeType = asset.mimeType || book.fileMimeType || "application/octet-stream";
+    const isPdf = mimeType === "application/pdf" || safeName.toLowerCase().endsWith(".pdf");
+    const licence = isPdf
+      ? await buildLicenceUpdate(asset.size, (o, l) => readAssetRange(asset, o, l), {
+          title: book.title,
+          author: "KONAN Amani Dieudonné",
+          buyerEmail: grant.order.email,
+          buyerName: grant.order.name,
+          orderNumber: grant.order.orderNumber,
+        })
+      : null;
+
     // Streamed piece by piece: a 50MB book never sits whole in memory.
-    return new NextResponse(streamAsset(asset), {
+    const body = licence ? withSuffix(streamAsset(asset), licence) : streamAsset(asset);
+    return new NextResponse(body, {
       headers: {
-        "Content-Type": asset.mimeType || book.fileMimeType || "application/octet-stream",
+        "Content-Type": mimeType,
         "Content-Disposition": `attachment; filename="${safeName}"`,
-        "Content-Length": String(asset.size),
+        "Content-Length": String(asset.size + (licence?.length ?? 0)),
         "Cache-Control": "private, no-store, max-age=0",
         "X-Content-Type-Options": "nosniff",
       },
@@ -79,4 +95,26 @@ export async function GET(
     console.error("Download error:", error);
     return notFound();
   }
+}
+
+/** The stream's bytes followed by `suffix`. */
+function withSuffix(stream: ReadableStream<Uint8Array>, suffix: Uint8Array): ReadableStream<Uint8Array> {
+  const reader = stream.getReader();
+  let done = false;
+  return new ReadableStream<Uint8Array>({
+    async pull(controller) {
+      if (done) return;
+      const r = await reader.read();
+      if (r.done) {
+        controller.enqueue(suffix);
+        controller.close();
+        done = true;
+      } else {
+        controller.enqueue(r.value);
+      }
+    },
+    cancel(reason) {
+      return reader.cancel(reason);
+    },
+  });
 }

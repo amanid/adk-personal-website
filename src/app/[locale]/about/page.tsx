@@ -29,7 +29,7 @@ export default async function AboutPage() {
       id: c.id,
       name: c.name,
       nameFr: c.nameFr ?? "",
-      skills: c.skills.map((s) => ({ id: s.id, name: s.name, level: s.level })),
+      skills: c.skills.map((s) => ({ id: s.id, name: s.name })),
     }));
     education = edu.map((e) => ({
       id: e.id,

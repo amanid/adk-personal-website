@@ -1,51 +1,27 @@
 "use client";
 
 import { usePathname } from "next/navigation";
-import { useLocale } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { safeJsonLd } from "@/lib/utils";
 import { Link } from "@/i18n/routing";
-import { ChevronRight, Home } from "lucide-react";
 
-const LABELS: Record<string, Record<string, string>> = {
-  en: {
-    about: "About",
-    experience: "Experience",
-    services: "Services",
-    projects: "Projects",
-    publications: "Publications",
-    blog: "Blog",
-    qa: "Q&A",
-    contact: "Contact",
-    research: "Research",
-    topics: "Topics",
-  },
-  fr: {
-    about: "À propos",
-    experience: "Expérience",
-    services: "Services",
-    projects: "Projets",
-    publications: "Publications",
-    blog: "Blog",
-    qa: "Q&R",
-    contact: "Contact",
-    research: "Recherche",
-    topics: "Thèmes",
-  },
-};
+// Never label a crumb with these nav keys: they are UI strings, not pages.
+const NOT_PAGES = new Set(["language", "more", "logout"]);
 
 export default function Breadcrumbs() {
   const pathname = usePathname();
   const locale = useLocale();
+  const tNav = useTranslations("nav");
 
   // Remove locale prefix
   const path = pathname.replace(`/${locale}`, "") || "/";
   if (path === "/") return null;
 
   const segments = path.split("/").filter(Boolean);
-  const labels = LABELS[locale] || LABELS.en;
 
   const crumbs = segments.map((seg, i) => ({
-    label: labels[seg] || decodeURIComponent(seg).replace(/-/g, " "),
+    label:
+      !NOT_PAGES.has(seg) && tNav.has(seg) ? tNav(seg) : decodeURIComponent(seg).replace(/-/g, " "),
     href: "/" + segments.slice(0, i + 1).join("/"),
     isLast: i === segments.length - 1,
   }));
@@ -58,7 +34,7 @@ export default function Breadcrumbs() {
       {
         "@type": "ListItem",
         position: 1,
-        name: "Home",
+        name: tNav("home"),
         item: `https://www.konanamanidieudonne.org/${locale}`,
       },
       ...crumbs.map((c, i) => ({
@@ -76,28 +52,30 @@ export default function Breadcrumbs() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: safeJsonLd(jsonLd) }}
       />
-      <nav aria-label="Breadcrumb" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
-        <ol className="flex items-center gap-1 text-xs text-text-muted">
+      <nav aria-label="Breadcrumb" className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-5">
+        <ol className="flex flex-wrap items-center gap-x-2 gap-y-1 font-mono text-xs text-text-muted">
           <li>
-            <Link href="/" className="hover:text-gold transition-colors flex items-center gap-1">
-              <Home className="w-3 h-3" />
-              <span className="sr-only">Home</span>
+            <Link href="/" className="hover:text-text-primary transition-colors">
+              {tNav("home")}
             </Link>
           </li>
-          {crumbs.map((crumb) => (
-            <li key={crumb.href} className="flex items-center gap-1">
-              <ChevronRight className="w-3 h-3" />
-              {crumb.isLast ? (
-                <span className="text-text-secondary font-medium truncate max-w-[200px]">
-                  {crumb.label.charAt(0).toUpperCase() + crumb.label.slice(1)}
-                </span>
-              ) : (
-                <Link href={crumb.href} className="hover:text-gold transition-colors truncate max-w-[200px]">
-                  {crumb.label.charAt(0).toUpperCase() + crumb.label.slice(1)}
-                </Link>
-              )}
-            </li>
-          ))}
+          {crumbs.map((crumb) => {
+            const label = crumb.label.charAt(0).toUpperCase() + crumb.label.slice(1);
+            return (
+              <li key={crumb.href} className="flex items-center gap-2 min-w-0">
+                <span aria-hidden className="text-glass-border">/</span>
+                {crumb.isLast ? (
+                  <span aria-current="page" className="text-text-secondary truncate max-w-[200px]">
+                    {label}
+                  </span>
+                ) : (
+                  <Link href={crumb.href} className="hover:text-text-primary transition-colors truncate max-w-[200px]">
+                    {label}
+                  </Link>
+                )}
+              </li>
+            );
+          })}
         </ol>
       </nav>
     </>

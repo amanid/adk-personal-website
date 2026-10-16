@@ -17,9 +17,9 @@ export interface ExtractionState {
 }
 
 const STATUS: Record<ReportRow["status"], { label: string; className: string }> = {
-  filled: { label: "Filled", className: "text-green-400" },
+  filled: { label: "Filled", className: "text-success" },
   confirmed: { label: "Matches", className: "text-text-secondary" },
-  kept: { label: "Kept yours", className: "text-amber-400" },
+  kept: { label: "Kept yours", className: "text-warning" },
   "kept-file": { label: "Kept the file's", className: "text-text-secondary" },
   drafted: { label: "AI draft", className: "text-gold" },
   translated: { label: "Translated", className: "text-gold" },
@@ -48,7 +48,7 @@ export default function ExtractionReport({ state }: { state: ExtractionState }) 
 
       {open && (
         <>
-          {state.error && <p className="text-red-400">{state.error}</p>}
+          {state.error && <p className="text-danger">{state.error}</p>}
           {state.rows.length > 0 && (
             <div className="overflow-x-auto">
               <table className="w-full text-xs">
@@ -97,7 +97,7 @@ export default function ExtractionReport({ state }: { state: ExtractionState }) 
           {(state.figuresChecked > 0 || state.removed.length > 0) && (
             <div className="text-xs space-y-1">
               <p className="flex gap-1.5 text-text-secondary">
-                <ShieldCheck className="w-3.5 h-3.5 mt-0.5 shrink-0 text-green-400" />
+                <ShieldCheck className="w-3.5 h-3.5 mt-0.5 shrink-0 text-success" />
                 The AI draft was checked against the document: {state.figuresChecked} figure{state.figuresChecked === 1 ? "" : "s"} kept, all present in the text
                 {state.removed.length ? `; ${state.removed.length} statement${state.removed.length === 1 ? "" : "s"} removed because the document doesn't support ${state.removed.length === 1 ? "it" : "them"}:` : "."}
               </p>
@@ -117,7 +117,7 @@ export default function ExtractionReport({ state }: { state: ExtractionState }) 
             </div>
           )}
           {state.aiError && (
-            <p className="text-xs text-amber-400 flex gap-1.5">
+            <p className="text-xs text-warning flex gap-1.5">
               <Sparkles className="w-3.5 h-3.5 mt-0.5 shrink-0" />
               {state.aiError}
             </p>

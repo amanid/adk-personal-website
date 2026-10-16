@@ -19,7 +19,7 @@ import ProductPurchase from "@/components/store/ProductPurchase";
 import { cardPrice, effectivePrice } from "@/lib/pricing";
 import BookViewBeacon from "@/components/store/BookViewBeacon";
 import BookCard, { type StoreBook } from "@/components/store/BookCard";
-import { BookOpen, Check, ChevronLeft, Calendar, Globe, Hash, FileDown } from "lucide-react";
+import { BookOpen, Check, ChevronLeft } from "lucide-react";
 import type { Book } from "@prisma/client";
 
 export const revalidate = 60;
@@ -139,6 +139,7 @@ export default async function BookDetailPage({
     slug: b.slug,
     title: l === "fr" && b.titleFr ? b.titleFr : b.title,
     subtitle: l === "fr" && b.subtitleFr ? b.subtitleFr : b.subtitle,
+    author: b.author,
     publicationYear: b.publicationYear,
     ...cardPrice(b),
     currency: b.currency,
@@ -184,8 +185,21 @@ export default async function BookDetailPage({
     },
   };
 
+  // Facts the record holds, in the order a buyer scans them. Nothing here is
+  // added for show: each row appears only when the book carries the value.
+  const facts: { label: string; value: string }[] = [
+    { label: l === "fr" ? "Auteur" : "Author", value: book.author },
+    { label: l === "fr" ? "Année" : "Year", value: String(book.publicationYear) },
+    ...(book.language ? [{ label: l === "fr" ? "Langue" : "Language", value: book.language }] : []),
+    ...(book.pageCount ? [{ label: "Pages", value: book.pageCount.toLocaleString(l) }] : []),
+    ...(format ? [{ label: "Format", value: fileSize ? `${format} · ${fileSize}` : format }] : []),
+    ...(book.isbn ? [{ label: "ISBN", value: book.isbn }] : []),
+  ];
+
+  const check = <Check aria-hidden="true" className="w-4 h-4 text-success mt-0.5 shrink-0" />;
+
   return (
-    <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+    <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-10 md:py-14">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: safeJsonLd(bookJsonLd) }}
@@ -193,33 +207,40 @@ export default async function BookDetailPage({
       <BookViewBeacon slug={book.slug} />
       <Link
         href="/store"
-        className="inline-flex items-center gap-1 text-sm text-text-secondary hover:text-gold transition-colors mb-6"
+        className="inline-flex items-center gap-1 min-h-11 text-sm text-text-secondary hover:text-gold transition-colors mb-6"
       >
-        <ChevronLeft className="w-4 h-4" />
+        <ChevronLeft aria-hidden="true" className="w-4 h-4" />
         {l === "fr" ? "Retour à la librairie" : "Back to bookstore"}
       </Link>
 
-      <div className="grid md:grid-cols-[320px_1fr] gap-8 lg:gap-12">
-        {/* Cover + purchase */}
-        <div>
-          <div className="relative glass rounded-xl overflow-hidden aspect-[3/4] bg-navy/50">
+      <div className="grid md:grid-cols-[minmax(0,340px)_1fr] gap-10 lg:gap-14 items-start">
+        {/* Cover */}
+        <div className="md:sticky md:top-24">
+          <div className="relative aspect-[3/4] w-full max-w-[340px] mx-auto overflow-hidden rounded-[var(--radius-sm)] bg-navy border border-glass-border shadow-[var(--elev-lg)]">
             {coverUrl ? (
               <Image
                 src={coverUrl}
                 alt={l === "fr" ? `Couverture de ${title}` : `Cover of ${title}`}
                 fill
-                sizes="(max-width: 768px) 100vw, 320px"
+                sizes="(max-width: 768px) 90vw, 340px"
                 className="object-cover"
                 priority
               />
             ) : (
-              <div className="w-full h-full flex items-center justify-center text-gold/30">
-                <BookOpen className="w-20 h-20" />
+              <div className="w-full h-full flex items-center justify-center text-text-muted">
+                <BookOpen aria-hidden="true" className="w-20 h-20" />
               </div>
             )}
           </div>
+        </div>
 
-          <div className="glass rounded-xl p-5 mt-4">
+        {/* Title, buy box, description */}
+        <div className="min-w-0">
+          {book.kind !== "BOOK" && <p className="eyebrow mb-3">{tStore(`kind_${book.kind}`)}</p>}
+          <h1 className="font-display text-4xl md:text-5xl leading-[1.05] tracking-tight">{title}</h1>
+          {subtitle && <p className="lede mt-3">{subtitle}</p>}
+
+          <div className="card-feature card p-6 mt-8">
             <ProductPurchase
               item={{ bookId: book.id, slug: book.slug, title, currency: book.currency, coverUrl }}
               priceCents={price.priceCents}
@@ -228,74 +249,57 @@ export default async function BookDetailPage({
               payWhatYouWant={price.payWhatYouWant}
               withQuantity={!price.payWhatYouWant}
             />
-            <ul className="text-xs text-text-secondary mt-4 space-y-1.5">
-              <li className="flex items-start gap-1.5">
-                <Check className="w-3.5 h-3.5 text-green-400 mt-0.5 shrink-0" />
+            <ul className="text-sm text-text-secondary mt-6 pt-5 border-t border-glass-border space-y-2">
+              <li className="flex items-start gap-2">
+                {check}
                 {paymentNote}
               </li>
-              <li className="flex items-start gap-1.5">
-                <Check className="w-3.5 h-3.5 text-green-400 mt-0.5 shrink-0" />
+              <li className="flex items-start gap-2">
+                {check}
                 {l === "fr"
-                  ? "Liens valables 7 jours, jusqu'à 5 téléchargements"
-                  : "Links valid for 7 days, up to 5 downloads"}
+                  ? "Lien valable 7 jours, jusqu'à 5 téléchargements"
+                  : "Link valid for 7 days, up to 5 downloads"}
               </li>
-              <li className="flex items-start gap-1.5">
-                <Check className="w-3.5 h-3.5 text-green-400 mt-0.5 shrink-0" />
+              <li className="flex items-start gap-2">
+                {check}
                 {l === "fr"
                   ? "Reçu envoyé par e-mail. Ventes définitives (produit numérique)."
-                  : "Receipt emailed to you. All sales final (digital product)."}
+                  : "Receipt sent by email. All sales are final (digital product)."}
               </li>
             </ul>
           </div>
-        </div>
 
-        {/* Details */}
-        <div>
-          {book.kind !== "BOOK" && <p className="eyebrow mb-2">{tStore(`kind_${book.kind}`)}</p>}
-          <h1 className="text-3xl font-bold font-[family-name:var(--font-display)]">{title}</h1>
-          {subtitle && <p className="text-lg text-text-secondary mt-2">{subtitle}</p>}
+          <dl className="mt-8 grid grid-cols-[auto_1fr] gap-x-6 text-sm">
+            {facts.map((f) => (
+              <div key={f.label} className="contents">
+                <dt className="eyebrow text-text-muted py-2.5 border-b border-glass-border">{f.label}</dt>
+                <dd className="font-mono tabular-nums text-text-primary py-2.5 border-b border-glass-border min-w-0 break-words">
+                  {f.value}
+                </dd>
+              </div>
+            ))}
+          </dl>
 
-          <div className="flex flex-wrap gap-x-6 gap-y-2 text-sm text-text-secondary mt-4">
-            <span className="flex items-center gap-1.5">
-              <Calendar className="w-4 h-4 text-gold/60" />
-              {book.publicationYear}
-            </span>
-            {book.language && (
-              <span className="flex items-center gap-1.5">
-                <Globe className="w-4 h-4 text-gold/60" />
-                {book.language}
-              </span>
-            )}
-            {book.pageCount ? (
-              <span className="flex items-center gap-1.5">
-                <BookOpen className="w-4 h-4 text-gold/60" />
-                {book.pageCount.toLocaleString(l)} pages
-              </span>
-            ) : null}
-            {book.isbn && (
-              <span className="flex items-center gap-1.5">
-                <Hash className="w-4 h-4 text-gold/60" />
-                ISBN {book.isbn}
-              </span>
-            )}
-            {format && (
-              <span className="flex items-center gap-1.5">
-                <FileDown className="w-4 h-4 text-gold/60" />
-                {format}
-                {fileSize ? ` · ${fileSize}` : ""}
-              </span>
-            )}
+          <div className="mt-12 max-w-prose">
+            <h2 className="font-display text-2xl mb-4">
+              {isDocument
+                ? l === "fr" ? "À propos de cet ouvrage" : "About this book"
+                : l === "fr" ? "À propos de ce produit" : "About this product"}
+            </h2>
+            <div className="text-text-secondary text-[1.0625rem] leading-relaxed whitespace-pre-wrap">
+              {description}
+            </div>
           </div>
 
           {insights.length > 0 && (
-            <div className="mt-8">
-              <h2 className="text-xl font-semibold mb-3">
+            <div className="mt-10 max-w-prose">
+              <h2 className="font-display text-2xl mb-4">
                 {l === "fr" ? "Points clés" : "Key insights"}
               </h2>
-              <ul className="space-y-2">
+              <ul className="space-y-3">
                 {insights.map((insight, i) => (
-                  <li key={i} className="flex items-start gap-2 text-text-secondary">
-                    <Check className="w-4 h-4 text-gold mt-1 shrink-0" />
+                  <li key={i} className="flex items-start gap-3 text-text-secondary leading-relaxed">
+                    <Check aria-hidden="true" className="w-4 h-4 text-gold mt-1 shrink-0" />
                     <span>{insight}</span>
                   </li>
                 ))}
@@ -303,38 +307,27 @@ export default async function BookDetailPage({
             </div>
           )}
 
-          <div className="mt-8">
-            <h2 className="text-xl font-semibold mb-3">
-              {isDocument
-                ? l === "fr" ? "À propos de cet ouvrage" : "About this book"
-                : l === "fr" ? "À propos de ce produit" : "About this product"}
-            </h2>
-            <div className="text-text-secondary leading-relaxed whitespace-pre-wrap">
-              {description}
-            </div>
-          </div>
-
           {book.tags.length > 0 && (
-            <div className="mt-8 flex flex-wrap gap-2">
+            <ul className="mt-10 flex flex-wrap gap-2" aria-label={l === "fr" ? "Mots-clés" : "Tags"}>
               {book.tags.map((tag) => (
-                <span
+                <li
                   key={tag}
-                  className="px-3 py-1 text-xs rounded-full bg-gold/10 text-gold border border-gold/20"
+                  className="px-3 py-1 font-mono text-xs rounded-full border border-glass-border text-text-secondary"
                 >
                   {tag}
-                </span>
+                </li>
               ))}
-            </div>
+            </ul>
           )}
         </div>
       </div>
 
       {relatedBooks.length > 0 && (
-        <section className="mt-16">
-          <h2 className="text-2xl font-bold font-[family-name:var(--font-display)] mb-6">
+        <section className="mt-20 pt-14 hairline" aria-labelledby="related-heading">
+          <h2 id="related-heading" className="h-section mb-10">
             {l === "fr" ? "À découvrir aussi" : "You might also like"}
           </h2>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-5 gap-y-12 sm:gap-x-8">
             {relatedBooks.map((b) => (
               <BookCard key={b.id} book={b} />
             ))}

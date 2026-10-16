@@ -59,10 +59,10 @@ interface Form {
 const STATUS_CHIP: Record<string, string> = {
   DRAFT: "bg-navy-light text-text-secondary",
   SENT: "bg-signal/15 text-signal",
-  ACCEPTED: "bg-amber-500/15 text-amber-400",
-  DEPOSIT_PAID: "bg-green-500/15 text-green-400",
-  BALANCE_DUE: "bg-amber-500/15 text-amber-400",
-  PAID: "bg-green-500/15 text-green-400",
+  ACCEPTED: "bg-warning/15 text-warning",
+  DEPOSIT_PAID: "bg-success/15 text-success",
+  BALANCE_DUE: "bg-warning/15 text-warning",
+  PAID: "bg-success/15 text-success",
   DECLINED: "bg-navy-light text-text-muted",
   CANCELLED: "bg-navy-light text-text-muted",
 };
@@ -210,7 +210,7 @@ export default function AdminQuotesPage() {
       </div>
 
       {flash && (
-        <p className={`text-sm rounded-md p-3 border ${flash.ok ? "text-green-400 border-green-400/30" : "text-red-400 border-red-400/30"}`}>
+        <p className={`text-sm rounded-md p-3 border ${flash.ok ? "text-success border-success/30" : "text-danger border-danger/30"}`}>
           {flash.text}
         </p>
       )}
@@ -254,7 +254,7 @@ export default function AdminQuotesPage() {
                 <div key={i} className="grid grid-cols-[1fr_9rem_auto] gap-2">
                   <input className={INPUT} placeholder="Description" value={it.description} onChange={(e) => setForm({ ...form, items: form.items.map((x, j) => (j === i ? { ...x, description: e.target.value } : x)) })} />
                   <input className={INPUT} type="number" min={0} step="0.01" placeholder="Amount" value={it.amount} onChange={(e) => setForm({ ...form, items: form.items.map((x, j) => (j === i ? { ...x, amount: e.target.value } : x)) })} />
-                  <button onClick={() => setForm({ ...form, items: form.items.filter((_, j) => j !== i) })} disabled={form.items.length === 1} className="text-text-muted hover:text-red-400 disabled:opacity-30" aria-label="Remove line">
+                  <button onClick={() => setForm({ ...form, items: form.items.filter((_, j) => j !== i) })} disabled={form.items.length === 1} className="text-text-muted hover:text-danger disabled:opacity-30" aria-label="Remove line">
                     <X className="w-4 h-4" />
                   </button>
                 </div>
@@ -388,7 +388,7 @@ export default function AdminQuotesPage() {
                       }}
                       className="px-3 py-1.5 rounded-md border border-glass-border inline-flex items-center gap-1"
                     >
-                      {copied === q.id ? <Check className="w-3.5 h-3.5 text-green-400" /> : <Copy className="w-3.5 h-3.5" />} Copy link
+                      {copied === q.id ? <Check className="w-3.5 h-3.5 text-success" /> : <Copy className="w-3.5 h-3.5" />} Copy link
                     </button>
                   </>
                 )}
@@ -398,7 +398,7 @@ export default function AdminQuotesPage() {
                       if (confirm("Cancel this quote? Refund any payment already received separately."))
                         act(() => send(`/api/admin/quotes/${q.id}`, "POST", { action: "cancel" }), "Cancelled.");
                     }}
-                    className="px-3 py-1.5 rounded-md border border-glass-border text-red-400"
+                    className="px-3 py-1.5 rounded-md border border-glass-border text-danger"
                   >
                     Cancel quote
                   </button>
@@ -408,7 +408,7 @@ export default function AdminQuotesPage() {
                     onClick={() => {
                       if (confirm("Delete this draft?")) act(() => send(`/api/admin/quotes/${q.id}`, "DELETE"), "Draft deleted.");
                     }}
-                    className="px-3 py-1.5 rounded-md border border-glass-border text-red-400"
+                    className="px-3 py-1.5 rounded-md border border-glass-border text-danger"
                     aria-label="Delete draft"
                   >
                     <Trash2 className="w-3.5 h-3.5" />

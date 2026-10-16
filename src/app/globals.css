@@ -40,10 +40,15 @@
   --color-violet: #9a7be8;
   --color-sand: #c9b98a;
 
-  --font-sans: var(--font-figtree), 'Figtree', ui-sans-serif, system-ui, sans-serif;
-  --font-display: var(--font-figtree), 'Figtree', ui-sans-serif, sans-serif;
-  /* Code and coupon codes only; no webfont download for it. */
-  --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  /* Status colours. Never use raw red/green utilities for these: the light
+     theme swaps in darker values so messages keep AA contrast on white. */
+  --color-success: #4ade80;
+  --color-danger: #f87171;
+  --color-warning: #fbbf24;
+
+  --font-sans: var(--font-geist), 'Geist', ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-newsreader), 'Newsreader', Georgia, serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
 }
 
 /*
@@ -62,13 +67,24 @@
   /* A hairline of light along the top edge: the cue that a surface is lit from
      above, and the cheapest way to make a card look raised rather than drawn. */
   --sheen-top: inset 0 1px 0 rgba(255, 255, 255, 0.05);
+
+  /* One radius scale: chips and inputs, cards and buttons, feature panels. */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+
+  /* A neutral wash for hovers that works on dark and light surfaces alike
+     (bg-white/5 vanished on the light theme). */
+  --hover-wash: color-mix(in srgb, var(--color-text-primary) 6%, transparent);
+
+  --ease-out-soft: cubic-bezier(0.2, 0.7, 0.2, 1);
 }
 
 /* Theme: Ink & Signal (default) */
 [data-theme="ink-signal"] {
-  --color-charcoal: #111110;
-  --color-navy: #0b0b0a;
-  --color-navy-light: #232320;
+  --color-charcoal: #0f0f0e;
+  --color-navy: #0a0a09;
+  --color-navy-light: #201f1d;
   --color-gold: #ea5536;
   --color-gold-light: #f2765b;
   --color-gold-dark: #c43e22;
@@ -109,27 +125,27 @@
   --color-surface-3: #263457;
 }
 
-/* Theme: Light Professional */
+/* Theme: Paper (light). Warm paper and ink rather than slate: the light
+   counterpart of Ink & Signal, sharing its accent family. The accent is darker
+   here (#c23d21, about 4.7:1 on the page) so it passes AA as text. */
 [data-theme="light-professional"] {
-  --color-charcoal: #f8fafc;
-  --color-navy: #e2e8f0;
-  --color-navy-light: #cbd5e1;
-  --color-gold: #1e3a5f;
-  --color-gold-light: #2d5a8e;
-  --color-gold-dark: #14273d;
-  --color-glass: #ffffff;
-  --color-glass-border: #d3dbe6;
-  /* Light-theme text ramp, verified against all three light surfaces
-     (--color-charcoal / --color-navy / --color-navy-light). Muted was #94a3b8,
-     which failed WCAG AA badly (2.45:1 on the page, 2.08:1 on cards) and made
-     small print such as timestamps unreadable. Secondary is darkened alongside
-     it so the primary > secondary > muted hierarchy still reads. */
-  --color-text-primary: #0f172a;
-  --color-text-secondary: #334155;
-  --color-text-muted: #4d5a6a;
-  --color-surface-1: #ffffff;
-  --color-surface-2: #f1f5f9;
-  --color-surface-3: #e7edf4;
+  --color-charcoal: #f6f4ef;
+  --color-navy: #ebe7df;
+  --color-navy-light: #efece5;
+  --color-gold: #c23d21;
+  --color-gold-light: #d4532f;
+  --color-gold-dark: #9c2f18;
+  --color-glass: #fffefb;
+  --color-glass-border: #e2ddd3;
+  --color-text-primary: #1a1917;
+  --color-text-secondary: #47443e;
+  --color-text-muted: #6b675f;
+  --color-surface-1: #fffefb;
+  --color-surface-2: #efece5;
+  --color-surface-3: #e6e2d9;
+  --color-success: #15803d;
+  --color-danger: #b91c1c;
+  --color-warning: #a16207;
 }
 
 /* Theme: Ocean Blue */
@@ -324,17 +340,20 @@ body {
 
 /* Prose styles for rich HTML blog content */
 .prose h2 {
-  font-size: 1.5rem;
-  font-weight: 700;
-  margin-top: 2rem;
+  font-size: 1.75rem;
+  font-weight: 500;
+  line-height: 1.2;
+  letter-spacing: -0.015em;
+  margin-top: 2.5rem;
   margin-bottom: 0.75rem;
   color: var(--color-text-primary);
   font-family: var(--font-display);
 }
 
 .prose h3 {
-  font-size: 1.25rem;
-  font-weight: 600;
+  font-family: var(--font-display);
+  font-size: 1.3rem;
+  font-weight: 500;
   margin-top: 1.5rem;
   margin-bottom: 0.5rem;
   color: var(--color-text-primary);
@@ -510,17 +529,6 @@ body {
   pointer-events: none;
 }
 
-/* Focus visible outlines for accessibility */
-a:focus-visible,
-button:focus-visible,
-input:focus-visible,
-select:focus-visible,
-textarea:focus-visible {
-  outline: 2px solid var(--color-gold);
-  outline-offset: 2px;
-  border-radius: 4px;
-}
-
 /* Smooth theme transitions */
 body,
 .glass,
@@ -589,11 +597,14 @@ body,
  * belongs to the subject (data) rather than to a template.
  */
 [data-theme="ink-signal"] .glass:not(.rounded-full),
-[data-theme="ink-signal"] .glass-strong:not(.rounded-full) {
-  border-radius: 6px;
+[data-theme="ink-signal"] .glass-strong:not(.rounded-full),
+[data-theme="light-professional"] .glass:not(.rounded-full),
+[data-theme="light-professional"] .glass-strong:not(.rounded-full) {
+  border-radius: var(--radius-md);
 }
 
-[data-theme="ink-signal"] .gradient-text {
+[data-theme="ink-signal"] .gradient-text,
+[data-theme="light-professional"] .gradient-text {
   background: none;
   -webkit-text-fill-color: currentColor;
   color: var(--color-text-primary);
@@ -605,13 +616,8 @@ body,
   letter-spacing: -0.015em;
 }
 
-[data-theme="ink-signal"] body {
-  background-image:
-    linear-gradient(to right, rgba(237, 234, 227, 0.025) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(237, 234, 227, 0.025) 1px, transparent 1px);
-  background-size: 72px 72px;
-  background-attachment: fixed;
-}
+/* The measurement grid now lives only behind the hero (.hero-grid), where it
+   fades out; a fixed full-page grid forced a repaint on every mobile scroll. */
 
 /* Numbers keep the text face but use tabular digits, so columns align. */
 .figure {
@@ -621,9 +627,143 @@ body,
 
 /* Small label above section titles. */
 .eyebrow {
-  font-size: 0.8125rem;
-  font-weight: 600;
-  letter-spacing: 0.06em;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
   color: var(--color-gold);
+}
+
+/* Never stack the back-to-top button on the cookie banner. */
+html[data-cookie-banner="open"] .back-to-top {
+  display: none;
+}
+
+/* ---------------------------------------------------------------------------
+ * Editorial type. Headings set in the display serif carry the page; body and
+ * UI stay in the grotesque.
+ * ------------------------------------------------------------------------- */
+.display-name {
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: clamp(3rem, 7vw + 1rem, 6.5rem);
+  line-height: 0.95;
+  letter-spacing: -0.025em;
+}
+
+.h-section {
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: clamp(1.875rem, 3vw + 0.5rem, 2.75rem);
+  line-height: 1.08;
+  letter-spacing: -0.02em;
+}
+
+.lede {
+  font-size: 1.0625rem;
+  line-height: 1.65;
+  color: var(--color-text-secondary);
+}
+
+/* ---------------------------------------------------------------------------
+ * Surfaces
+ * ------------------------------------------------------------------------- */
+.card {
+  background: var(--color-glass);
+  border: 1px solid var(--color-glass-border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--elev-sm), var(--sheen-top);
+}
+
+.card-interactive {
+  transition: transform 180ms var(--ease-out-soft), box-shadow 180ms var(--ease-out-soft),
+    border-color 180ms var(--ease-out-soft);
+}
+
+.card-interactive:hover {
+  transform: translateY(-2px);
+  border-color: color-mix(in srgb, var(--color-gold) 35%, var(--color-glass-border));
+  box-shadow: var(--elev-md), var(--sheen-top);
+}
+
+/* One highlighted panel per section: a hairline accent edge and a faint glow
+   from the top-left corner. */
+.card-feature {
+  position: relative;
+  background:
+    radial-gradient(600px circle at 0 0, color-mix(in srgb, var(--color-gold) 7%, transparent), transparent 60%),
+    var(--color-glass);
+}
+
+.card-feature::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  padding: 1px;
+  border-radius: inherit;
+  background: linear-gradient(135deg, color-mix(in srgb, var(--color-gold) 70%, transparent), transparent 55%);
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+}
+
+.hairline {
+  border-top: 1px solid var(--color-glass-border);
+}
+
+/* The measurement grid, behind the hero only, fading out from the top-left. */
+.hero-grid {
+  background-image:
+    linear-gradient(to right, color-mix(in srgb, var(--color-text-primary) 4%, transparent) 1px, transparent 1px),
+    linear-gradient(to bottom, color-mix(in srgb, var(--color-text-primary) 4%, transparent) 1px, transparent 1px);
+  background-size: 72px 72px;
+  -webkit-mask-image: radial-gradient(ellipse 80% 70% at 30% 20%, #000 30%, transparent 75%);
+  mask-image: radial-gradient(ellipse 80% 70% at 30% 20%, #000 30%, transparent 75%);
+}
+
+/* ---------------------------------------------------------------------------
+ * Motion budget: four moments only (hero entrance, the career line drawing
+ * in, section reveals, card hover). Content is always visible without JS:
+ * .reveal only hides once the observer has armed it (html.js-reveal).
+ * ------------------------------------------------------------------------- */
+@keyframes rise-in {
+  from { opacity: 0; transform: translateY(14px); }
+  to { opacity: 1; transform: none; }
+}
+
+.rise {
+  animation: rise-in 700ms var(--ease-out-soft) both;
+  animation-delay: calc(var(--i, 0) * 60ms);
+}
+
+@keyframes draw-line {
+  from { stroke-dashoffset: var(--len, 1200); }
+  to { stroke-dashoffset: 0; }
+}
+
+.draw {
+  stroke-dasharray: var(--len, 1200);
+  animation: draw-line 1.2s var(--ease-out-soft) 300ms both;
+}
+
+html.js-reveal .reveal:not(.is-visible) {
+  opacity: 0;
+  transform: translateY(12px);
+}
+
+.reveal {
+  transition: opacity 600ms var(--ease-out-soft), transform 600ms var(--ease-out-soft);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rise, .draw { animation: none !important; }
+  html.js-reveal .reveal:not(.is-visible) { opacity: 1; transform: none; }
+}
+
+/* Native cross-fade between pages, no JavaScript needed. */
+@view-transition {
+  navigation: auto;
 }

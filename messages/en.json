@@ -20,13 +20,14 @@
     "dba": "My DBA",
     "store": "Bookstore",
     "topics": "Topics",
-    "developers": "Developers"
+    "developers": "Developers",
+    "more": "More"
   },
   "hero": {
     "greeting": "Hello, I'm",
     "name": "KONAN Amani Dieudonné",
-    "roles": "Global Statistician | Data Scientist | ML & AI Architect | Data Engineer | Full-Stack Developer | Strategic Advisor",
-    "description": "Global Statistician, Data Scientist, Machine Learning & AI Professional with 13+ years of experience across the United Nations system, international development finance, and global organizations. MIT-certified in Data Engineering and AI, with advanced degrees in Statistics & Econometrics. Expert in the full data-to-intelligence pipeline: from statistical modeling and data engineering to AI/ML systems, full-stack development, and strategic advisory. Currently completing a Doctor of Business Administration (DBA) in Artificial Intelligence focused on AI adoption in international development.",
+    "roles": "Senior Statistician | Data Scientist | AI Engineer | Data Architect | Econometrician",
+    "description": "I have spent 13 years turning data into decisions for development finance, UN agencies and research institutions. Today I lead data architecture and AI work at Afreximbank; before that I spent six years as statistician and econometrician at the International Cocoa Organization. I hold a Master's in Statistics and Econometrics from Toulouse, an engineering degree from ENSEA and MIT certificates in data engineering and applied AI. I submitted my DBA thesis on how development institutions adopt AI in June 2026.",
     "cta_services": "Explore Services",
     "cta_contact": "Get in Touch",
     "download_cv": "Download CV",
@@ -41,27 +42,7 @@
     "certifications": "Degrees & Certificates"
   },
   "home": {
-    "who_i_am_title": "Who I Am",
-    "who_i_am_text": "With a Master's in Statistics & Econometrics from Université Toulouse I Capitole (France) and professional certificates from MIT, I bring 13+ years of expertise across 11 organizations in 6+ countries. My career spans the United Nations system (ITU, IOM, UNHCR, UNIDIR), the International Cocoa Organization, and the African Export-Import Bank — where I've built enterprise AI systems, led econometric analysis of global commodity markets, and designed data architectures at institutional scale. What ties this work together is range: I move comfortably from rigorous statistical and econometric analysis to data engineering, machine learning, and the full-stack applications that put those models into people's hands. I am currently completing a Doctor of Business Administration (DBA) in Artificial Intelligence at the IIBM Institute of Business Management, where my thesis, Renting Intelligence, examines how AI sourcing choices shape institutional performance in international development. I'm driven by a conviction that data and intelligence are among the most powerful levers for economic transformation and institutional excellence.",
-    "summary_title": "Professional Summary",
-    "summary_text": "A versatile professional who works end to end across the data value chain, I bridge rigorous quantitative analysis and production-grade technology — the distance between a sound model and a system people can actually use. Over 13+ years and 11 international organizations spanning the UN system, the International Cocoa Organization, development finance, and the private sector, that has meant building enterprise AI systems, data architectures, and web platforms at Afreximbank, and leading econometric analysis of global cocoa markets at ICCO. It is a combination I rarely see in one place: statistical rigor, engineering depth, and strategic perspective brought to each engagement.",
-    "expertise_title": "Areas of Expertise",
-    "expertise_stats_title": "Statistics & Econometrics",
-    "expertise_stats_desc": "Statistical inference, econometric modeling (ARIMA, VAR, VECM), causal analysis, survey design, impact evaluation, and time series forecasting for policy and research.",
-    "expertise_ds_title": "Data Science & Analytics",
-    "expertise_ds_desc": "Advanced analytics, predictive modeling, feature engineering, and data-driven decision support for complex organizational challenges across finance, trade, and development.",
-    "expertise_ai_title": "AI & Machine Learning",
-    "expertise_ai_desc": "End-to-end ML pipelines, deep learning, LLMs, RAG systems, NLP, AI agents, multi-model platforms, and production-grade AI system deployment with MLOps.",
-    "expertise_de_title": "Data Engineering & Architecture",
-    "expertise_de_desc": "Lakehouse architectures (Databricks/Delta Lake), ETL/ELT pipelines, CDC streaming, data governance (DAMA-DMBOK), and enterprise data platform design on AWS and cloud.",
-    "expertise_fullstack_title": "Full-Stack Development",
-    "expertise_fullstack_desc": "Modern web applications with Next.js, React, TypeScript, Node.js, Python Flask, PostgreSQL, Prisma ORM, REST APIs, authentication, and cloud deployment.",
-    "expertise_strategy_title": "Strategy & Leadership",
-    "expertise_strategy_desc": "Data strategy roadmaps, AI adoption advisory, digital transformation, organizational capacity building, and executive-level data-driven decision support.",
-    "experience_title": "Career Highlights",
-    "publications_title": "Featured Publications",
-    "impact_title": "Impact & Achievements",
-    "view_all": "View All"
+    "publications_title": "Recent reports"
   },
   "market": {
     "live": "Live Markets",
@@ -71,40 +52,20 @@
     "last_updated": "Last updated"
   },
   "organizations": {
-    "title": "Trusted by Leading Organizations",
-    "subtitle": "Over 13 years of impact across international institutions, UN agencies, and global organizations.",
-    "core_title": "Core Institutions",
-    "advisory_title": "United Nations & International Research"
-  },
-  "techStack": {
-    "title": "Technology Stack",
-    "subtitle": "A comprehensive toolkit spanning the full data-to-intelligence pipeline and modern software development.",
-    "domain_ai_ml": "AI & Machine Learning",
-    "domain_data_engineering": "Data Engineering",
-    "domain_statistics": "Statistics & Econometrics",
-    "domain_cloud": "Cloud & DevOps",
-    "domain_fullstack": "Full-Stack Development"
-  },
-  "globalReach": {
-    "title": "Global Reach",
-    "subtitle": "Professional experience spanning multiple continents and diverse international contexts.",
-    "continent_africa": "Africa",
-    "continent_europe": "Europe",
-    "continent_middle_east": "Middle East",
-    "continent_global": "Remote / Global",
-    "primary": "Primary"
+    "title": "Where I've Worked",
+    "subtitle": "Employers and clients over 13 years: development finance, commodity markets, UN agencies and research centres."
   },
   "certifications_showcase": {
     "title": "Education & Certifications",
-    "subtitle": "World-class credentials from leading institutions powering deep expertise.",
+    "subtitle": "Degrees and certificates, most recent first.",
     "education_title": "Academic Credentials",
     "certifications_title": "Professional Certifications"
   },
   "about": {
     "title": "About Me",
-    "subtitle": "Global Statistician | Data Scientist | ML & AI Professional | DBA Candidate (AI)",
+    "subtitle": "Senior Data Scientist | Principal AI Engineer | ML & Data Architect",
     "bio_title": "Professional Biography",
-    "bio": "Over more than 13 years, I have worked across 11 international organizations in 6+ countries, covering the full span from statistical and econometric analysis to data engineering, machine learning, AI systems, and the web applications that deliver them. I trained as a Statistics & Information Systems Engineer at ENSEA Abidjan and hold a Master's in Statistics & Econometrics from Université Toulouse I Capitole, sharpened further by professional certificates from MIT in Data Engineering, AI & Data Science, and a MicroMasters in Data, Economics & Development Policy. My career spans the United Nations system (ITU, IOM, UNHCR, UNIDIR), the International Cocoa Organization (ICCO), the African Export-Import Bank (Afreximbank), Barry-Callebaut, FHI360, ICRAF, and PAC-CI. I specialize in designing enterprise data architectures, building full-stack applications, deploying production-grade AI/ML systems, conducting rigorous econometric analysis, and driving data strategy for complex international organizations. I am currently completing a Doctor of Business Administration (DBA) in Artificial Intelligence at the IIBM Institute of Business Management; my thesis, Renting Intelligence, applies quasi-experimental methods to how AI sourcing choices shape performance in international development.",
+    "bio": "I am a statistician and data scientist from Côte d'Ivoire. I trained at ENSEA in Abidjan, where I qualified as a Statistics and Information Systems Engineer in 2012, and I hold a Master's in Statistics and Econometrics from Université Toulouse I Capitole (2017).\n\nSince September 2023 I have been Manager, Data Scientist / Architect at the African Export-Import Bank (Afreximbank) in Cairo. I work on the bank's Databricks lakehouse, data quality and master data, the pipelines that bring core banking and treasury data into the warehouse, and generative AI tools for internal use. From 2017 to 2023 I was Statistician and Econometrician at the International Cocoa Organization (ICCO) in Abidjan, where I built forecasting models and the statistical database behind its market reports.\n\nBefore and alongside those roles, I managed data and monitoring and evaluation work for PAC-CI, ICRAF, FHI360, Barry-Callebaut and UNHCR in Abidjan, ran a training for ICRISAT in Mali, and took remote assignments for IOM, UNIDIR and ITU.\n\nI also hold certificates from MIT, Johns Hopkins University and the Corporate Finance Institute. In June 2026 I submitted my Doctor of Business Administration thesis, Renting Intelligence, at the IIBM Institute of Business Management. It looks at how AI sourcing choices shape performance in international development.",
     "education_title": "Education",
     "certifications_title": "Certifications",
     "skills_title": "Technical Skills",
@@ -112,22 +73,22 @@
   },
   "experience": {
     "title": "Professional Experience",
-    "subtitle": "A journey across international organizations",
+    "subtitle": "Every role, most recent first, as listed in my CV.",
     "present": "Present"
   },
   "services": {
     "title": "Services",
-    "subtitle": "Expert professional services tailored to your needs",
+    "subtitle": "What I can do for your team, from the first analysis to a system people use every day.",
     "consulting": "AI & Data Strategy",
-    "consulting_desc": "Strategic advisory on AI adoption, data strategy, and digital transformation for enterprises and international organizations.",
+    "consulting_desc": "Advice on adopting AI and on data strategy, for companies and international organisations.",
     "architecture": "Data Architecture",
-    "architecture_desc": "Design and implementation of modern data platforms, lakehouse architectures, and enterprise data management solutions.",
+    "architecture_desc": "Designing and building data platforms: lakehouse architecture, data quality, master data and governance.",
     "mlops": "MLOps & AI Engineering",
-    "mlops_desc": "End-to-end ML pipeline development, model deployment, monitoring, and optimization at scale.",
+    "mlops_desc": "Building ML pipelines, deploying and monitoring models, and LLM and RAG systems on AWS and Databricks.",
     "training": "Training & Workshops",
-    "training_desc": "Customized training programs in data science, machine learning, and AI for teams and organizations.",
+    "training_desc": "Training in data science, machine learning and AI, adapted to your team.",
     "statistics": "Statistical & Econometric Analysis",
-    "statistics_desc": "Rigorous statistical analysis, econometric modeling, survey design, causal inference, and impact evaluation for research and policy.",
+    "statistics_desc": "Statistical analysis, econometric modelling, survey design, causal inference and impact evaluation for research and policy.",
     "fullstack": "Full-Stack Web Development",
     "fullstack_desc": "Custom web applications, dashboards, and platforms built with modern technologies — Next.js, React, TypeScript, Python, PostgreSQL, and cloud deployment.",
     "card_features": {
@@ -178,9 +139,9 @@
       "speaking": "Speaking Engagements",
       "other": "Other"
     },
-    "view_packages": "View structured consulting packages & pricing",
+    "view_packages": "Packages and pricing",
     "request_title": "Request a Service",
-    "request_desc": "Fill out the form below and I'll get back to you within 24 hours.",
+    "request_desc": "Tell me about the project and I'll reply by email.",
     "form": {
       "name": "Full Name",
       "email": "Email Address",
@@ -202,11 +163,12 @@
     "all": "All",
     "featured": "Featured",
     "live": "Live",
-    "code": "Code"
+    "code": "Code",
+    "filter_label": "Filter by category"
   },
   "publications": {
     "title": "Publications",
-    "subtitle": "Academic research, analytical reports, and scholarly publications in AI, Machine Learning, Economics, and African Development",
+    "subtitle": "Analytical reports and short briefs on African economies, trade and development finance, commodities, fintech and AI.",
     "search": "Search publications...",
     "categories": "Categories",
     "all": "All",
@@ -261,7 +223,9 @@
     "type_preprint": "Preprint",
     "type_analytical": "Analytical Report",
     "related": "Related Publications",
-    "loading": "Loading..."
+    "loading": "Loading...",
+    "eyebrow": "Reports & analysis",
+    "members_only": "Members only"
   },
   "blog": {
     "title": "Blog",
@@ -281,7 +245,8 @@
     "related": "Related Posts",
     "toc": "Table of Contents",
     "loading": "Loading...",
-    "not_found": "Post not found"
+    "not_found": "Post not found",
+    "eyebrow": "Writing"
   },
   "qa": {
     "title": "Questions & Answers",
@@ -305,8 +270,8 @@
     "loading": "Loading..."
   },
   "contact": {
-    "title": "Get in Touch",
-    "subtitle": "Have a question or want to work together? Let's connect.",
+    "title": "Let's work together",
+    "subtitle": "Tell me what you are working on and how I can help.",
     "form": {
       "name": "Your Name",
       "email": "Your Email",
@@ -327,16 +292,16 @@
     "consulting_link": "View consulting options"
   },
   "auth": {
-    "login_title": "Welcome Back",
+    "login_title": "Sign in",
     "login_subtitle": "Sign in to your account",
-    "register_title": "Create Account",
-    "register_subtitle": "Join the community",
+    "register_title": "Create an account",
+    "register_subtitle": "Sign up with your email and a password.",
     "email": "Email",
     "password": "Password",
-    "confirm_password": "Confirm Password",
-    "name": "Full Name",
-    "login_button": "Sign In",
-    "register_button": "Create Account",
+    "confirm_password": "Confirm password",
+    "name": "Full name",
+    "login_button": "Sign in",
+    "register_button": "Create account",
     "or": "or",
     "google": "Continue with Google",
     "no_account": "Don't have an account?",
@@ -344,10 +309,11 @@
     "forgot_password": "Forgot password?"
   },
   "footer": {
-    "description": "Global Statistician, Data Scientist, ML & AI Professional with 13+ years of international experience across 11 organizations.",
+    "description": "Statistician and data scientist. 13 years of work for development finance, UN agencies and research institutions.",
     "quick_links": "Quick Links",
     "connect": "Connect",
-    "rights": "All rights reserved."
+    "rights": "All rights reserved.",
+    "location": "Cairo, Egypt · Abidjan, Côte d'Ivoire"
   },
   "newsletter": {
     "title": "Stay Updated",
@@ -364,7 +330,7 @@
   },
   "research": {
     "title": "Research Activities",
-    "subtitle": "Conferences, talks, peer reviews, and academic milestones",
+    "subtitle": "A dated record of talks, conferences and other research milestones.",
     "no_activities": "No research activities yet.",
     "type_conference": "Conference",
     "type_talk": "Talk",
@@ -379,8 +345,8 @@
   },
   "subscribe": {
     "badge": "Premium Publications",
-    "title": "Access Premium Research & Data",
-    "subtitle": "Unlock in-depth analytical reports and underlying datasets from 13+ years of international experience in economics, trade, AI, and African development.",
+    "title": "Premium reports and data",
+    "subtitle": "Some of my reports, and the datasets behind them, are available by subscription. Many publications stay free.",
     "monthly": "Monthly",
     "yearly": "Yearly",
     "per_month": "/mo",
@@ -404,28 +370,28 @@
     "tier_document_access": "Document Access",
     "tier_document_access_desc": "Full PDF access to all premium analytical reports and publications.",
     "tier_data_access": "Data Access",
-    "tier_data_access_desc": "Access underlying datasets, raw data, and methodology behind publications.",
+    "tier_data_access_desc": "Datasets and supplementary files attached to premium publications.",
     "tier_full_access": "Full Access",
-    "tier_full_access_desc": "Complete access to all documents, datasets, and exclusive author interactions.",
+    "tier_full_access_desc": "Full reports plus their datasets and supplementary files.",
     "whats_included": "What Every Subscription Includes",
     "whats_included_desc": "All plans come with these core benefits, regardless of tier.",
     "included_1": "Access to new premium content as published",
     "included_2": "Cancel anytime — no lock-in contracts",
     "included_3": "Academic citation exports (BibTeX, APA, MLA)",
-    "included_4": "Secure access across all devices",
+    "included_4": "Access from any device by signing in",
     "included_5": "Email notifications for new publications",
-    "included_6": "Support within 24 hours",
+    "included_6": "Help by email",
     "faq_title": "Subscription FAQ",
     "faq_q1": "Can I switch between plans?",
-    "faq_a1": "Yes, you can upgrade or downgrade at any time. Changes take effect at the next billing cycle. When upgrading, you'll get immediate access to additional content.",
+    "faq_a1": "Yes. Get in touch and I'll help you move to the other plan.",
     "faq_q2": "Are all publications behind the paywall?",
-    "faq_a2": "No. Many publications remain completely free. Only selected premium publications with in-depth analysis and proprietary datasets require a subscription. Free publications are clearly marked.",
+    "faq_a2": "No. Many publications are completely free. Only selected premium publications require a subscription, and free ones are clearly marked.",
     "faq_q3": "What format are the datasets in?",
-    "faq_a3": "Datasets are provided in CSV and Excel formats with full documentation. Each dataset includes methodology notes, data dictionaries, and source references.",
+    "faq_a3": "Where a premium publication has a dataset, it is offered as a file download on the publication page.",
     "faq_q4": "Can I cancel anytime?",
     "faq_a4": "Yes, you can cancel at any time with no penalties. You'll retain access until the end of your current billing period.",
     "cta_title": "Start Exploring Premium Research",
-    "cta_desc": "Browse our publications library and see which reports are available with each subscription tier.",
+    "cta_desc": "Browse the publications to see which reports are free and which are premium.",
     "browse_publications": "Browse Publications",
     "premium": "Premium",
     "free_label": "Free",
@@ -472,16 +438,16 @@
     "publications": "Publications"
   },
   "dba": {
-    "eyebrow": "Doctoral Research",
-    "candidate": "Candidate",
+    "eyebrow": "Doctoral thesis · submitted June 2026",
+    "candidate": "Author",
     "supervisor": "Research Supervisor",
     "date": "Date",
     "central_claim": "The central claim",
     "abstract_title": "Abstract",
     "framework_title": "Theoretical Framework",
-    "framework_subtitle": "Four load-bearing lenses, integrated into one explanatory architecture.",
+    "framework_subtitle": "Four theories, combined into one explanation.",
     "design_title": "Research Design",
-    "design_subtitle": "A quasi-experimental apparatus built entirely on public data.",
+    "design_subtitle": "A quasi-experimental design built only on public data.",
     "findings_title": "Established to Date",
     "findings_subtitle": "What the public evidence currently supports, under a strict zero-fabrication standard.",
     "contributions_title": "Contributions",
@@ -518,13 +484,13 @@
     "emailPlaceholder": "you@example.com",
     "emptySubtitle": "Browse the bookstore to find your next read.",
     "emptyTitle": "Your cart is empty",
-    "encryptedNote": "Card and PayPal details are handled securely by PayPal — we never see them.",
+    "encryptedNote": "Card and PayPal details are handled by PayPal. We never see them.",
     "featured": "Featured",
     "filterAll": "All",
     "findMyOrders": "Find my orders",
     "free": "Free",
     "pagesCount": "{count, plural, one {# page} other {# pages}}",
-    "freeDesc": "No payment needed — enter your email and download instantly.",
+    "freeDesc": "No payment needed. Enter your email and download straight away.",
     "freeError": "Could not complete your free order. Please try again.",
     "freeProcessing": "Processing…",
     "freeTitle": "Get it free",
@@ -575,17 +541,17 @@
     "payMobileMoney": "Mobile Money",
     "payMobileMoneyDesc": "Wave, Djamo or Orange Money. Confirmed within a few hours.",
     "payPaypal": "PayPal / Card",
-    "payPaypalDesc": "Instant download. Pay with your PayPal balance or any card.",
+    "payPaypalDesc": "Download as soon as the payment goes through. Pay with your PayPal balance or a card.",
     "payPaypalDirectDesc": "Send directly to our PayPal account. Confirmed within a few hours.",
     "paymentUnverified": "Payment could not be verified.",
     "paypalError": "Something went wrong with PayPal. Please try again.",
     "paypalLoadError": "Unable to load PayPal. Please refresh and try again.",
     "paypalUnavailable": "Checkout is temporarily unavailable. Please try again later.",
-    "policyDownloads": "Instant download after payment — links valid for 7 days, up to 5 downloads.",
+    "policyDownloads": "Each title comes with a private download link, valid for 7 days and up to 5 downloads.",
     "policyPrivacy": "Your email is used only to deliver your receipt and downloads.",
     "policyReceipt": "A receipt is emailed to you and available on the platform.",
     "policyRefund": "Because books are delivered digitally, all sales are final.",
-    "policySecure": "Payments processed securely by PayPal.",
+    "policySecure": "Card and PayPal payments are processed by PayPal. Mobile money payments are checked by hand.",
     "policyTitle": "Secure digital purchase",
     "ppdAccount": "Our PayPal account",
     "ppdAmount": "Amount to pay",
@@ -827,7 +793,7 @@
     "meta_description": "Programmatic access to publications and datasets on African economics, trade, commodities, AI and data governance.",
     "eyebrow": "Developers",
     "title": "Data & Research API",
-    "subtitle": "Pull publication metadata and datasets into your apps, dashboards and models — JSON over HTTPS, with an OpenAPI description.",
+    "subtitle": "Pull publication metadata and datasets into your apps, dashboards and models. JSON over HTTPS, with an OpenAPI description.",
     "plans": "Plans",
     "free": "Free",
     "pro": "Pro",
@@ -878,13 +844,13 @@
     "ai_llms": "Site map for language models"
   },
   "topics": {
-    "meta_title": "Research topics",
+    "meta_title": "Topics",
     "meta_description": "Publications, data products and articles by KONAN Amani Dieudonné, grouped by subject.",
     "eyebrow": "Topics",
-    "title": "Research topics",
+    "title": "Topics",
     "subtitle": "Every publication, product and article, grouped by subject.",
     "n_publications": "{n, plural, one {# publication} other {# publications}}",
-    "topic_title": "{topic}: research and analysis",
+    "topic_title": "{topic}: reports and analysis",
     "topic_meta_description": "{n, plural, one {# publication} other {# publications}} on {topic} ({years}) by KONAN Amani Dieudonné, with related reports, datasets and articles.",
     "stat_publications": "Publications",
     "stat_years": "Years covered",
@@ -899,5 +865,17 @@
     "cta_body": "Book a consulting session, or request a quote for a tailored study.",
     "cta_book": "Book a session",
     "cta_quote": "Request a quote"
+  },
+  "homeV2": {
+    "work_eyebrow": "Selected work",
+    "work_title": "Systems I have designed and built",
+    "all_projects": "All projects",
+    "all_publications": "All reports",
+    "members": "Members",
+    "services_title": "How I can help",
+    "worked_eyebrow": "Experience",
+    "worked_title": "Where I've worked",
+    "book_call": "Book a call",
+    "creds_eyebrow": "Credentials"
   }
 }

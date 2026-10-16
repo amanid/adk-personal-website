@@ -20,13 +20,14 @@
     "dba": "Mon DBA",
     "store": "Librairie",
     "topics": "Thèmes",
-    "developers": "Développeurs"
+    "developers": "Développeurs",
+    "more": "Plus"
   },
   "hero": {
     "greeting": "Bonjour, je suis",
     "name": "KONAN Amani Dieudonné",
-    "roles": "Statisticien Mondial | Data Scientist | Architecte ML & IA | Ingénieur de Données | Développeur Full-Stack | Stratège IA & Données",
-    "description": "Statisticien Mondial, Data Scientist, Professionnel ML & IA avec plus de 13 ans d'expérience au sein du système des Nations Unies, de la finance de développement internationale et d'organisations mondiales. Certifié MIT en Ingénierie des Données et IA, avec des diplômes avancés en Statistique & Économétrie. Expert sur toute la chaîne données-intelligence : de la modélisation statistique et l'ingénierie des données aux systèmes IA/ML, au développement full-stack et au pilotage stratégique. Termine actuellement un Doctorat en Administration des Affaires (DBA) en Intelligence Artificielle portant sur l'adoption de l'IA dans le développement international.",
+    "roles": "Statisticien senior | Data Scientist | Ingénieur IA | Architecte de données | Économètre",
+    "description": "Depuis 13 ans, je transforme des données en décisions pour la finance du développement, les agences des Nations Unies et des instituts de recherche. Je dirige aujourd'hui l'architecture des données et les projets d'IA à Afreximbank ; auparavant, j'ai été pendant six ans statisticien et économètre à l'Organisation internationale du cacao. Je suis titulaire d'un Master en statistique et économétrie de Toulouse, d'un diplôme d'ingénieur de l'ENSEA et de certificats du MIT en ingénierie des données et en IA appliquée. J'ai soumis en juin 2026 ma thèse de DBA sur l'adoption de l'IA par les institutions de développement.",
     "cta_services": "Découvrir les Services",
     "cta_contact": "Me Contacter",
     "download_cv": "Télécharger le CV",
@@ -41,27 +42,7 @@
     "certifications": "Diplômes & Certificats"
   },
   "home": {
-    "who_i_am_title": "Qui Suis-Je",
-    "who_i_am_text": "Titulaire d'un Master en Statistique & Économétrie de l'Université Toulouse I Capitole (France) et de certificats professionnels du MIT, j'apporte plus de 13 ans d'expertise au sein de 11 organisations dans plus de 6 pays. Ma carrière couvre le système des Nations Unies (UIT, OIM, HCR, UNIDIR), l'Organisation Internationale du Cacao et la Banque Africaine d'Import-Export — où j'ai construit des systèmes d'IA d'entreprise, dirigé l'analyse économétrique des marchés mondiaux de matières premières et conçu des architectures de données à l'échelle institutionnelle. Ce qui relie ces missions, c'est l'étendue : je passe aisément de l'analyse statistique et économétrique rigoureuse à l'ingénierie des données, à l'apprentissage automatique et aux applications full-stack qui mettent ces modèles entre les mains des utilisateurs. Je termine actuellement un Doctorat en Administration des Affaires (DBA) en Intelligence Artificielle à l'IIBM Institute of Business Management, où ma thèse, Louer l'Intelligence, examine comment les choix d'approvisionnement en IA façonnent la performance institutionnelle dans le développement international. Je suis animé par la conviction que les données et l'intelligence comptent parmi les leviers les plus puissants de transformation économique et d'excellence institutionnelle.",
-    "summary_title": "Résumé Professionnel",
-    "summary_text": "Professionnel polyvalent qui intervient de bout en bout sur la chaîne de valeur des données, je fais le pont entre l'analyse quantitative rigoureuse et la technologie de production — l'écart entre un modèle solide et un système réellement exploitable. En plus de 13 ans et 11 organisations internationales couvrant le système des Nations Unies, l'Organisation Internationale du Cacao, la finance du développement et le secteur privé, cela s'est traduit par la construction de systèmes d'IA d'entreprise, d'architectures de données et de plateformes web à Afreximbank, et par la direction de l'analyse économétrique des marchés mondiaux du cacao à l'OICAO. C'est une combinaison que l'on rencontre rarement réunie : rigueur statistique, profondeur technique et vision stratégique, apportées à chaque mission.",
-    "expertise_title": "Domaines d'Expertise",
-    "expertise_stats_title": "Statistique & Économétrie",
-    "expertise_stats_desc": "Inférence statistique, modélisation économétrique (ARIMA, VAR, VECM), analyse causale, conception d'enquêtes, évaluation d'impact et prévision de séries temporelles pour la politique et la recherche.",
-    "expertise_ds_title": "Science des Données & Analytique",
-    "expertise_ds_desc": "Analytique avancée, modélisation prédictive, ingénierie des caractéristiques et aide à la décision basée sur les données pour des défis organisationnels complexes en finance, commerce et développement.",
-    "expertise_ai_title": "IA & Apprentissage Automatique",
-    "expertise_ai_desc": "Pipelines ML de bout en bout, deep learning, LLMs, systèmes RAG, NLP, agents IA, plateformes multi-modèles et déploiement de systèmes d'IA en production avec MLOps.",
-    "expertise_de_title": "Ingénierie & Architecture des Données",
-    "expertise_de_desc": "Architectures lakehouse (Databricks/Delta Lake), pipelines ETL/ELT, streaming CDC, gouvernance des données (DAMA-DMBOK) et conception de plateformes de données d'entreprise sur AWS et cloud.",
-    "expertise_fullstack_title": "Développement Full-Stack",
-    "expertise_fullstack_desc": "Applications web modernes avec Next.js, React, TypeScript, Node.js, Python Flask, PostgreSQL, Prisma ORM, APIs REST, authentification et déploiement cloud.",
-    "expertise_strategy_title": "Stratégie & Leadership",
-    "expertise_strategy_desc": "Feuilles de route de stratégie de données, accompagnement à l'adoption de l'IA, transformation numérique, renforcement des capacités organisationnelles et aide à la décision data-driven au niveau exécutif.",
-    "experience_title": "Parcours Professionnel",
-    "publications_title": "Publications en Vedette",
-    "impact_title": "Impact & Réalisations",
-    "view_all": "Voir Tout"
+    "publications_title": "Rapports récents"
   },
   "market": {
     "live": "Marchés en Direct",
@@ -71,40 +52,20 @@
     "last_updated": "Dernière mise à jour"
   },
   "organizations": {
-    "title": "Reconnu par des Organisations de Premier Plan",
-    "subtitle": "Plus de 13 ans d'impact au sein d'institutions internationales, d'agences des Nations Unies et d'organisations mondiales.",
-    "core_title": "Institutions Principales",
-    "advisory_title": "Nations Unies & Recherche Internationale"
-  },
-  "techStack": {
-    "title": "Stack Technologique",
-    "subtitle": "Une boîte à outils complète couvrant toute la chaîne données-intelligence et le développement logiciel moderne.",
-    "domain_ai_ml": "IA & Apprentissage Automatique",
-    "domain_data_engineering": "Ingénierie des Données",
-    "domain_statistics": "Statistique & Économétrie",
-    "domain_cloud": "Cloud & DevOps",
-    "domain_fullstack": "Développement Full-Stack"
-  },
-  "globalReach": {
-    "title": "Portée Mondiale",
-    "subtitle": "Une expérience professionnelle couvrant plusieurs continents et des contextes internationaux diversifiés.",
-    "continent_africa": "Afrique",
-    "continent_europe": "Europe",
-    "continent_middle_east": "Moyen-Orient",
-    "continent_global": "À Distance / Mondial",
-    "primary": "Principal"
+    "title": "Où j'ai travaillé",
+    "subtitle": "Employeurs et clients sur 13 ans : finance du développement, marchés des matières premières, agences des Nations Unies et centres de recherche."
   },
   "certifications_showcase": {
     "title": "Formation & Certifications",
-    "subtitle": "Des diplômes de renommée mondiale issus d'institutions de premier plan alimentant une expertise approfondie.",
+    "subtitle": "Diplômes et certificats, du plus récent au plus ancien.",
     "education_title": "Diplômes Académiques",
     "certifications_title": "Certifications Professionnelles"
   },
   "about": {
     "title": "À Propos",
-    "subtitle": "Statisticien Mondial | Data Scientist | Professionnel ML & IA | Doctorant DBA (IA)",
+    "subtitle": "Data scientist senior | Ingénieur IA principal | Architecte ML & données",
     "bio_title": "Biographie Professionnelle",
-    "bio": "En plus de 13 ans, j'ai travaillé au sein de 11 organisations internationales réparties dans plus de 6 pays, couvrant tout le spectre de l'analyse statistique et économétrique à l'ingénierie des données, l'apprentissage automatique, les systèmes d'IA et les applications web qui les concrétisent. Formé comme Ingénieur Statisticien à l'ENSEA Abidjan et titulaire d'un Master en Statistique & Économétrie de l'Université Toulouse I Capitole, j'ai renforcé mes compétences grâce à des certificats professionnels du MIT en Ingénierie des Données, IA & Science des Données, et un MicroMasters en Données, Économie & Politique de Développement. Ma carrière couvre le système des Nations Unies (UIT, OIM, HCR, UNIDIR), l'Organisation Internationale du Cacao (OICAO), la Banque Africaine d'Import-Export (Afreximbank), Barry-Callebaut, FHI360, ICRAF et PAC-CI. Je me spécialise dans la conception d'architectures de données d'entreprise, la construction d'applications full-stack, le déploiement de systèmes IA/ML de production, la conduite d'analyses économétriques rigoureuses et la définition de stratégies de données pour les organisations internationales complexes. Je termine actuellement un Doctorat en Administration des Affaires (DBA) en Intelligence Artificielle à l'IIBM Institute of Business Management ; ma thèse, Louer l'Intelligence, applique des méthodes quasi-expérimentales à la manière dont les choix d'approvisionnement en IA façonnent la performance dans le développement international.",
+    "bio": "Je suis statisticien et data scientist ivoirien. J'ai été formé à l'ENSEA d'Abidjan, dont je suis sorti Ingénieur statisticien en 2012, et je suis titulaire d'un Master en statistique et économétrie de l'Université Toulouse I Capitole (2017).\n\nDepuis septembre 2023, je suis Manager, Data Scientist / Architecte à la Banque africaine d'import-export (Afreximbank) au Caire. J'y travaille sur le lakehouse Databricks de la banque, la qualité et les données de référence, les pipelines qui alimentent l'entrepôt à partir des systèmes bancaires et de trésorerie, et des outils d'IA générative à usage interne. De 2017 à 2023, j'ai été statisticien et économètre à l'Organisation internationale du cacao (ICCO) à Abidjan, où j'ai construit des modèles de prévision et la base de données statistique qui alimente ses rapports de marché.\n\nAvant et en parallèle de ces postes, j'ai géré des données et du suivi-évaluation pour PAC-CI, l'ICRAF, FHI360, Barry-Callebaut et le HCR à Abidjan, animé une formation pour l'ICRISAT au Mali, et réalisé des missions à distance pour l'OIM, l'UNIDIR et l'UIT.\n\nJe suis également titulaire de certificats du MIT, de l'Université Johns Hopkins et du Corporate Finance Institute. En juin 2026, j'ai soumis ma thèse de Doctorat en administration des affaires (DBA), « Renting Intelligence », à l'IIBM Institute of Business Management. Elle étudie comment les choix d'approvisionnement en IA influencent la performance dans le développement international.",
     "education_title": "Formation",
     "certifications_title": "Certifications",
     "skills_title": "Compétences Techniques",
@@ -112,22 +73,22 @@
   },
   "experience": {
     "title": "Expérience Professionnelle",
-    "subtitle": "Un parcours à travers les organisations internationales",
+    "subtitle": "Tous mes postes, du plus récent au plus ancien, tels qu'indiqués dans mon CV.",
     "present": "Présent"
   },
   "services": {
     "title": "Services",
-    "subtitle": "Services professionnels experts adaptés à vos besoins",
+    "subtitle": "Ce que je peux faire pour votre équipe, de la première analyse jusqu'à un système utilisé au quotidien.",
     "consulting": "Stratégie IA & Données",
-    "consulting_desc": "Accompagnement stratégique sur l'adoption de l'IA, la stratégie de données et la transformation numérique pour les entreprises et les organisations internationales.",
+    "consulting_desc": "Conseil sur l'adoption de l'IA et la stratégie de données, pour les entreprises et les organisations internationales.",
     "architecture": "Architecture de Données",
-    "architecture_desc": "Conception et mise en œuvre de plateformes de données modernes, d'architectures lakehouse et de solutions de gestion de données d'entreprise.",
+    "architecture_desc": "Conception et mise en place de plateformes de données : architecture lakehouse, qualité des données, données de référence et gouvernance.",
     "mlops": "MLOps & Ingénierie IA",
-    "mlops_desc": "Développement de pipelines ML de bout en bout, déploiement de modèles, surveillance et optimisation à grande échelle.",
+    "mlops_desc": "Pipelines ML, déploiement et suivi de modèles, systèmes LLM et RAG sur AWS et Databricks.",
     "training": "Formations & Ateliers",
-    "training_desc": "Programmes de formation personnalisés en science des données, apprentissage automatique et IA pour les équipes et les organisations.",
+    "training_desc": "Formations en science des données, apprentissage automatique et IA, adaptées à votre équipe.",
     "statistics": "Analyse Statistique & Économétrique",
-    "statistics_desc": "Analyse statistique rigoureuse, modélisation économétrique, conception d'enquêtes, inférence causale et évaluation d'impact pour la recherche et les politiques.",
+    "statistics_desc": "Analyse statistique, modélisation économétrique, conception d'enquêtes, inférence causale et évaluation d'impact pour la recherche et les politiques.",
     "fullstack": "Développement Web Full-Stack",
     "fullstack_desc": "Applications web personnalisées, tableaux de bord et plateformes construits avec des technologies modernes — Next.js, React, TypeScript, Python, PostgreSQL et déploiement cloud.",
     "card_features": {
@@ -178,9 +139,9 @@
       "speaking": "Conférences & Interventions",
       "other": "Autre"
     },
-    "view_packages": "Voir les forfaits et tarifs de conseil structurés",
+    "view_packages": "Formules et tarifs",
     "request_title": "Demander un Service",
-    "request_desc": "Remplissez le formulaire ci-dessous et je vous répondrai dans les 24 heures.",
+    "request_desc": "Décrivez votre projet et je vous répondrai par email.",
     "form": {
       "name": "Nom Complet",
       "email": "Adresse Email",
@@ -202,11 +163,12 @@
     "all": "Tous",
     "featured": "En Vedette",
     "live": "Démo",
-    "code": "Code"
+    "code": "Code",
+    "filter_label": "Filtrer par catégorie"
   },
   "publications": {
     "title": "Publications",
-    "subtitle": "Recherches académiques, rapports analytiques et publications scientifiques en IA, Machine Learning, Économie et Développement Africain",
+    "subtitle": "Rapports analytiques et notes sur les économies africaines, le financement du commerce et du développement, les matières premières, la fintech et l'IA.",
     "search": "Rechercher des publications...",
     "categories": "Catégories",
     "all": "Toutes",
@@ -261,7 +223,9 @@
     "type_preprint": "Prépublication",
     "type_analytical": "Rapport Analytique",
     "related": "Publications Connexes",
-    "loading": "Chargement..."
+    "loading": "Chargement...",
+    "eyebrow": "Rapports et analyses",
+    "members_only": "Réservé aux abonnés"
   },
   "blog": {
     "title": "Blog",
@@ -281,7 +245,8 @@
     "related": "Articles Similaires",
     "toc": "Table des Matières",
     "loading": "Chargement...",
-    "not_found": "Article introuvable"
+    "not_found": "Article introuvable",
+    "eyebrow": "Articles"
   },
   "qa": {
     "title": "Questions & Réponses",
@@ -305,8 +270,8 @@
     "loading": "Chargement..."
   },
   "contact": {
-    "title": "Me Contacter",
-    "subtitle": "Vous avez une question ou souhaitez collaborer ? Connectons-nous.",
+    "title": "Travaillons ensemble",
+    "subtitle": "Parlez-moi de votre projet et de la manière dont je peux vous aider.",
     "form": {
       "name": "Votre Nom",
       "email": "Votre Email",
@@ -327,16 +292,16 @@
     "consulting_link": "Voir les options de conseil"
   },
   "auth": {
-    "login_title": "Bon Retour",
+    "login_title": "Connexion",
     "login_subtitle": "Connectez-vous à votre compte",
-    "register_title": "Créer un Compte",
-    "register_subtitle": "Rejoignez la communauté",
-    "email": "Email",
+    "register_title": "Créer un compte",
+    "register_subtitle": "Inscrivez-vous avec votre e-mail et un mot de passe.",
+    "email": "E-mail",
     "password": "Mot de passe",
     "confirm_password": "Confirmer le mot de passe",
-    "name": "Nom Complet",
-    "login_button": "Se Connecter",
-    "register_button": "Créer le Compte",
+    "name": "Nom complet",
+    "login_button": "Se connecter",
+    "register_button": "Créer le compte",
     "or": "ou",
     "google": "Continuer avec Google",
     "no_account": "Vous n'avez pas de compte ?",
@@ -344,10 +309,11 @@
     "forgot_password": "Mot de passe oublié ?"
   },
   "footer": {
-    "description": "Statisticien Mondial, Data Scientist, Professionnel ML & IA avec plus de 13 ans d'expérience internationale dans 11 organisations.",
+    "description": "Statisticien et data scientist. 13 ans de travail pour la finance du développement, les agences des Nations Unies et des instituts de recherche.",
     "quick_links": "Liens Rapides",
     "connect": "Se Connecter",
-    "rights": "Tous droits réservés."
+    "rights": "Tous droits réservés.",
+    "location": "Le Caire, Égypte · Abidjan, Côte d'Ivoire"
   },
   "newsletter": {
     "title": "Restez Informé",
@@ -364,7 +330,7 @@
   },
   "research": {
     "title": "Activités de Recherche",
-    "subtitle": "Conférences, présentations, évaluations et jalons académiques",
+    "subtitle": "Un relevé daté des interventions, conférences et autres étapes de recherche.",
     "no_activities": "Aucune activité de recherche pour le moment.",
     "type_conference": "Conférence",
     "type_talk": "Présentation",
@@ -379,8 +345,8 @@
   },
   "subscribe": {
     "badge": "Publications Premium",
-    "title": "Accédez aux Recherches & Données Premium",
-    "subtitle": "Débloquez des rapports analytiques approfondis et les jeux de données sous-jacents issus de 13+ ans d'expérience internationale en économie, commerce, IA et développement africain.",
+    "title": "Rapports et données premium",
+    "subtitle": "Certains de mes rapports, et les jeux de données qui les accompagnent, sont disponibles sur abonnement. De nombreuses publications restent gratuites.",
     "monthly": "Mensuel",
     "yearly": "Annuel",
     "per_month": "/mois",
@@ -404,28 +370,28 @@
     "tier_document_access": "Accès Documents",
     "tier_document_access_desc": "Accès PDF complet à tous les rapports analytiques et publications premium.",
     "tier_data_access": "Accès Données",
-    "tier_data_access_desc": "Accès aux jeux de données sous-jacents, données brutes et méthodologie.",
+    "tier_data_access_desc": "Jeux de données et fichiers complémentaires joints aux publications premium.",
     "tier_full_access": "Accès Complet",
-    "tier_full_access_desc": "Accès complet aux documents, données et interactions exclusives avec l'auteur.",
+    "tier_full_access_desc": "Les rapports complets, avec leurs jeux de données et fichiers complémentaires.",
     "whats_included": "Ce Que Chaque Abonnement Inclut",
     "whats_included_desc": "Tous les forfaits incluent ces avantages de base, quel que soit le niveau.",
     "included_1": "Accès au nouveau contenu premium dès sa publication",
     "included_2": "Annulation à tout moment — sans engagement",
     "included_3": "Export de citations académiques (BibTeX, APA, MLA)",
-    "included_4": "Accès sécurisé sur tous les appareils",
+    "included_4": "Accès depuis n'importe quel appareil en vous connectant",
     "included_5": "Notifications par email pour les nouvelles publications",
-    "included_6": "Support sous 24 heures",
+    "included_6": "Aide par email",
     "faq_title": "FAQ Abonnement",
     "faq_q1": "Puis-je changer de forfait ?",
-    "faq_a1": "Oui, vous pouvez passer à un niveau supérieur ou inférieur à tout moment. Les changements prennent effet au prochain cycle de facturation. Lors d'une mise à niveau, vous obtenez un accès immédiat au contenu supplémentaire.",
+    "faq_a1": "Oui. Écrivez-moi et je vous aiderai à changer de formule.",
     "faq_q2": "Toutes les publications sont-elles payantes ?",
-    "faq_a2": "Non. De nombreuses publications restent entièrement gratuites. Seules les publications premium sélectionnées avec des analyses approfondies et des données propriétaires nécessitent un abonnement.",
+    "faq_a2": "Non. De nombreuses publications sont entièrement gratuites. Seules certaines publications premium nécessitent un abonnement, et les gratuites sont clairement signalées.",
     "faq_q3": "Quel format ont les jeux de données ?",
-    "faq_a3": "Les jeux de données sont fournis aux formats CSV et Excel avec documentation complète. Chaque jeu inclut des notes méthodologiques, des dictionnaires de données et des références sources.",
+    "faq_a3": "Lorsqu'une publication premium a un jeu de données, il est proposé en téléchargement sur la page de la publication.",
     "faq_q4": "Puis-je annuler à tout moment ?",
     "faq_a4": "Oui, vous pouvez annuler à tout moment sans pénalité. Vous conservez l'accès jusqu'à la fin de votre période de facturation en cours.",
     "cta_title": "Explorez la Recherche Premium",
-    "cta_desc": "Parcourez notre bibliothèque de publications et découvrez les rapports disponibles avec chaque niveau d'abonnement.",
+    "cta_desc": "Parcourez les publications pour voir quels rapports sont gratuits et lesquels sont premium.",
     "browse_publications": "Parcourir les Publications",
     "premium": "Premium",
     "free_label": "Gratuit",
@@ -472,16 +438,16 @@
     "publications": "Publications"
   },
   "dba": {
-    "eyebrow": "Recherche doctorale",
-    "candidate": "Candidat",
+    "eyebrow": "Thèse de doctorat · soumise en juin 2026",
+    "candidate": "Auteur",
     "supervisor": "Directeur de recherche",
     "date": "Date",
     "central_claim": "La thèse centrale",
     "abstract_title": "Résumé",
     "framework_title": "Cadre théorique",
-    "framework_subtitle": "Quatre prismes porteurs, intégrés en une seule architecture explicative.",
+    "framework_subtitle": "Quatre théories réunies en une seule explication.",
     "design_title": "Dispositif de recherche",
-    "design_subtitle": "Un appareil quasi-expérimental entièrement bâti sur des données publiques.",
+    "design_subtitle": "Un dispositif quasi-expérimental construit uniquement sur des données publiques.",
     "findings_title": "Établi à ce jour",
     "findings_subtitle": "Ce que les preuves publiques étayent actuellement, sous un strict standard de zéro fabrication.",
     "contributions_title": "Contributions",
@@ -518,13 +484,13 @@
     "emailPlaceholder": "vous@exemple.com",
     "emptySubtitle": "Parcourez la librairie pour trouver votre prochaine lecture.",
     "emptyTitle": "Votre panier est vide",
-    "encryptedNote": "Les informations de carte et PayPal sont gérées en toute sécurité par PayPal — nous n.y avons jamais accès.",
+    "encryptedNote": "Les informations de carte et PayPal sont traitées par PayPal. Nous n'y avons jamais accès.",
     "featured": "À la une",
     "filterAll": "Tous",
     "findMyOrders": "Retrouver mes commandes",
     "free": "Gratuit",
     "pagesCount": "{count, plural, one {# page} other {# pages}}",
-    "freeDesc": "Aucun paiement requis — saisissez votre e-mail et téléchargez immédiatement.",
+    "freeDesc": "Aucun paiement requis. Saisissez votre e-mail et téléchargez tout de suite.",
     "freeError": "Impossible de finaliser votre commande gratuite. Veuillez réessayer.",
     "freeProcessing": "Traitement…",
     "freeTitle": "Obtenez-le gratuitement",
@@ -575,17 +541,17 @@
     "payMobileMoney": "Mobile Money",
     "payMobileMoneyDesc": "Wave, Djamo ou Orange Money. Confirmé sous quelques heures.",
     "payPaypal": "PayPal / Carte",
-    "payPaypalDesc": "Téléchargement immédiat. Payez avec PayPal ou une carte.",
+    "payPaypalDesc": "Téléchargement dès que le paiement est validé. Payez avec PayPal ou une carte.",
     "payPaypalDirectDesc": "Envoi direct vers notre compte PayPal. Confirmé en quelques heures.",
     "paymentUnverified": "Le paiement n'a pas pu être vérifié.",
     "paypalError": "Un problème est survenu avec PayPal. Veuillez réessayer.",
     "paypalLoadError": "Impossible de charger PayPal. Veuillez actualiser et réessayer.",
     "paypalUnavailable": "Le paiement est temporairement indisponible. Veuillez réessayer plus tard.",
-    "policyDownloads": "Téléchargement immédiat après paiement — liens valables 7 jours, jusqu'à 5 téléchargements.",
+    "policyDownloads": "Chaque titre est livré avec un lien de téléchargement privé, valable 7 jours et jusqu'à 5 téléchargements.",
     "policyPrivacy": "Votre e-mail sert uniquement à vous transmettre votre reçu et vos téléchargements.",
     "policyReceipt": "Un reçu vous est envoyé par e-mail et disponible sur la plateforme.",
     "policyRefund": "Les ouvrages étant livrés sous forme numérique, toutes les ventes sont définitives.",
-    "policySecure": "Paiements sécurisés par PayPal.",
+    "policySecure": "Les paiements par carte et PayPal sont traités par PayPal. Les paiements mobile money sont vérifiés manuellement.",
     "policyTitle": "Achat numérique sécurisé",
     "ppdAccount": "Notre compte PayPal",
     "ppdAmount": "Montant à payer",
@@ -827,7 +793,7 @@
     "meta_description": "Accès programmatique aux publications et jeux de données sur l'économie africaine, le commerce, les matières premières, l'IA et la gouvernance des données.",
     "eyebrow": "Développeurs",
     "title": "API Données & Recherche",
-    "subtitle": "Intégrez les métadonnées des publications et les jeux de données à vos applications, tableaux de bord et modèles — JSON via HTTPS, avec une description OpenAPI.",
+    "subtitle": "Intégrez les métadonnées des publications et les jeux de données dans vos applications, tableaux de bord et modèles. JSON sur HTTPS, avec une description OpenAPI.",
     "plans": "Formules",
     "free": "Gratuit",
     "pro": "Pro",
@@ -878,13 +844,13 @@
     "ai_llms": "Plan du site pour les modèles de langage"
   },
   "topics": {
-    "meta_title": "Thèmes de recherche",
+    "meta_title": "Thèmes",
     "meta_description": "Publications, produits de données et articles de KONAN Amani Dieudonné, classés par thème.",
     "eyebrow": "Thèmes",
-    "title": "Thèmes de recherche",
+    "title": "Thèmes",
     "subtitle": "Toutes les publications, produits et articles, classés par thème.",
     "n_publications": "{n, plural, one {# publication} other {# publications}}",
-    "topic_title": "{topic} : recherche et analyse",
+    "topic_title": "{topic} : rapports et analyses",
     "topic_meta_description": "{n, plural, one {# publication} other {# publications}} sur le thème {topic} ({years}) par KONAN Amani Dieudonné, avec rapports, jeux de données et articles associés.",
     "stat_publications": "Publications",
     "stat_years": "Période couverte",
@@ -899,5 +865,17 @@
     "cta_body": "Réservez une séance de conseil ou demandez un devis pour une étude sur mesure.",
     "cta_book": "Réserver une séance",
     "cta_quote": "Demander un devis"
+  },
+  "homeV2": {
+    "work_eyebrow": "Travaux choisis",
+    "work_title": "Des systèmes que j'ai conçus et construits",
+    "all_projects": "Tous les projets",
+    "all_publications": "Tous les rapports",
+    "members": "Abonnés",
+    "services_title": "Comment je peux vous aider",
+    "worked_eyebrow": "Expérience",
+    "worked_title": "Où j'ai travaillé",
+    "book_call": "Réserver un appel",
+    "creds_eyebrow": "Diplômes"
   }
 }

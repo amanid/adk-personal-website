@@ -7,7 +7,8 @@ import StoreBrowser from "@/components/store/StoreBrowser";
 import BundleCard, { type BundleCardData } from "@/components/store/BundleCard";
 import { loadBundles } from "@/lib/bundles";
 import { Link } from "@/i18n/routing";
-import { BookOpen, Search } from "lucide-react";
+import { Container } from "@/components/ui/Section";
+import { BookOpen, ArrowRight } from "lucide-react";
 
 export async function generateMetadata({
   params,
@@ -54,6 +55,7 @@ export default async function StorePage({
     slug: b.slug,
     title: l === "fr" && b.titleFr ? b.titleFr : b.title,
     subtitle: l === "fr" && b.subtitleFr ? b.subtitleFr : b.subtitle,
+    author: b.author,
     publicationYear: b.publicationYear,
     ...cardPrice(b),
     currency: b.currency,
@@ -83,51 +85,55 @@ export default async function StorePage({
   }));
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-      <header className="mb-10 text-center">
-        <h1 className="text-3xl sm:text-4xl font-bold gradient-text font-[family-name:var(--font-display)]">
-          {l === "fr" ? "Librairie" : "Bookstore"}
-        </h1>
-        <p className="text-text-secondary mt-3 max-w-2xl mx-auto">
-          {l === "fr"
-            ? "Parcourez les ouvrages, choisissez vos quantités et téléchargez en toute sécurité après paiement."
-            : "Browse the books, choose your quantities, and download securely after payment."}
-        </p>
+    <Container size="wide" className="py-14 md:py-20">
+      <header className="mb-12 md:mb-16 flex flex-col md:flex-row md:items-end md:justify-between gap-6">
+        <div className="max-w-2xl">
+          <p className="eyebrow mb-4">{l === "fr" ? "Boutique" : "Store"}</p>
+          <h1 className="font-display text-4xl md:text-6xl leading-[1.02] tracking-tight">
+            {l === "fr" ? "Librairie" : "Bookstore"}
+          </h1>
+          <p className="lede mt-5">
+            {l === "fr"
+              ? "Mes livres et autres publications. Après le paiement, vous les téléchargez depuis un lien privé."
+              : "My books and other publications. After payment, you download them from a private link."}
+          </p>
+        </div>
         <Link
           href="/store/orders"
-          className="inline-flex items-center gap-1.5 mt-4 text-sm text-text-secondary hover:text-gold transition-colors"
+          className="inline-flex items-center gap-1.5 min-h-11 text-sm text-text-secondary hover:text-gold transition-colors shrink-0"
         >
-          <Search className="w-4 h-4" />
           {l === "fr" ? "Retrouver mes commandes" : "Find my orders"}
+          <ArrowRight aria-hidden="true" className="w-4 h-4" />
         </Link>
       </header>
 
+      {storeBooks.length === 0 ? (
+        <div className="card p-12 text-center text-text-secondary">
+          <BookOpen aria-hidden="true" className="w-10 h-10 mx-auto mb-4 text-text-muted" />
+          <p>{l === "fr" ? "Aucun ouvrage disponible pour le moment." : "No books available yet."}</p>
+        </div>
+      ) : (
+        <StoreBrowser books={storeBooks} />
+      )}
+
       {bundles.length > 0 && (
-        <section className="mb-12" aria-labelledby="bundles-heading">
-          <div className="flex items-baseline justify-between gap-4 mb-4">
-            <h2 id="bundles-heading" className="text-xl font-semibold">
-              {l === "fr" ? "Packs" : "Bundles"}
+        <section className="mt-20 pt-14 hairline" aria-labelledby="bundles-heading">
+          <div className="mb-8 max-w-2xl">
+            <p className="eyebrow mb-3">{l === "fr" ? "Packs" : "Bundles"}</p>
+            <h2 id="bundles-heading" className="h-section">
+              {l === "fr" ? "Plusieurs titres ensemble" : "Several titles together"}
             </h2>
-            <p className="text-sm text-text-secondary">
-              {l === "fr" ? "Plusieurs titres ensemble, pour moins cher." : "Several titles together, for less."}
+            <p className="lede mt-3">
+              {l === "fr" ? "Achetés en pack, ils coûtent moins cher que séparément." : "Bought as a bundle, they cost less than separately."}
             </p>
           </div>
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {bundles.map((b) => (
               <BundleCard key={b.id} bundle={b} />
             ))}
           </div>
         </section>
       )}
-
-      {storeBooks.length === 0 ? (
-        <div className="glass rounded-xl p-12 text-center text-text-secondary">
-          <BookOpen className="w-12 h-12 mx-auto mb-4 text-gold/40" />
-          <p>{l === "fr" ? "Aucun ouvrage disponible pour le moment." : "No books available yet. Check back soon."}</p>
-        </div>
-      ) : (
-        <StoreBrowser books={storeBooks} />
-      )}
-    </div>
+    </Container>
   );
 }

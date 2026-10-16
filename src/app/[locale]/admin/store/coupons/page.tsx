@@ -196,7 +196,7 @@ export default function AdminCouponsPage() {
               >
                 <span
                   className={`w-10 h-10 rounded-lg flex items-center justify-center shrink-0 ${
-                    c.type === "PERCENT" ? "bg-gold/15 text-gold" : "bg-green-500/15 text-green-400"
+                    c.type === "PERCENT" ? "bg-gold/15 text-gold" : "bg-success/15 text-success"
                   }`}
                 >
                   {c.type === "PERCENT" ? (
@@ -212,17 +212,17 @@ export default function AdminCouponsPage() {
                       {discountLabel(c)}
                     </span>
                     {!c.active && (
-                      <span className="text-xs px-1.5 py-0.5 rounded-full bg-red-500/15 text-red-400">
+                      <span className="text-xs px-1.5 py-0.5 rounded-full bg-danger/15 text-danger">
                         Disabled
                       </span>
                     )}
                     {expired && (
-                      <span className="text-xs px-1.5 py-0.5 rounded-full bg-amber-500/15 text-amber-400">
+                      <span className="text-xs px-1.5 py-0.5 rounded-full bg-warning/15 text-warning">
                         Expired
                       </span>
                     )}
                     {maxed && (
-                      <span className="text-xs px-1.5 py-0.5 rounded-full bg-amber-500/15 text-amber-400">
+                      <span className="text-xs px-1.5 py-0.5 rounded-full bg-warning/15 text-warning">
                         Limit reached
                       </span>
                     )}
@@ -251,7 +251,7 @@ export default function AdminCouponsPage() {
                   </button>
                   <button
                     onClick={() => remove(c)}
-                    className="p-2 rounded-lg text-text-secondary hover:text-red-400 hover:bg-red-400/5 transition-all"
+                    className="p-2 rounded-lg text-text-secondary hover:text-danger hover:bg-danger/5 transition-all"
                     aria-label="Delete"
                   >
                     <Trash2 className="w-4 h-4" />
@@ -432,7 +432,7 @@ export default function AdminCouponsPage() {
               </label>
 
               {error && (
-                <p className="text-sm text-red-400 border border-red-400/30 rounded-lg p-3">
+                <p className="text-sm text-danger border border-danger/30 rounded-lg p-3">
                   {error}
                 </p>
               )}

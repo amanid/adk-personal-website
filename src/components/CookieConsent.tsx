@@ -17,6 +17,14 @@ export default function CookieConsent() {
     }
   }, []);
 
+  // Back-to-top hides while the banner is open (see globals.css) so the two
+  // never overlap on phones.
+  useEffect(() => {
+    const root = document.documentElement;
+    if (show) root.dataset.cookieBanner = "open";
+    else delete root.dataset.cookieBanner;
+  }, [show]);
+
   const accept = () => {
     localStorage.setItem("cookie-consent", "accepted");
     setShow(false);
@@ -43,7 +51,7 @@ export default function CookieConsent() {
           exit={{ y: 100, opacity: 0 }}
           className="fixed bottom-4 left-4 right-4 md:left-auto md:right-6 md:max-w-md z-50"
         >
-          <div className="glass rounded-2xl p-5 shadow-2xl border border-glass-border">
+          <div role="region" aria-label="Cookies" className="glass rounded-2xl p-5 shadow-2xl border border-glass-border">
             <div className="flex items-start gap-3">
               <Cookie className="w-5 h-5 text-gold shrink-0 mt-0.5" />
               <div className="flex-1">
@@ -55,19 +63,23 @@ export default function CookieConsent() {
                 <div className="flex items-center gap-2">
                   <button
                     onClick={accept}
-                    className="px-4 py-1.5 bg-gold text-charcoal text-xs font-semibold rounded-lg hover:bg-gold-light transition-colors"
+                    className="min-h-11 px-5 bg-gold text-charcoal text-sm font-semibold rounded-lg hover:bg-gold-light transition-colors"
                   >
                     {locale === "fr" ? "Accepter" : "Accept"}
                   </button>
                   <button
                     onClick={decline}
-                    className="px-4 py-1.5 glass text-xs text-text-muted hover:text-text-primary rounded-lg transition-colors"
+                    className="min-h-11 px-5 glass text-sm text-text-muted hover:text-text-primary rounded-lg transition-colors"
                   >
                     {locale === "fr" ? "Refuser" : "Decline"}
                   </button>
                 </div>
               </div>
-              <button onClick={decline} className="text-text-muted hover:text-text-primary shrink-0">
+              <button
+                onClick={decline}
+                aria-label={locale === "fr" ? "Fermer" : "Close"}
+                className="-m-2 p-3 text-text-muted hover:text-text-primary shrink-0"
+              >
                 <X className="w-4 h-4" />
               </button>
             </div>

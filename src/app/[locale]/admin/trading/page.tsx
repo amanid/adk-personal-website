@@ -191,7 +191,7 @@ function MarketsDesk() {
     return (
       <div className="glass p-6 space-y-3 text-sm max-w-2xl">
         <p className="font-medium flex items-center gap-2">
-          <ShieldAlert className="w-5 h-5 text-amber-400" /> Not connected
+          <ShieldAlert className="w-5 h-5 text-warning" /> Not connected
         </p>
         <p className="text-text-secondary">
           Open an OANDA account (start with a free practice account), create a personal API token in OANDA&apos;s dashboard,
@@ -237,13 +237,13 @@ OANDA_MAX_UNITS=100000    # largest order the desk will accept`}</pre>
   return (
     <div className="space-y-5">
       <div className="flex flex-wrap items-center gap-3">
-        <span className={`px-3 py-1 rounded-md text-sm font-bold ${live ? "bg-red-500/20 text-red-400 border border-red-500/40" : "bg-green-500/15 text-green-400 border border-green-500/30"}`}>
+        <span className={`px-3 py-1 rounded-md text-sm font-bold ${live ? "bg-danger/20 text-danger border border-danger/40" : "bg-success/15 text-success border border-success/30"}`}>
           {live ? "LIVE ACCOUNT — real money" : "PRACTICE ACCOUNT"}
         </span>
         <button onClick={load} className="text-sm text-text-secondary inline-flex items-center gap-1 hover:text-text-primary">
           <RefreshCw className="w-4 h-4" /> Refresh
         </button>
-        {desk.error && <span className="text-sm text-red-400">{desk.error}</span>}
+        {desk.error && <span className="text-sm text-danger">{desk.error}</span>}
       </div>
 
       {s && (
@@ -257,7 +257,7 @@ OANDA_MAX_UNITS=100000    # largest order the desk will accept`}</pre>
           ].map(([k, v]) => (
             <div key={k} className="glass p-3">
               <dt className="text-xs text-text-muted">{k}</dt>
-              <dd className={`figure text-lg ${k === "Unrealised P/L" ? (Number(v) >= 0 ? "text-green-400" : "text-red-400") : ""}`}>
+              <dd className={`figure text-lg ${k === "Unrealised P/L" ? (Number(v) >= 0 ? "text-success" : "text-danger") : ""}`}>
                 {Number(v).toLocaleString(undefined, { maximumFractionDigits: 2 })} <span className="text-xs text-text-muted">{s.currency}</span>
               </dd>
             </div>
@@ -265,7 +265,7 @@ OANDA_MAX_UNITS=100000    # largest order the desk will accept`}</pre>
         </dl>
       )}
 
-      {flash && <p className={`text-sm rounded-md p-3 border ${flash.ok ? "text-green-400 border-green-400/30" : "text-red-400 border-red-400/30"}`}>{flash.text}</p>}
+      {flash && <p className={`text-sm rounded-md p-3 border ${flash.ok ? "text-success border-success/30" : "text-danger border-danger/30"}`}>{flash.text}</p>}
 
       <div className="grid lg:grid-cols-[1fr_22rem] gap-5 items-start">
         <div className="glass p-4 space-y-3">
@@ -301,7 +301,7 @@ OANDA_MAX_UNITS=100000    # largest order the desk will accept`}</pre>
                   <td className="py-2 text-right figure">{prices[w]?.bid ?? "…"}</td>
                   <td className="py-2 text-right figure">{prices[w]?.ask ?? "…"}</td>
                   <td className="py-2 text-right">
-                    <button onClick={(e) => { e.stopPropagation(); saveWatch(watch.filter((x) => x !== w)); }} className="text-text-muted hover:text-red-400" aria-label={`Remove ${w}`}>
+                    <button onClick={(e) => { e.stopPropagation(); saveWatch(watch.filter((x) => x !== w)); }} className="text-text-muted hover:text-danger" aria-label={`Remove ${w}`}>
                       <X className="w-3.5 h-3.5" />
                     </button>
                   </td>
@@ -326,7 +326,7 @@ OANDA_MAX_UNITS=100000    # largest order the desk will accept`}</pre>
           </label>
           <div className="grid grid-cols-2 gap-2">
             {(["BUY", "SELL"] as const).map((sd) => (
-              <button key={sd} onClick={() => setTicket({ ...ticket, side: sd })} className={`py-2 rounded-md text-sm font-semibold border ${ticket.side === sd ? (sd === "BUY" ? "bg-green-500/20 border-green-500/50 text-green-400" : "bg-red-500/20 border-red-500/50 text-red-400") : "border-glass-border text-text-secondary"}`}>
+              <button key={sd} onClick={() => setTicket({ ...ticket, side: sd })} className={`py-2 rounded-md text-sm font-semibold border ${ticket.side === sd ? (sd === "BUY" ? "bg-success/20 border-success/50 text-success" : "bg-danger/20 border-danger/50 text-danger") : "border-glass-border text-text-secondary"}`}>
                 {sd} {q ? (sd === "BUY" ? q.ask : q.bid) : ""}
               </button>
             ))}
@@ -362,7 +362,7 @@ OANDA_MAX_UNITS=100000    # largest order the desk will accept`}</pre>
                 {ticket.takeProfit && `, TP ${ticket.takeProfit}`}.
               </p>
               {live && (
-                <label className="flex items-start gap-2 text-red-400">
+                <label className="flex items-start gap-2 text-danger">
                   <input type="checkbox" checked={liveAck} onChange={(e) => setLiveAck(e.target.checked)} className="mt-1" />
                   I understand this order uses real money on my live account.
                 </label>
@@ -400,9 +400,9 @@ OANDA_MAX_UNITS=100000    # largest order the desk will accept`}</pre>
               {desk.openTrades!.map((t) => (
                 <tr key={t.id} className="border-b border-glass-border/60">
                   <td className="py-2">{tradable.get(t.instrument)?.displayName ?? t.instrument}</td>
-                  <td className={`py-2 text-right figure ${Number(t.currentUnits) > 0 ? "text-green-400" : "text-red-400"}`}>{t.currentUnits}</td>
+                  <td className={`py-2 text-right figure ${Number(t.currentUnits) > 0 ? "text-success" : "text-danger"}`}>{t.currentUnits}</td>
                   <td className="py-2 text-right figure">{t.price}</td>
-                  <td className={`py-2 text-right figure ${Number(t.unrealizedPL) >= 0 ? "text-green-400" : "text-red-400"}`}>{t.unrealizedPL}</td>
+                  <td className={`py-2 text-right figure ${Number(t.unrealizedPL) >= 0 ? "text-success" : "text-danger"}`}>{t.unrealizedPL}</td>
                   <td className="py-2 text-text-secondary">{new Date(t.openTime).toLocaleString()}</td>
                   <td className="py-2 text-right">
                     <button
@@ -416,7 +416,7 @@ OANDA_MAX_UNITS=100000    # largest order the desk will accept`}</pre>
                           setFlash({ ok: false, text: (e as Error).message });
                         }
                       }}
-                      className="px-2 py-1 rounded border border-glass-border text-xs hover:border-red-400 hover:text-red-400"
+                      className="px-2 py-1 rounded border border-glass-border text-xs hover:border-danger hover:text-danger"
                     >
                       Close
                     </button>
@@ -446,7 +446,7 @@ function History() {
       <div className="glass p-4">
         <p className="font-medium mb-1">Closed trades ({data.closed.length})</p>
         <p className="text-sm text-text-secondary mb-3">
-          Realised P/L over these: <span className={`figure ${realized >= 0 ? "text-green-400" : "text-red-400"}`}>{realized.toFixed(2)}</span> (account currency)
+          Realised P/L over these: <span className={`figure ${realized >= 0 ? "text-success" : "text-danger"}`}>{realized.toFixed(2)}</span> (account currency)
         </p>
         <table className="w-full text-sm">
           <tbody>
@@ -455,7 +455,7 @@ function History() {
                 <td className="py-1.5">{t.instrument}</td>
                 <td className="py-1.5 figure text-right">{t.initialUnits}</td>
                 <td className="py-1.5 figure text-right">{t.price} → {t.averageClosePrice ?? "—"}</td>
-                <td className={`py-1.5 figure text-right ${Number(t.realizedPL) >= 0 ? "text-green-400" : "text-red-400"}`}>{t.realizedPL}</td>
+                <td className={`py-1.5 figure text-right ${Number(t.realizedPL) >= 0 ? "text-success" : "text-danger"}`}>{t.realizedPL}</td>
                 <td className="py-1.5 text-text-muted text-right">{t.closeTime ? new Date(t.closeTime).toLocaleString() : ""}</td>
               </tr>
             ))}
@@ -472,7 +472,7 @@ function History() {
                 <td className="py-1.5">{a.environment}</td>
                 <td className="py-1.5">{a.action}</td>
                 <td className="py-1.5 figure">{a.instrument ?? ""} {a.units ?? ""}</td>
-                <td className={`py-1.5 ${a.ok ? "text-green-400" : "text-red-400"}`}>{a.ok ? "ok" : a.error}</td>
+                <td className={`py-1.5 ${a.ok ? "text-success" : "text-danger"}`}>{a.ok ? "ok" : a.error}</td>
               </tr>
             ))}
           </tbody>
@@ -484,9 +484,9 @@ function History() {
 
 const BOOKMAKERS = ["1xBet", "Betclic", "Betway", "Bet365", "Premier Bet", "Betfair", "Other"];
 const BET_STATUS_CHIP: Record<string, string> = {
-  OPEN: "bg-amber-500/15 text-amber-400",
-  WON: "bg-green-500/15 text-green-400",
-  LOST: "bg-red-500/15 text-red-400",
+  OPEN: "bg-warning/15 text-warning",
+  WON: "bg-success/15 text-success",
+  LOST: "bg-danger/15 text-danger",
   VOID: "bg-navy-light text-text-muted",
   CASHED_OUT: "bg-signal/15 text-signal",
 };
@@ -557,14 +557,14 @@ function BetJournal() {
         Record bets you place yourself at a bookmaker to track your bankroll. Bookmakers such as Betclic forbid automated
         betting tools, so this journal never connects to your accounts.
       </p>
-      {flash && <p className={`text-sm rounded-md p-3 border ${flash.ok ? "text-green-400 border-green-400/30" : "text-red-400 border-red-400/30"}`}>{flash.text}</p>}
+      {flash && <p className={`text-sm rounded-md p-3 border ${flash.ok ? "text-success border-success/30" : "text-danger border-danger/30"}`}>{flash.text}</p>}
 
       {stats.length > 0 && (
         <div className="grid md:grid-cols-2 gap-3">
           {stats.map((s) => (
             <div key={s.currency} className="glass p-4 grid grid-cols-3 gap-3 text-sm">
               <div><p className="text-xs text-text-muted">Staked (settled)</p><p className="figure">{money(s.staked, s.currency)}</p></div>
-              <div><p className="text-xs text-text-muted">Profit</p><p className={`figure ${s.profit >= 0 ? "text-green-400" : "text-red-400"}`}>{money(s.profit, s.currency)}</p></div>
+              <div><p className="text-xs text-text-muted">Profit</p><p className={`figure ${s.profit >= 0 ? "text-success" : "text-danger"}`}>{money(s.profit, s.currency)}</p></div>
               <div><p className="text-xs text-text-muted">ROI</p><p className="figure">{s.roi === null ? "—" : `${s.roi.toFixed(1)}%`}</p></div>
               <div><p className="text-xs text-text-muted">Strike rate</p><p className="figure">{s.strikeRate === null ? "—" : `${s.strikeRate.toFixed(0)}%`}</p></div>
               <div><p className="text-xs text-text-muted">Settled</p><p className="figure">{s.settled}</p></div>

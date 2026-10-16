@@ -1,8 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Download, X, Mail, Check, FileText, ArrowRight } from "lucide-react";
+import { useLocale } from "next-intl";
+import { Download, X, Check } from "lucide-react";
+import { Button, buttonClass } from "@/components/ui/Button";
 
 interface LeadMagnetProps {
   title: string;
@@ -11,12 +13,99 @@ interface LeadMagnetProps {
   buttonText?: string;
 }
 
-export default function LeadMagnet({ title, description, pdfUrl, buttonText = "Download Free Report" }: LeadMagnetProps) {
+const field =
+  "w-full min-h-11 px-4 py-2.5 rounded-[var(--radius-md)] bg-navy border border-glass-border text-text-primary text-sm " +
+  "placeholder:text-text-muted focus:border-gold focus:outline-none transition-colors";
+
+export default function LeadMagnet({ title, description, pdfUrl, buttonText }: LeadMagnetProps) {
+  const fr = useLocale() === "fr";
   const [showModal, setShowModal] = useState(false);
   const [email, setEmail] = useState("");
   const [name, setName] = useState("");
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
+  const panelRef = useRef<HTMLDivElement>(null);
+  const uid = useId();
+  const titleId = `${uid}-title`;
+  const descId = `${uid}-desc`;
+
+  const L = fr
+    ? {
+        open: buttonText ?? "Télécharger le rapport gratuit",
+        close: "Fermer",
+        name: "Votre nom (facultatif)",
+        email: "Votre adresse email",
+        submit: "Recevoir le rapport",
+        consent: "En téléchargeant, vous acceptez de recevoir des emails occasionnels. Désinscription possible à tout moment.",
+        doneTitle: "Téléchargement en cours",
+        doneText: "Le téléchargement devrait démarrer tout seul. Sinon, utilisez le bouton ci-dessous.",
+        doneCta: "Télécharger",
+      }
+    : {
+        open: buttonText ?? "Download the free report",
+        close: "Close",
+        name: "Your name (optional)",
+        email: "Your email address",
+        submit: "Get the report",
+        consent: "By downloading, you agree to receive occasional emails. You can unsubscribe at any time.",
+        doneTitle: "Your download is starting",
+        doneText: "The download should start on its own. If it doesn't, use the button below.",
+        doneCta: "Download",
+      };
+
+  const close = () => setShowModal(false);
+
+  // Escape closes, Tab stays inside the dialog, and focus returns to the
+  // opener on close (same pattern as the cart drawer in StoreUI).
+  useEffect(() => {
+    if (!showModal) return;
+    const opener = document.activeElement as HTMLElement | null;
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+
+    const focusable = () =>
+      Array.from(
+        panelRef.current?.querySelectorAll<HTMLElement>(
+          'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+        ) ?? []
+      ).filter((el) => el.offsetParent !== null);
+
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        setShowModal(false);
+        return;
+      }
+      if (e.key !== "Tab") return;
+      const items = focusable();
+      if (items.length === 0) {
+        e.preventDefault();
+        panelRef.current?.focus();
+        return;
+      }
+      const first = items[0];
+      const last = items[items.length - 1];
+      const active = document.activeElement;
+      if (e.shiftKey && (active === first || active === panelRef.current)) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && active === last) {
+        e.preventDefault();
+        first.focus();
+      }
+    };
+
+    document.addEventListener("keydown", onKey);
+    // Move focus into the dialog: the first field, or the panel itself.
+    requestAnimationFrame(() => {
+      const target = panelRef.current?.querySelector<HTMLElement>("input") ?? panelRef.current;
+      target?.focus();
+    });
+    return () => {
+      document.body.style.overflow = prevOverflow;
+      document.removeEventListener("keydown", onKey);
+      opener?.focus?.();
+    };
+  }, [showModal]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -53,13 +142,10 @@ export default function LeadMagnet({ title, description, pdfUrl, buttonText = "D
 
   return (
     <>
-      <button
-        onClick={() => setShowModal(true)}
-        className="inline-flex items-center gap-2 px-5 py-2.5 bg-gold text-charcoal font-medium text-sm rounded-lg hover:bg-gold-light transition-colors"
-      >
-        <Download className="w-4 h-4" />
-        {buttonText}
-      </button>
+      <Button type="button" onClick={() => setShowModal(true)} aria-haspopup="dialog">
+        <Download className="w-4 h-4" aria-hidden />
+        {L.open}
+      </Button>
 
       <AnimatePresence>
         {showModal && (
@@ -68,83 +154,84 @@ export default function LeadMagnet({ title, description, pdfUrl, buttonText = "D
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-charcoal/80 backdrop-blur-sm"
-            onClick={(e) => e.target === e.currentTarget && setShowModal(false)}
+            onClick={(e) => e.target === e.currentTarget && close()}
           >
             <motion.div
-              initial={{ opacity: 0, scale: 0.95, y: 20 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              className="glass rounded-2xl p-8 max-w-md w-full relative"
+              ref={panelRef}
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby={titleId}
+              aria-describedby={descId}
+              tabIndex={-1}
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 12 }}
+              className="card bg-surface-1 p-6 md:p-8 max-w-md w-full relative focus:outline-none"
             >
               <button
-                onClick={() => setShowModal(false)}
-                className="absolute top-4 right-4 text-text-muted hover:text-text-primary transition-colors"
+                type="button"
+                onClick={close}
+                aria-label={L.close}
+                className="absolute top-3 right-3 w-11 h-11 flex items-center justify-center rounded-[var(--radius-md)] text-text-muted hover:text-text-primary hover:bg-[var(--hover-wash)] transition-colors"
               >
-                <X className="w-5 h-5" />
+                <X className="w-5 h-5" aria-hidden />
               </button>
 
               {!submitted ? (
                 <>
-                  <div className="flex items-center gap-3 mb-4">
-                    <div className="w-12 h-12 rounded-xl bg-gold/10 flex items-center justify-center">
-                      <FileText className="w-6 h-6 text-gold" />
+                  <h2 id={titleId} className="font-display text-2xl leading-tight pr-10 mb-2">
+                    {title}
+                  </h2>
+                  <p id={descId} className="text-text-secondary text-sm mb-6">
+                    {description}
+                  </p>
+                  <form onSubmit={handleSubmit} className="space-y-4">
+                    <div>
+                      <label htmlFor={`${uid}-email`} className="block text-sm text-text-secondary mb-1.5">
+                        {L.email} <span aria-hidden>*</span>
+                      </label>
+                      <input
+                        id={`${uid}-email`}
+                        type="email"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        autoComplete="email"
+                        required
+                        className={field}
+                      />
                     </div>
                     <div>
-                      <h3 className="font-bold text-lg">{title}</h3>
-                      <p className="text-text-secondary text-xs">{description}</p>
+                      <label htmlFor={`${uid}-name`} className="block text-sm text-text-secondary mb-1.5">
+                        {L.name}
+                      </label>
+                      <input
+                        id={`${uid}-name`}
+                        type="text"
+                        value={name}
+                        onChange={(e) => setName(e.target.value)}
+                        autoComplete="name"
+                        className={field}
+                      />
                     </div>
-                  </div>
-                  <form onSubmit={handleSubmit} className="space-y-3">
-                    <input
-                      type="text"
-                      value={name}
-                      onChange={(e) => setName(e.target.value)}
-                      placeholder="Your name (optional)"
-                      className="w-full px-4 py-2.5 bg-navy/50 border border-glass-border rounded-lg text-text-primary focus:border-gold/50 focus:outline-none text-sm"
-                    />
-                    <input
-                      type="email"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      placeholder="Your email address *"
-                      required
-                      className="w-full px-4 py-2.5 bg-navy/50 border border-glass-border rounded-lg text-text-primary focus:border-gold/50 focus:outline-none text-sm"
-                    />
-                    <button
-                      type="submit"
-                      disabled={loading}
-                      className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-gold text-charcoal font-semibold text-sm rounded-lg hover:bg-gold-light transition-colors disabled:opacity-50"
-                    >
-                      {loading ? (
-                        <div className="w-4 h-4 border-2 border-charcoal/30 border-t-charcoal rounded-full animate-spin" />
-                      ) : (
-                        <>
-                          <Download className="w-4 h-4" />
-                          Get Free Access
-                        </>
-                      )}
-                    </button>
-                    <p className="text-text-muted text-[10px] text-center">
-                      By downloading, you agree to receive occasional updates. Unsubscribe anytime.
-                    </p>
+                    <Button type="submit" size="lg" loading={loading} className="w-full">
+                      {!loading && <Download className="w-4 h-4" aria-hidden />}
+                      {L.submit}
+                    </Button>
+                    <p className="text-text-muted text-xs">{L.consent}</p>
                   </form>
                 </>
               ) : (
-                <div className="text-center py-4">
-                  <div className="w-16 h-16 rounded-full bg-green-500/10 flex items-center justify-center mx-auto mb-4">
-                    <Check className="w-8 h-8 text-green-400" />
-                  </div>
-                  <h3 className="font-bold text-lg mb-2">Download Starting!</h3>
-                  <p className="text-text-secondary text-sm mb-4">
-                    Your download should begin automatically. If not, click below.
+                <div role="status">
+                  <Check className="w-8 h-8 text-success mb-4" aria-hidden />
+                  <h2 id={titleId} className="font-display text-2xl leading-tight pr-10 mb-2">
+                    {L.doneTitle}
+                  </h2>
+                  <p id={descId} className="text-text-secondary text-sm mb-6">
+                    {L.doneText}
                   </p>
-                  <a
-                    href={pdfUrl}
-                    download
-                    className="inline-flex items-center gap-2 px-4 py-2 bg-gold text-charcoal font-medium text-sm rounded-lg hover:bg-gold-light transition-colors"
-                  >
-                    <Download className="w-4 h-4" />
-                    Download Now
+                  <a href={pdfUrl} download className={buttonClass("primary", "md")}>
+                    <Download className="w-4 h-4" aria-hidden />
+                    {L.doneCta}
                   </a>
                 </div>
               )}

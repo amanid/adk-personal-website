@@ -83,8 +83,8 @@ export default function AdminSubscribersPage() {
           </div>
         </div>
         <div className="glass rounded-xl p-4 flex items-center gap-3">
-          <div className="w-10 h-10 rounded-lg bg-green-500/10 flex items-center justify-center">
-            <CheckCircle className="w-5 h-5 text-green-400" />
+          <div className="w-10 h-10 rounded-lg bg-success/10 flex items-center justify-center">
+            <CheckCircle className="w-5 h-5 text-success" />
           </div>
           <div>
             <p className="text-2xl font-bold text-text-primary">{confirmedCount}</p>
@@ -136,7 +136,7 @@ export default function AdminSubscribersPage() {
                     </td>
                     <td className="px-4 py-3">
                       {subscriber.confirmed ? (
-                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-green-500/10 text-green-400 border border-green-500/20">
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-success/10 text-success border border-success/20">
                           <CheckCircle className="w-3 h-3" />
                           Confirmed
                         </span>
@@ -154,7 +154,7 @@ export default function AdminSubscribersPage() {
                       <button
                         onClick={() => handleDelete(subscriber.id)}
                         disabled={deleting === subscriber.id}
-                        className="p-1.5 text-text-muted hover:text-red-400 transition-colors disabled:opacity-50"
+                        className="p-1.5 text-text-muted hover:text-danger transition-colors disabled:opacity-50"
                         title="Remove subscriber"
                       >
                         {deleting === subscriber.id ? (

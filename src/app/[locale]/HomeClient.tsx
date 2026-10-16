@@ -1,93 +1,33 @@
-"use client";
-
 import { useTranslations, useLocale } from "next-intl";
-import { motion } from "framer-motion";
 import { Link } from "@/i18n/routing";
-import {
-  ArrowRight,
-  Brain,
-  Database,
-  Server,
-  GraduationCap,
-  BarChart3,
-  Lightbulb,
-  Calendar,
-  Users,
-  Globe,
-  Building2,
-  TrendingUp,
-  Award,
-  MapPin,
-  Heart,
-  FileText,
-  Download,
-  Code2,
-} from "lucide-react";
+import { ArrowRight, ArrowUpRight, BarChart3, Brain, Code2, Database, GraduationCap, Server } from "lucide-react";
 import HeroSection from "@/components/home/HeroSection";
-import StatsCounter from "@/components/home/StatsCounter";
-import MarketTicker from "@/components/home/MarketTicker";
-import MarketIntelligence from "@/components/home/MarketIntelligence";
-import TrustedBySection from "@/components/home/TrustedBySection";
-import TechStackSection from "@/components/home/TechStackSection";
-import GlobalReachSection from "@/components/home/GlobalReachSection";
-import CertificationsShowcase from "@/components/home/CertificationsShowcase";
-import TestimonialsSection from "@/components/home/TestimonialsSection";
 import CapabilitiesSection from "@/components/home/CapabilitiesSection";
+import CertificationsShowcase from "@/components/home/CertificationsShowcase";
+import { Section } from "@/components/ui/Section";
+import { ButtonLink } from "@/components/ui/Button";
+import Reveal from "@/components/ui/Reveal";
 import type { CapabilityData } from "@/lib/capabilities";
 import { projects as staticProjects } from "@/data/projects";
 import { experiences as staticExperiences } from "@/data/experience";
 import { publications as staticPublications } from "@/data/publications";
+import { organizations } from "@/data/organizations";
+import { countriesWorked } from "@/data/countries";
+
+/*
+ * Server-rendered home page. Seven sections, each earning its place:
+ * hero, capabilities, selected work, services, where I've worked,
+ * credentials, contact. Every figure is computed from the records.
+ */
 
 const services = [
-  {
-    icon: BarChart3,
-    titleKey: "statistics",
-    descKey: "statistics_desc",
-  },
-  {
-    icon: Brain,
-    titleKey: "consulting",
-    descKey: "consulting_desc",
-  },
-  {
-    icon: Database,
-    titleKey: "architecture",
-    descKey: "architecture_desc",
-  },
-  {
-    icon: Server,
-    titleKey: "mlops",
-    descKey: "mlops_desc",
-  },
-  {
-    icon: Code2,
-    titleKey: "fullstack",
-    descKey: "fullstack_desc",
-  },
-  {
-    icon: GraduationCap,
-    titleKey: "training",
-    descKey: "training_desc",
-  },
-];
-
-const expertiseAreas = [
-  { iconKey: "stats", icon: BarChart3 },
-  { iconKey: "ds", icon: Database },
-  { iconKey: "ai", icon: Brain },
-  { iconKey: "de", icon: Server },
-  { iconKey: "fullstack", icon: Code2 },
-  { iconKey: "strategy", icon: Lightbulb },
-];
-
-const impactMetrics = [
-  { value: 11, suffix: "", labelKey: "organizations", icon: Building2 },
-  { value: 6, suffix: "+", labelKey: "countries", icon: Globe },
-  { value: 27, suffix: "", labelKey: "publications", icon: FileText },
-  { value: 9, suffix: "", labelKey: "certifications", icon: Award },
-  { value: 50, suffix: "+", labelKey: "projects", icon: TrendingUp },
-  { value: 13, suffix: "+", labelKey: "years", icon: Calendar },
-];
+  { icon: BarChart3, key: "statistics" },
+  { icon: Brain, key: "consulting" },
+  { icon: Database, key: "architecture" },
+  { icon: Server, key: "mlops" },
+  { icon: Code2, key: "fullstack" },
+  { icon: GraduationCap, key: "training" },
+] as const;
 
 interface ProjectEntry {
   id: string;
@@ -108,35 +48,29 @@ interface ExperienceEntry {
   location: string;
   startDate: string;
   endDate?: string | null;
-  description: string[];
-  descriptionFr: string[];
 }
 
 interface PublicationEntry {
   id: string;
+  slug?: string;
   title: string;
   titleFr?: string | null;
   abstract: string;
   abstractFr?: string | null;
-  authors: string[];
   year: number;
   category?: string | null;
-  pdfUrl?: string | null;
   accessLevel?: string | null;
   featured: boolean;
-}
-
-interface SectionVisibility {
-  [key: string]: boolean;
 }
 
 interface HomeClientProps {
   initialProjects?: ProjectEntry[];
   initialExperiences?: ExperienceEntry[];
   initialPublications?: PublicationEntry[];
-  initialVisibility?: SectionVisibility;
+  initialVisibility?: Record<string, boolean>;
   initialCvUrl?: string;
-  capabilities?: CapabilityData;
+  profilePhoto?: string;
+  capabilities: CapabilityData;
 }
 
 export default function HomeClient({
@@ -145,459 +79,204 @@ export default function HomeClient({
   initialPublications,
   initialVisibility,
   initialCvUrl,
+  profilePhoto,
   capabilities,
 }: HomeClientProps) {
   const t = useTranslations();
-  const locale = useLocale();
-  // Server-provided data (in the first-byte HTML); fall back to static seeds.
+  const fr = useLocale() === "fr";
   const projects = initialProjects?.length ? initialProjects : staticProjects;
   const experiences = initialExperiences?.length ? initialExperiences : staticExperiences;
   const publications = initialPublications?.length ? initialPublications : staticPublications;
-  const vis: SectionVisibility = initialVisibility ?? {};
-  const cvUrl = initialCvUrl ?? "";
+  const vis = initialVisibility ?? {};
 
   const featuredProjects = projects.filter((p) => p.featured).slice(0, 4);
   const featuredPublications = publications.filter((p) => p.featured).slice(0, 3);
-  const topExperiences = experiences.slice(0, 4);
   const current = experiences.find((e) => !e.endDate);
   const currentRole = current
-    ? {
-        role: locale === "fr" && current.roleFr ? current.roleFr : current.role,
-        organization: current.organization,
-        location: current.location,
-      }
+    ? { role: fr && current.roleFr ? current.roleFr : current.role, organization: current.organization, location: current.location }
     : null;
+
+  const figures = [
+    ...(capabilities.facts.years ? [{ value: capabilities.facts.years, suffix: "+", label: t("stats.years") }] : []),
+    { value: capabilities.facts.organizations, label: t("stats.organizations") },
+    { value: countriesWorked.length, label: t("stats.countries") },
+    { value: capabilities.facts.publications, label: t("stats.publications") },
+  ];
 
   return (
     <>
-      {/* 1. Hero */}
       <HeroSection
-        showCvDownload={vis.cvDownload !== false && vis.cvDownload === true}
-        cvUrl={cvUrl}
+        showCvDownload={vis.cvDownload === true}
+        cvUrl={initialCvUrl}
+        profilePhoto={profilePhoto}
         currentRole={currentRole}
+        figures={figures}
+        timeline={capabilities.timeline}
+        rangeStart={capabilities.rangeStart}
+        rangeEnd={capabilities.rangeEnd}
       />
 
-      {/* 2. Market Ticker */}
-      {vis.marketTicker !== false && <MarketTicker />}
+      {vis.capabilities !== false && <CapabilitiesSection data={capabilities} />}
 
-      {/* 3. Who I Am — Personal Story */}
-      {vis.whoIAm !== false && <section className="section-padding">
-        <div className="max-w-4xl mx-auto">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="text-center"
-          >
-            <div className="inline-flex items-center gap-2 mb-6">
-              <Heart className="w-5 h-5 text-gold" />
-              <h2 className="text-3xl md:text-4xl font-bold font-[family-name:var(--font-display)] gradient-text">
-                {t("home.who_i_am_title")}
-              </h2>
-            </div>
-            <p className="text-text-secondary text-base md:text-lg leading-relaxed">
-              {t("home.who_i_am_text")}
-            </p>
-          </motion.div>
-        </div>
-      </section>}
-
-      {/* 4. Stats */}
-      {vis.stats !== false && <section className="section-padding bg-navy/30">
-        <div className="max-w-5xl mx-auto">
-          <div className="grid grid-cols-2 md:grid-cols-5 gap-8">
-            {/* Years, organisations and publications are counted from the
-                records; countries and projects are the owner's own figures. */}
-            <StatsCounter value={capabilities?.facts.years ?? 13} suffix="+" label={t("stats.years")} />
-            <StatsCounter value={capabilities?.facts.organizations ?? 11} suffix="" label={t("stats.organizations")} />
-            <StatsCounter value={6} suffix="+" label={t("stats.countries")} />
-            <StatsCounter value={capabilities?.facts.publications ?? publications.length} suffix="" label={t("stats.publications")} />
-            <StatsCounter value={50} suffix="+" label={t("stats.projects")} />
-          </div>
-        </div>
-      </section>}
-
-      {/* Capabilities infographics, computed from the records */}
-      {vis.capabilities !== false && capabilities && <CapabilitiesSection data={capabilities} />}
-
-      {/* 5. Trusted By Organizations */}
-      {vis.trustedBy !== false && <TrustedBySection />}
-
-      {/* 6. Market Intelligence */}
-      {vis.marketIntelligence !== false && <MarketIntelligence />}
-
-      {/* 7. Expertise Areas */}
-      {vis.expertise !== false && <section className="section-padding">
-        <div className="max-w-6xl mx-auto">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="text-center mb-12"
-          >
-            <h2 className="text-3xl md:text-4xl font-bold font-[family-name:var(--font-display)] gradient-text mb-4">
-              {t("home.expertise_title")}
-            </h2>
-          </motion.div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {expertiseAreas.map((area, index) => (
-              <motion.div
-                key={area.iconKey}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: index * 0.1 }}
-                className="glass rounded-xl p-6 hover:border-gold/30 transition-all duration-300 group"
-              >
-                <div className="w-12 h-12 rounded-lg bg-gold/10 flex items-center justify-center mb-4 group-hover:bg-gold/20 transition-colors">
-                  <area.icon className="w-6 h-6 text-gold" />
-                </div>
-                <h3 className="text-lg font-semibold mb-2">
-                  {t(`home.expertise_${area.iconKey}_title`)}
-                </h3>
-                <p className="text-text-secondary text-sm leading-relaxed">
-                  {t(`home.expertise_${area.iconKey}_desc`)}
-                </p>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>}
-
-      {/* 8. Technology Stack */}
-      {vis.techStack !== false && <TechStackSection />}
-
-      {/* 9. Career Highlights */}
-      {vis.careerHighlights !== false && <section className="section-padding">
-        <div className="max-w-6xl mx-auto">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="text-center mb-12"
-          >
-            <h2 className="text-3xl md:text-4xl font-bold font-[family-name:var(--font-display)] gradient-text mb-4">
-              {t("home.experience_title")}
-            </h2>
-          </motion.div>
-
-          <div className="space-y-4">
-            {topExperiences.map((exp, index) => (
-              <motion.div
-                key={exp.id}
-                initial={{ opacity: 0, x: -20 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: index * 0.1 }}
-                className="glass rounded-xl p-6 hover:border-gold/30 transition-all duration-300"
-              >
-                <div className="flex flex-col md:flex-row md:items-center justify-between mb-3">
-                  <div>
-                    <h3 className="text-lg font-semibold">
-                      {locale === "fr" ? exp.roleFr : exp.role}
-                    </h3>
-                    <p className="text-gold text-sm">{exp.organization}</p>
-                  </div>
-                  <div className="flex items-center gap-3 text-text-muted text-sm mt-2 md:mt-0">
-                    <span className="flex items-center gap-1">
-                      <MapPin className="w-3.5 h-3.5" />
-                      {exp.location}
-                    </span>
-                    <span className="flex items-center gap-1">
-                      <Calendar className="w-3.5 h-3.5" />
-                      {exp.startDate} – {exp.endDate || t("experience.present")}
-                    </span>
-                  </div>
-                </div>
-                <ul className="space-y-1">
-                  {(locale === "fr" ? exp.descriptionFr : exp.description)
-                    .slice(0, 2)
-                    .map((item, i) => (
-                      <li
-                        key={i}
-                        className="text-text-secondary text-sm flex items-start gap-2"
-                      >
-                        <span className="w-1.5 h-1.5 rounded-full bg-gold mt-1.5 shrink-0" />
-                        {item}
-                      </li>
-                    ))}
-                </ul>
-              </motion.div>
-            ))}
-          </div>
-
-          <div className="text-center mt-8">
-            <Link
-              href="/experience"
-              className="inline-flex items-center gap-2 text-gold hover:text-gold-light transition-colors"
-            >
-              {t("home.view_all")}
-              <ArrowRight className="w-4 h-4" />
+      {(vis.projects !== false || vis.publications !== false) && (
+        <Section
+          eyebrow={t("homeV2.work_eyebrow")}
+          title={t("homeV2.work_title")}
+          action={
+            <Link href="/projects" className="inline-flex items-center gap-1.5 text-sm text-gold hover:text-gold-light">
+              {t("homeV2.all_projects")} <ArrowRight className="w-4 h-4" />
             </Link>
-          </div>
-        </div>
-      </section>}
-
-      {/* 10. Featured Publications */}
-      {vis.publications !== false && <section className="section-padding bg-navy/30">
-        <div className="max-w-6xl mx-auto">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="text-center mb-12"
-          >
-            <h2 className="text-3xl md:text-4xl font-bold font-[family-name:var(--font-display)] gradient-text mb-4">
-              {t("home.publications_title")}
-            </h2>
-          </motion.div>
-
-          <div className="space-y-4">
-            {featuredPublications.map((pub, index) => (
-              <motion.div
-                key={pub.id}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: index * 0.1 }}
-                className="glass rounded-xl p-6 hover:border-gold/30 transition-all duration-300 group"
-              >
-                <div className="flex flex-wrap items-center gap-2 mb-2">
-                  <span className="text-xs px-2 py-1 rounded-full bg-gold/10 text-gold">
-                    {pub.category}
-                  </span>
-                  <span className="text-xs text-text-muted">{pub.year}</span>
-                </div>
-                <h3 className="text-lg font-semibold mb-2 group-hover:text-gold transition-colors">
-                  {locale === "fr" ? pub.titleFr : pub.title}
-                </h3>
-                <p className="text-text-muted text-sm flex items-center gap-1 mb-2">
-                  <Users className="w-3.5 h-3.5" />
-                  {pub.authors.join(", ")}
-                </p>
-                <p className="text-text-secondary text-sm leading-relaxed line-clamp-2 mb-3">
-                  {locale === "fr" ? pub.abstractFr : pub.abstract}
-                </p>
-                {/* Gated titles open their page (with the subscribe prompt)
-                    rather than a file link that would only return 403. */}
-                {pub.pdfUrl && pub.accessLevel !== "GATED" && (
-                  <a
-                    href={pub.pdfUrl}
-                    download
-                    className="inline-flex items-center gap-1.5 text-sm text-gold hover:text-gold-light transition-colors"
-                    onClick={(e) => e.stopPropagation()}
+          }
+        >
+          {vis.projects !== false && (
+            <div className="grid md:grid-cols-2 gap-5">
+              {featuredProjects.map((p, i) => (
+                <Reveal key={p.id}>
+                  <Link
+                    href="/projects"
+                    className={`card card-interactive group flex h-full flex-col p-6 md:p-7 ${i === 0 ? "card-feature" : ""}`}
                   >
-                    <Download className="w-3.5 h-3.5" />
-                    {t("publications.download_pdf")}
-                  </a>
-                )}
-              </motion.div>
-            ))}
-          </div>
+                    <div className="flex items-center justify-between mb-5">
+                      <span className="font-mono text-[11px] uppercase tracking-[0.12em] text-gold">{p.category}</span>
+                      <ArrowUpRight className="w-4 h-4 text-text-muted group-hover:text-gold transition-colors" />
+                    </div>
+                    <h3 className="font-display text-2xl leading-tight mb-3">{fr && p.titleFr ? p.titleFr : p.title}</h3>
+                    <p className="text-sm text-text-secondary leading-relaxed line-clamp-3 mb-6">
+                      {fr && p.descriptionFr ? p.descriptionFr : p.description}
+                    </p>
+                    <ul className="mt-auto flex flex-wrap gap-1.5">
+                      {p.technologies.slice(0, 5).map((tech) => (
+                        <li key={tech} className="text-xs px-2 py-1 rounded-[var(--radius-sm)] bg-surface-2 text-text-secondary">
+                          {tech}
+                        </li>
+                      ))}
+                    </ul>
+                  </Link>
+                </Reveal>
+              ))}
+            </div>
+          )}
 
-          <div className="text-center mt-8">
-            <Link
-              href="/publications"
-              className="inline-flex items-center gap-2 text-gold hover:text-gold-light transition-colors"
-            >
-              {t("home.view_all")}
-              <ArrowRight className="w-4 h-4" />
-            </Link>
-          </div>
-        </div>
-      </section>}
-
-      {/* 11. Featured Projects */}
-      {vis.projects !== false && <section className="section-padding">
-        <div className="max-w-6xl mx-auto">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="text-center mb-12"
-          >
-            <h2 className="text-3xl md:text-4xl font-bold font-[family-name:var(--font-display)] gradient-text mb-4">
-              {t("projects.title")}
-            </h2>
-            <p className="text-text-secondary max-w-2xl mx-auto">
-              {t("projects.subtitle")}
-            </p>
-          </motion.div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {featuredProjects.map((project, index) => (
-              <motion.div
-                key={project.id}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: index * 0.1 }}
-                className="glass rounded-xl p-6 hover:border-gold/30 transition-all duration-300 group"
-              >
-                <div className="flex items-center gap-2 mb-3">
-                  <span className="text-xs px-2 py-1 rounded-full bg-gold/10 text-gold">
-                    {project.category}
-                  </span>
-                </div>
-                <h3 className="text-lg font-semibold mb-2 group-hover:text-gold transition-colors">
-                  {locale === "fr" ? project.titleFr : project.title}
-                </h3>
-                <p className="text-text-secondary text-sm leading-relaxed mb-4">
-                  {((locale === "fr" ? project.descriptionFr : project.description) || "").substring(0, 150)}...
-                </p>
-                <div className="flex flex-wrap gap-2">
-                  {project.technologies.slice(0, 4).map((tech) => (
-                    <span
-                      key={tech}
-                      className="text-xs px-2 py-1 rounded bg-navy-light text-text-secondary"
+          {vis.publications !== false && featuredPublications.length > 0 && (
+            <div className="mt-16">
+              <div className="flex items-end justify-between gap-4 mb-6">
+                <h3 className="font-display text-2xl">{t("home.publications_title")}</h3>
+                <Link href="/publications" className="inline-flex items-center gap-1.5 text-sm text-gold hover:text-gold-light shrink-0">
+                  {t("homeV2.all_publications")} <ArrowRight className="w-4 h-4" />
+                </Link>
+              </div>
+              <ol className="hairline">
+                {featuredPublications.map((pub) => (
+                  <li key={pub.id} className="border-b border-glass-border">
+                    <Link
+                      href={pub.slug ? `/publications/${pub.slug}` : "/publications"}
+                      className="group grid md:grid-cols-12 gap-2 md:gap-6 py-6 hover:bg-[var(--hover-wash)] transition-colors -mx-3 px-3 rounded-[var(--radius-sm)]"
                     >
-                      {tech}
-                    </span>
-                  ))}
-                </div>
-              </motion.div>
-            ))}
-          </div>
+                      <span className="md:col-span-2 font-mono text-xs text-text-muted pt-1.5">
+                        {pub.year}
+                        {pub.accessLevel === "GATED" && <span className="ml-2 text-gold">{t("homeV2.members")}</span>}
+                      </span>
+                      <span className="md:col-span-9">
+                        <span className="block font-display text-xl leading-snug group-hover:text-gold transition-colors">
+                          {fr && pub.titleFr ? pub.titleFr : pub.title}
+                        </span>
+                        <span className="mt-2 text-sm text-text-secondary line-clamp-2">
+                          {fr && pub.abstractFr ? pub.abstractFr : pub.abstract}
+                        </span>
+                      </span>
+                      <ArrowUpRight className="hidden md:block md:col-span-1 justify-self-end w-4 h-4 mt-1.5 text-text-muted group-hover:text-gold transition-colors" />
+                    </Link>
+                  </li>
+                ))}
+              </ol>
+            </div>
+          )}
+        </Section>
+      )}
 
-          <div className="text-center mt-8">
-            <Link
-              href="/projects"
-              className="inline-flex items-center gap-2 text-gold hover:text-gold-light transition-colors"
-            >
-              {t("home.view_all")}
-              <ArrowRight className="w-4 h-4" />
-            </Link>
-          </div>
-        </div>
-      </section>}
-
-      {/* 12. Services Overview */}
-      {vis.services !== false && <section className="section-padding bg-navy/30">
-        <div className="max-w-6xl mx-auto">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="text-center mb-12"
-          >
-            <h2 className="text-3xl md:text-4xl font-bold font-[family-name:var(--font-display)] gradient-text mb-4">
-              {t("services.title")}
-            </h2>
-            <p className="text-text-secondary max-w-2xl mx-auto">
-              {t("services.subtitle")}
-            </p>
-          </motion.div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {services.map((service, index) => (
-              <motion.div
-                key={service.titleKey}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: index * 0.1 }}
-                className="glass rounded-xl p-6 hover:border-gold/30 transition-all duration-300 group"
+      {vis.services !== false && (
+        <Section
+          eyebrow={t("services.title")}
+          title={t("homeV2.services_title")}
+          intro={t("services.subtitle")}
+          action={
+            <ButtonLink href="/services" variant="secondary">
+              {t("services.view_packages")}
+            </ButtonLink>
+          }
+        >
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 border-t border-l border-glass-border rounded-[var(--radius-md)] overflow-hidden">
+            {services.map((s) => (
+              <Link
+                key={s.key}
+                href="/services"
+                className="group p-7 border-r border-b border-glass-border hover:bg-[var(--hover-wash)] transition-colors"
               >
-                <div className="w-12 h-12 rounded-lg bg-gold/10 flex items-center justify-center mb-4 group-hover:bg-gold/20 transition-colors">
-                  <service.icon className="w-6 h-6 text-gold" />
-                </div>
-                <h3 className="text-lg font-semibold mb-2">
-                  {t(`services.${service.titleKey}`)}
+                <s.icon className="w-5 h-5 text-gold mb-6" strokeWidth={1.5} />
+                <h3 className="text-lg font-semibold mb-2 flex items-center gap-2">
+                  {t(`services.${s.key}`)}
+                  <ArrowRight className="w-4 h-4 opacity-0 -translate-x-1 group-hover:opacity-100 group-hover:translate-x-0 transition-all text-gold" />
                 </h3>
-                <p className="text-text-secondary text-sm leading-relaxed">
-                  {t(`services.${service.descKey}`)}
-                </p>
-              </motion.div>
+                <p className="text-sm text-text-secondary leading-relaxed">{t(`services.${s.key}_desc`)}</p>
+              </Link>
             ))}
           </div>
+        </Section>
+      )}
 
-          <div className="text-center mt-8">
-            <Link
-              href="/services"
-              className="inline-flex items-center gap-2 text-gold hover:text-gold-light transition-colors"
-            >
-              {t("services.title")}
-              <ArrowRight className="w-4 h-4" />
-            </Link>
-          </div>
-        </div>
-      </section>}
+      {vis.trustedBy !== false && (
+        <Section
+          eyebrow={t("homeV2.worked_eyebrow")}
+          title={t("homeV2.worked_title")}
+          intro={t("organizations.subtitle")}
+        >
+          <ul className="grid grid-cols-1 md:grid-cols-2 gap-x-12">
+            {organizations.map((o) => (
+              <li key={o.id} className="min-w-0 flex items-baseline justify-between gap-4 py-4 border-b border-glass-border">
+                <a
+                  href={o.website}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="group min-w-0"
+                >
+                  <span className="font-display text-xl group-hover:text-gold transition-colors">{o.abbreviation}</span>
+                  <span className="block text-xs text-text-muted truncate">{fr ? o.nameFr : o.name}</span>
+                </a>
+                <span className="font-mono text-xs text-text-muted text-right">{o.location}</span>
+              </li>
+            ))}
+          </ul>
+          <p className="mt-10 text-sm text-text-secondary">
+            <span className="eyebrow mr-3">{t("stats.countries")}</span>
+            {countriesWorked.map((c) => (fr ? c.nameFr : c.name)).join(" · ")}
+          </p>
+        </Section>
+      )}
 
-      {/* 13. Global Reach */}
-      {vis.globalReach !== false && <GlobalReachSection />}
-
-      {/* 14. Certifications Showcase */}
       {vis.certifications !== false && <CertificationsShowcase />}
 
-      {/* 15. Impact & Achievements (enhanced with animated counters) */}
-      {vis.impact !== false && <section className="section-padding">
-        <div className="max-w-6xl mx-auto">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="text-center mb-12"
-          >
-            <h2 className="text-3xl md:text-4xl font-bold font-[family-name:var(--font-display)] gradient-text mb-4">
-              {t("home.impact_title")}
-            </h2>
-          </motion.div>
-
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-            {impactMetrics.map((metric, index) => (
-              <motion.div
-                key={metric.labelKey}
-                initial={{ opacity: 0, scale: 0.95 }}
-                whileInView={{ opacity: 1, scale: 1 }}
-                viewport={{ once: true }}
-                transition={{ delay: index * 0.08 }}
-                className="glass rounded-xl p-6 text-center hover:border-gold/30 transition-all duration-300"
-              >
-                <metric.icon className="w-6 h-6 text-gold mx-auto mb-3" />
-                <StatsCounter value={metric.value} suffix={metric.suffix} label={t(`stats.${metric.labelKey}`)} />
-              </motion.div>
-            ))}
+      {vis.cta !== false && (
+        <section className="py-20 md:py-28 hairline">
+          <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+            <Reveal className="card card-feature p-8 md:p-14 rounded-[var(--radius-lg)] grid md:grid-cols-12 gap-8 items-end">
+              <div className="md:col-span-8">
+                <p className="eyebrow mb-4">{t("nav.contact")}</p>
+                <h2 className="h-section mb-4">{t("contact.title")}</h2>
+                <p className="lede max-w-xl">{t("contact.subtitle")}</p>
+              </div>
+              <div className="md:col-span-4 flex flex-col sm:flex-row md:flex-col gap-3 md:items-stretch md:max-w-xs md:ml-auto md:w-full">
+                <ButtonLink href="/contact" size="lg" className="group">
+                  {t("hero.cta_contact")}
+                  <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
+                </ButtonLink>
+                <ButtonLink href="/book" variant="secondary" size="lg">
+                  {t("homeV2.book_call")}
+                </ButtonLink>
+              </div>
+            </Reveal>
           </div>
-        </div>
-      </section>}
-
-      {/* 16. Client Testimonials */}
-      {vis.testimonials !== false && <TestimonialsSection />}
-
-      {/* 17. CTA Section */}
-      {vis.cta !== false && <section className="section-padding bg-navy/30">
-        <div className="max-w-4xl mx-auto text-center">
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            whileInView={{ opacity: 1, scale: 1 }}
-            viewport={{ once: true }}
-            className="glass rounded-2xl p-8 md:p-12 gradient-border"
-          >
-            <h2 className="text-2xl md:text-3xl font-bold font-[family-name:var(--font-display)] mb-4">
-              {t("contact.title")}
-            </h2>
-            <p className="text-text-secondary mb-8 max-w-xl mx-auto">
-              {t("contact.subtitle")}
-            </p>
-            <Link
-              href="/contact"
-              className="inline-flex items-center gap-2 px-8 py-3 bg-gold text-charcoal font-semibold rounded-lg hover:bg-gold-light transition-all duration-300 hover:shadow-lg hover:shadow-gold/20"
-            >
-              {t("hero.cta_contact")}
-              <ArrowRight className="w-4 h-4" />
-            </Link>
-            <div className="mt-4">
-              <Link
-                href="/consulting"
-                className="text-sm text-text-muted hover:text-gold transition-colors"
-              >
-                {t("services.view_packages")}
-              </Link>
-            </div>
-          </motion.div>
-        </div>
-      </section>}
+        </section>
+      )}
     </>
   );
 }

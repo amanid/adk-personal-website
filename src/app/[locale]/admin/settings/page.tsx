@@ -182,7 +182,7 @@ export default function SettingsPage() {
           {message && (
             <span
               className={`text-sm ${
-                message.type === "success" ? "text-green-400" : "text-red-400"
+                message.type === "success" ? "text-success" : "text-danger"
               }`}
             >
               {message.text}
@@ -411,7 +411,7 @@ export default function SettingsPage() {
         {message && (
           <span
             className={`text-sm ${
-              message.type === "success" ? "text-green-400" : "text-red-400"
+              message.type === "success" ? "text-success" : "text-danger"
             }`}
           >
             {message.text}

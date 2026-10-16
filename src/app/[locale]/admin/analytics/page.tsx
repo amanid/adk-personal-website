@@ -118,7 +118,7 @@ export default function AnalyticsPage() {
                   : 0
               }
               icon={Eye}
-              color="text-amber-400"
+              color="text-warning"
             />
           </div>
 

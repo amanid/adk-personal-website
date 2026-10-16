@@ -2,20 +2,10 @@
 
 import { useState } from "react";
 import { useTranslations, useLocale } from "next-intl";
-import { motion } from "framer-motion";
-import {
-  GraduationCap,
-  Quote,
-  Layers,
-  FlaskConical,
-  Sparkles,
-  Trophy,
-  Tags,
-  FileSignature,
-  ChevronDown,
-  Building2,
-  Target,
-} from "lucide-react";
+import { AnimatePresence, motion } from "framer-motion";
+import { ChevronDown } from "lucide-react";
+import { Container } from "@/components/ui/Section";
+import Reveal from "@/components/ui/Reveal";
 import {
   dbaThesis,
   keyFacts,
@@ -34,12 +24,6 @@ import {
 
 type Locale = "en" | "fr";
 
-const fadeUp = {
-  initial: { opacity: 0, y: 24 },
-  whileInView: { opacity: 1, y: 0 },
-  viewport: { once: true, margin: "-80px" },
-};
-
 export default function DbaClient() {
   const t = useTranslations("dba");
   const locale = useLocale() as Locale;
@@ -47,326 +31,211 @@ export default function DbaClient() {
   const [declarationOpen, setDeclarationOpen] = useState(false);
 
   return (
-    <div className="section-padding">
-      <div className="max-w-5xl mx-auto">
-        {/* ===== Hero ===== */}
-        <motion.header
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="relative glass rounded-3xl overflow-hidden mb-14"
-        >
+    <div className="pt-16 md:pt-24 pb-24">
+      {/* ===== Header ===== */}
+      <Container>
+        <header className="max-w-4xl mb-14">
+          <p className="eyebrow mb-4">{t("eyebrow")}</p>
+          <p className="text-text-secondary mb-1">
+            {pick(dbaThesis.degree)} · {dbaThesis.institution}
+          </p>
+          <p className="text-sm text-text-muted mb-8">{pick(dbaThesis.option)}</p>
+          <h1 className="font-display text-5xl md:text-7xl leading-[1] tracking-tight mb-5">{pick(dbaThesis.title)}</h1>
+          <p className="font-display text-xl md:text-2xl leading-snug text-text-secondary max-w-3xl">
+            {pick(dbaThesis.subtitle)}
+          </p>
+          <p className="text-text-muted mt-6 max-w-2xl italic">{pick(dbaThesis.thesisLine)}</p>
+        </header>
 
-          <div className="relative p-8 md:p-14 text-center">
-            <div className="inline-flex items-center gap-2 rounded-full border border-gold/30 bg-gold/5 px-4 py-1.5 text-xs font-medium uppercase tracking-[0.2em] text-gold mb-6">
-              <GraduationCap className="w-4 h-4" />
-              {t("eyebrow")}
+        {/* Thesis cover facts */}
+        <dl className="grid grid-cols-1 sm:grid-cols-3 border-t border-glass-border mb-4">
+          {[
+            { k: t("candidate"), v: dbaThesis.candidate },
+            { k: t("supervisor"), v: dbaThesis.supervisor },
+            { k: t("date"), v: pick(dbaThesis.date) },
+          ].map((item) => (
+            <div key={item.k} className="py-4 sm:pr-6 border-b border-glass-border">
+              <dt className="eyebrow text-text-muted mb-1">{item.k}</dt>
+              <dd className="text-text-primary">{item.v}</dd>
             </div>
-
-            <div className="flex items-center justify-center gap-2 text-text-secondary text-sm mb-2">
-              <Building2 className="w-4 h-4 text-gold" />
-              {dbaThesis.institution}
+          ))}
+        </dl>
+        <dl className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 mb-20">
+          {keyFacts.map((fact) => (
+            <div key={fact.label.en} className="py-4 sm:pr-6 border-b border-glass-border">
+              <dt className="eyebrow text-text-muted mb-1">{pick(fact.label)}</dt>
+              <dd className="text-text-primary leading-snug">{pick(fact.value)}</dd>
             </div>
-            <p className="text-text-muted text-sm mb-1">{pick(dbaThesis.degree)}</p>
-            <p className="text-gold/90 text-xs uppercase tracking-wider mb-8">
-              {pick(dbaThesis.option)}
-            </p>
+          ))}
+        </dl>
+      </Container>
 
-            <h1 className="text-4xl md:text-6xl font-bold font-[family-name:var(--font-display)] gradient-text mb-4">
-              {pick(dbaThesis.title)}
-            </h1>
-            <p className="text-text-secondary text-lg md:text-xl max-w-3xl mx-auto leading-relaxed">
-              {pick(dbaThesis.subtitle)}
-            </p>
-
-            <p className="text-text-muted text-sm max-w-2xl mx-auto mt-6 italic">
-              {pick(dbaThesis.thesisLine)}
-            </p>
-
-            {/* candidate / supervisor / date */}
-            <div className="mt-10 grid grid-cols-1 sm:grid-cols-3 gap-4 max-w-3xl mx-auto">
-              {[
-                { k: t("candidate"), v: dbaThesis.candidate },
-                { k: t("supervisor"), v: dbaThesis.supervisor },
-                { k: t("date"), v: pick(dbaThesis.date) },
-              ].map((item) => (
-                <div key={item.k} className="rounded-xl bg-navy/40 px-4 py-3">
-                  <p className="text-[11px] uppercase tracking-wider text-text-muted mb-1">
-                    {item.k}
-                  </p>
-                  <p className="text-sm font-medium text-text-primary">{item.v}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </motion.header>
-
-        {/* ===== Key facts ===== */}
-        <motion.section {...fadeUp} className="mb-16">
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-            {keyFacts.map((fact) => (
-              <div
-                key={fact.label.en}
-                className="glass rounded-xl p-5 hover:border-gold/30 transition-colors"
-              >
-                <p className="text-[11px] uppercase tracking-wider text-text-muted mb-1.5">
-                  {pick(fact.label)}
-                </p>
-                <p className="text-sm font-medium text-text-primary leading-snug">
-                  {pick(fact.value)}
-                </p>
-              </div>
-            ))}
-          </div>
-        </motion.section>
-
-        {/* ===== Central claim ===== */}
-        <motion.section {...fadeUp} className="mb-16">
-          <div className="relative glass rounded-2xl p-8 md:p-10 gradient-border">
-            <Quote className="w-8 h-8 text-gold/40 mb-4" />
-            <p className="text-xl md:text-2xl font-[family-name:var(--font-display)] leading-relaxed text-text-primary">
+      {/* ===== Central claim ===== */}
+      <Container size="prose">
+        <Reveal className="mb-20">
+          <figure className="card card-feature p-8 md:p-10">
+            <figcaption className="eyebrow mb-4">{t("central_claim")}</figcaption>
+            <blockquote className="font-display text-2xl md:text-[1.75rem] leading-[1.4] text-text-primary">
               {pick(claimStatement)}
-            </p>
-            <p className="mt-4 text-xs uppercase tracking-[0.2em] text-gold">
-              {t("central_claim")}
-            </p>
-          </div>
-        </motion.section>
+            </blockquote>
+          </figure>
+        </Reveal>
 
         {/* ===== Abstract ===== */}
-        <motion.section {...fadeUp} className="mb-16">
-          <SectionHeading icon={<FileSignature className="w-5 h-5" />} title={t("abstract_title")} />
-          <div className="glass rounded-2xl p-8 md:p-10 space-y-5">
+        <section aria-labelledby="dba-abstract" className="mb-20">
+          <SectionHeading id="dba-abstract" title={t("abstract_title")} />
+          <div className="space-y-5">
             {abstractParagraphs.map((para, i) => (
-              <p key={i} className="text-text-secondary leading-relaxed text-[15px]">
+              <p key={i} className="text-text-secondary text-[1.0625rem] leading-[1.75]">
                 {pick(para)}
               </p>
             ))}
           </div>
-        </motion.section>
+        </section>
+      </Container>
 
+      <Container>
         {/* ===== Theoretical framework ===== */}
-        <motion.section {...fadeUp} className="mb-16">
-          <SectionHeading
-            icon={<Layers className="w-5 h-5" />}
-            title={t("framework_title")}
-            subtitle={t("framework_subtitle")}
-          />
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-            {frameworkLenses.map((lens, i) => (
-              <motion.div
-                key={lens.name.en}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: i * 0.08 }}
-                className="glass rounded-xl p-6 flex flex-col"
-              >
-                <span className="self-start rounded-full bg-gold/10 px-3 py-1 text-[11px] font-medium uppercase tracking-wider text-gold mb-3">
-                  {pick(lens.role)}
-                </span>
-                <h3 className="text-lg font-semibold font-[family-name:var(--font-display)] mb-2">
-                  {pick(lens.name)}
-                </h3>
-                <p className="text-text-secondary text-sm leading-relaxed">
-                  {pick(lens.description)}
-                </p>
-              </motion.div>
+        <section aria-labelledby="dba-framework" className="hairline pt-14 mb-20">
+          <SectionHeading id="dba-framework" title={t("framework_title")} subtitle={t("framework_subtitle")} />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12">
+            {frameworkLenses.map((lens) => (
+              <div key={lens.name.en} className="py-6 border-t border-glass-border">
+                <p className="eyebrow text-text-muted mb-2">{pick(lens.role)}</p>
+                <h3 className="font-display text-2xl leading-snug mb-2">{pick(lens.name)}</h3>
+                <p className="text-text-secondary leading-relaxed">{pick(lens.description)}</p>
+              </div>
             ))}
           </div>
-        </motion.section>
+        </section>
 
         {/* ===== Research design ===== */}
-        <motion.section {...fadeUp} className="mb-16">
-          <SectionHeading
-            icon={<FlaskConical className="w-5 h-5" />}
-            title={t("design_title")}
-            subtitle={t("design_subtitle")}
-          />
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <section aria-labelledby="dba-design" className="hairline pt-14 mb-20">
+          <SectionHeading id="dba-design" title={t("design_title")} subtitle={t("design_subtitle")} />
+          <dl className="grid grid-cols-1 sm:grid-cols-2 gap-x-12">
             {designMetrics.map((m) => (
-              <div
-                key={m.label.en}
-                className="glass rounded-xl p-5 border-l-2 border-gold/40"
-              >
-                <p className="text-[11px] uppercase tracking-wider text-text-muted mb-1.5">
-                  {pick(m.label)}
-                </p>
-                <p className="text-sm font-medium text-text-primary leading-snug">
-                  {pick(m.value)}
-                </p>
+              <div key={m.label.en} className="py-4 border-t border-glass-border">
+                <dt className="eyebrow text-text-muted mb-1">{pick(m.label)}</dt>
+                <dd className="text-text-primary leading-snug">{pick(m.value)}</dd>
               </div>
             ))}
-          </div>
-        </motion.section>
+          </dl>
+        </section>
+      </Container>
 
+      <Container size="prose">
         {/* ===== Findings ===== */}
-        <motion.section {...fadeUp} className="mb-16">
-          <SectionHeading
-            icon={<Sparkles className="w-5 h-5" />}
-            title={t("findings_title")}
-            subtitle={t("findings_subtitle")}
-          />
-          <div className="space-y-4">
+        <section aria-labelledby="dba-findings" className="hairline pt-14 mb-20">
+          <SectionHeading id="dba-findings" title={t("findings_title")} subtitle={t("findings_subtitle")} />
+          <ol>
             {findings.map((f, i) => (
-              <motion.div
-                key={f.title.en}
-                initial={{ opacity: 0, x: -16 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: i * 0.06 }}
-                className="glass rounded-xl p-6"
-              >
-                <div className="flex items-start gap-4">
-                  <span className="shrink-0 mt-0.5 flex h-8 w-8 items-center justify-center rounded-lg bg-gold/10 text-gold text-sm font-semibold">
-                    {String(i + 1).padStart(2, "0")}
-                  </span>
-                  <div>
-                    <h3 className="text-base font-semibold text-text-primary mb-1.5">
-                      {pick(f.title)}
-                    </h3>
-                    <p className="text-text-secondary text-sm leading-relaxed">
-                      {pick(f.body)}
-                    </p>
-                  </div>
+              <li key={f.title.en} className="grid grid-cols-[2.5rem_1fr] gap-4 py-6 border-t border-glass-border">
+                <span className="font-mono text-sm tabular-nums text-gold pt-1">{String(i + 1).padStart(2, "0")}</span>
+                <div>
+                  <h3 className="font-display text-xl leading-snug mb-2">{pick(f.title)}</h3>
+                  <p className="text-text-secondary leading-relaxed">{pick(f.body)}</p>
                 </div>
-              </motion.div>
+              </li>
             ))}
-          </div>
-        </motion.section>
+          </ol>
+        </section>
 
         {/* ===== Contributions ===== */}
-        <motion.section {...fadeUp} className="mb-16">
-          <SectionHeading icon={<Trophy className="w-5 h-5" />} title={t("contributions_title")} />
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-            {contributions.map((c, i) => (
-              <motion.div
-                key={c.index}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: i * 0.08 }}
-                className="glass rounded-xl p-6 relative overflow-hidden"
-              >
-                <span className="absolute -top-3 -right-1 text-6xl font-bold font-[family-name:var(--font-display)] text-gold/10 select-none">
-                  {c.index}
-                </span>
-                <h3 className="text-lg font-semibold font-[family-name:var(--font-display)] mb-2 relative">
-                  {pick(c.title)}
-                </h3>
-                <p className="text-text-secondary text-sm leading-relaxed relative">
-                  {pick(c.body)}
-                </p>
-              </motion.div>
+        <section aria-labelledby="dba-contributions" className="hairline pt-14 mb-20">
+          <SectionHeading id="dba-contributions" title={t("contributions_title")} />
+          <ol>
+            {contributions.map((c) => (
+              <li key={c.index} className="grid grid-cols-[2.5rem_1fr] gap-4 py-6 border-t border-glass-border">
+                <span className="font-mono text-sm tabular-nums text-gold pt-1">{c.index}</span>
+                <div>
+                  <h3 className="font-display text-xl leading-snug mb-2">{pick(c.title)}</h3>
+                  <p className="text-text-secondary leading-relaxed">{pick(c.body)}</p>
+                </div>
+              </li>
             ))}
-          </div>
-        </motion.section>
+          </ol>
+        </section>
 
         {/* ===== Practical message ===== */}
-        <motion.section {...fadeUp} className="mb-16">
-          <div className="relative glass-strong rounded-2xl p-8 md:p-10 text-center">
-            <Target className="w-8 h-8 text-gold mx-auto mb-4" />
-            <p className="text-xs uppercase tracking-[0.2em] text-gold mb-3">
-              {t("practical_title")}
-            </p>
-            <p className="text-lg md:text-xl font-[family-name:var(--font-display)] leading-relaxed text-text-primary max-w-3xl mx-auto">
-              {pick(practicalMessage)}
-            </p>
-          </div>
-        </motion.section>
+        <section aria-labelledby="dba-practical" className="hairline pt-14 mb-20">
+          <h2 id="dba-practical" className="eyebrow mb-4">
+            {t("practical_title")}
+          </h2>
+          <p className="font-display text-xl md:text-2xl leading-[1.45] text-text-primary">{pick(practicalMessage)}</p>
+        </section>
 
         {/* ===== Keywords ===== */}
-        <motion.section {...fadeUp} className="mb-16">
-          <SectionHeading icon={<Tags className="w-5 h-5" />} title={t("keywords_title")} />
-          <div className="flex flex-wrap gap-2.5">
+        <section aria-labelledby="dba-keywords" className="hairline pt-14 mb-20">
+          <h2 id="dba-keywords" className="eyebrow mb-4">
+            {t("keywords_title")}
+          </h2>
+          <ul className="flex flex-wrap gap-x-5 gap-y-2 font-mono text-sm text-text-secondary">
             {keywords.map((kw) => (
-              <span
-                key={kw.en}
-                className="rounded-full border border-glass-border bg-navy/40 px-4 py-2 text-sm text-text-secondary hover:text-gold hover:border-gold/30 transition-colors"
-              >
-                {pick(kw)}
-              </span>
+              <li key={kw.en}>{pick(kw)}</li>
             ))}
-          </div>
-        </motion.section>
+          </ul>
+        </section>
 
         {/* ===== Declaration (collapsible) ===== */}
-        <motion.section {...fadeUp}>
-          <div className="glass rounded-2xl overflow-hidden">
-            <button
-              onClick={() => setDeclarationOpen((v) => !v)}
-              className="w-full flex items-center justify-between gap-4 p-6 text-left hover:bg-white/5 transition-colors"
-              aria-expanded={declarationOpen}
-            >
-              <span className="flex items-center gap-3">
-                <FileSignature className="w-5 h-5 text-gold" />
-                <span className="text-lg font-semibold font-[family-name:var(--font-display)]">
-                  {t("declaration_title")}
-                </span>
-              </span>
-              <ChevronDown
-                className={`w-5 h-5 text-text-secondary transition-transform ${
-                  declarationOpen ? "rotate-180" : ""
-                }`}
-              />
-            </button>
-            <motion.div
-              initial={false}
-              animate={{ height: declarationOpen ? "auto" : 0, opacity: declarationOpen ? 1 : 0 }}
-              className="overflow-hidden"
-            >
-              <div className="px-6 pb-6 pt-0">
-                <p className="text-text-secondary text-sm leading-relaxed mb-4">
-                  {pick(declarationIntro)}
-                </p>
-                <ul className="space-y-2.5 mb-6">
-                  {declarationPoints.map((p, i) => (
-                    <li key={i} className="flex items-start gap-3 text-sm text-text-secondary">
-                      <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-gold" />
-                      <span className="leading-relaxed">{pick(p)}</span>
-                    </li>
-                  ))}
-                </ul>
-                <div className="flex flex-col sm:flex-row gap-6 border-t border-glass-border pt-5 text-sm">
-                  <div>
-                    <p className="text-text-muted text-xs uppercase tracking-wider mb-1">
-                      {t("signed")}
-                    </p>
-                    <p className="font-[family-name:var(--font-display)] text-gold">
-                      {dbaThesis.candidate}
-                    </p>
-                  </div>
-                  <div>
-                    <p className="text-text-muted text-xs uppercase tracking-wider mb-1">
-                      {t("date")}
-                    </p>
-                    <p className="text-text-primary">{pick(dbaThesis.date)}</p>
-                  </div>
+        <section className="card overflow-hidden">
+          <button
+            type="button"
+            onClick={() => setDeclarationOpen((v) => !v)}
+            className="w-full min-h-11 flex items-center justify-between gap-4 p-6 text-left hover:bg-[var(--hover-wash)] transition-colors"
+            aria-expanded={declarationOpen}
+            aria-controls="dba-declaration"
+          >
+            <span className="font-display text-xl">{t("declaration_title")}</span>
+            <ChevronDown
+              aria-hidden
+              className={`w-5 h-5 text-text-secondary transition-transform ${declarationOpen ? "rotate-180" : ""}`}
+            />
+          </button>
+          <AnimatePresence initial={false}>
+            {declarationOpen && (
+              <motion.div
+                id="dba-declaration"
+                initial={{ height: 0, opacity: 0 }}
+                animate={{ height: "auto", opacity: 1 }}
+                exit={{ height: 0, opacity: 0 }}
+                className="overflow-hidden"
+              >
+                <div className="px-6 pb-6">
+                  <p className="text-text-secondary leading-relaxed mb-4">{pick(declarationIntro)}</p>
+                  <ul className="space-y-2.5 mb-6 list-disc pl-5 marker:text-gold">
+                    {declarationPoints.map((p, i) => (
+                      <li key={i} className="text-text-secondary leading-relaxed">
+                        {pick(p)}
+                      </li>
+                    ))}
+                  </ul>
+                  <dl className="flex flex-col sm:flex-row gap-6 border-t border-glass-border pt-5">
+                    <div>
+                      <dt className="eyebrow text-text-muted mb-1">{t("signed")}</dt>
+                      <dd className="font-display text-lg text-gold">{dbaThesis.candidate}</dd>
+                    </div>
+                    <div>
+                      <dt className="eyebrow text-text-muted mb-1">{t("date")}</dt>
+                      <dd className="text-text-primary">{pick(dbaThesis.date)}</dd>
+                    </div>
+                  </dl>
                 </div>
-              </div>
-            </motion.div>
-          </div>
-        </motion.section>
-      </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </section>
+      </Container>
     </div>
   );
 }
 
-function SectionHeading({
-  icon,
-  title,
-  subtitle,
-}: {
-  icon: React.ReactNode;
-  title: string;
-  subtitle?: string;
-}) {
+function SectionHeading({ id, title, subtitle }: { id: string; title: string; subtitle?: string }) {
   return (
-    <div className="mb-6">
-      <div className="flex items-center gap-2.5 mb-1.5">
-        <span className="text-gold">{icon}</span>
-        <h2 className="text-2xl font-bold font-[family-name:var(--font-display)]">{title}</h2>
-      </div>
-      {subtitle && <p className="text-text-secondary text-sm">{subtitle}</p>}
+    <div className="mb-8">
+      <h2 id={id} className="h-section">
+        {title}
+      </h2>
+      {subtitle && <p className="lede mt-3">{subtitle}</p>}
     </div>
   );
 }

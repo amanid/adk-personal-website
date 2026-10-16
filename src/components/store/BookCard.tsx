@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { Link } from "@/i18n/routing";
-import { BookOpen, Star } from "lucide-react";
+import { BookOpen } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { formatPrice, fileFormatLabel } from "@/lib/utils";
 import AddToCartButton from "./AddToCartButton";
@@ -12,6 +12,8 @@ export interface StoreBook {
   slug: string;
   title: string;
   subtitle?: string | null;
+  /** The book's own author field; shown under the title when present. */
+  author?: string | null;
   publicationYear: number;
   priceCents: number;
   currency: string;
@@ -29,61 +31,66 @@ export interface StoreBook {
   payWhatYouWant?: boolean;
 }
 
+/**
+ * A book on the shelf: the cover carries the card, the title is set in the
+ * serif, and the price sits in mono so a column of cards lines up. The card
+ * itself is not a link (it holds an add-to-cart button), so it does not lift
+ * on hover; the cover and title are the links.
+ */
 export default function BookCard({ book }: { book: StoreBook }) {
   const t = useTranslations("store");
   const format = fileFormatLabel(book.fileMimeType);
+  const isFree = book.priceCents === 0 && !book.payWhatYouWant;
   return (
-    <div className="group glass rounded-xl overflow-hidden flex flex-col hover:border-gold/40 transition-all">
-      <Link href={`/store/${book.slug}`} className="block">
-        <div className="relative aspect-[3/4] bg-navy/50 overflow-hidden">
+    <article className="group flex flex-col min-w-0">
+      <Link
+        href={`/store/${book.slug}`}
+        className="block rounded-[var(--radius-sm)] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-gold"
+        tabIndex={-1}
+        aria-hidden="true"
+      >
+        <div className="relative aspect-[3/4] overflow-hidden rounded-[var(--radius-sm)] bg-navy border border-glass-border shadow-[var(--elev-md)] transition-transform duration-300 group-hover:-translate-y-1">
           {book.coverUrl ? (
             <Image
               src={book.coverUrl}
               alt={t("coverAlt", { title: book.title })}
               fill
               sizes="(max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
-              className="object-cover group-hover:scale-105 transition-transform duration-500"
+              className="object-cover"
             />
           ) : (
-            <div className="w-full h-full flex items-center justify-center text-gold/30">
-              <BookOpen className="w-16 h-16" />
+            <div className="w-full h-full flex items-center justify-center text-text-muted">
+              <BookOpen className="w-14 h-14" />
             </div>
           )}
           {book.featured && (
-            <span className="absolute top-2 left-2 inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-gold text-charcoal text-[10px] font-bold shadow">
-              <Star className="w-3 h-3 fill-charcoal" />
+            <span className="absolute top-2 left-2 px-2 py-0.5 rounded-[var(--radius-sm)] bg-gold text-charcoal text-xs font-semibold shadow-[var(--elev-sm)]">
               {t("featured")}
             </span>
           )}
           {book.priceCents === 0 && (
-            <span className="absolute top-2 right-2 px-2 py-0.5 rounded-full bg-green-500 text-white text-[10px] font-bold shadow">
+            <span className="absolute top-2 right-2 px-2 py-0.5 rounded-[var(--radius-sm)] bg-charcoal text-success border border-success/40 text-xs font-semibold shadow-[var(--elev-sm)]">
               {t("free")}
             </span>
           )}
         </div>
       </Link>
-      <div className="p-4 flex flex-col flex-1">
-        <Link href={`/store/${book.slug}`}>
-          {/* title attribute so a clamped title is still readable on hover */}
-          <h2
-            title={book.title}
-            className="font-semibold text-base leading-snug line-clamp-2 hover:text-gold transition-colors"
-          >
-            {book.title}
-          </h2>
-        </Link>
-        {book.subtitle && (
-          <p className="text-xs text-text-secondary mt-1 line-clamp-1">{book.subtitle}</p>
+
+      <div className="pt-4 flex flex-col flex-1">
+        {book.kind && book.kind !== "BOOK" && (
+          <p className="eyebrow mb-1.5">{t(`kind_${book.kind}`)}</p>
         )}
-        {/* Year, format and length: what the buyer is actually getting. A card
-            that only shows a price makes a 300-page PDF look like a pamphlet. */}
-        <p className="text-xs text-text-secondary mt-1 flex flex-wrap items-center gap-x-1.5">
-          {book.kind && book.kind !== "BOOK" && (
-            <>
-              <span className="font-semibold text-gold">{t(`kind_${book.kind}`)}</span>
-              <span aria-hidden="true">·</span>
-            </>
-          )}
+        <h2 className="font-display text-lg leading-snug line-clamp-2" title={book.title}>
+          <Link href={`/store/${book.slug}`} className="hover:text-gold transition-colors">
+            {book.title}
+          </Link>
+        </h2>
+        {book.author && <p className="text-sm text-text-secondary mt-1 line-clamp-1">{book.author}</p>}
+        {book.subtitle && !book.author && (
+          <p className="text-sm text-text-secondary mt-1 line-clamp-1">{book.subtitle}</p>
+        )}
+        {/* Year, format and length: what the buyer is actually getting. */}
+        <p className="font-mono tabular-nums text-xs text-text-muted mt-2 flex flex-wrap items-center gap-x-1.5">
           <span>{book.publicationYear}</span>
           {format && (
             <>
@@ -98,16 +105,16 @@ export default function BookCard({ book }: { book: StoreBook }) {
             </>
           ) : null}
         </p>
-        {book.firstInsight && (
-          <p className="text-sm text-text-secondary mt-2 line-clamp-2">{book.firstInsight}</p>
-        )}
-        <div className="mt-4">
-          {book.payWhatYouWant && <span className="text-xs text-text-secondary mr-1.5">{t("pwyw_from")}</span>}
-          <span className="text-lg font-bold text-gold">
-            {book.priceCents === 0 && !book.payWhatYouWant ? t("free") : formatPrice(book.priceCents, book.currency)}
+
+        <div className="mt-auto pt-4 flex flex-wrap items-baseline gap-x-2">
+          {book.payWhatYouWant && <span className="text-xs text-text-secondary">{t("pwyw_from")}</span>}
+          <span className={`font-mono tabular-nums text-base font-medium ${isFree ? "text-success" : "text-text-primary"}`}>
+            {isFree ? t("free") : formatPrice(book.priceCents, book.currency)}
           </span>
           {book.regularCents ? (
-            <span className="ml-2 text-sm text-text-muted line-through">{formatPrice(book.regularCents, book.currency)}</span>
+            <span className="font-mono tabular-nums text-sm text-text-muted line-through">
+              {formatPrice(book.regularCents, book.currency)}
+            </span>
           ) : null}
         </div>
         <div className="mt-3">
@@ -123,6 +130,6 @@ export default function BookCard({ book }: { book: StoreBook }) {
           />
         </div>
       </div>
-    </div>
+    </article>
   );
 }

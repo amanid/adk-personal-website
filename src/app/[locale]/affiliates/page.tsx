@@ -35,18 +35,18 @@ export default async function AffiliatesPage({ params }: { params: Promise<{ loc
   ];
 
   return (
-    <div className="max-w-5xl mx-auto px-4 py-12 md:py-16">
-      <p className="eyebrow mb-3">{t("eyebrow")}</p>
-      <h1 className="text-3xl md:text-5xl font-semibold mb-4 max-w-3xl">{t("title")}</h1>
-      <p className="text-text-secondary text-lg max-w-2xl mb-12">{t("subtitle", { pct: s.defaultPercent })}</p>
+    <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pt-14 pb-20 md:pt-20 md:pb-28">
+      <p className="eyebrow mb-4">{t("eyebrow")}</p>
+      <h1 className="font-display text-4xl md:text-6xl leading-[1.02] tracking-tight mb-5 max-w-3xl">{t("title")}</h1>
+      <p className="lede max-w-2xl mb-14">{t("subtitle", { pct: s.defaultPercent })}</p>
 
-      <section className="mb-12">
-        <h2 className="text-xl font-semibold mb-5">{t("how_title")}</h2>
-        <ol className="grid md:grid-cols-3 gap-4">
+      <section className="mb-16" aria-labelledby="aff-how">
+        <h2 id="aff-how" className="h-section mb-8">{t("how_title")}</h2>
+        <ol className="grid md:grid-cols-3 gap-8">
           {steps.map(([title, text], i) => (
-            <li key={title} className="glass p-5">
-              <p className="figure text-sm text-text-muted mb-2">{String(i + 1).padStart(2, "0")}</p>
-              <p className="font-semibold mb-1">{title}</p>
+            <li key={title} className="pt-5 hairline">
+              <p className="font-mono tabular-nums text-sm text-gold mb-3">{String(i + 1).padStart(2, "0")}</p>
+              <h3 className="font-display text-xl mb-2">{title}</h3>
               <p className="text-sm text-text-secondary leading-relaxed">{text}</p>
             </li>
           ))}
@@ -54,8 +54,8 @@ export default async function AffiliatesPage({ params }: { params: Promise<{ loc
       </section>
 
       <div className="grid md:grid-cols-[1fr_1.2fr] gap-8 items-start">
-        <section className="glass p-6">
-          <h2 className="text-lg font-semibold mb-4">{t("terms_title")}</h2>
+        <section className="card p-6 md:p-8" aria-labelledby="aff-terms">
+          <h2 id="aff-terms" className="font-display text-2xl mb-5">{t("terms_title")}</h2>
           <ul className="space-y-3 text-sm text-text-secondary">
             {[
               t("term_rate", { pct: s.defaultPercent }),
@@ -64,7 +64,7 @@ export default async function AffiliatesPage({ params }: { params: Promise<{ loc
               t("term_self"),
             ].map((x) => (
               <li key={x} className="flex gap-2">
-                <Check className="w-4 h-4 text-gold shrink-0 mt-0.5" />
+                <Check className="w-4 h-4 text-gold shrink-0 mt-0.5" aria-hidden />
                 {x}
               </li>
             ))}

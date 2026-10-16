@@ -215,7 +215,7 @@ export default function MarketWatchlist() {
       )}
 
       {error && (
-        <p className="text-sm text-red-400 mb-3 flex items-start gap-2">
+        <p className="text-sm text-danger mb-3 flex items-start gap-2">
           <span className="flex-1">{error}</span>
           <button onClick={() => setError(null)} aria-label="Dismiss">
             <X className="w-4 h-4" />
@@ -272,7 +272,7 @@ export default function MarketWatchlist() {
                             <div className="font-semibold text-sm">{num(row.price)}</div>
                             <div
                               className={`text-xs flex items-center justify-end gap-1 ${
-                                up ? "text-green-400" : "text-red-400"
+                                up ? "text-success" : "text-danger"
                               }`}
                             >
                               {up ? (
@@ -288,7 +288,7 @@ export default function MarketWatchlist() {
 
                       <button
                         onClick={() => remove(row)}
-                        className="text-text-muted hover:text-red-400 transition-colors shrink-0"
+                        className="text-text-muted hover:text-danger transition-colors shrink-0"
                         aria-label={`Remove ${row.name}`}
                       >
                         <Trash2 className="w-4 h-4" />

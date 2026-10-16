@@ -6,7 +6,7 @@ export const runtime = "edge";
 export async function GET(request: NextRequest) {
   const { searchParams } = request.nextUrl;
   const title = searchParams.get("title") || "KONAN Amani Dieudonné";
-  const subtitle = searchParams.get("subtitle") || "Global Statistician, Data, ML & AI Professional";
+  const subtitle = searchParams.get("subtitle") || "Senior Statistician & Data Scientist";
   const type = searchParams.get("type") || "page";
 
   const typeColors: Record<string, string> = {

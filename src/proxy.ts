@@ -9,7 +9,7 @@ const intl = createMiddleware(routing);
  * A second, central admin gate. Every /api/admin handler already checks the
  * role itself; this means a future handler that forgets to is still not
  * reachable. It reads the signed session JWT only — no database — so it is
- * cheap and runs at the edge.
+ * cheap. (Next 16 renamed the `middleware` convention to `proxy`.)
  */
 async function isAdmin(request: NextRequest): Promise<boolean> {
   // TLS ends at the proxy, so the protocol seen here can't be trusted to say
@@ -25,7 +25,7 @@ async function isAdmin(request: NextRequest): Promise<boolean> {
   return false;
 }
 
-export default async function middleware(request: NextRequest) {
+export default async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   if (pathname.startsWith("/api/admin")) {

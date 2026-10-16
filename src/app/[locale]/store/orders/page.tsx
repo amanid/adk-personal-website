@@ -3,7 +3,8 @@
 import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/routing";
-import { Mail, Search, CheckCircle2, ChevronLeft } from "lucide-react";
+import { Mail, CheckCircle2, ChevronLeft } from "lucide-react";
+import { Button } from "@/components/ui/Button";
 
 export default function FindOrdersPage() {
   const t = useTranslations("store");
@@ -32,65 +33,62 @@ export default function FindOrdersPage() {
   };
 
   return (
-    <div className="max-w-lg mx-auto px-4 sm:px-6 py-12">
+    <div className="max-w-lg mx-auto px-4 sm:px-6 py-12 md:py-20">
       <Link
         href="/store"
-        className="inline-flex items-center gap-1 text-sm text-text-secondary hover:text-gold transition-colors mb-6"
+        className="inline-flex items-center gap-1 min-h-11 text-sm text-text-secondary hover:text-gold transition-colors mb-6"
       >
-        <ChevronLeft className="w-4 h-4" />
+        <ChevronLeft aria-hidden="true" className="w-4 h-4" />
         {t("backToStore")}
       </Link>
 
-      <div className="glass rounded-2xl p-8">
+      <div className="card p-6 sm:p-8">
         {sent ? (
-          <div className="text-center">
-            <CheckCircle2 className="w-12 h-12 mx-auto mb-4 text-green-400" />
-            <h1 className="text-2xl font-bold mb-2">{t("lookupSentTitle")}</h1>
+          <div role="status">
+            <CheckCircle2 aria-hidden="true" className="w-10 h-10 mb-4 text-success" />
+            <h1 className="font-display text-3xl leading-tight mb-2">{t("lookupSentTitle")}</h1>
             <p className="text-text-secondary">{t("lookupSentDesc")}</p>
-            <button
+            <Button
+              type="button"
+              variant="secondary"
+              className="mt-6"
               onClick={() => {
                 setSent(false);
                 setEmail("");
               }}
-              className="mt-6 text-sm text-gold hover:underline"
             >
               {t("lookupTryAnother")}
-            </button>
+            </Button>
           </div>
         ) : (
           <>
-            <div className="flex items-center gap-3 mb-2">
-              <Search className="w-6 h-6 text-gold" />
-              <h1 className="text-2xl font-bold">{t("lookupTitle")}</h1>
-            </div>
-            <p className="text-text-secondary text-sm mb-6">{t("lookupDesc")}</p>
+            <h1 className="font-display text-3xl leading-tight mb-2">{t("lookupTitle")}</h1>
+            <p className="text-text-secondary mb-6">{t("lookupDesc")}</p>
             <form onSubmit={submit} className="space-y-4">
               <div>
-                <label htmlFor="lookup-email" className="block text-sm text-text-secondary mb-1">
+                <label htmlFor="lookup-email" className="block text-sm text-text-secondary mb-1.5">
                   {t("email")}
                 </label>
                 <div className="relative">
-                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted" />
+                  <Mail aria-hidden="true" className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted" />
                   <input
                     id="lookup-email"
                     type="email"
+                    autoComplete="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder={t("emailPlaceholder")}
-                    className="w-full pl-9 pr-3 py-2.5 rounded-lg bg-navy/50 border border-glass-border focus:border-gold/50 outline-none text-sm"
+                    aria-describedby="lookup-privacy"
+                    className="w-full min-h-11 pl-9 pr-3 rounded-[var(--radius-md)] bg-navy border border-glass-border focus:border-gold outline-none text-sm"
                     required
                   />
                 </div>
               </div>
-              <button
-                type="submit"
-                disabled={!emailValid || sending}
-                className="w-full inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-lg bg-gold text-charcoal font-semibold hover:bg-gold-light transition-all disabled:opacity-50"
-              >
+              <Button type="submit" size="lg" className="w-full" loading={sending} disabled={!emailValid}>
                 {sending ? t("lookupSending") : t("lookupSubmit")}
-              </button>
+              </Button>
             </form>
-            <p className="text-xs text-text-secondary mt-4">{t("lookupPrivacy")}</p>
+            <p id="lookup-privacy" className="text-sm text-text-secondary mt-4">{t("lookupPrivacy")}</p>
           </>
         )}
       </div>

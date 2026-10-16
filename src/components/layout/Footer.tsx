@@ -2,7 +2,7 @@
 
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/routing";
-import { Github, Linkedin, Mail, MapPin, ArrowUp, Phone } from "lucide-react";
+import { Github, Linkedin, Mail, MapPin, Phone } from "lucide-react";
 import NewsletterSignup from "@/components/NewsletterSignup";
 
 const socialLinks = [
@@ -26,26 +26,23 @@ export default function Footer() {
   const t = useTranslations("footer");
   const tNav = useTranslations("nav");
 
-  const scrollToTop = () => {
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  };
 
   return (
     <footer className="border-t border-glass-border bg-navy/50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-14">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {/* Brand */}
           <div>
-            <h3 className="text-xl font-bold font-[family-name:var(--font-display)] gradient-text mb-3">
+            <p className="font-display text-2xl mb-3">
               KONAN Amani Dieudonné
-            </h3>
+            </p>
             <p className="text-text-secondary text-sm leading-relaxed mb-4">
               {t("description")}
             </p>
             <div className="space-y-2">
               <div className="flex items-center gap-2 text-text-muted text-sm">
                 <MapPin className="w-4 h-4 shrink-0" />
-                <span>Available Globally</span>
+                <span>{t("location")}</span>
               </div>
               <div className="flex items-center gap-2 text-text-muted text-sm">
                 <Mail className="w-4 h-4 shrink-0" />
@@ -76,9 +73,9 @@ export default function Footer() {
 
           {/* Quick Links */}
           <div>
-            <h4 className="text-sm font-semibold text-text-primary uppercase tracking-wider mb-4">
+            <h2 className="eyebrow text-text-muted mb-4">
               {t("quick_links")}
-            </h4>
+            </h2>
             <ul className="space-y-2">
               {quickLinks.map((link) => (
                 <li key={link.key}>
@@ -95,9 +92,9 @@ export default function Footer() {
 
           {/* Connect */}
           <div>
-            <h4 className="text-sm font-semibold text-text-primary uppercase tracking-wider mb-4">
+            <h2 className="eyebrow text-text-muted mb-4">
               {t("connect")}
-            </h4>
+            </h2>
             <NewsletterSignup />
             <div className="flex items-center gap-3 mb-4">
               {socialLinks.map((social) => (
@@ -121,13 +118,6 @@ export default function Footer() {
           <p className="text-text-muted text-xs">
             &copy; {new Date().getFullYear()} KONAN Amani Dieudonné. {t("rights")}
           </p>
-          <button
-            onClick={scrollToTop}
-            className="w-8 h-8 rounded-lg glass flex items-center justify-center text-text-secondary hover:text-gold transition-colors"
-            aria-label="Scroll to top"
-          >
-            <ArrowUp className="w-4 h-4" />
-          </button>
         </div>
       </div>
     </footer>

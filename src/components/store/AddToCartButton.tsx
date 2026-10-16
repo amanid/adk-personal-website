@@ -7,6 +7,7 @@ import { useRouter } from "@/i18n/routing";
 import { useCart, type CartItem } from "@/lib/cart-context";
 import { useStoreUI } from "./StoreUI";
 import QuantitySelector from "./QuantitySelector";
+import { buttonClass } from "@/components/ui/Button";
 
 interface AddToCartButtonProps {
   book: Omit<CartItem, "quantity">;
@@ -53,7 +54,7 @@ export default function AddToCartButton({
     <div className={`flex flex-col gap-3 ${className}`}>
       {withQuantity && (
         <div className="flex items-center gap-3">
-          <span className="text-sm text-text-secondary">{t("quantity")}</span>
+          <span className="text-sm text-text-secondary" aria-hidden="true">{t("quantity")}</span>
           <QuantitySelector value={qty} onChange={setQty} />
         </div>
       )}
@@ -61,7 +62,7 @@ export default function AddToCartButton({
         <button
           type="button"
           onClick={handleAdd}
-          className="flex items-center gap-2 px-5 py-2.5 rounded-lg border border-gold/40 text-gold font-medium hover:bg-gold/10 transition-all"
+          className={buttonClass("secondary", "md", "flex-1 min-w-[9rem]")}
         >
           {added ? <Check className="w-4 h-4" /> : <ShoppingCart className="w-4 h-4" />}
           {added ? t("added") : t("addToCart")}
@@ -70,7 +71,7 @@ export default function AddToCartButton({
           <button
             type="button"
             onClick={handleBuyNow}
-            className="flex items-center gap-2 px-5 py-2.5 rounded-lg bg-gold text-charcoal font-semibold hover:bg-gold-light transition-all"
+            className={buttonClass("primary", "md", "flex-1 min-w-[9rem]")}
           >
             {t("buyNow")}
           </button>

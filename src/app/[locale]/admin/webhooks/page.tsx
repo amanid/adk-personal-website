@@ -37,9 +37,9 @@ async function send(url: string, method: string, body?: unknown) {
 }
 
 const CHIP: Record<string, string> = {
-  SUCCESS: "text-green-400",
-  PENDING: "text-amber-400",
-  FAILED: "text-red-400",
+  SUCCESS: "text-success",
+  PENDING: "text-warning",
+  FAILED: "text-danger",
 };
 
 export default function WebhooksPage() {
@@ -96,7 +96,7 @@ export default function WebhooksPage() {
         retry with backoff for about a day via the scheduled tick.
       </p>
 
-      {flash && <p className={`text-sm rounded-md p-3 border ${flash.ok ? "text-green-400 border-green-400/30" : "text-red-400 border-red-400/30"}`}>{flash.text}</p>}
+      {flash && <p className={`text-sm rounded-md p-3 border ${flash.ok ? "text-success border-success/30" : "text-danger border-danger/30"}`}>{flash.text}</p>}
 
       {secret && (
         <div className="glass-strong p-4 space-y-2">
@@ -190,7 +190,7 @@ export default function WebhooksPage() {
               onClick={() => {
                 if (confirm("Delete this endpoint and its delivery log?")) act(() => send(`/api/admin/webhooks/${e.id}`, "DELETE"), "Deleted.");
               }}
-              className="px-3 py-1.5 rounded-md border border-glass-border text-red-400"
+              className="px-3 py-1.5 rounded-md border border-glass-border text-danger"
               aria-label="Delete endpoint"
             >
               <Trash2 className="w-3.5 h-3.5" />

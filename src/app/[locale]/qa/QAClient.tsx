@@ -1,23 +1,11 @@
 "use client";
 
 import { useTranslations, useLocale } from "next-intl";
-import { motion } from "framer-motion";
-import { Link } from "@/i18n/routing";
-import {
-  MessageCircle,
-  CheckCircle,
-  Clock,
-  Send,
-  User,
-  ChevronDown,
-  ChevronUp,
-  Search,
-  ThumbsUp,
-  ThumbsDown,
-  Award,
-  ChevronLeft,
-  ChevronRight,
-} from "lucide-react";
+import { AnimatePresence, motion } from "framer-motion";
+import { ChevronDown, Search, ThumbsUp, ThumbsDown, ChevronLeft, ChevronRight } from "lucide-react";
+import { Container } from "@/components/ui/Section";
+import { Button, ButtonLink } from "@/components/ui/Button";
+import { cn } from "@/lib/utils";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { questionSchema, QuestionInput } from "@/lib/validations";
@@ -187,309 +175,296 @@ export default function QAClient({
     { key: "unanswered" as const, label: t("sort_unanswered") || "Unanswered" },
   ];
 
+  const inputCls =
+    "w-full min-h-11 px-4 py-2.5 bg-navy border border-glass-border rounded-[var(--radius-md)] text-text-primary focus:border-gold focus:outline-none transition-colors";
+  const voteBtn =
+    "w-11 h-11 inline-flex items-center justify-center rounded-[var(--radius-sm)] text-text-muted transition-colors disabled:opacity-40 disabled:pointer-events-none";
+
   return (
-    <div className="section-padding">
-      <div className="max-w-4xl mx-auto">
-        {/* Header */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="text-center mb-12"
-        >
-          <h1 className="text-4xl md:text-5xl font-bold font-[family-name:var(--font-display)] gradient-text mb-4">
-            {t("title")}
-          </h1>
-          <p className="text-text-secondary text-lg">{t("subtitle")}</p>
-        </motion.div>
+    <div className="pt-16 md:pt-24 pb-24">
+      <Container size="prose">
+        <header className="mb-10">
+          <p className="eyebrow mb-4">Q&amp;A</p>
+          <h1 className="font-display text-4xl md:text-6xl leading-[1.02] tracking-tight mb-5">{t("title")}</h1>
+          <p className="lede">{t("subtitle")}</p>
+        </header>
 
         {/* Search */}
-        <div className="relative mb-6">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted" />
+        <div className="relative mb-5">
+          <label htmlFor="qa-search" className="sr-only">
+            {t("search")}
+          </label>
+          <Search aria-hidden className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted" />
           <input
+            id="qa-search"
+            type="search"
             value={searchInput}
             onChange={(e) => setSearchInput(e.target.value)}
-            placeholder={t("search") || "Search questions..."}
-            className="w-full pl-10 pr-4 py-2.5 bg-navy/50 border border-glass-border rounded-lg text-text-primary focus:border-gold/50 focus:outline-none transition-colors"
+            placeholder={t("search")}
+            className={cn(inputCls, "pl-11")}
           />
         </div>
 
-        {/* Sort Tabs + Ask Button */}
+        {/* Sort + ask */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8">
-          <div className="flex gap-2">
+          <div role="group" className="flex flex-wrap gap-2">
             {sortTabs.map((tab) => (
               <button
                 key={tab.key}
+                type="button"
+                aria-pressed={sort === tab.key}
                 onClick={() => { setSort(tab.key); setPage(1); }}
-                className={`px-3 py-1.5 rounded-lg text-sm transition-all ${
+                className={cn(
+                  "inline-flex items-center min-h-11 md:min-h-9 px-3.5 text-sm rounded-[var(--radius-sm)] border transition-colors",
                   sort === tab.key
-                    ? "bg-gold text-charcoal font-medium"
-                    : "glass text-text-secondary hover:text-gold"
-                }`}
+                    ? "border-gold/40 bg-gold/10 text-gold"
+                    : "border-glass-border text-text-secondary hover:text-text-primary hover:bg-[var(--hover-wash)]",
+                )}
               >
                 {tab.label}
               </button>
             ))}
           </div>
           {session ? (
-            <button
-              onClick={() => setShowForm(!showForm)}
-              className="flex items-center gap-2 px-5 py-2 bg-gold text-charcoal font-semibold rounded-lg hover:bg-gold-light transition-all text-sm"
-            >
-              <MessageCircle className="w-4 h-4" />
+            <Button onClick={() => setShowForm(!showForm)} aria-expanded={showForm} aria-controls="qa-form">
               {t("ask")}
-            </button>
+            </Button>
           ) : (
-            <Link
-              href="/auth/login"
-              className="flex items-center gap-2 px-5 py-2 glass text-gold rounded-lg hover:border-gold/30 transition-all text-sm"
-            >
+            <ButtonLink href="/auth/login" variant="secondary">
               {t("login_to_ask")}
-            </Link>
+            </ButtonLink>
           )}
         </div>
 
         {submitted && (
-          <div className="mb-6 p-3 rounded-lg bg-green-500/10 border border-green-500/30 text-green-400 text-sm text-center">
-            {t("question_submitted") || "Question submitted successfully!"}
-          </div>
+          <p role="status" className="mb-6 p-3 rounded-[var(--radius-md)] bg-success/10 border border-success/30 text-success text-sm">
+            {t("question_submitted")}
+          </p>
         )}
 
-        {/* Question Form */}
-        {showForm && (
-          <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: "auto" }}
-            className="glass rounded-xl p-6 mb-8"
-          >
-            <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-              <div>
-                <label className="block text-sm text-text-secondary mb-1">
-                  {t("question_title")} *
-                </label>
-                <input
-                  {...register("title")}
-                  className="w-full px-4 py-2.5 bg-navy/50 border border-glass-border rounded-lg text-text-primary focus:border-gold/50 focus:outline-none transition-colors"
-                />
-                {errors.title && (
-                  <p className="text-red-400 text-xs mt-1">{errors.title.message}</p>
-                )}
-              </div>
-              <div>
-                <label className="block text-sm text-text-secondary mb-1">
-                  {t("question_content")} *
-                </label>
-                <textarea
-                  {...register("content")}
-                  rows={4}
-                  className="w-full px-4 py-2.5 bg-navy/50 border border-glass-border rounded-lg text-text-primary focus:border-gold/50 focus:outline-none transition-colors resize-none"
-                />
-                {errors.content && (
-                  <p className="text-red-400 text-xs mt-1">{errors.content.message}</p>
-                )}
-              </div>
-              <button
-                type="submit"
-                disabled={isSubmitting}
-                className="flex items-center gap-2 px-6 py-2.5 bg-gold text-charcoal font-semibold rounded-lg hover:bg-gold-light transition-all disabled:opacity-50"
-              >
-                <Send className="w-4 h-4" />
-                {isSubmitting ? "..." : t("submit")}
-              </button>
-            </form>
-          </motion.div>
-        )}
+        {/* Question form */}
+        <AnimatePresence initial={false}>
+          {showForm && (
+            <motion.div
+              id="qa-form"
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: "auto" }}
+              exit={{ opacity: 0, height: 0 }}
+              className="overflow-hidden"
+            >
+              <form onSubmit={handleSubmit(onSubmit)} className="card p-6 mb-8 space-y-4" noValidate>
+                <div>
+                  <label htmlFor="qa-title" className="block text-sm text-text-secondary mb-1.5">
+                    {t("question_title")} *
+                  </label>
+                  <input
+                    id="qa-title"
+                    {...register("title")}
+                    aria-invalid={!!errors.title}
+                    aria-describedby={errors.title ? "qa-title-error" : undefined}
+                    className={inputCls}
+                  />
+                  {errors.title && (
+                    <p id="qa-title-error" className="text-danger text-sm mt-1.5">
+                      {errors.title.message}
+                    </p>
+                  )}
+                </div>
+                <div>
+                  <label htmlFor="qa-content" className="block text-sm text-text-secondary mb-1.5">
+                    {t("question_content")} *
+                  </label>
+                  <textarea
+                    id="qa-content"
+                    {...register("content")}
+                    rows={4}
+                    aria-invalid={!!errors.content}
+                    aria-describedby={errors.content ? "qa-content-error" : undefined}
+                    className={cn(inputCls, "resize-y")}
+                  />
+                  {errors.content && (
+                    <p id="qa-content-error" className="text-danger text-sm mt-1.5">
+                      {errors.content.message}
+                    </p>
+                  )}
+                </div>
+                <Button type="submit" loading={isSubmitting}>
+                  {t("submit")}
+                </Button>
+              </form>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
-        {/* Questions List */}
+        {/* Questions */}
         {loading ? (
-          <div className="text-center py-12 text-text-secondary">
-            <div className="inline-block w-5 h-5 border-2 border-gold/30 border-t-gold rounded-full animate-spin mb-3" />
-            <p>{t("loading") || "Loading..."}</p>
-          </div>
+          <p role="status" className="py-12 text-text-secondary">{t("loading")}</p>
         ) : questions.length === 0 ? (
-          <div className="text-center py-12 text-text-secondary">
-            {t("no_questions")}
-          </div>
+          <p className="py-12 text-text-secondary border-t border-glass-border">{t("no_questions")}</p>
         ) : (
-          <div className="space-y-4">
-            {questions.map((q, index) => (
-              <motion.div
-                key={q.id}
-                initial={{ opacity: 0, y: 10 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: index * 0.05 }}
-                className="glass rounded-xl overflow-hidden"
-              >
-                <div className="flex">
-                  {/* Vote column */}
-                  <div className="flex flex-col items-center gap-1 p-3 border-r border-glass-border min-w-[56px]">
-                    <button
-                      onClick={(e) => { e.stopPropagation(); voteQuestion(q.id, 1); }}
-                      className="p-1 text-text-muted hover:text-gold transition-colors"
-                      disabled={!session}
-                    >
-                      <ThumbsUp className="w-4 h-4" />
-                    </button>
-                    <span className={`text-sm font-medium ${q.votes > 0 ? "text-gold" : q.votes < 0 ? "text-red-400" : "text-text-muted"}`}>
-                      {q.votes}
-                    </span>
-                    <button
-                      onClick={(e) => { e.stopPropagation(); voteQuestion(q.id, -1); }}
-                      className="p-1 text-text-muted hover:text-red-400 transition-colors"
-                      disabled={!session}
-                    >
-                      <ThumbsDown className="w-4 h-4" />
-                    </button>
-                  </div>
-
-                  {/* Content */}
-                  <div className="flex-1">
-                    <div
-                      className="p-5 cursor-pointer hover:bg-white/[0.02] transition-colors"
-                      onClick={() =>
-                        setExpandedId(expandedId === q.id ? null : q.id)
-                      }
-                    >
-                      <div className="flex items-start justify-between gap-3">
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2 mb-1">
-                            {q.isAnswered ? (
-                              <CheckCircle className="w-4 h-4 text-green-400 shrink-0" />
-                            ) : (
-                              <Clock className="w-4 h-4 text-gold shrink-0" />
-                            )}
-                            <span
-                              className={`text-xs ${
-                                q.isAnswered ? "text-green-400" : "text-gold"
-                              }`}
-                            >
-                              {q.isAnswered ? t("answered") : t("unanswered")}
-                            </span>
-                            <span className="text-xs text-text-muted">
-                              {q._count?.answers || q.answers.length} {t("answers") || "answers"}
-                            </span>
-                          </div>
-                          <h3 className="text-lg font-semibold">{q.title}</h3>
-                          <div className="flex items-center gap-3 mt-2 text-text-muted text-xs">
-                            <span className="flex items-center gap-1">
-                              <User className="w-3 h-3" />
-                              {q.author.name}
-                            </span>
-                            <span>{formatDate(q.createdAt, locale)}</span>
-                          </div>
-                        </div>
-                        {expandedId === q.id ? (
-                          <ChevronUp className="w-5 h-5 text-text-muted" />
-                        ) : (
-                          <ChevronDown className="w-5 h-5 text-text-muted" />
+          <ol className="border-t border-glass-border">
+            {questions.map((q) => {
+              const open = expandedId === q.id;
+              return (
+                <li key={q.id} className="border-b border-glass-border">
+                  <div className="flex gap-3 py-5">
+                    {/* Votes */}
+                    <div className="flex flex-col items-center shrink-0 -my-1">
+                      <button
+                        type="button"
+                        onClick={() => voteQuestion(q.id, 1)}
+                        className={cn(voteBtn, "hover:text-gold")}
+                        disabled={!session}
+                        aria-label={`${t("vote")} +1`}
+                      >
+                        <ThumbsUp aria-hidden className="w-4 h-4" />
+                      </button>
+                      <span
+                        className={cn(
+                          "font-mono text-sm tabular-nums",
+                          q.votes > 0 ? "text-gold" : q.votes < 0 ? "text-danger" : "text-text-muted",
                         )}
-                      </div>
+                      >
+                        {q.votes}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => voteQuestion(q.id, -1)}
+                        className={cn(voteBtn, "hover:text-danger")}
+                        disabled={!session}
+                        aria-label={`${t("vote")} -1`}
+                      >
+                        <ThumbsDown aria-hidden className="w-4 h-4" />
+                      </button>
                     </div>
 
-                    {expandedId === q.id && (
-                      <motion.div
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        className="border-t border-glass-border p-5"
+                    <div className="flex-1 min-w-0">
+                      <button
+                        type="button"
+                        onClick={() => setExpandedId(open ? null : q.id)}
+                        aria-expanded={open}
+                        aria-controls={`qa-${q.id}`}
+                        className="group w-full text-left flex items-start justify-between gap-3"
                       >
-                        <p className="text-text-secondary text-sm mb-4">{q.content}</p>
-                        {q.answers.length > 0 && (
-                          <div className="space-y-3">
-                            {q.answers.map((a) => (
-                              <div
-                                key={a.id}
-                                className={`bg-navy/50 rounded-lg p-4 ${
-                                  a.isBestAnswer
-                                    ? "border-l-2 border-green-400"
-                                    : "border-l-2 border-gold"
-                                }`}
-                              >
-                                <div className="flex items-start gap-3">
-                                  {/* Answer vote */}
-                                  <div className="flex flex-col items-center gap-0.5 min-w-[40px]">
+                        <span className="min-w-0">
+                          <span className="flex flex-wrap items-center gap-x-3 gap-y-1 mb-1.5 text-sm">
+                            <span className={q.isAnswered ? "text-success" : "text-gold"}>
+                              {q.isAnswered ? t("answered") : t("unanswered")}
+                            </span>
+                            <span className="font-mono text-text-muted tabular-nums">
+                              {q._count?.answers || q.answers.length} {t("answers")}
+                            </span>
+                          </span>
+                          <span className="block font-display text-xl leading-snug group-hover:text-gold transition-colors">
+                            {q.title}
+                          </span>
+                          <span className="flex flex-wrap gap-x-3 mt-1.5 text-sm text-text-muted">
+                            <span>{q.author.name}</span>
+                            <span className="font-mono tabular-nums">{formatDate(q.createdAt, locale)}</span>
+                          </span>
+                        </span>
+                        <ChevronDown
+                          aria-hidden
+                          className={cn("w-5 h-5 mt-1 text-text-muted shrink-0 transition-transform", open && "rotate-180")}
+                        />
+                      </button>
+
+                      {open && (
+                        <div id={`qa-${q.id}`} className="mt-4">
+                          <p className="text-text-secondary leading-relaxed mb-5">{q.content}</p>
+                          {q.answers.length > 0 && (
+                            <ul className="space-y-3">
+                              {q.answers.map((a) => (
+                                <li
+                                  key={a.id}
+                                  className={cn(
+                                    "flex gap-3 rounded-[var(--radius-md)] bg-[var(--hover-wash)] p-4 border-l-2",
+                                    a.isBestAnswer ? "border-success" : "border-gold",
+                                  )}
+                                >
+                                  <div className="flex flex-col items-center shrink-0 -my-2">
                                     <button
+                                      type="button"
                                       onClick={() => voteAnswer(q.id, a.id, 1)}
-                                      className="p-0.5 text-text-muted hover:text-gold transition-colors"
+                                      className={cn(voteBtn, "hover:text-gold")}
                                       disabled={!session}
+                                      aria-label={`${t("vote")} +1`}
                                     >
-                                      <ThumbsUp className="w-3.5 h-3.5" />
+                                      <ThumbsUp aria-hidden className="w-3.5 h-3.5" />
                                     </button>
-                                    <span className={`text-xs font-medium ${a.votes > 0 ? "text-gold" : "text-text-muted"}`}>
+                                    <span className={cn("font-mono text-xs tabular-nums", a.votes > 0 ? "text-gold" : "text-text-muted")}>
                                       {a.votes}
                                     </span>
                                     <button
+                                      type="button"
                                       onClick={() => voteAnswer(q.id, a.id, -1)}
-                                      className="p-0.5 text-text-muted hover:text-red-400 transition-colors"
+                                      className={cn(voteBtn, "hover:text-danger")}
                                       disabled={!session}
+                                      aria-label={`${t("vote")} -1`}
                                     >
-                                      <ThumbsDown className="w-3.5 h-3.5" />
+                                      <ThumbsDown aria-hidden className="w-3.5 h-3.5" />
                                     </button>
                                   </div>
-                                  <div className="flex-1">
-                                    <div className="flex items-center gap-2 mb-2">
-                                      <User className="w-3 h-3 text-gold" />
-                                      <span className="text-sm font-medium text-gold">
-                                        {a.author.name}
-                                      </span>
-                                      {a.isBestAnswer && (
-                                        <span className="flex items-center gap-1 text-xs text-green-400 bg-green-500/10 px-2 py-0.5 rounded-full">
-                                          <Award className="w-3 h-3" />
-                                          {t("best_answer") || "Best Answer"}
-                                        </span>
-                                      )}
-                                      <span className="text-text-muted text-xs">
-                                        {formatDate(a.createdAt, locale)}
-                                      </span>
-                                    </div>
-                                    <p className="text-text-secondary text-sm">{a.content}</p>
+                                  <div className="flex-1 min-w-0">
+                                    <p className="flex flex-wrap items-center gap-x-3 gap-y-1 mb-2 text-sm">
+                                      <span className="font-medium text-gold">{a.author.name}</span>
+                                      {a.isBestAnswer && <span className="text-success">{t("best_answer")}</span>}
+                                      <span className="font-mono text-xs text-text-muted">{formatDate(a.createdAt, locale)}</span>
+                                    </p>
+                                    <p className="text-text-secondary leading-relaxed">{a.content}</p>
                                   </div>
-                                </div>
-                              </div>
-                            ))}
-                          </div>
-                        )}
-                      </motion.div>
-                    )}
+                                </li>
+                              ))}
+                            </ul>
+                          )}
+                        </div>
+                      )}
+                    </div>
                   </div>
-                </div>
-              </motion.div>
-            ))}
-          </div>
+                </li>
+              );
+            })}
+          </ol>
         )}
 
         {/* Pagination */}
         {totalPages > 1 && (
-          <div className="flex items-center justify-center gap-2 mt-10">
+          <nav aria-label="Pagination" className="flex flex-wrap items-center gap-2 mt-10">
             <button
+              type="button"
               onClick={() => setPage(Math.max(1, page - 1))}
               disabled={page === 1}
-              className="p-2 glass rounded-lg text-text-secondary hover:text-gold disabled:opacity-30 transition-colors"
+              aria-label={locale === "fr" ? "Page précédente" : "Previous page"}
+              className="w-11 h-11 inline-flex items-center justify-center rounded-[var(--radius-sm)] border border-glass-border text-text-secondary hover:text-gold disabled:opacity-30 transition-colors"
             >
-              <ChevronLeft className="w-4 h-4" />
+              <ChevronLeft aria-hidden className="w-4 h-4" />
             </button>
             {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
               <button
                 key={p}
+                type="button"
                 onClick={() => setPage(p)}
-                className={`w-8 h-8 rounded-lg text-sm transition-colors ${
-                  p === page
-                    ? "bg-gold text-charcoal font-medium"
-                    : "glass text-text-secondary hover:text-gold"
-                }`}
+                aria-current={p === page ? "page" : undefined}
+                className={cn(
+                  "w-11 h-11 rounded-[var(--radius-sm)] font-mono text-sm tabular-nums transition-colors",
+                  p === page ? "bg-gold text-charcoal" : "border border-glass-border text-text-secondary hover:text-gold",
+                )}
               >
                 {p}
               </button>
             ))}
             <button
+              type="button"
               onClick={() => setPage(Math.min(totalPages, page + 1))}
               disabled={page === totalPages}
-              className="p-2 glass rounded-lg text-text-secondary hover:text-gold disabled:opacity-30 transition-colors"
+              aria-label={locale === "fr" ? "Page suivante" : "Next page"}
+              className="w-11 h-11 inline-flex items-center justify-center rounded-[var(--radius-sm)] border border-glass-border text-text-secondary hover:text-gold disabled:opacity-30 transition-colors"
             >
-              <ChevronRight className="w-4 h-4" />
+              <ChevronRight aria-hidden className="w-4 h-4" />
             </button>
-          </div>
+          </nav>
         )}
-      </div>
+      </Container>
     </div>
   );
 }

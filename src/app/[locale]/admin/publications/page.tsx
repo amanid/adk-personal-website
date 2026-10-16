@@ -268,7 +268,7 @@ export default function AdminPublicationsPage() {
           </h2>
 
           {error && (
-            <div className="mb-4 p-3 bg-red-500/10 border border-red-500/30 rounded-lg text-red-400 text-sm">
+            <div className="mb-4 p-3 bg-danger/10 border border-danger/30 rounded-lg text-danger text-sm">
               {error}
             </div>
           )}
@@ -460,17 +460,17 @@ export default function AdminPublicationsPage() {
 
             {/* Conditional: Book Chapter fields */}
             {showBookFields && (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 border border-emerald-500/20 rounded-lg">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 border border-success/20 rounded-lg">
                 <div>
-                  <label className="block text-sm text-emerald-400 mb-1">Book Title (EN)</label>
+                  <label className="block text-sm text-success mb-1">Book Title (EN)</label>
                   <input value={form.bookTitle} onChange={(e) => setForm({ ...form, bookTitle: e.target.value })} className={INPUT_CLASS} />
                 </div>
                 <div>
-                  <label className="block text-sm text-emerald-400 mb-1">Book Title (FR)</label>
+                  <label className="block text-sm text-success mb-1">Book Title (FR)</label>
                   <input value={form.bookTitleFr} onChange={(e) => setForm({ ...form, bookTitleFr: e.target.value })} className={INPUT_CLASS} />
                 </div>
                 <div>
-                  <label className="block text-sm text-emerald-400 mb-1">Pages</label>
+                  <label className="block text-sm text-success mb-1">Pages</label>
                   <input value={form.pages} onChange={(e) => setForm({ ...form, pages: e.target.value })} className={INPUT_CLASS} />
                 </div>
               </div>
@@ -478,13 +478,13 @@ export default function AdminPublicationsPage() {
 
             {/* Conditional: Institution fields */}
             {showInstitutionFields && (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 border border-amber-500/20 rounded-lg">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 border border-warning/20 rounded-lg">
                 <div>
-                  <label className="block text-sm text-amber-400 mb-1">Institution (EN)</label>
+                  <label className="block text-sm text-warning mb-1">Institution (EN)</label>
                   <input value={form.institution} onChange={(e) => setForm({ ...form, institution: e.target.value })} className={INPUT_CLASS} />
                 </div>
                 <div>
-                  <label className="block text-sm text-amber-400 mb-1">Institution (FR)</label>
+                  <label className="block text-sm text-warning mb-1">Institution (FR)</label>
                   <input value={form.institutionFr} onChange={(e) => setForm({ ...form, institutionFr: e.target.value })} className={INPUT_CLASS} />
                 </div>
               </div>
@@ -565,7 +565,7 @@ export default function AdminPublicationsPage() {
                       <Lock className="w-2.5 h-2.5" />Premium
                     </span>
                   ) : (
-                    <span className="text-[9px] px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-400 font-medium uppercase flex items-center gap-0.5">
+                    <span className="text-[9px] px-1.5 py-0.5 rounded bg-success/10 text-success font-medium uppercase flex items-center gap-0.5">
                       <Unlock className="w-2.5 h-2.5" />Free
                     </span>
                   )}
@@ -575,7 +575,7 @@ export default function AdminPublicationsPage() {
                 <div className="flex items-center gap-3 text-text-muted text-xs">
                   <span>{pub.year}</span>
                   {pub.category && <span>{pub.category}</span>}
-                  {pub.doi && <span className="text-emerald-400">DOI</span>}
+                  {pub.doi && <span className="text-success">DOI</span>}
                   <span className="flex items-center gap-1">
                     <Eye className="w-3 h-3" />{pub.views}
                   </span>
@@ -589,7 +589,7 @@ export default function AdminPublicationsPage() {
                 <button onClick={() => openEdit(pub)} className="p-2 text-text-muted hover:text-gold transition-colors" aria-label="Edit">
                   <Edit className="w-4 h-4" />
                 </button>
-                <button onClick={() => handleDelete(pub.id)} className="p-2 text-text-muted hover:text-red-400 transition-colors" aria-label="Delete">
+                <button onClick={() => handleDelete(pub.id)} className="p-2 text-text-muted hover:text-danger transition-colors" aria-label="Delete">
                   <Trash2 className="w-4 h-4" />
                 </button>
               </div>

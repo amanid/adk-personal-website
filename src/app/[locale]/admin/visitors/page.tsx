@@ -122,7 +122,7 @@ export default function AdminVisitorsPage() {
           label="Pages visited"
           value={data?.summary.uniquePaths ?? 0}
           icon={FileText}
-          color="text-green-400"
+          color="text-success"
         />
       </div>
 

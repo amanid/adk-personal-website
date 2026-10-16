@@ -1,15 +1,16 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { motion } from "framer-motion";
 import { Link } from "@/i18n/routing";
 import { Mail, Lock, LogIn } from "lucide-react";
+import { Button } from "@/components/ui/Button";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { loginSchema, LoginInput } from "@/lib/validations";
 import { signIn } from "next-auth/react";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { safeRedirectPath } from "@/lib/utils";
 
 export default function LoginPage() {
   const t = useTranslations("auth");
@@ -28,7 +29,7 @@ export default function LoginPage() {
   // (never another origin), else the home page.
   const nextPath = () => {
     const raw = typeof window !== "undefined" ? new URLSearchParams(window.location.search).get("callbackUrl") : null;
-    return raw && raw.startsWith("/") && !raw.startsWith("//") && !raw.startsWith("/\\") ? raw : "/";
+    return safeRedirectPath(raw);
   };
 
   const onSubmit = async (data: LoginInput) => {
@@ -47,98 +48,97 @@ export default function LoginPage() {
     }
   };
 
+  const field =
+    "w-full min-h-11 pl-10 pr-4 rounded-[var(--radius-md)] bg-navy border border-glass-border text-text-primary focus:border-gold focus:outline-none transition-colors";
+
   return (
-    <div className="min-h-[80vh] flex items-center justify-center px-4">
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="w-full max-w-md"
-      >
-        <div className="glass rounded-2xl p-8">
-          <div className="text-center mb-8">
-            <h1 className="text-2xl font-bold font-[family-name:var(--font-display)] gradient-text mb-2">
-              {t("login_title")}
-            </h1>
-            <p className="text-text-secondary text-sm">{t("login_subtitle")}</p>
+    <div className="min-h-[80vh] flex items-center justify-center px-4 py-12">
+      <div className="w-full max-w-md">
+        <div className="card p-6 sm:p-8">
+          <div className="mb-8">
+            <h1 className="font-display text-3xl md:text-4xl leading-tight tracking-tight">{t("login_title")}</h1>
+            <p className="text-text-secondary mt-2">{t("login_subtitle")}</p>
           </div>
 
           {error && (
-            <div className="mb-4 p-3 rounded-lg bg-red-500/10 border border-red-500/30 text-red-400 text-sm">
+            <div role="alert" className="mb-5 p-3 rounded-[var(--radius-md)] bg-danger/10 border border-danger/30 text-danger text-sm">
               {error}
             </div>
           )}
 
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
             <div>
-              <label className="block text-sm text-text-secondary mb-1">
+              <label htmlFor="login-email" className="block text-sm text-text-secondary mb-1.5">
                 {t("email")}
               </label>
               <div className="relative">
-                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted" />
+                <Mail aria-hidden="true" className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted" />
                 <input
                   {...register("email")}
+                  id="login-email"
                   type="email"
-                  className="w-full pl-10 pr-4 py-2.5 bg-navy/50 border border-glass-border rounded-lg text-text-primary focus:border-gold/50 focus:outline-none transition-colors"
+                  autoComplete="email"
+                  aria-invalid={errors.email ? true : undefined}
+                  aria-describedby={errors.email ? "login-email-error" : undefined}
+                  className={field}
                 />
               </div>
               {errors.email && (
-                <p className="text-red-400 text-xs mt-1">{errors.email.message}</p>
+                <p id="login-email-error" className="text-danger text-sm mt-1.5">{errors.email.message}</p>
               )}
             </div>
 
             <div>
-              <label className="block text-sm text-text-secondary mb-1">
+              <label htmlFor="login-password" className="block text-sm text-text-secondary mb-1.5">
                 {t("password")}
               </label>
               <div className="relative">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted" />
+                <Lock aria-hidden="true" className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted" />
                 <input
                   {...register("password")}
+                  id="login-password"
                   type="password"
-                  className="w-full pl-10 pr-4 py-2.5 bg-navy/50 border border-glass-border rounded-lg text-text-primary focus:border-gold/50 focus:outline-none transition-colors"
+                  autoComplete="current-password"
+                  aria-invalid={errors.password ? true : undefined}
+                  aria-describedby={errors.password ? "login-password-error" : undefined}
+                  className={field}
                 />
               </div>
               {errors.password && (
-                <p className="text-red-400 text-xs mt-1">{errors.password.message}</p>
+                <p id="login-password-error" className="text-danger text-sm mt-1.5">{errors.password.message}</p>
               )}
             </div>
 
-            <button
-              type="submit"
-              disabled={isSubmitting}
-              className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-gold text-charcoal font-semibold rounded-lg hover:bg-gold-light transition-all disabled:opacity-50"
-            >
-              <LogIn className="w-4 h-4" />
-              {isSubmitting ? "..." : t("login_button")}
-            </button>
+            <Button type="submit" size="lg" loading={isSubmitting} className="w-full">
+              {!isSubmitting && <LogIn aria-hidden="true" className="w-4 h-4" />}
+              {t("login_button")}
+            </Button>
           </form>
 
-          <div className="mt-6 text-center">
-            <div className="relative mb-4">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-glass-border" />
-              </div>
-              <div className="relative flex justify-center text-xs">
-                <span className="px-2 bg-navy text-text-muted">{t("or")}</span>
-              </div>
-            </div>
-
-            <button
-              onClick={() => signIn("google", { callbackUrl: nextPath() })}
-              className="w-full flex items-center justify-center gap-2 px-6 py-2.5 border border-glass-border rounded-lg text-text-secondary hover:text-gold hover:border-gold/30 transition-all text-sm"
-            >
-              {t("google")}
-            </button>
+          <div className="mt-6 flex items-center gap-3 text-xs text-text-muted" aria-hidden="true">
+            <span className="h-px flex-1 bg-glass-border" />
+            {t("or")}
+            <span className="h-px flex-1 bg-glass-border" />
           </div>
 
-          <p className="mt-6 text-center text-text-secondary text-sm">
+          <Button
+            type="button"
+            variant="secondary"
+            size="lg"
+            className="w-full mt-6"
+            onClick={() => signIn("google", { callbackUrl: nextPath() })}
+          >
+            {t("google")}
+          </Button>
+
+          <p className="mt-8 text-center text-text-secondary text-sm">
             {t("no_account")}{" "}
-            <Link href="/auth/register" className="text-gold hover:text-gold-light">
+            <Link href="/auth/register" className="inline-flex items-center min-h-11 text-gold hover:text-gold-light underline-offset-4 hover:underline">
               {t("register_button")}
             </Link>
           </p>
         </div>
-      </motion.div>
+      </div>
     </div>
   );
 }

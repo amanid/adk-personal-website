@@ -4,6 +4,7 @@ import { Link } from "@/i18n/routing";
 import { buildPageMetadata, normalizeLocale, BASE_URL } from "@/lib/seo";
 import { safeJsonLd } from "@/lib/utils";
 import { getTopics } from "@/lib/topics";
+import { Container } from "@/components/ui/Section";
 
 export const revalidate = 3600;
 
@@ -33,27 +34,35 @@ export default async function TopicsPage({ params }: { params: Promise<{ locale:
   };
 
   return (
-    <div className="max-w-5xl mx-auto px-4 py-12 md:py-16">
+    <Container className="pt-16 md:pt-24 pb-24">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(jsonLd) }} />
-      <p className="eyebrow mb-3">{t("eyebrow")}</p>
-      <h1 className="text-3xl md:text-5xl font-semibold mb-4">{t("title")}</h1>
-      <p className="text-text-secondary text-lg max-w-2xl mb-10">{t("subtitle")}</p>
-      <ul className="grid sm:grid-cols-2 gap-4">
+      <header className="max-w-3xl mb-12">
+        <p className="eyebrow mb-4">{t("eyebrow")}</p>
+        <h1 className="font-display text-4xl md:text-6xl leading-[1.02] tracking-tight mb-5">{t("title")}</h1>
+        <p className="lede">{t("subtitle")}</p>
+      </header>
+      <ul className="grid sm:grid-cols-2 gap-x-12 border-t border-glass-border sm:border-t-0">
         {topics.map((x) => (
-          <li key={x.slug}>
-            <Link href={`/topics/${x.slug}`} className="glass block p-5 hover:border-gold/40 transition-colors h-full">
-              <p className="font-semibold text-lg">{x.name}</p>
-              <p className="text-sm text-text-secondary mt-1">
-                {t("n_publications", { n: x.count })} · <span className="figure">{x.firstYear === x.lastYear ? x.lastYear : `${x.firstYear}–${x.lastYear}`}</span>
-              </p>
+          <li key={x.slug} className="sm:border-t border-b sm:border-b-0 border-glass-border">
+            <Link
+              href={`/topics/${x.slug}`}
+              className="group block py-5 px-2 -mx-2 rounded-[var(--radius-sm)] hover:bg-[var(--hover-wash)] transition-colors"
+            >
+              <span className="flex items-baseline justify-between gap-4">
+                <span className="font-display text-2xl leading-snug group-hover:text-gold transition-colors">{x.name}</span>
+                <span className="font-mono text-sm tabular-nums text-text-muted shrink-0">
+                  {x.firstYear === x.lastYear ? x.lastYear : `${x.firstYear}–${x.lastYear}`}
+                </span>
+              </span>
+              <span className="block text-sm text-text-secondary mt-1">{t("n_publications", { n: x.count })}</span>
               {/* Share of the largest topic, so the list reads as a quick size comparison. */}
-              <div className="mt-3 h-1 rounded-full bg-glass-border/60" aria-hidden="true">
-                <div className="h-1 rounded-full bg-gold" style={{ width: `${(x.count / max) * 100}%` }} />
-              </div>
+              <span className="block mt-3 h-px bg-glass-border" aria-hidden="true">
+                <span className="block h-px bg-gold" style={{ width: `${(x.count / max) * 100}%` }} />
+              </span>
             </Link>
           </li>
         ))}
       </ul>
-    </div>
+    </Container>
   );
 }

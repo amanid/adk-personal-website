@@ -490,7 +490,7 @@ export default function AdminResearchActivitiesPage() {
                       <Lock className="w-2.5 h-2.5" />Premium
                     </span>
                   ) : (
-                    <span className="text-[9px] px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-400 font-medium uppercase flex items-center gap-0.5">
+                    <span className="text-[9px] px-1.5 py-0.5 rounded bg-success/10 text-success font-medium uppercase flex items-center gap-0.5">
                       <Unlock className="w-2.5 h-2.5" />Free
                     </span>
                   )}
@@ -532,12 +532,12 @@ export default function AdminResearchActivitiesPage() {
                     </span>
                   )}
                   {activity.dataUrl && (
-                    <span className="inline-flex items-center gap-1 text-xs text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded">
+                    <span className="inline-flex items-center gap-1 text-xs text-success bg-success/10 px-2 py-0.5 rounded">
                       <Database className="w-3 h-3" />Dataset
                     </span>
                   )}
                   {activity.supplementaryUrl && (
-                    <span className="inline-flex items-center gap-1 text-xs text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded">
+                    <span className="inline-flex items-center gap-1 text-xs text-warning bg-warning/10 px-2 py-0.5 rounded">
                       <Paperclip className="w-3 h-3" />Supplementary
                     </span>
                   )}
@@ -564,7 +564,7 @@ export default function AdminResearchActivitiesPage() {
                 </button>
                 <button
                   onClick={() => handleDelete(activity.id)}
-                  className="p-2 text-text-muted hover:text-red-400 transition-colors"
+                  className="p-2 text-text-muted hover:text-danger transition-colors"
                   title="Delete"
                 >
                   <Trash2 className="w-4 h-4" />

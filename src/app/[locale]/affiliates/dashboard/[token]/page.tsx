@@ -54,10 +54,10 @@ export default async function AffiliateDashboard({ params }: { params: Promise<{
   ];
 
   return (
-    <div className="max-w-4xl mx-auto px-4 py-12">
-      <p className="eyebrow mb-3">{t("eyebrow")}</p>
-      <h1 className="text-3xl font-semibold mb-1">{t("dash_title")}</h1>
-      <p className={`mb-8 ${a.status === "APPROVED" ? "text-green-400" : "text-amber-400"}`}>
+    <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pt-14 pb-20 md:pt-20">
+      <p className="eyebrow mb-4">{t("eyebrow")}</p>
+      <h1 className="font-display text-4xl md:text-5xl leading-[1.05] tracking-tight mb-3">{t("dash_title")}</h1>
+      <p role="status" className={`mb-10 ${a.status === "APPROVED" ? "text-success" : "text-warning"}`}>
         {a.name} · {t(`dash_status_${a.status}`)}
       </p>
 
@@ -75,9 +75,9 @@ export default async function AffiliateDashboard({ params }: { params: Promise<{
                   .join(" + ") || formatPrice(0, "USD"),
               ],
             ].map(([k, v]) => (
-              <div key={k} className="glass p-4">
+              <div key={k} className="card p-4">
                 <dt className="text-xs text-text-muted mb-1">{k}</dt>
-                <dd className="figure text-2xl">{v}</dd>
+                <dd className="font-mono tabular-nums text-2xl break-words">{v}</dd>
               </div>
             ))}
           </dl>
@@ -85,11 +85,11 @@ export default async function AffiliateDashboard({ params }: { params: Promise<{
           <LinkBuilder base={base} code={a.code} targets={targets} />
 
           {totals.size > 0 && (
-            <div className="glass p-5 mt-6 grid grid-cols-3 gap-4 text-sm">
+            <div className="card p-5 mt-6 grid grid-cols-1 sm:grid-cols-3 gap-4 text-sm">
               {(["PENDING", "APPROVED", "PAID"] as const).map((st) => (
                 <div key={st}>
                   <p className="text-text-muted">{t(st.toLowerCase())}</p>
-                  <p className="figure">
+                  <p className="font-mono tabular-nums">
                     {[...totals.entries()].map(([cur, r]) => formatPrice(r[st], cur)).join(" + ")}
                   </p>
                 </div>
@@ -97,11 +97,12 @@ export default async function AffiliateDashboard({ params }: { params: Promise<{
             </div>
           )}
 
-          <section className="mt-8">
-            <h2 className="text-lg font-semibold mb-3">{t("recent")}</h2>
+          <section className="mt-12">
+            <h2 className="font-display text-2xl mb-4">{t("recent")}</h2>
             {commissions.length === 0 ? (
               <p className="text-sm text-text-secondary">{t("none_yet")}</p>
             ) : (
+              <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
                   <tr className="text-left text-text-muted border-b border-glass-border">
@@ -115,13 +116,14 @@ export default async function AffiliateDashboard({ params }: { params: Promise<{
                   {commissions.map((c) => (
                     <tr key={c.id} className="border-b border-glass-border/60">
                       <td className="py-2 pr-3">{date(c.createdAt)}</td>
-                      <td className="py-2 pr-3 figure text-text-secondary">{c.order.orderNumber}</td>
-                      <td className="py-2 pr-3 figure text-right">{formatPrice(c.amountCents, c.currency)}</td>
+                      <td className="py-2 pr-3 font-mono text-text-secondary">{c.order.orderNumber}</td>
+                      <td className="py-2 pr-3 font-mono tabular-nums text-right">{formatPrice(c.amountCents, c.currency)}</td>
                       <td className="py-2 text-text-secondary">{c.status === "VOID" ? "—" : t(c.status.toLowerCase())}</td>
                     </tr>
                   ))}
                 </tbody>
               </table>
+              </div>
             )}
           </section>
         </>

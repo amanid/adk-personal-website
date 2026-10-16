@@ -84,3 +84,20 @@ export function fileFormatLabel(mimeType?: string | null): string | null {
   };
   return labels[mimeType] ?? null;
 }
+
+/**
+ * A same-site path to redirect to, or "/". Parsing (rather than prefix checks)
+ * matters: URL parsing drops tabs and newlines, so "/\t/evil.com" would
+ * otherwise pass a "starts with one slash" test and land on evil.com.
+ */
+export function safeRedirectPath(to: string | null | undefined): string {
+  if (!to || to.length > 300 || !to.startsWith("/") || /[\x00-\x1f\\]/.test(to)) return "/";
+  try {
+    const base = "https://same-origin.invalid";
+    const u = new URL(to, base);
+    if (u.origin !== base) return "/";
+    return u.pathname + u.search + u.hash;
+  } catch {
+    return "/";
+  }
+}

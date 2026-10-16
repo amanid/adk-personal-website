@@ -7,65 +7,43 @@ import { useTranslations, useLocale } from "next-intl";
 import { motion, AnimatePresence } from "framer-motion";
 import { Link } from "@/i18n/routing";
 import { TIER_PRICES } from "@/lib/subscription-plans";
-import {
-  Check,
-  FileText,
-  Database,
-  Crown,
-  Sparkles,
-  ArrowRight,
-  Send,
-  User,
-  Mail,
-  Building2,
-  MessageSquare,
-} from "lucide-react";
+import { Check, Minus, ArrowRight, Send, Plus } from "lucide-react";
+import { Container, Section } from "@/components/ui/Section";
+import { Button, ButtonLink, buttonClass } from "@/components/ui/Button";
+import { cn } from "@/lib/utils";
 
+/*
+ * Tier features list only what the code delivers: gated report PDFs for
+ * document plans, gated dataset/supplementary files for data plans
+ * (src/lib/subscription.ts, src/lib/publication-access.ts).
+ */
 const tiers = [
   {
     id: "DOCUMENT_ACCESS" as const,
-    icon: FileText,
-    color: "text-cyan-400",
     monthlyPrice: TIER_PRICES.DOCUMENT_ACCESS.MONTH / 100,
     yearlyPrice: TIER_PRICES.DOCUMENT_ACCESS.YEAR / 100,
     features: {
-      en: [
-        "Full PDF access for all premium publications",
-        "New reports as they are published",
-        "Academic citation exports",
-        "Reading list & bookmarks",
-      ],
-      fr: [
-        "Accès PDF complet pour toutes les publications premium",
-        "Nouveaux rapports dès leur publication",
-        "Export de citations académiques",
-        "Liste de lecture et favoris",
-      ],
+      en: ["Full PDF access for all premium publications", "New premium reports as they are published"],
+      fr: ["Accès PDF complet pour toutes les publications premium", "Nouveaux rapports premium dès leur publication"],
     },
     excluded: {
-      en: ["Underlying datasets", "Raw data downloads"],
-      fr: ["Jeux de données sous-jacents", "Téléchargements de données brutes"],
+      en: ["Datasets and supplementary files"],
+      fr: ["Jeux de données et fichiers complémentaires"],
     },
     popular: false,
   },
   {
     id: "DATA_ACCESS" as const,
-    icon: Database,
-    color: "text-emerald-400",
     monthlyPrice: TIER_PRICES.DATA_ACCESS.MONTH / 100,
     yearlyPrice: TIER_PRICES.DATA_ACCESS.YEAR / 100,
     features: {
       en: [
-        "Underlying datasets for all premium publications",
-        "CSV/Excel data exports",
-        "Methodology documentation",
-        "API access to data (coming soon)",
+        "Datasets attached to premium publications",
+        "Supplementary files attached to premium publications",
       ],
       fr: [
-        "Jeux de données pour toutes les publications premium",
-        "Export de données CSV/Excel",
-        "Documentation méthodologique",
-        "Accès API aux données (bientôt)",
+        "Jeux de données joints aux publications premium",
+        "Fichiers complémentaires joints aux publications premium",
       ],
     },
     excluded: {
@@ -76,30 +54,21 @@ const tiers = [
   },
   {
     id: "FULL_ACCESS" as const,
-    icon: Crown,
-    color: "text-gold",
     monthlyPrice: TIER_PRICES.FULL_ACCESS.MONTH / 100,
     yearlyPrice: TIER_PRICES.FULL_ACCESS.YEAR / 100,
     features: {
-      en: [
-        "Everything in Document Access",
-        "Everything in Data Access",
-        "Priority access to new publications",
-        "Direct Q&A with the author",
-        "Custom data requests (1/month)",
-      ],
-      fr: [
-        "Tout l'accès Document",
-        "Tout l'accès Données",
-        "Accès prioritaire aux nouvelles publications",
-        "Q&R directe avec l'auteur",
-        "Demandes de données personnalisées (1/mois)",
-      ],
+      en: ["Everything in Document Access", "Everything in Data Access"],
+      fr: ["Tout l'accès Document", "Tout l'accès Données"],
     },
     excluded: { en: [], fr: [] },
     popular: true,
   },
 ];
+
+const field =
+  "w-full min-h-11 px-4 py-2.5 rounded-[var(--radius-md)] bg-navy border border-glass-border text-text-primary text-sm " +
+  "placeholder:text-text-muted focus:border-gold focus:outline-none transition-colors";
+const labelCls = "block text-sm text-text-secondary mb-1.5";
 
 export default function SubscribeClient() {
   const t = useTranslations("subscribe");
@@ -199,56 +168,51 @@ export default function SubscribeClient() {
   const selectedTierData = tiers.find((t) => t.id === selectedTier);
 
   return (
-    <div className="section-padding">
-      <div className="max-w-6xl mx-auto">
-        {/* Hero */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="text-center mb-12"
-        >
-          <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full glass text-gold text-sm font-medium mb-6">
-            <Sparkles className="w-4 h-4" />
-            {t("badge")}
-          </span>
-          <h1 className="text-4xl md:text-5xl font-bold font-[family-name:var(--font-display)] gradient-text mb-4">
-            {t("title")}
-          </h1>
-          <p className="text-text-secondary text-lg max-w-2xl mx-auto">
-            {t("subtitle")}
-          </p>
-        </motion.div>
+    <>
+      <Container className="pt-14 pb-4 md:pt-20">
+        <p className="eyebrow mb-4">{t("badge")}</p>
+        <h1 className="font-display text-4xl md:text-6xl leading-[1.02] tracking-tight mb-5 max-w-4xl">
+          {t("title")}
+        </h1>
+        <p className="lede max-w-2xl">{t("subtitle")}</p>
+      </Container>
 
+      <Section className="pt-10 md:pt-14">
         {/* Billing toggle */}
-        <div className="flex items-center justify-center gap-3 mb-10">
-          <button
-            onClick={() => setBilling("monthly")}
-            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-              billing === "monthly"
-                ? "bg-gold text-charcoal"
-                : "glass text-text-secondary hover:text-gold"
-            }`}
-          >
-            {t("monthly")}
-          </button>
-          <button
-            onClick={() => setBilling("yearly")}
-            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-              billing === "yearly"
-                ? "bg-gold text-charcoal"
-                : "glass text-text-secondary hover:text-gold"
-            }`}
-          >
-            {t("yearly")}
-            <span className="ml-2 text-xs px-2 py-0.5 rounded-full bg-green-500/20 text-green-400">
-              -{yearlySavings}%
-            </span>
-          </button>
+        <div
+          role="group"
+          aria-label={`${t("monthly")} / ${t("yearly")}`}
+          className="inline-flex p-1 mb-10 rounded-[var(--radius-md)] border border-glass-border bg-surface-1"
+        >
+          {(["monthly", "yearly"] as const).map((b) => (
+            <button
+              key={b}
+              type="button"
+              onClick={() => setBilling(b)}
+              aria-pressed={billing === b}
+              className={cn(
+                "min-h-11 px-5 rounded-[var(--radius-sm)] text-sm font-medium transition-colors inline-flex items-center gap-2",
+                billing === b ? "bg-gold text-charcoal" : "text-text-secondary hover:text-text-primary hover:bg-[var(--hover-wash)]"
+              )}
+            >
+              {t(b)}
+              {b === "yearly" && (
+                <span
+                  className={cn(
+                    "font-mono text-xs tabular-nums",
+                    billing === b ? "text-charcoal/80" : "text-success"
+                  )}
+                >
+                  −{yearlySavings}%
+                </span>
+              )}
+            </button>
+          ))}
         </div>
 
         {/* Current plan */}
         {current?.tier && (
-          <div className="glass rounded-xl p-5 max-w-2xl mx-auto mb-10 flex flex-wrap items-center justify-between gap-3">
+          <div role="status" className="card p-5 max-w-2xl mb-10 flex flex-wrap items-center justify-between gap-3">
             <div>
               <p className="font-semibold">{t("pp_active", { tier: t(`tier_${current.tier.toLowerCase()}`) })}</p>
               {current.currentPeriodEnd && (
@@ -260,138 +224,120 @@ export default function SubscribeClient() {
               )}
             </div>
             {current.provider === "PAYPAL" && !current.cancelAtPeriodEnd && (
-              <button onClick={cancelRenewal} className="text-sm px-4 py-2 rounded-lg border border-glass-border text-text-secondary hover:text-text-primary">
+              <Button type="button" variant="secondary" size="md" onClick={cancelRenewal}>
                 {t("pp_cancel")}
-              </button>
+              </Button>
             )}
           </div>
         )}
 
         {/* Pricing cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-16">
-          {tiers.map((tier, i) => {
-            const price =
-              billing === "monthly" ? tier.monthlyPrice : tier.yearlyPrice;
+        <ul className="grid grid-cols-1 md:grid-cols-3 gap-5">
+          {tiers.map((tier) => {
+            const price = billing === "monthly" ? tier.monthlyPrice : tier.yearlyPrice;
             const isSelected = selectedTier === tier.id;
-            const features =
-              locale === "fr" ? tier.features.fr : tier.features.en;
-            const excluded =
-              locale === "fr" ? tier.excluded.fr : tier.excluded.en;
+            const features = locale === "fr" ? tier.features.fr : tier.features.en;
+            const excluded = locale === "fr" ? tier.excluded.fr : tier.excluded.en;
+            const name = t(`tier_${tier.id.toLowerCase()}`);
 
             return (
-              <motion.div
+              <li
                 key={tier.id}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: i * 0.1 }}
-                className={`relative glass rounded-2xl p-6 flex flex-col cursor-pointer transition-all duration-300 ${
-                  tier.popular && !isSelected ? "ring-2 ring-gold/50" : ""
-                } ${isSelected ? "ring-2 ring-gold scale-[1.02]" : "hover:border-gold/30"}`}
-                onClick={() => handleSelectTier(tier.id)}
+                className={cn(
+                  "card p-6 flex flex-col",
+                  tier.popular && "card-feature",
+                  isSelected && "ring-2 ring-gold"
+                )}
               >
-                {tier.popular && (
-                  <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                    <span className="px-3 py-1 bg-gold text-charcoal text-xs font-bold rounded-full">
+                <div className="flex items-baseline justify-between gap-3">
+                  <h2 className="font-display text-2xl leading-tight">{name}</h2>
+                  {tier.popular && (
+                    <span className="font-mono text-xs uppercase tracking-[0.08em] text-gold shrink-0">
                       {t("best_value")}
                     </span>
-                  </div>
-                )}
-
-                <div className="mb-4">
-                  <tier.icon className={`w-8 h-8 ${tier.color} mb-3`} />
-                  <h3 className="text-lg font-bold">
-                    {t(`tier_${tier.id.toLowerCase()}`)}
-                  </h3>
-                  <p className="text-text-secondary text-xs mt-1">
-                    {t(`tier_${tier.id.toLowerCase()}_desc`)}
-                  </p>
+                  )}
                 </div>
+                <p className="text-text-secondary text-sm mt-2">{t(`tier_${tier.id.toLowerCase()}_desc`)}</p>
 
-                <div className="mb-6">
-                  <span className="text-3xl font-bold">${price}</span>
-                  <span className="text-text-muted text-sm">
+                <p className="mt-5 mb-6">
+                  <span className="font-mono tabular-nums text-3xl text-text-primary">${price}</span>
+                  <span className="font-mono text-sm text-text-muted">
                     {billing === "monthly" ? t("per_month") : t("per_year")}
                   </span>
                   {billing === "yearly" && (
-                    <p className="text-xs text-text-muted mt-1">
-                      ${(tier.yearlyPrice / 12).toFixed(2)}{t("per_month")}
-                    </p>
+                    <span className="block font-mono tabular-nums text-xs text-text-muted mt-1">
+                      ${(tier.yearlyPrice / 12).toFixed(2)}
+                      {t("per_month")}
+                    </span>
                   )}
-                </div>
+                </p>
 
-                <ul className="space-y-2.5 mb-4 flex-1">
+                <ul className="space-y-2.5 mb-6 flex-1 pt-4 hairline">
                   {features.map((feature) => (
-                    <li
-                      key={feature}
-                      className="flex items-start gap-2 text-sm text-text-secondary"
-                    >
-                      <Check
-                        className={`w-4 h-4 shrink-0 mt-0.5 ${tier.color}`}
-                      />
+                    <li key={feature} className="flex items-start gap-2 text-sm text-text-secondary">
+                      <Check className="w-4 h-4 shrink-0 mt-0.5 text-gold" aria-hidden />
                       {feature}
                     </li>
                   ))}
                   {excluded.map((item) => (
-                    <li
-                      key={item}
-                      className="flex items-start gap-2 text-sm text-text-muted line-through opacity-50"
-                    >
-                      <span className="w-4 h-4 shrink-0 mt-0.5 text-center">
-                        &times;
+                    <li key={item} className="flex items-start gap-2 text-sm text-text-muted">
+                      <Minus className="w-4 h-4 shrink-0 mt-0.5" aria-hidden />
+                      <span>
+                        <span className="sr-only">{locale === "fr" ? "Non inclus : " : "Not included: "}</span>
+                        {item}
                       </span>
-                      {item}
                     </li>
                   ))}
                 </ul>
 
                 <button
-                  className={`w-full text-center py-2.5 rounded-lg font-medium text-sm transition-colors ${
-                    isSelected
-                      ? "bg-gold text-charcoal"
-                      : tier.popular
-                        ? "bg-gold/80 text-charcoal hover:bg-gold"
-                        : "glass hover:text-gold"
-                  }`}
+                  type="button"
+                  onClick={() => handleSelectTier(tier.id)}
+                  aria-pressed={isSelected}
+                  aria-label={`${isSelected ? t("selected") : t("subscribe_now")}: ${name}`}
+                  className={buttonClass(isSelected || tier.popular ? "primary" : "secondary", "md", "w-full")}
                 >
+                  {isSelected && <Check className="w-4 h-4" aria-hidden />}
                   {isSelected ? t("selected") : t("subscribe_now")}
                 </button>
-              </motion.div>
+              </li>
             );
           })}
-        </div>
+        </ul>
 
-        {/* Subscription Request Form */}
+        {/* Subscription request form */}
         <AnimatePresence>
           {selectedTier && (
             <motion.div
               id="subscription-form"
-              initial={{ opacity: 0, y: 20 }}
+              initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              className="glass rounded-2xl p-8 max-w-2xl mx-auto mb-16"
+              exit={{ opacity: 0, y: -12 }}
+              className="card p-6 md:p-8 max-w-2xl mx-auto mt-12"
             >
-              <h2 className="text-2xl font-bold font-[family-name:var(--font-display)] text-gold mb-2">
-                {t("form_title")}
-              </h2>
+              <h2 className="font-display text-3xl leading-tight mb-2">{t("form_title")}</h2>
               <p className="text-text-secondary text-sm mb-6">
                 {selectedTierData && (
-                  <span className="text-gold font-medium">
-                    {t(`tier_${selectedTierData.id.toLowerCase()}`)}
-                  </span>
+                  <span className="text-gold font-medium">{t(`tier_${selectedTierData.id.toLowerCase()}`)}</span>
                 )}
-                {" — "}
+                {" · "}
                 {t("form_desc")}
               </p>
 
               {/* Automatic billing with PayPal */}
               {plans && selectedTier && plans[selectedTier] && (
                 <div className="mb-8 pb-8 border-b border-glass-border">
-                  <p className="font-semibold mb-1">{t("pp_title")}</p>
+                  <h3 className="font-semibold mb-1">{t("pp_title")}</h3>
                   <p className="text-sm text-text-secondary mb-4">
                     {t("pp_desc", { period: billing === "monthly" ? t("pp_month") : t("pp_year") })}
                   </p>
                   {subscribed ? (
-                    <p className="p-4 rounded-lg bg-green-500/10 border border-green-500/30 text-green-400 text-sm">{t("pp_success")}</p>
+                    <p
+                      role="status"
+                      className="p-4 rounded-[var(--radius-md)] bg-success/10 border border-success/30 text-success text-sm"
+                    >
+                      {t("pp_success")}
+                    </p>
                   ) : userId ? (
                     <PayPalSubscribeButton
                       planId={plans[selectedTier][billing === "monthly" ? "MONTH" : "YEAR"]}
@@ -403,200 +349,141 @@ export default function SubscribeClient() {
                       labels={{ loading: t("pp_loading"), error: t("pp_error"), verifying: t("pp_verifying") }}
                     />
                   ) : (
-                    <Link
-                      href={`/auth/login?callbackUrl=${encodeURIComponent(`/${locale}/subscribe`)}`}
-                      className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-gold text-charcoal font-semibold"
-                    >
+                    <ButtonLink href={`/auth/login?callbackUrl=${encodeURIComponent(`/${locale}/subscribe`)}`}>
                       {t("pp_signin")}
-                    </Link>
+                    </ButtonLink>
                   )}
-                  <p className="text-xs text-text-muted mt-4">{t("pp_or_manual")}</p>
+                  <p className="text-sm text-text-muted mt-4">{t("pp_or_manual")}</p>
                 </div>
               )}
 
               {submitted && (
-                <motion.div
-                  initial={{ opacity: 0, y: -10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className="mb-4 p-4 rounded-lg bg-green-500/10 border border-green-500/30 text-green-400 text-sm"
+                <div
+                  role="status"
+                  className="mb-5 p-4 rounded-[var(--radius-md)] bg-success/10 border border-success/30 text-success text-sm"
                 >
                   <p className="font-medium">{t("form_success_title")}</p>
-                  <p className="text-green-400/80 mt-1">{t("form_success_desc")}</p>
-                </motion.div>
+                  <p className="mt-1">{t("form_success_desc")}</p>
+                </div>
               )}
 
               {error && (
-                <motion.div
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  className="mb-4 p-3 rounded-lg bg-red-500/10 border border-red-500/30 text-red-400 text-sm"
+                <p
+                  role="alert"
+                  className="mb-5 p-3 rounded-[var(--radius-md)] bg-danger/10 border border-danger/30 text-danger text-sm"
                 >
                   {t("form_error")}
-                </motion.div>
+                </p>
               )}
 
               {!submitted && (
-                <form onSubmit={handleSubmit} className="space-y-4">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <form onSubmit={handleSubmit} className="space-y-5">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                     <div>
-                      <label className="flex items-center gap-1.5 text-sm text-text-secondary mb-1.5">
-                        <User className="w-3.5 h-3.5" />
-                        {t("form_name")} *
+                      <label htmlFor="sub-name" className={labelCls}>
+                        {t("form_name")} <span aria-hidden>*</span>
                       </label>
                       <input
+                        id="sub-name"
                         value={formData.name}
                         onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                         required
-                        className="w-full px-4 py-2.5 bg-navy/50 border border-glass-border rounded-lg text-text-primary focus:border-gold/50 focus:outline-none transition-colors"
+                        autoComplete="name"
+                        className={field}
                       />
                     </div>
                     <div>
-                      <label className="flex items-center gap-1.5 text-sm text-text-secondary mb-1.5">
-                        <Mail className="w-3.5 h-3.5" />
-                        {t("form_email")} *
+                      <label htmlFor="sub-email" className={labelCls}>
+                        {t("form_email")} <span aria-hidden>*</span>
                       </label>
                       <input
+                        id="sub-email"
                         type="email"
                         value={formData.email}
                         onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                         required
-                        className="w-full px-4 py-2.5 bg-navy/50 border border-glass-border rounded-lg text-text-primary focus:border-gold/50 focus:outline-none transition-colors"
+                        autoComplete="email"
+                        className={field}
                       />
                     </div>
                   </div>
 
                   <div>
-                    <label className="flex items-center gap-1.5 text-sm text-text-secondary mb-1.5">
-                      <Building2 className="w-3.5 h-3.5" />
+                    <label htmlFor="sub-org" className={labelCls}>
                       {t("form_organization")}
                     </label>
                     <input
+                      id="sub-org"
                       value={formData.organization}
                       onChange={(e) => setFormData({ ...formData, organization: e.target.value })}
-                      className="w-full px-4 py-2.5 bg-navy/50 border border-glass-border rounded-lg text-text-primary focus:border-gold/50 focus:outline-none transition-colors"
+                      autoComplete="organization"
+                      className={field}
                     />
                   </div>
 
                   <div>
-                    <label className="flex items-center gap-1.5 text-sm text-text-secondary mb-1.5">
-                      <MessageSquare className="w-3.5 h-3.5" />
+                    <label htmlFor="sub-message" className={labelCls}>
                       {t("form_message")}
                     </label>
                     <textarea
+                      id="sub-message"
                       value={formData.message}
                       onChange={(e) => setFormData({ ...formData, message: e.target.value })}
                       rows={3}
                       placeholder={locale === "fr" ? "Questions ou besoins spécifiques..." : "Any questions or specific requirements..."}
-                      className="w-full px-4 py-2.5 bg-navy/50 border border-glass-border rounded-lg text-text-primary focus:border-gold/50 focus:outline-none transition-colors resize-none"
+                      className={`${field} resize-y`}
                     />
                   </div>
 
-                  <button
-                    type="submit"
-                    disabled={submitting}
-                    className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-gold text-charcoal font-semibold rounded-lg hover:bg-gold-light transition-all disabled:opacity-50 hover:shadow-lg hover:shadow-gold/20 active:scale-[0.98]"
-                  >
-                    {submitting ? (
-                      <div className="w-5 h-5 border-2 border-charcoal border-t-transparent rounded-full animate-spin" />
-                    ) : (
-                      <Send className="w-4 h-4" />
-                    )}
-                    {submitting ? "" : t("form_submit")}
-                  </button>
+                  <Button type="submit" size="lg" loading={submitting} className="w-full sm:w-auto">
+                    {!submitting && <Send className="w-4 h-4" aria-hidden />}
+                    {t("form_submit")}
+                  </Button>
                 </form>
               )}
             </motion.div>
           )}
         </AnimatePresence>
+      </Section>
 
-        {/* What's included */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="glass rounded-2xl p-8 mb-16"
-        >
-          <h2 className="text-2xl font-bold font-[family-name:var(--font-display)] text-center mb-6">
-            {t("whats_included")}
-          </h2>
-          <p className="text-text-secondary text-center max-w-2xl mx-auto mb-8">
-            {t("whats_included_desc")}
-          </p>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-3xl mx-auto">
-            {[
-              t("included_1"),
-              t("included_2"),
-              t("included_3"),
-              t("included_4"),
-              t("included_5"),
-              t("included_6"),
-            ].map((item) => (
-              <div
-                key={item}
-                className="flex items-center gap-3 text-sm text-text-secondary"
-              >
-                <Check className="w-4 h-4 text-gold shrink-0" />
+      {/* What's included */}
+      <Section index={1} eyebrow={t("premium")} title={t("whats_included")} intro={t("whats_included_desc")}>
+        <ul className="grid grid-cols-1 md:grid-cols-2 gap-x-10 gap-y-3 max-w-3xl">
+          {[t("included_1"), t("included_2"), t("included_3"), t("included_4"), t("included_5"), t("included_6")].map(
+            (item) => (
+              <li key={item} className="flex items-start gap-3 text-sm text-text-secondary">
+                <Check className="w-4 h-4 text-gold shrink-0 mt-0.5" aria-hidden />
                 {item}
-              </div>
-            ))}
-          </div>
-        </motion.div>
+              </li>
+            )
+          )}
+        </ul>
+      </Section>
 
-        {/* FAQ */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="max-w-3xl mx-auto mb-16"
-        >
-          <h2 className="text-2xl font-bold font-[family-name:var(--font-display)] text-center mb-8">
-            {t("faq_title")}
-          </h2>
-          <div className="space-y-3">
-            {[1, 2, 3, 4].map((i) => (
-              <details key={i} className="glass rounded-xl overflow-hidden group">
-                <summary className="p-5 cursor-pointer flex items-center justify-between hover:bg-gold/5 transition-colors">
-                  <span className="font-medium text-sm pr-4">
-                    {t(`faq_q${i}`)}
-                  </span>
-                  <span className="text-gold transition-transform group-open:rotate-45">
-                    +
-                  </span>
-                </summary>
-                <div className="px-5 pb-5">
-                  <p className="text-text-secondary text-sm leading-relaxed">
-                    {t(`faq_a${i}`)}
-                  </p>
-                </div>
-              </details>
-            ))}
-          </div>
-        </motion.div>
+      {/* FAQ */}
+      <Section index={2} eyebrow="FAQ" title={t("faq_title")} size="prose">
+        <div className="divide-y divide-glass-border border-y border-glass-border">
+          {[1, 2, 3, 4].map((i) => (
+            <details key={i} className="group">
+              <summary className="min-h-11 py-5 cursor-pointer list-none flex items-center justify-between gap-4 hover:text-gold transition-colors [&::-webkit-details-marker]:hidden">
+                <span className="font-medium">{t(`faq_q${i}`)}</span>
+                <Plus className="w-4 h-4 text-gold shrink-0 transition-transform group-open:rotate-45" aria-hidden />
+              </summary>
+              <p className="pb-5 text-text-secondary text-sm leading-relaxed">{t(`faq_a${i}`)}</p>
+            </details>
+          ))}
+        </div>
+      </Section>
 
-        {/* CTA */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="text-center glass rounded-2xl p-12"
-        >
-          <h2 className="text-2xl md:text-3xl font-bold font-[family-name:var(--font-display)] gradient-text mb-4">
-            {t("cta_title")}
-          </h2>
-          <p className="text-text-secondary mb-6 max-w-2xl mx-auto">
-            {t("cta_desc")}
-          </p>
-          <div className="flex flex-wrap justify-center gap-4">
-            <Link
-              href="/publications"
-              className="inline-flex items-center gap-2 px-6 py-3 glass rounded-lg text-text-secondary hover:text-gold transition-colors"
-            >
-              {t("browse_publications")}
-              <ArrowRight className="w-4 h-4" />
-            </Link>
-          </div>
-        </motion.div>
-      </div>
-    </div>
+      {/* CTA */}
+      <Section size="prose">
+        <h2 className="h-section mb-4">{t("cta_title")}</h2>
+        <p className="lede mb-7">{t("cta_desc")}</p>
+        <Link href="/publications" className={buttonClass("secondary", "lg")}>
+          {t("browse_publications")}
+          <ArrowRight className="w-4 h-4" aria-hidden />
+        </Link>
+      </Section>
+    </>
   );
 }

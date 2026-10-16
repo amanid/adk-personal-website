@@ -5,6 +5,7 @@ import { Lock, ArrowRight } from "lucide-react";
 import { useLocale } from "next-intl";
 import { useSession } from "next-auth/react";
 import { useSubscription } from "@/hooks/useSubscription";
+import { buttonClass } from "@/components/ui/Button";
 
 interface SubscriptionGateProps {
   accessLevel: "FREE" | "GATED";
@@ -27,9 +28,8 @@ export default function SubscriptionGate({
 
   if (isLoading) {
     return (
-      <div className="animate-pulse glass rounded-lg p-6 text-center">
-        <div className="w-8 h-8 mx-auto bg-gold/20 rounded-full mb-2" />
-        <div className="h-4 bg-gold/10 rounded w-48 mx-auto" />
+      <div aria-hidden className="animate-pulse card p-6">
+        <div className="h-4 bg-[var(--hover-wash)] rounded w-48" />
       </div>
     );
   }
@@ -42,14 +42,14 @@ export default function SubscriptionGate({
   if (fallback) return <>{fallback}</>;
 
   return (
-    <div className="glass rounded-xl p-6 text-center border border-gold/20">
-      <Lock className="w-8 h-8 text-gold mx-auto mb-3" />
-      <h3 className="text-lg font-semibold mb-2">
+    <div className="card p-6">
+      <h3 className="font-display text-xl mb-2 flex items-center gap-2">
+        <Lock aria-hidden className="w-4 h-4 text-gold" />
         {locale === "fr"
-          ? "Abonnement Requis"
-          : "Subscription Required"}
+          ? "Réservé aux abonnés"
+          : "Members only"}
       </h3>
-      <p className="text-text-secondary text-sm mb-4 max-w-md mx-auto">
+      <p className="text-text-secondary mb-5 max-w-md">
         {requiredAccess === "document"
           ? locale === "fr"
             ? "Abonnez-vous pour accéder au document complet de cette publication."
@@ -58,18 +58,18 @@ export default function SubscriptionGate({
             ? "Abonnez-vous pour accéder aux données sous-jacentes de cette publication."
             : "Subscribe to access the underlying data for this publication."}
       </p>
-      <div className="flex items-center justify-center gap-3">
+      <div className="flex flex-wrap items-center gap-3">
         <Link
           href="/subscribe"
-          className="inline-flex items-center gap-2 px-5 py-2 bg-gold text-charcoal font-medium text-sm rounded-lg hover:bg-gold-light transition-colors"
+          className={buttonClass("primary", "md")}
         >
           {locale === "fr" ? "Voir les forfaits" : "View Plans"}
-          <ArrowRight className="w-3.5 h-3.5" />
+          <ArrowRight aria-hidden className="w-4 h-4" />
         </Link>
         {!session && (
           <Link
             href="/auth/login"
-            className="text-sm text-text-muted hover:text-gold transition-colors"
+            className={buttonClass("ghost", "md")}
           >
             {locale === "fr" ? "Se connecter" : "Sign In"}
           </Link>

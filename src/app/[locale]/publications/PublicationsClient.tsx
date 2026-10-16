@@ -2,23 +2,10 @@
 
 import { useState, useMemo } from "react";
 import { useTranslations, useLocale } from "next-intl";
-import { motion } from "framer-motion";
 import { Link } from "@/i18n/routing";
-import {
-  Search,
-  BookOpen,
-  Calendar,
-  Users,
-  Eye,
-  Download,
-  Star,
-  LayoutGrid,
-  LayoutList,
-  ArrowUpDown,
-  ExternalLink,
-  FileText,
-  Lock,
-} from "lucide-react";
+import { Search, Lock } from "lucide-react";
+import { Container } from "@/components/ui/Section";
+import { cn } from "@/lib/utils";
 import { publications as staticPublications } from "@/data/publications";
 import { PUBLICATION_TYPES, getPublicationTypeLabel } from "@/lib/publication-types";
 import PublicationStats from "@/components/publications/PublicationStats";
@@ -60,7 +47,14 @@ const categories = [
 ];
 
 type SortOption = "year_desc" | "year_asc" | "views" | "downloads";
-type ViewMode = "list" | "grid";
+
+const chip = (active: boolean) =>
+  cn(
+    "inline-flex items-center min-h-11 md:min-h-9 px-3.5 text-sm rounded-[var(--radius-sm)] border transition-colors",
+    active
+      ? "border-gold/40 bg-gold/10 text-gold"
+      : "border-glass-border text-text-secondary hover:text-text-primary hover:bg-[var(--hover-wash)]",
+  );
 
 export interface DbPublicationRow {
   id: string;
@@ -92,13 +86,13 @@ export default function PublicationsClient({
   initialDbPublications?: DbPublicationRow[];
 }) {
   const t = useTranslations("publications");
+  const tTopics = useTranslations("topics");
   const locale = useLocale();
   const [search, setSearch] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [selectedYear, setSelectedYear] = useState<number | null>(null);
   const [selectedType, setSelectedType] = useState<string>("All");
   const [sortBy, setSortBy] = useState<SortOption>("year_desc");
-  const [viewMode, setViewMode] = useState<ViewMode>("list");
 
   // Merge the static seed set with DB publications (server-provided) once, so the
   // full list is present in the server-rendered HTML.
@@ -187,6 +181,8 @@ export default function PublicationsClient({
     return { total: allPublications.length, byType, totalViews, totalDownloads };
   }, [allPublications]);
 
+  const typesPresent = PUBLICATION_TYPES.filter((pt) => stats.byType[pt.value]);
+
   const getTypeLabel = (pub: Publication) => {
     return getPublicationTypeLabel(
       (pub.publicationType || "ANALYTICAL_REPORT") as PublicationType,
@@ -203,23 +199,17 @@ export default function PublicationsClient({
   };
 
   return (
-    <div className="section-padding">
-      <div className="max-w-6xl mx-auto">
+    <div className="pt-16 md:pt-24 pb-24">
+      <Container>
         {/* Header */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="text-center mb-8"
-        >
-          <h1 className="text-4xl md:text-5xl font-bold font-[family-name:var(--font-display)] gradient-text mb-4">
+        <header className="max-w-3xl mb-10 md:mb-14">
+          <p className="eyebrow mb-4">{t("eyebrow")}</p>
+          <h1 className="font-display text-4xl md:text-6xl leading-[1.02] tracking-tight mb-5">
             {t("title")}
           </h1>
-          <p className="text-text-secondary text-lg max-w-3xl mx-auto">
-            {t("subtitle")}
-          </p>
-        </motion.div>
+          <p className="lede">{t("subtitle")}</p>
+        </header>
 
-        {/* Stats Panel */}
         <PublicationStats
           totalPublications={stats.total}
           totalViews={stats.totalViews}
@@ -229,311 +219,156 @@ export default function PublicationsClient({
           typeBreakdown={Object.entries(stats.byType).map(([type, count]) => ({ type, count }))}
         />
 
-        {/* Search & Filters */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
-          className="mb-8 space-y-4"
-        >
-          {/* Search bar */}
-          <div className="relative">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted" />
-            <input
-              type="text"
-              placeholder={t("search")}
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="w-full pl-11 pr-4 py-3 bg-navy/50 border border-glass-border rounded-lg text-text-primary focus:border-gold/50 focus:outline-none transition-colors"
-            />
-          </div>
-
-          {/* Publication Type Filter */}
-          <div className="flex flex-wrap gap-2">
-            <button
-              onClick={() => setSelectedType("All")}
-              className={`px-3 py-1.5 text-xs rounded-lg transition-all ${
-                selectedType === "All"
-                  ? "bg-gold/20 text-gold border border-gold/30"
-                  : "glass text-text-secondary hover:text-gold"
-              }`}
-            >
-              {t("all_types") || "All Types"}
-            </button>
-            {PUBLICATION_TYPES.map((pt) => (
-              <button
-                key={pt.value}
-                onClick={() => setSelectedType(pt.value)}
-                className={`px-3 py-1.5 text-xs rounded-lg transition-all ${
-                  selectedType === pt.value
-                    ? "bg-gold/20 text-gold border border-gold/30"
-                    : "glass text-text-secondary hover:text-gold"
-                }`}
+        {/* Search & filters */}
+        <div className="mb-10 space-y-5">
+          <div className="flex flex-col md:flex-row gap-3">
+            <div className="relative flex-1">
+              <label htmlFor="pub-search" className="sr-only">
+                {t("search")}
+              </label>
+              <Search aria-hidden className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted" />
+              <input
+                id="pub-search"
+                type="search"
+                placeholder={t("search")}
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="w-full min-h-11 pl-11 pr-4 bg-navy border border-glass-border rounded-[var(--radius-md)] text-text-primary placeholder:text-text-muted focus:border-gold focus:outline-none transition-colors"
+              />
+            </div>
+            <div className="flex items-center gap-3">
+              <label htmlFor="pub-sort" className="eyebrow text-text-muted whitespace-nowrap">
+                {t("sort_by")}
+              </label>
+              <select
+                id="pub-sort"
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value as SortOption)}
+                className="min-h-11 px-3 text-sm bg-navy border border-glass-border rounded-[var(--radius-md)] text-text-secondary focus:border-gold focus:outline-none"
               >
-                {locale === "fr" ? pt.shortFr : pt.shortEn}
-              </button>
-            ))}
+                <option value="year_desc">{t("sort_year_desc")}</option>
+                <option value="year_asc">{t("sort_year_asc")}</option>
+                <option value="views">{t("sort_views")}</option>
+                <option value="downloads">{t("sort_downloads")}</option>
+              </select>
+            </div>
           </div>
 
-          {/* Category Filter */}
-          <div className="flex flex-wrap gap-2">
+          <div role="group" aria-label={t("categories")} className="flex flex-wrap gap-2">
             {categories.map((cat) => (
               <button
                 key={cat}
+                type="button"
+                aria-pressed={selectedCategory === cat}
                 onClick={() => setSelectedCategory(cat)}
-                className={`px-3 py-1.5 text-sm rounded-lg transition-all ${
-                  selectedCategory === cat
-                    ? "bg-gold/20 text-gold border border-gold/30"
-                    : "glass text-text-secondary hover:text-gold"
-                }`}
+                className={chip(selectedCategory === cat)}
               >
                 {cat === "All" ? t("all") : cat}
               </button>
             ))}
           </div>
 
-          {/* Year Filter + Sort + View Toggle */}
-          <div className="flex flex-wrap items-center gap-3">
-            <div className="flex flex-wrap gap-2 flex-1">
+          <div className="flex flex-wrap items-center gap-x-6 gap-y-3">
+            <div role="group" aria-label={t("year")} className="flex flex-wrap gap-2">
               <button
+                type="button"
+                aria-pressed={!selectedYear}
                 onClick={() => setSelectedYear(null)}
-                className={`px-3 py-1.5 text-xs rounded-lg transition-all ${
-                  !selectedYear
-                    ? "bg-gold/20 text-gold border border-gold/30"
-                    : "glass text-text-secondary hover:text-gold"
-                }`}
+                className={chip(!selectedYear)}
               >
-                {t("all")} {t("year")}
+                {t("all")}
               </button>
               {years.map((year) => (
                 <button
                   key={year}
+                  type="button"
+                  aria-pressed={selectedYear === year}
                   onClick={() => setSelectedYear(year)}
-                  className={`px-3 py-1.5 text-xs rounded-lg transition-all ${
-                    selectedYear === year
-                      ? "bg-gold/20 text-gold border border-gold/30"
-                      : "glass text-text-secondary hover:text-gold"
-                  }`}
+                  className={cn(chip(selectedYear === year), "font-mono tabular-nums")}
                 >
                   {year}
                 </button>
               ))}
             </div>
 
-            {/* Sort Dropdown */}
-            <div className="flex items-center gap-2">
-              <ArrowUpDown className="w-3.5 h-3.5 text-text-muted" />
-              <select
-                value={sortBy}
-                onChange={(e) => setSortBy(e.target.value as SortOption)}
-                className="px-3 py-1.5 text-xs bg-navy/50 border border-glass-border rounded-lg text-text-secondary focus:border-gold/50 focus:outline-none"
-              >
-                <option value="year_desc">{t("sort_year_desc") || "Year (newest)"}</option>
-                <option value="year_asc">{t("sort_year_asc") || "Year (oldest)"}</option>
-                <option value="views">{t("sort_views") || "Most viewed"}</option>
-                <option value="downloads">{t("sort_downloads") || "Most downloaded"}</option>
-              </select>
-            </div>
-
-            {/* View Toggle */}
-            <div className="flex glass rounded-lg p-0.5">
-              <button
-                onClick={() => setViewMode("list")}
-                className={`p-1.5 rounded-md transition-colors ${
-                  viewMode === "list" ? "bg-gold/20 text-gold" : "text-text-muted hover:text-gold"
-                }`}
-                title={t("view_list") || "List"}
-              >
-                <LayoutList className="w-4 h-4" />
-              </button>
-              <button
-                onClick={() => setViewMode("grid")}
-                className={`p-1.5 rounded-md transition-colors ${
-                  viewMode === "grid" ? "bg-gold/20 text-gold" : "text-text-muted hover:text-gold"
-                }`}
-                title={t("view_grid") || "Grid"}
-              >
-                <LayoutGrid className="w-4 h-4" />
-              </button>
-            </div>
+            {typesPresent.length > 1 && (
+              <div role="group" aria-label={t("type_filter")} className="flex flex-wrap gap-2">
+                <button
+                  type="button"
+                  aria-pressed={selectedType === "All"}
+                  onClick={() => setSelectedType("All")}
+                  className={chip(selectedType === "All")}
+                >
+                  {t("all_types")}
+                </button>
+                {typesPresent.map((pt) => (
+                  <button
+                    key={pt.value}
+                    type="button"
+                    aria-pressed={selectedType === pt.value}
+                    onClick={() => setSelectedType(pt.value)}
+                    className={chip(selectedType === pt.value)}
+                  >
+                    {locale === "fr" ? pt.shortFr : pt.shortEn}
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
-        </motion.div>
+        </div>
 
-        {/* Results count */}
-        <p className="text-text-muted text-sm mb-6">
-          {filtered.length} {filtered.length === 1 ? "publication" : "publications"}
+        <p className="eyebrow text-text-muted mb-2" role="status">
+          {tTopics("n_publications", { n: filtered.length })}
         </p>
 
-        {/* Publications */}
+        {/* Index */}
         {filtered.length === 0 ? (
-          <div className="text-center py-12">
-            <BookOpen className="w-12 h-12 text-text-muted mx-auto mb-4" />
-            <p className="text-text-secondary">{t("no_publications")}</p>
-          </div>
-        ) : viewMode === "grid" ? (
-          /* Grid View */
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {filtered.map((pub, index) => (
-              <motion.div
-                key={pub.id}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: index * 0.03 }}
-              >
-                <Link
-                  href={`/publications/${pub.slug}`}
-                  className="block glass rounded-xl p-5 hover:border-gold/30 transition-all duration-300 group h-full"
-                >
-                  <div className="flex flex-wrap items-center gap-1.5 mb-3">
-                    <span className="text-[10px] px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-400 font-medium">
-                      {getTypeLabel(pub)}
-                    </span>
-                    {pub.category && (
-                      <span className="text-[10px] px-2 py-0.5 rounded-full bg-gold/10 text-gold">
-                        {pub.category}
-                      </span>
-                    )}
-                    {pub.featured && (
-                      <Star className="w-3 h-3 text-gold" />
-                    )}
-                    {pub.accessLevel === "GATED" && (
-                      <span className="flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full bg-purple-500/10 text-purple-400 font-medium">
-                        <Lock className="w-2.5 h-2.5" />
-                        Premium
-                      </span>
-                    )}
-                  </div>
-                  <h2 className="text-sm font-semibold mb-2 group-hover:text-gold transition-colors line-clamp-2">
-                    {locale === "fr" ? pub.titleFr : pub.title}
-                  </h2>
-                  <p className="text-text-muted text-xs mb-2">
-                    {pub.authors.join(", ")}
-                  </p>
-                  <p className="text-text-secondary text-xs leading-relaxed line-clamp-3 mb-3">
-                    {locale === "fr" ? pub.abstractFr : pub.abstract}
-                  </p>
-                  <div className="mt-auto flex items-center gap-3 text-text-muted text-[10px]">
-                    <span className="flex items-center gap-1">
-                      <Calendar className="w-3 h-3" />
-                      {pub.year}
-                    </span>
-                    {(pub.views || 0) > 0 && (
-                      <span className="flex items-center gap-1">
-                        <Eye className="w-3 h-3" />
-                        {pub.views}
-                      </span>
-                    )}
-                    {pub.doi && (
-                      <span className="flex items-center gap-1">
-                        <ExternalLink className="w-3 h-3" />
-                        DOI
-                      </span>
-                    )}
-                    {pub.pdfUrl && (
-                      <FileText className="w-3 h-3 text-gold" />
-                    )}
-                  </div>
-                </Link>
-              </motion.div>
-            ))}
-          </div>
+          <p className="py-16 text-text-secondary border-t border-glass-border">{t("no_publications")}</p>
         ) : (
-          /* List View */
-          <div className="space-y-4">
-            {filtered.map((pub, index) => (
-              <motion.div
-                key={pub.id}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: index * 0.03 }}
-              >
-                <Link
-                  href={`/publications/${pub.slug}`}
-                  className="block glass rounded-xl p-6 hover:border-gold/30 transition-all duration-300 group"
-                >
-                  <div className="flex flex-col md:flex-row md:items-start gap-4">
-                    <div className="flex-1">
-                      <div className="flex flex-wrap items-center gap-2 mb-2">
-                        <span className="text-[10px] px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-400 font-medium uppercase tracking-wider">
-                          {getTypeLabel(pub)}
-                        </span>
-                        {pub.category && (
-                          <span className="text-xs px-2 py-1 rounded-full bg-gold/10 text-gold">
-                            {pub.category}
-                          </span>
-                        )}
-                        {pub.featured && (
-                          <span className="text-xs px-2 py-1 rounded-full bg-gold/20 text-gold font-medium">
-                            <Star className="w-3 h-3 inline -mt-0.5 mr-1" />
-                            {t("featured")}
-                          </span>
-                        )}
-                        {pub.accessLevel === "GATED" && (
-                          <span className="flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full bg-purple-500/10 text-purple-400 font-medium">
-                            <Lock className="w-2.5 h-2.5" />
-                            Premium
-                          </span>
-                        )}
-                        {pub.doi && (
-                          <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400">
-                            DOI
-                          </span>
-                        )}
-                      </div>
-                      <h2 className="text-lg font-semibold mb-2 group-hover:text-gold transition-colors">
+          <ol className="border-t border-glass-border">
+            {filtered.map((pub) => {
+              const venue = getVenueInfo(pub);
+              return (
+                <li key={pub.id} className="border-b border-glass-border">
+                  <Link
+                    href={`/publications/${pub.slug}`}
+                    className="group grid grid-cols-[3.5rem_1fr] md:grid-cols-[5rem_1fr_auto] gap-x-4 md:gap-x-8 gap-y-2 py-6 md:py-7 px-2 -mx-2 rounded-[var(--radius-sm)] hover:bg-[var(--hover-wash)] transition-colors"
+                  >
+                    <span className="font-mono text-sm tabular-nums text-text-muted pt-1">{pub.year}</span>
+                    <div className="min-w-0">
+                      <h2 className="font-display text-xl md:text-2xl leading-snug text-text-primary group-hover:text-gold transition-colors">
                         {locale === "fr" ? pub.titleFr : pub.title}
                       </h2>
-                      <div className="flex flex-wrap items-center gap-4 text-text-muted text-sm mb-3">
-                        <span className="flex items-center gap-1">
-                          <Users className="w-3.5 h-3.5" />
-                          {pub.authors.join(", ")}
-                        </span>
-                        <span className="flex items-center gap-1">
-                          <Calendar className="w-3.5 h-3.5" />
-                          {pub.year}
-                        </span>
-                        {getVenueInfo(pub) && (
-                          <span className="flex items-center gap-1">
-                            <BookOpen className="w-3.5 h-3.5" />
-                            {getVenueInfo(pub)}
-                          </span>
-                        )}
-                        {(pub.views || 0) > 0 && (
-                          <span className="flex items-center gap-1">
-                            <Eye className="w-3.5 h-3.5" />
-                            {pub.views}
-                          </span>
-                        )}
-                        {(pub.downloadCount || 0) > 0 && (
-                          <span className="flex items-center gap-1">
-                            <Download className="w-3.5 h-3.5" />
-                            {pub.downloadCount}
-                          </span>
-                        )}
-                      </div>
-                      <p className="text-text-secondary text-sm leading-relaxed line-clamp-2">
+                      <p className="mt-2 text-sm text-text-muted flex flex-wrap gap-x-3 gap-y-1">
+                        {pub.category && <span>{pub.category}</span>}
+                        <span>{venue && venue !== getTypeLabel(pub) ? venue : getTypeLabel(pub)}</span>
+                        {pub.featured && <span className="text-gold">{t("featured")}</span>}
+                      </p>
+                      <p className="mt-3 text-text-secondary text-[0.95rem] leading-relaxed line-clamp-2 max-w-3xl">
                         {locale === "fr" ? pub.abstractFr : pub.abstract}
                       </p>
-                      <div className="flex flex-wrap gap-1.5 mt-3">
-                        {pub.tags.slice(0, 5).map((tag) => (
-                          <span
-                            key={tag}
-                            className="text-xs px-2 py-0.5 rounded bg-navy-light text-text-muted"
-                          >
-                            {tag}
-                          </span>
-                        ))}
-                      </div>
                     </div>
-                  </div>
-                </Link>
-              </motion.div>
-            ))}
-          </div>
+                    <div className="col-start-2 md:col-start-auto flex md:flex-col md:items-end gap-3 md:gap-2 text-xs font-mono tabular-nums text-text-muted md:pt-1.5">
+                      {pub.accessLevel === "GATED" && (
+                        <span className="inline-flex items-center gap-1.5 text-gold">
+                          <Lock aria-hidden className="w-3.5 h-3.5" />
+                          {t("members_only")}
+                        </span>
+                      )}
+                      {(pub.views || 0) > 0 && (
+                        <span>
+                          {pub.views} {t("views")}
+                        </span>
+                      )}
+                      {pub.doi && <span>DOI</span>}
+                    </div>
+                  </Link>
+                </li>
+              );
+            })}
+          </ol>
         )}
-      </div>
+      </Container>
     </div>
   );
 }

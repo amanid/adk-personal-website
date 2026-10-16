@@ -76,12 +76,12 @@ export default function PaymentPanel({
   const active = method === "paypal" && !paypalAvailable ? "mobile" : method;
 
   return (
-    <div className="glass rounded-xl p-6">
+    <div className="card p-5 md:p-7">
       <div className="flex items-center gap-2 mb-4">
-        <Lock className="w-4 h-4 text-gold" />
-        <h2 className="text-lg font-semibold">{title ?? t("secureCheckout")}</h2>
+        <Lock className="w-4 h-4 text-gold" aria-hidden />
+        <h2 className="font-display text-2xl leading-tight">{title ?? t("secureCheckout")}</h2>
       </div>
-      <p className="text-xs text-text-secondary mb-2">{t("payMethod")}</p>
+      <p className="text-sm text-text-secondary mb-2">{t("payMethod")}</p>
       <div className="grid sm:grid-cols-2 gap-2">
         {options.map((opt) => {
           const isActive = active === opt.id;
@@ -91,28 +91,28 @@ export default function PaymentPanel({
               type="button"
               onClick={() => setChosen(opt.id)}
               aria-pressed={isActive}
-              className={`h-full flex items-start gap-3 p-3 rounded-xl border text-left transition-all ${
-                isActive ? "border-gold/60 bg-gold/10 ring-1 ring-gold/40" : "border-glass-border hover:border-gold/40"
+              className={`h-full min-h-11 flex items-start gap-3 p-3 rounded-[var(--radius-md)] border text-left transition-colors ${
+                isActive ? "border-gold/60 bg-gold/10 ring-1 ring-gold/40" : "border-glass-border hover:border-text-muted hover:bg-[var(--hover-wash)]"
               }`}
             >
               <span
                 className={`mt-0.5 w-9 h-9 rounded-lg flex items-center justify-center shrink-0 ${
-                  isActive ? "bg-gold/20 text-gold" : "bg-navy/60 text-text-secondary"
+                  isActive ? "bg-gold/20 text-gold" : "bg-navy text-text-secondary"
                 }`}
               >
-                <opt.icon className="w-4 h-4" />
+                <opt.icon className="w-4 h-4" aria-hidden />
               </span>
               <span className="flex-1 min-w-0">
                 <span className="flex items-center gap-2 flex-wrap">
                   <span className="font-medium text-sm">{opt.label}</span>
-                  <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-navy/60 text-text-secondary">
+                  <span className="font-mono text-xs px-1.5 py-0.5 rounded-[var(--radius-sm)] bg-navy text-text-secondary">
                     {opt.badge}
                   </span>
                 </span>
-                <span className="block text-xs text-text-secondary mt-0.5">{opt.desc}</span>
+                <span className="block text-sm text-text-secondary mt-0.5">{opt.desc}</span>
               </span>
               {isActive && (
-                <span className="mt-1 w-4 h-4 rounded-full bg-gold shrink-0 flex items-center justify-center">
+                <span className="mt-1 w-4 h-4 rounded-full bg-gold shrink-0 flex items-center justify-center" aria-hidden>
                   <Check className="w-3 h-3 text-charcoal" />
                 </span>
               )}
@@ -143,8 +143,8 @@ export default function PaymentPanel({
         )}
       </div>
 
-      <p className="text-[11px] text-text-secondary mt-3 flex items-start gap-1.5">
-        <Lock className="w-3 h-3 mt-0.5 shrink-0" />
+      <p className="text-xs text-text-secondary mt-3 flex items-start gap-1.5">
+        <Lock className="w-3 h-3 mt-0.5 shrink-0" aria-hidden />
         {t("encryptedNote")}
       </p>
     </div>

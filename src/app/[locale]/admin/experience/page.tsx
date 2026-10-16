@@ -184,7 +184,7 @@ export default function AdminExperiencePage() {
       </div>
 
       {error && (
-        <div className="glass rounded-xl p-4 border border-red-500/30 text-red-400 text-sm">
+        <div className="glass rounded-xl p-4 border border-danger/30 text-danger text-sm">
           {error}
         </div>
       )}
@@ -414,7 +414,7 @@ export default function AdminExperiencePage() {
                   </button>
                   <button
                     onClick={() => handleDelete(exp.id)}
-                    className="p-2 glass rounded-lg text-text-secondary hover:text-red-400 transition-all"
+                    className="p-2 glass rounded-lg text-text-secondary hover:text-danger transition-all"
                     title="Delete"
                   >
                     <Trash2 size={16} />

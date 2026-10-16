@@ -79,7 +79,7 @@ export default function AdminStoreAnalyticsPage() {
       {/* Revenue by currency */}
       <div className="glass rounded-xl p-6 mb-6">
         <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
-          <DollarSign className="w-5 h-5 text-green-400" />
+          <DollarSign className="w-5 h-5 text-success" />
           Revenue by currency
         </h3>
         {data.revenueByCurrency.length === 0 ? (

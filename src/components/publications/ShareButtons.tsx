@@ -1,7 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { Share2, Copy, Check, ExternalLink } from "lucide-react";
+import { useLocale } from "next-intl";
+import { Copy, Check, ExternalLink } from "lucide-react";
+import { buttonClass } from "@/components/ui/Button";
 
 interface ShareButtonsProps {
   title: string;
@@ -11,6 +13,7 @@ interface ShareButtonsProps {
 
 export default function ShareButtons({ title, url, doi }: ShareButtonsProps) {
   const [copied, setCopied] = useState(false);
+  const fr = useLocale() === "fr";
   const fullUrl = typeof window !== "undefined" ? window.location.href : url;
 
   const handleCopy = async () => {
@@ -23,50 +26,31 @@ export default function ShareButtons({ title, url, doi }: ShareButtonsProps) {
     {
       label: "LinkedIn",
       href: `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(fullUrl)}`,
-      color: "hover:text-blue-400",
     },
     {
       label: "Twitter",
       href: `https://twitter.com/intent/tweet?text=${encodeURIComponent(title)}&url=${encodeURIComponent(fullUrl)}`,
-      color: "hover:text-sky-400",
-    },
-    {
-      label: "ResearchGate",
-      href: `https://www.researchgate.net/publication/search?q=${encodeURIComponent(title)}`,
-      color: "hover:text-teal-400",
     },
   ];
 
+  const cls = buttonClass("secondary", "md", "md:h-9 md:px-3.5");
+
   return (
     <div className="flex flex-wrap items-center gap-2">
-      <Share2 className="w-4 h-4 text-text-secondary" />
+      <span className="eyebrow text-text-muted mr-2">{fr ? "Partager" : "Share"}</span>
       {shareLinks.map((link) => (
-        <a
-          key={link.label}
-          href={link.href}
-          target="_blank"
-          rel="noopener noreferrer"
-          className={`px-3 py-1.5 text-sm glass rounded-lg text-text-secondary ${link.color} transition-colors`}
-        >
+        <a key={link.label} href={link.href} target="_blank" rel="noopener noreferrer" className={cls}>
           {link.label}
         </a>
       ))}
       {doi && (
-        <a
-          href={`https://doi.org/${doi}`}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="px-3 py-1.5 text-sm glass rounded-lg text-text-secondary hover:text-gold transition-colors flex items-center gap-1"
-        >
-          DOI <ExternalLink className="w-3 h-3" />
+        <a href={`https://doi.org/${doi}`} target="_blank" rel="noopener noreferrer" className={cls}>
+          DOI <ExternalLink aria-hidden className="w-3.5 h-3.5" />
         </a>
       )}
-      <button
-        onClick={handleCopy}
-        className="px-3 py-1.5 text-sm glass rounded-lg text-text-secondary hover:text-gold transition-colors flex items-center gap-1"
-      >
-        {copied ? <Check className="w-3.5 h-3.5 text-green-400" /> : <Copy className="w-3.5 h-3.5" />}
-        {copied ? "Copied" : "Copy Link"}
+      <button type="button" onClick={handleCopy} className={cls}>
+        {copied ? <Check aria-hidden className="w-3.5 h-3.5 text-success" /> : <Copy aria-hidden className="w-3.5 h-3.5" />}
+        <span role="status">{copied ? (fr ? "Lien copié" : "Link copied") : fr ? "Copier le lien" : "Copy link"}</span>
       </button>
     </div>
   );

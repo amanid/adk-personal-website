@@ -82,6 +82,32 @@ export function streamAsset(asset: AssetMeta): ReadableStream<Uint8Array> {
   });
 }
 
+/**
+ * `length` bytes at `offset`, loading only the pieces that hold them (at most
+ * two for a read under PART_SIZE). Used to read a PDF's trailer.
+ */
+export async function readAssetRange(asset: AssetMeta, offset: number, length: number): Promise<Buffer> {
+  const start = Math.max(0, offset);
+  const end = Math.min(asset.size, offset + length);
+  if (end <= start) return Buffer.alloc(0);
+  if (asset.parts === 0) {
+    const row = await prisma.bookAsset.findUnique({ where: { id: asset.id }, select: { data: true } });
+    if (!row?.data) throw new Error("The stored file has no data");
+    return Buffer.from(row.data.subarray(start, end));
+  }
+  const first = Math.floor(start / PART_SIZE);
+  const last = Math.floor((end - 1) / PART_SIZE);
+  const pieces: Buffer[] = [];
+  for (let index = first; index <= last; index++) {
+    const part = await prisma.bookAssetPart.findUnique({ where: { assetId_index: { assetId: asset.id, index } }, select: { data: true } });
+    if (!part) throw new Error(`Piece ${index + 1} missing`);
+    pieces.push(Buffer.from(part.data));
+  }
+  const joined = Buffer.concat(pieces);
+  const base = first * PART_SIZE;
+  return joined.subarray(start - base, end - base);
+}
+
 /** SHA-256 of a stored file, computed piece by piece. */
 export async function hashAsset(asset: AssetMeta): Promise<string> {
   const hash = createHash("sha256");

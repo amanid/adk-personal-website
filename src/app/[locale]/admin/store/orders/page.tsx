@@ -67,9 +67,9 @@ const STATUS_META: Record<
   string,
   { label: string; icon: typeof Clock; chip: string; bar: string }
 > = {
-  PAID: { label: "Paid", icon: CheckCircle2, chip: "bg-green-500/15 text-green-400", bar: "bg-green-400" },
-  PENDING: { label: "Pending", icon: Clock, chip: "bg-amber-500/15 text-amber-400", bar: "bg-amber-400" },
-  FAILED: { label: "Failed", icon: AlertCircle, chip: "bg-red-500/15 text-red-400", bar: "bg-red-400" },
+  PAID: { label: "Paid", icon: CheckCircle2, chip: "bg-success/15 text-success", bar: "bg-success" },
+  PENDING: { label: "Pending", icon: Clock, chip: "bg-warning/15 text-warning", bar: "bg-warning" },
+  FAILED: { label: "Failed", icon: AlertCircle, chip: "bg-danger/15 text-danger", bar: "bg-danger" },
   REFUNDED: { label: "Refunded", icon: RefreshCw, chip: "bg-purple-500/15 text-purple-400", bar: "bg-purple-400" },
   CANCELLED: { label: "Cancelled", icon: Ban, chip: "bg-gray-500/15 text-gray-400", bar: "bg-gray-500" },
 };
@@ -250,7 +250,7 @@ export default function AdminOrdersPage() {
       {/* Summary tiles */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
         <div className="glass rounded-xl p-5">
-          <DollarSign className="w-5 h-5 text-green-400 mb-2" />
+          <DollarSign className="w-5 h-5 text-success mb-2" />
           {summary.revenueByCurrency.length === 0 ? (
             <p className="text-2xl font-bold">—</p>
           ) : (
@@ -270,13 +270,13 @@ export default function AdminOrdersPage() {
           <p className="text-text-secondary text-sm mt-1">Revenue (paid)</p>
         </div>
         <StatCard label="Paid orders" value={summary.paidCount} icon={ShoppingBag} color="text-gold" />
-        <StatCard label="Pending" value={summary.pending} icon={Clock} color="text-amber-400" />
+        <StatCard label="Pending" value={summary.pending} icon={Clock} color="text-warning" />
         <StatCard label="Total orders" value={summary.total} icon={Package} color="text-blue-400" />
       </div>
 
       {/* Pending banner */}
       {summary.pending > 0 && (
-        <div className="flex items-center gap-2 mb-4 rounded-xl border border-amber-400/30 bg-amber-400/10 px-4 py-2.5 text-sm text-amber-300">
+        <div className="flex items-center gap-2 mb-4 rounded-xl border border-warning/30 bg-warning/10 px-4 py-2.5 text-sm text-warning">
           <Clock className="w-4 h-4 shrink-0" />
           {summary.pending} order{summary.pending === 1 ? "" : "s"} awaiting your confirmation.
         </div>
@@ -284,7 +284,7 @@ export default function AdminOrdersPage() {
 
       {/* Email failure banner */}
       {emailFailedCount > 0 && (
-        <div className="flex items-start gap-2 mb-4 rounded-xl border border-red-400/30 bg-red-400/10 px-4 py-2.5 text-sm text-red-300">
+        <div className="flex items-start gap-2 mb-4 rounded-xl border border-danger/30 bg-danger/10 px-4 py-2.5 text-sm text-danger">
           <MailWarning className="w-4 h-4 shrink-0 mt-0.5" />
           <span>
             {emailFailedCount} order{emailFailedCount === 1 ? "" : "s"} had an email delivery
@@ -368,7 +368,7 @@ export default function AdminOrdersPage() {
                       <StatusPill status={o.status} />
                       <MethodChip method={o.paymentMethod} />
                       {o.lastEmailError && (
-                        <span className="inline-flex items-center gap-1 text-[11px] font-medium px-2 py-0.5 rounded-full bg-red-500/15 text-red-400">
+                        <span className="inline-flex items-center gap-1 text-[11px] font-medium px-2 py-0.5 rounded-full bg-danger/15 text-danger">
                           <MailWarning className="w-3 h-3" />
                           Email failed
                         </span>
@@ -399,8 +399,8 @@ export default function AdminOrdersPage() {
                   <div className="border-t border-glass-border/60 bg-navy/20 p-4 sm:p-5">
                     {/* action bar for pending */}
                     {o.status === "PENDING" && (
-                      <div className="flex flex-wrap items-center gap-2 mb-4 rounded-lg border border-amber-400/25 bg-amber-400/5 p-3">
-                        <span className="text-xs text-amber-300 flex-1 min-w-[160px]">
+                      <div className="flex flex-wrap items-center gap-2 mb-4 rounded-lg border border-warning/25 bg-warning/5 p-3">
+                        <span className="text-xs text-warning flex-1 min-w-[160px]">
                           Confirm the payment{" "}
                           {o.paymentMethod !== "PAYPAL"
                             ? `(${paymentMethodLabel(o.paymentMethod)}${
@@ -412,7 +412,7 @@ export default function AdminOrdersPage() {
                         <button
                           onClick={() => updateStatus(o.id, "mark-paid")}
                           disabled={busyId === o.id}
-                          className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg bg-green-500 text-white text-xs font-semibold hover:bg-green-500/90 transition-all disabled:opacity-50"
+                          className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg bg-success text-white text-xs font-semibold hover:bg-success/90 transition-all disabled:opacity-50"
                         >
                           <Check className="w-3.5 h-3.5" />
                           {busyId === o.id ? "Working…" : "Mark as paid"}
@@ -420,7 +420,7 @@ export default function AdminOrdersPage() {
                         <button
                           onClick={() => updateStatus(o.id, "cancel")}
                           disabled={busyId === o.id}
-                          className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg border border-glass-border text-text-secondary text-xs hover:text-red-400 hover:border-red-400/40 transition-all disabled:opacity-50"
+                          className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg border border-glass-border text-text-secondary text-xs hover:text-danger hover:border-danger/40 transition-all disabled:opacity-50"
                         >
                           <X className="w-3.5 h-3.5" />
                           Cancel
@@ -466,7 +466,7 @@ export default function AdminOrdersPage() {
                         label="Email"
                       >
                         {o.lastEmailError ? (
-                          <span className="text-red-400">Failed — {o.lastEmailError}</span>
+                          <span className="text-danger">Failed — {o.lastEmailError}</span>
                         ) : o.receiptEmailedAt ? (
                           `Confirmation sent ${fmtDate(o.receiptEmailedAt)}`
                         ) : o.invoiceEmailedAt ? (
@@ -525,10 +525,10 @@ export default function AdminOrdersPage() {
                                 </td>
                               </tr>
                               <tr>
-                                <td className="px-3 py-1 text-green-400" colSpan={2}>
+                                <td className="px-3 py-1 text-success" colSpan={2}>
                                   Discount{o.couponCode ? ` (${o.couponCode})` : ""}
                                 </td>
-                                <td className="px-3 py-1 text-right text-green-400">
+                                <td className="px-3 py-1 text-right text-success">
                                   −{formatPrice(o.discountCents, o.currency)}
                                 </td>
                               </tr>

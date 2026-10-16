@@ -1,16 +1,15 @@
 "use client";
 
 import { Printer } from "lucide-react";
+import { useLocale } from "next-intl";
+import { buttonClass } from "@/components/ui/Button";
 
 export default function PrintButton() {
+  const fr = useLocale() === "fr";
   return (
-    <button
-      onClick={() => window.print()}
-      className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm glass rounded-lg text-text-secondary hover:text-gold transition-colors"
-      title="Print this page"
-    >
-      <Printer className="w-3.5 h-3.5" />
-      Print
+    <button type="button" onClick={() => window.print()} className={buttonClass("secondary", "md")}>
+      <Printer aria-hidden className="w-4 h-4" />
+      {fr ? "Imprimer" : "Print"}
     </button>
   );
 }

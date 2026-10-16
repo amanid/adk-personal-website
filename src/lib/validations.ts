@@ -35,10 +35,22 @@ export const serviceRequestSchema = z.object({
   name: z.string().min(2, "Name is required").max(100),
   email: z.string().email("Invalid email address"),
   company: z.string().optional(),
-  serviceType: z.enum(["CONSULTING", "TRAINING", "SPEAKING", "AI_DEVELOPMENT", "OTHER"]),
+  // The form also offers services the DB enum predates; the API stores those
+  // as OTHER and names the choice in the description (see SERVICE_EXTRA_TYPES).
+  serviceType: z.enum([
+    "CONSULTING", "TRAINING", "SPEAKING", "AI_DEVELOPMENT", "OTHER",
+    "STATISTICS", "DATA_ENGINEERING", "FULLSTACK",
+  ]),
   description: z.string().min(20, "Please provide more details").max(5000),
   budget: z.string().optional(),
 });
+
+/** Form choices with no ServiceType enum value of their own. */
+export const SERVICE_EXTRA_TYPES: Record<string, string> = {
+  STATISTICS: "Statistics & econometrics",
+  DATA_ENGINEERING: "Data engineering",
+  FULLSTACK: "Web development",
+};
 
 export const questionSchema = z.object({
   title: z.string().min(5, "Title must be at least 5 characters").max(200, "Title is too long"),

@@ -1,10 +1,9 @@
 "use client";
 
 import { useTranslations, useLocale } from "next-intl";
-import { motion } from "framer-motion";
-import { MapPin, Calendar, ChevronDown, ChevronUp } from "lucide-react";
-import { useState } from "react";
 import { experiences as staticExperiences } from "@/data/experience";
+import { Container } from "@/components/ui/Section";
+import Reveal from "@/components/ui/Reveal";
 
 export interface ExperienceEntry {
   id: string;
@@ -18,122 +17,116 @@ export interface ExperienceEntry {
   descriptionFr: string[];
 }
 
+const MONTHS_FR: Record<string, string> = {
+  Jan: "janv.",
+  Feb: "févr.",
+  Mar: "mars",
+  Apr: "avr.",
+  May: "mai",
+  Jun: "juin",
+  Jul: "juil.",
+  Aug: "août",
+  Sep: "sept.",
+  Oct: "oct.",
+  Nov: "nov.",
+  Dec: "déc.",
+};
+
+const LOCATIONS_FR: Record<string, string> = {
+  Remote: "À distance",
+  "Cairo, Egypt": "Le Caire, Égypte",
+};
+
+/** "Sep 2023" stays as is in English; in French the month is translated. */
+function formatMonth(value: string, fr: boolean) {
+  if (!fr) return value;
+  const [m, y] = value.split(" ");
+  return MONTHS_FR[m] && y ? `${MONTHS_FR[m]} ${y}` : value;
+}
+
 export default function ExperienceClient({
   initialExperiences,
 }: {
   initialExperiences: ExperienceEntry[];
 }) {
   const t = useTranslations("experience");
-  const locale = useLocale();
+  const fr = useLocale() === "fr";
   const experiences: ExperienceEntry[] = initialExperiences.length
     ? initialExperiences
     : staticExperiences;
-  const [expandedId, setExpandedId] = useState<string | null>(experiences[0]?.id ?? null);
+  // The span shown above the title comes from the records, never typed in.
+  const years = experiences
+    .map((e) => Number(e.startDate.match(/\d{4}/)?.[0]))
+    .filter((y) => Number.isFinite(y) && y > 0);
+  const firstYear = years.length ? Math.min(...years) : null;
 
   return (
-    <div className="section-padding">
-      <div className="max-w-4xl mx-auto">
-        {/* Header */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="text-center mb-16"
-        >
-          <h1 className="text-4xl md:text-5xl font-bold font-[family-name:var(--font-display)] gradient-text mb-4">
+    <>
+      <header className="pt-10 pb-12 md:pt-16 md:pb-16">
+        <Container>
+          {firstYear && (
+            <p className="eyebrow mb-5 tabular-nums">
+              {firstYear} – {t("present")}
+            </p>
+          )}
+          <h1 className="font-display text-4xl md:text-6xl leading-[1.02] tracking-tight max-w-3xl">
             {t("title")}
           </h1>
-          <p className="text-text-secondary text-lg">{t("subtitle")}</p>
-        </motion.div>
+          <p className="lede mt-5 max-w-2xl">{t("subtitle")}</p>
+        </Container>
+      </header>
 
-        {/* Timeline */}
-        <div className="relative">
-          {/* Vertical line */}
-          <div className="absolute left-4 md:left-8 top-0 bottom-0 w-0.5 bg-gradient-to-b from-gold via-gold/50 to-transparent" />
+      <section className="pb-20 md:pb-28">
+        <Container>
+          <Reveal>
+            <ol>
+              {experiences.map((exp) => {
+                const role = fr && exp.roleFr ? exp.roleFr : exp.role;
+                const bullets = fr && exp.descriptionFr?.length ? exp.descriptionFr : exp.description;
+                const start = formatMonth(exp.startDate, fr);
+                const end = exp.endDate ? formatMonth(exp.endDate, fr) : t("present");
+                const dates = exp.endDate && exp.endDate === exp.startDate ? start : `${start} – ${end}`;
+                const location = fr ? (LOCATIONS_FR[exp.location] ?? exp.location) : exp.location;
+                const current = !exp.endDate;
+                const dot = `absolute -left-[5px] top-1.5 w-2.5 h-2.5 rounded-full border-2 ${
+                  current ? "bg-gold border-gold" : "bg-charcoal border-text-muted"
+                }`;
 
-          <div className="space-y-6">
-            {experiences.map((exp, index) => {
-              const isExpanded = expandedId === exp.id;
-              const descriptions =
-                locale === "fr" ? exp.descriptionFr : exp.description;
-              const role = locale === "fr" ? exp.roleFr : exp.role;
-
-              return (
-                <motion.div
-                  key={exp.id}
-                  initial={{ opacity: 0, x: -20 }}
-                  whileInView={{ opacity: 1, x: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: index * 0.05 }}
-                  className="relative pl-12 md:pl-20"
-                >
-                  {/* Timeline dot */}
-                  <div className="absolute left-2.5 md:left-6.5 top-6 w-3 h-3 rounded-full bg-gold border-2 border-charcoal z-10" />
-
-                  <div
-                    className={`glass rounded-xl p-6 cursor-pointer transition-all duration-300 ${
-                      isExpanded ? "border-gold/30" : "hover:border-gold/20"
-                    }`}
-                    onClick={() =>
-                      setExpandedId(isExpanded ? null : exp.id)
-                    }
+                return (
+                  <li
+                    key={exp.id}
+                    className="relative grid md:grid-cols-12 gap-2 md:gap-0 border-l md:border-l-0 border-glass-border pl-6 md:pl-0"
                   >
-                    <div className="flex items-start justify-between">
-                      <div className="flex-1">
-                        <h3 className="text-lg font-semibold text-text-primary">
-                          {role}
-                        </h3>
-                        <p className="text-gold font-medium text-sm mt-1">
-                          {exp.organization}
-                        </p>
-                        <div className="flex items-center gap-4 mt-2 text-text-muted text-xs">
-                          <span className="flex items-center gap-1">
-                            <Calendar className="w-3 h-3" />
-                            {exp.startDate} – {exp.endDate || t("present")}
-                          </span>
-                          <span className="flex items-center gap-1">
-                            <MapPin className="w-3 h-3" />
-                            {exp.location}
-                          </span>
-                        </div>
-                      </div>
-                      <button className="text-text-muted hover:text-gold transition-colors p-1">
-                        {isExpanded ? (
-                          <ChevronUp className="w-5 h-5" />
-                        ) : (
-                          <ChevronDown className="w-5 h-5" />
-                        )}
-                      </button>
+                    <span className={`${dot} md:hidden`} aria-hidden />
+                    <div className="md:col-span-3 md:pr-8 md:text-right">
+                      <p className="font-mono text-sm text-text-primary tabular-nums">{dates}</p>
+                      <p className="font-mono text-xs text-text-muted mt-1">{location}</p>
                     </div>
-
-                    {/* Expandable details */}
-                    <motion.div
-                      initial={false}
-                      animate={{
-                        height: isExpanded ? "auto" : 0,
-                        opacity: isExpanded ? 1 : 0,
-                      }}
-                      transition={{ duration: 0.3 }}
-                      className="overflow-hidden"
-                    >
-                      <ul className="mt-4 space-y-2 border-t border-glass-border pt-4">
-                        {descriptions.map((desc, i) => (
-                          <li
-                            key={i}
-                            className="flex items-start gap-2 text-text-secondary text-sm"
-                          >
-                            <span className="w-1.5 h-1.5 rounded-full bg-gold mt-2 shrink-0" />
-                            {desc}
-                          </li>
-                        ))}
-                      </ul>
-                    </motion.div>
-                  </div>
-                </motion.div>
-              );
-            })}
-          </div>
-        </div>
-      </div>
-    </div>
+                    <div className="md:col-span-9 relative md:border-l md:border-glass-border md:pl-10 pb-12 md:pb-14">
+                      <span className={`${dot} hidden md:block`} aria-hidden />
+                      <h2 className="font-display text-2xl md:text-3xl leading-tight tracking-tight">{role}</h2>
+                      <p className="mt-1.5 text-gold">{exp.organization}</p>
+                      {bullets.length > 0 && (
+                        <ul className="mt-5 space-y-2.5 max-w-3xl">
+                          {bullets.map((desc, i) => (
+                            <li
+                              key={i}
+                              className="grid grid-cols-[1rem_1fr] text-sm md:text-[0.9375rem] text-text-secondary leading-relaxed"
+                            >
+                              <span className="mt-[0.75em] w-1.5 h-px bg-text-muted" aria-hidden />
+                              {desc}
+                            </li>
+                          ))}
+                        </ul>
+                      )}
+                    </div>
+                  </li>
+                );
+              })}
+            </ol>
+          </Reveal>
+        </Container>
+      </section>
+    </>
   );
 }

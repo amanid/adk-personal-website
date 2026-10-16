@@ -280,7 +280,7 @@ export default function AdminBlogPage() {
             </div>
 
             {error && (
-              <div className="flex items-center gap-2 px-4 py-2.5 bg-red-500/10 border border-red-500/30 rounded-lg text-red-400 text-sm">
+              <div className="flex items-center gap-2 px-4 py-2.5 bg-danger/10 border border-danger/30 rounded-lg text-danger text-sm">
                 <AlertCircle className="w-4 h-4 shrink-0" />
                 {error}
               </div>
@@ -313,7 +313,7 @@ export default function AdminBlogPage() {
       )}
 
       {success && (
-        <div className="flex items-center gap-2 px-4 py-3 mb-4 bg-green-500/10 border border-green-500/30 rounded-lg text-green-400 text-sm">
+        <div className="flex items-center gap-2 px-4 py-3 mb-4 bg-success/10 border border-success/30 rounded-lg text-success text-sm">
           <CheckCircle className="w-4 h-4 shrink-0" />
           {success}
         </div>
@@ -360,7 +360,7 @@ export default function AdminBlogPage() {
                 </td>
                 <td className="px-4 py-3 hidden md:table-cell">
                   {post.published ? (
-                    <span className="flex items-center gap-1 text-xs text-green-400">
+                    <span className="flex items-center gap-1 text-xs text-success">
                       <Eye className="w-3 h-3" />
                       Published
                     </span>
@@ -406,7 +406,7 @@ export default function AdminBlogPage() {
                     </button>
                     <button
                       onClick={() => deletePost(post.id)}
-                      className="p-1.5 text-text-secondary hover:text-red-400 transition-colors"
+                      className="p-1.5 text-text-secondary hover:text-danger transition-colors"
                     >
                       <Trash2 className="w-4 h-4" />
                     </button>

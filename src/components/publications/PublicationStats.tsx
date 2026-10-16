@@ -1,6 +1,6 @@
 "use client";
 
-import { BookOpen, Eye, Download, Star, FileText, Users } from "lucide-react";
+import { useLocale } from "next-intl";
 
 interface PublicationStatsProps {
   totalPublications: number;
@@ -11,30 +11,37 @@ interface PublicationStatsProps {
   typeBreakdown: { type: string; count: number }[];
 }
 
+/**
+ * A single quiet row of counts. Counts that are zero (for example views when
+ * the database is unavailable, or citations, which are not tracked) are not
+ * shown, so the row never advertises an empty number.
+ */
 export default function PublicationStats({
   totalPublications,
   totalViews,
   totalDownloads,
   totalCitations,
-  featuredCount,
 }: PublicationStatsProps) {
+  const fr = useLocale() === "fr";
   const stats = [
-    { label: "Publications", value: totalPublications, icon: BookOpen, color: "text-gold" },
-    { label: "Total Views", value: totalViews, icon: Eye, color: "text-cyan-400" },
-    { label: "Downloads", value: totalDownloads, icon: Download, color: "text-green-400" },
-    { label: "Citations", value: totalCitations, icon: FileText, color: "text-purple-400" },
-    { label: "Featured", value: featuredCount, icon: Star, color: "text-amber-400" },
-  ];
+    { label: fr ? "Publications" : "Publications", value: totalPublications },
+    { label: fr ? "Lectures" : "Views", value: totalViews },
+    { label: fr ? "Téléchargements" : "Downloads", value: totalDownloads },
+    { label: fr ? "Citations" : "Citations", value: totalCitations },
+  ].filter((s) => s.value > 0);
+
+  if (stats.length === 0) return null;
 
   return (
-    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 mb-8">
+    <dl className="flex flex-wrap gap-x-10 gap-y-4 py-5 mb-10 border-y border-glass-border">
       {stats.map((stat) => (
-        <div key={stat.label} className="glass rounded-xl p-4 text-center">
-          <stat.icon className={`w-5 h-5 mx-auto mb-2 ${stat.color}`} />
-          <p className="text-2xl font-bold">{stat.value.toLocaleString()}</p>
-          <p className="text-text-secondary text-xs mt-1">{stat.label}</p>
+        <div key={stat.label} className="flex flex-row-reverse justify-end items-baseline gap-3">
+          <dt className="eyebrow text-text-muted">{stat.label}</dt>
+          <dd className="font-mono text-2xl tabular-nums text-text-primary">
+            {stat.value.toLocaleString(fr ? "fr-FR" : "en-US")}
+          </dd>
         </div>
       ))}
-    </div>
+    </dl>
   );
 }

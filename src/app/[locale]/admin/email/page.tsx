@@ -175,13 +175,13 @@ export default function AdminEmailPage() {
       {/* Status */}
       <div
         className={`glass rounded-xl p-4 flex items-start gap-3 border ${
-          config.configured ? "border-green-500/30" : "border-amber-500/30"
+          config.configured ? "border-success/30" : "border-warning/30"
         }`}
       >
         {config.configured ? (
-          <CheckCircle2 className="w-5 h-5 text-green-400 mt-0.5 shrink-0" />
+          <CheckCircle2 className="w-5 h-5 text-success mt-0.5 shrink-0" />
         ) : (
-          <AlertTriangle className="w-5 h-5 text-amber-400 mt-0.5 shrink-0" />
+          <AlertTriangle className="w-5 h-5 text-warning mt-0.5 shrink-0" />
         )}
         <div className="text-sm">
           <p className="font-medium">
@@ -219,8 +219,8 @@ export default function AdminEmailPage() {
           role="status"
           className={`rounded-xl p-4 text-sm border ${
             feedback.kind === "success"
-              ? "border-green-500/30 bg-green-500/10 text-green-300"
-              : "border-red-500/30 bg-red-500/10 text-red-300"
+              ? "border-success/30 bg-success/10 text-success"
+              : "border-danger/30 bg-danger/10 text-danger"
           }`}
         >
           {feedback.message}
@@ -308,7 +308,7 @@ export default function AdminEmailPage() {
           </div>
           <div>
             <label htmlFor="password" className="block text-sm text-text-secondary mb-1">
-              Password {config.hasPassword && <span className="text-green-400">· saved</span>}
+              Password {config.hasPassword && <span className="text-success">· saved</span>}
             </label>
             <input
               id="password"
@@ -414,9 +414,9 @@ export default function AdminEmailPage() {
 
       {/* Delivery failures */}
       {failedCount > 0 && (
-        <section className="glass rounded-xl p-6 space-y-3 border border-red-500/20">
+        <section className="glass rounded-xl p-6 space-y-3 border border-danger/20">
           <h2 className="font-semibold flex items-center gap-2">
-            <AlertTriangle className="w-4 h-4 text-red-400" />
+            <AlertTriangle className="w-4 h-4 text-danger" />
             Recent delivery failures
             <span className="text-xs font-normal text-text-secondary">
               ({failedCount} order{failedCount === 1 ? "" : "s"})
@@ -429,7 +429,7 @@ export default function AdminEmailPage() {
                   <span className="font-medium">{f.orderNumber}</span>
                   <span className="text-text-secondary">{f.email}</span>
                 </div>
-                <p className="text-xs text-red-400 mt-1 break-words">{f.lastEmailError}</p>
+                <p className="text-xs text-danger mt-1 break-words">{f.lastEmailError}</p>
               </li>
             ))}
           </ul>

@@ -1,20 +1,20 @@
 "use client";
 
 import { useTranslations, useLocale } from "next-intl";
-import { motion } from "framer-motion";
-import { GraduationCap, Award, Globe, BookOpen } from "lucide-react";
 import Image from "next/image";
+import { ArrowRight } from "lucide-react";
 import {
   skillCategories as staticSkillCategories,
   education as staticEducation,
   certifications as staticCertifications,
   languages,
 } from "@/data/skills";
+import { Container, Section } from "@/components/ui/Section";
+import { ButtonLink } from "@/components/ui/Button";
 
 interface SkillEntry {
   id?: string;
   name: string;
-  level: number;
 }
 
 export interface SkillCategoryEntry {
@@ -47,6 +47,10 @@ interface AboutClientProps {
   initialProfilePhoto?: string;
 }
 
+// Formal degrees; certificates and programmes are listed under Certifications.
+// \b keeps "MicroMasters" (a certificate programme) out of the degrees.
+const DEGREE = /\b(Master|Ingénieur|Bachelor|Licence)/;
+
 export default function AboutClient({
   initialSkillCategories,
   initialEducation,
@@ -54,204 +58,156 @@ export default function AboutClient({
   initialProfilePhoto,
 }: AboutClientProps) {
   const t = useTranslations("about");
+  const tHero = useTranslations("hero");
+  const tNav = useTranslations("nav");
+  const tCreds = useTranslations("certifications_showcase");
   const locale = useLocale();
-  const cacheBust = "v2";
-  const skillCategories = initialSkillCategories?.length
+  const fr = locale === "fr";
+  const skillCategories: SkillCategoryEntry[] = initialSkillCategories?.length
     ? initialSkillCategories
     : staticSkillCategories;
-  const education = initialEducation?.length ? initialEducation : staticEducation;
-  const certifications = initialCertifications?.length
+  const education: EducationEntry[] = initialEducation?.length ? initialEducation : staticEducation;
+  const certifications: CertificationEntry[] = initialCertifications?.length
     ? initialCertifications
     : staticCertifications;
-  const profilePhoto = initialProfilePhoto || `/images/profile.jpg?${cacheBust}`;
+  const degrees = education.filter((e) => DEGREE.test(e.degree));
+  const profilePhoto = initialProfilePhoto || "/images/profile.jpg?v2";
+  const [surname, ...given] = tHero("name").split(" ");
+  const bio = t("bio")
+    .split(/\n\s*\n/)
+    .map((p) => p.trim())
+    .filter(Boolean);
 
   return (
-    <div className="section-padding">
-      <div className="max-w-6xl mx-auto">
-        {/* Header */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="text-center mb-16"
-        >
-          <h1 className="text-4xl md:text-5xl font-bold font-[family-name:var(--font-display)] gradient-text mb-4">
-            {t("title")}
-          </h1>
-          <p className="text-text-secondary text-lg">{t("subtitle")}</p>
-        </motion.div>
+    <>
+      {/* Editorial header: portrait, name, plain biography */}
+      <header className="pt-10 pb-16 md:pt-16 md:pb-24">
+        <Container>
+          <div className="grid md:grid-cols-12 gap-10 md:gap-14 items-start">
+            <div className="md:col-span-8 order-2 md:order-1">
+              <p className="eyebrow mb-5">{t("title")}</p>
+              <h1 className="font-display text-4xl md:text-6xl leading-[1.02] tracking-tight mb-6">
+                {surname}{" "}
+                <em className="font-normal text-text-secondary">{given.join(" ")}</em>
+              </h1>
+              <p className="font-mono text-xs uppercase tracking-[0.08em] text-text-muted mb-8">
+                {t("subtitle")}
+              </p>
+              <h2 className="sr-only">{t("bio_title")}</h2>
+              <div className="space-y-5 max-w-2xl">
+                {bio.map((p, i) => (
+                  <p key={i} className="lede">
+                    {p}
+                  </p>
+                ))}
+              </div>
+              <div className="mt-10 flex flex-col sm:flex-row gap-3">
+                <ButtonLink href="/experience" size="lg">
+                  {tNav("experience")}
+                  <ArrowRight className="w-4 h-4" />
+                </ButtonLink>
+                <ButtonLink href="/contact" variant="secondary" size="lg">
+                  {tHero("cta_contact")}
+                </ButtonLink>
+              </div>
+            </div>
 
-        {/* Bio with Photo */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="glass rounded-2xl p-8 mb-12"
-        >
-          <div className="flex flex-col md:flex-row gap-8 items-start">
-            <div className="shrink-0 mx-auto md:mx-0">
-              <div className="relative w-40 h-40 rounded-xl overflow-hidden border-2 border-gold/30">
+            <figure className="md:col-span-4 order-1 md:order-2 max-w-[16rem] md:max-w-none">
+              <div className="relative aspect-[4/5] overflow-hidden rounded-[var(--radius-lg)] border border-glass-border bg-surface-1 shadow-[var(--elev-lg)]">
                 <Image
                   src={profilePhoto}
                   alt="KONAN Amani Dieudonné"
                   fill
-                  className="object-cover"
+                  className="object-cover scale-[1.04] origin-top-left"
+                  sizes="(max-width: 768px) 256px, 360px"
+                  priority
                   unoptimized
                 />
               </div>
-            </div>
-            <div>
-              <h2 className="text-2xl font-bold font-[family-name:var(--font-display)] text-gold mb-4">
-                {t("bio_title")}
-              </h2>
-              <p className="text-text-secondary leading-relaxed text-base">
-                {t("bio")}
-              </p>
-            </div>
+            </figure>
           </div>
-        </motion.div>
+        </Container>
+      </header>
 
-        {/* Skills */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="mb-12"
-        >
-          <h2 className="text-2xl font-bold font-[family-name:var(--font-display)] text-gold mb-8 text-center">
-            {t("skills_title")}
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {skillCategories.map((category, catIndex) => (
-              <motion.div
-                key={category.name}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: catIndex * 0.1 }}
-                className="glass rounded-xl p-6"
-              >
-                <h3 className="text-lg font-semibold mb-4">
-                  {locale === "fr" ? category.nameFr : category.name}
-                </h3>
-                <div className="space-y-3">
-                  {category.skills.map((skill) => (
-                    <div key={skill.name}>
-                      <div className="flex justify-between text-sm mb-1">
-                        <span className="text-text-secondary">{skill.name}</span>
-                        <span className="text-gold">{skill.level}%</span>
-                      </div>
-                      <div className="h-2 bg-navy-light rounded-full overflow-hidden">
-                        <motion.div
-                          initial={{ width: 0 }}
-                          whileInView={{ width: `${skill.level}%` }}
-                          viewport={{ once: true }}
-                          transition={{ duration: 1, delay: 0.2 }}
-                          className="h-full bg-gradient-to-r from-gold-dark to-gold rounded-full"
-                        />
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </motion.div>
-            ))}
-          </div>
-        </motion.div>
-
-        {/* Education & Certifications */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
-          {/* Education */}
-          <motion.div
-            initial={{ opacity: 0, x: -20 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
-            className="glass rounded-xl p-6"
-          >
-            <div className="flex items-center gap-2 mb-6">
-              <GraduationCap className="w-5 h-5 text-gold" />
-              <h2 className="text-xl font-bold font-[family-name:var(--font-display)]">
-                {t("education_title")}
-              </h2>
+      {/* Skills: grouped lists, no self-rated levels */}
+      <Section title={t("skills_title")}>
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-x-10 gap-y-12">
+          {skillCategories.map((category) => (
+            <div key={category.id ?? category.name}>
+              <h3 className="eyebrow text-text-muted mb-4">
+                {fr && category.nameFr ? category.nameFr : category.name}
+              </h3>
+              <ul className="flex flex-wrap gap-2">
+                {category.skills.map((skill) => (
+                  <li
+                    key={skill.id ?? skill.name}
+                    className="text-sm px-2.5 py-1 rounded-[var(--radius-sm)] bg-surface-2 text-text-secondary"
+                  >
+                    {skill.name}
+                  </li>
+                ))}
+              </ul>
             </div>
-            <div className="space-y-4">
-              {education.map((edu) => (
-                <div key={edu.degree + edu.year} className="border-l-2 border-gold/30 pl-4">
-                  <h3 className="font-semibold text-sm">
-                    {locale === "fr" ? edu.degreeFr : edu.degree}
-                  </h3>
-                  <p className="text-text-secondary text-sm">{edu.institution}</p>
-                  <p className="text-text-muted text-xs mt-1">
-                    {edu.year} · {edu.location}
-                  </p>
-                </div>
-              ))}
-            </div>
-          </motion.div>
-
-          {/* Certifications */}
-          <motion.div
-            initial={{ opacity: 0, x: 20 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
-            className="glass rounded-xl p-6"
-          >
-            <div className="flex items-center gap-2 mb-6">
-              <Award className="w-5 h-5 text-gold" />
-              <h2 className="text-xl font-bold font-[family-name:var(--font-display)]">
-                {t("certifications_title")}
-              </h2>
-            </div>
-            <div className="space-y-3">
-              {certifications.map((cert) => (
-                <div
-                  key={cert.name}
-                  className="flex items-start gap-3 p-3 rounded-lg hover:bg-white/5 transition-colors"
-                >
-                  <Award className="w-4 h-4 text-gold mt-0.5 shrink-0" />
-                  <div>
-                    <h3 className="text-sm font-medium">{cert.name}</h3>
-                    <p className="text-text-muted text-xs">
-                      {cert.issuer} · {cert.year}
-                    </p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </motion.div>
+          ))}
         </div>
+      </Section>
 
-        {/* Languages */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="glass rounded-xl p-6"
-        >
-          <div className="flex items-center gap-2 mb-6">
-            <Globe className="w-5 h-5 text-gold" />
-            <h2 className="text-xl font-bold font-[family-name:var(--font-display)]">
-              {t("languages_title")}
-            </h2>
+      {/* Education and certifications */}
+      <Section title={tCreds("title")}>
+        <div className="grid md:grid-cols-2 gap-x-12 gap-y-12">
+          <div>
+            <h3 className="eyebrow text-text-muted mb-2">{t("education_title")}</h3>
+            <ul>
+              {degrees.map((edu) => (
+                <li
+                  key={edu.id ?? edu.degree + edu.year}
+                  className="grid grid-cols-[4rem_1fr] gap-4 py-4 border-b border-glass-border"
+                >
+                  <span className="font-mono text-sm text-text-muted tabular-nums pt-0.5">{edu.year}</span>
+                  <span>
+                    <span className="block text-text-primary leading-snug">
+                      {fr && edu.degreeFr ? edu.degreeFr : edu.degree}
+                    </span>
+                    <span className="block text-sm text-text-muted mt-1">
+                      {edu.institution}
+                      {edu.location && ` · ${edu.location}`}
+                    </span>
+                  </span>
+                </li>
+              ))}
+            </ul>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {languages.map((lang) => (
-              <div
-                key={lang.name}
-                className="flex items-center gap-3 p-3 rounded-lg bg-navy/50"
-              >
-                <BookOpen className="w-4 h-4 text-gold" />
-                <div>
-                  <h3 className="text-sm font-medium">
-                    {locale === "fr" ? lang.nameFr : lang.name}
-                  </h3>
-                  <p className="text-text-muted text-xs">
-                    {locale === "fr" ? lang.levelFr : lang.level}
-                  </p>
-                </div>
-              </div>
-            ))}
+          <div>
+            <h3 className="eyebrow text-text-muted mb-2">{t("certifications_title")}</h3>
+            <ul>
+              {certifications.map((cert) => (
+                <li
+                  key={cert.id ?? cert.name}
+                  className="grid grid-cols-[4rem_1fr] gap-4 py-4 border-b border-glass-border"
+                >
+                  <span className="font-mono text-sm text-text-muted tabular-nums pt-0.5">{cert.year}</span>
+                  <span>
+                    <span className="block text-text-primary leading-snug">{cert.name}</span>
+                    <span className="block text-sm text-text-muted mt-1">{cert.issuer}</span>
+                  </span>
+                </li>
+              ))}
+            </ul>
           </div>
-        </motion.div>
-      </div>
-    </div>
+        </div>
+      </Section>
+
+      {/* Languages */}
+      <Section title={t("languages_title")}>
+        <dl className="grid sm:grid-cols-3 gap-x-10">
+          {languages.map((lang) => (
+            <div key={lang.name} className="py-4 border-b border-glass-border">
+              <dt className="font-display text-xl">{fr ? lang.nameFr : lang.name}</dt>
+              <dd className="text-sm text-text-muted mt-1">{fr ? lang.levelFr : lang.level}</dd>
+            </div>
+          ))}
+        </dl>
+      </Section>
+    </>
   );
 }

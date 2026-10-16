@@ -894,7 +894,7 @@ export default function AdminStorePage() {
                 <span className="text-text-secondary">{selected.size} selected</span>
                 <button
                   onClick={confirmDeleteSelected}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-red-500/15 text-red-400 hover:bg-red-500/25 transition-all font-medium"
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-danger/15 text-danger hover:bg-danger/25 transition-all font-medium"
                 >
                   <Trash2 className="w-3.5 h-3.5" />
                   Delete selected
@@ -904,7 +904,7 @@ export default function AdminStorePage() {
             <div className="flex-1" />
             <button
               onClick={confirmDeleteAll}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-red-500/40 text-red-400 hover:bg-red-500/10 transition-all font-medium"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-danger/40 text-danger hover:bg-danger/10 transition-all font-medium"
             >
               <AlertTriangle className="w-3.5 h-3.5" />
               Delete all
@@ -949,16 +949,16 @@ export default function AdminStorePage() {
                   <span
                     className={`text-[10px] px-2 py-0.5 rounded-full ${
                       b.status === "PUBLISHED"
-                        ? "bg-green-500/15 text-green-400"
+                        ? "bg-success/15 text-success"
                         : b.status === "DRAFT"
-                          ? "bg-amber-500/15 text-amber-400"
+                          ? "bg-warning/15 text-warning"
                           : "bg-gray-500/15 text-gray-400"
                     }`}
                   >
                     {b.status}
                   </span>
                   {!b.fileId && (
-                    <span className="text-[10px] px-2 py-0.5 rounded-full bg-red-500/15 text-red-400">
+                    <span className="text-[10px] px-2 py-0.5 rounded-full bg-danger/15 text-danger">
                       No file
                     </span>
                   )}
@@ -966,7 +966,7 @@ export default function AdminStorePage() {
                 <p className="text-xs text-text-secondary mt-0.5">
                   {b.publicationYear} ·{" "}
                   {b.priceCents === 0 ? (
-                    <span className="text-green-400 font-medium">Free</span>
+                    <span className="text-success font-medium">Free</span>
                   ) : (
                     formatPrice(b.priceCents, b.currency)
                   )}
@@ -997,7 +997,7 @@ export default function AdminStorePage() {
                 {b.status === "ARCHIVED" ? (
                   <button
                     onClick={() => setBookStatus(b, "PUBLISHED")}
-                    className="p-2 text-text-secondary hover:text-green-400 transition-colors"
+                    className="p-2 text-text-secondary hover:text-success transition-colors"
                     aria-label="Restore (publish)"
                     title="Restore & publish"
                   >
@@ -1006,7 +1006,7 @@ export default function AdminStorePage() {
                 ) : (
                   <button
                     onClick={() => setBookStatus(b, "ARCHIVED")}
-                    className="p-2 text-text-secondary hover:text-amber-400 transition-colors"
+                    className="p-2 text-text-secondary hover:text-warning transition-colors"
                     aria-label="Archive"
                     title="Archive (hide from store)"
                   >
@@ -1025,7 +1025,7 @@ export default function AdminStorePage() {
                 )}
                 <button
                   onClick={() => handleDelete(b)}
-                  className="p-2 text-text-secondary hover:text-red-400 transition-colors"
+                  className="p-2 text-text-secondary hover:text-danger transition-colors"
                   aria-label="Delete"
                 >
                   <Trash2 className="w-4 h-4" />
@@ -1051,7 +1051,7 @@ export default function AdminStorePage() {
             className="glass-strong rounded-2xl w-full max-w-md p-6"
           >
             <div className="flex items-start gap-3 mb-4">
-              <span className="w-10 h-10 rounded-lg bg-red-500/15 text-red-400 flex items-center justify-center shrink-0">
+              <span className="w-10 h-10 rounded-lg bg-danger/15 text-danger flex items-center justify-center shrink-0">
                 <AlertTriangle className="w-5 h-5" />
               </span>
               <div className="min-w-0">
@@ -1095,7 +1095,7 @@ export default function AdminStorePage() {
                   confirmBusy ||
                   (!!confirmDialog.requireText && confirmText.trim() !== confirmDialog.requireText)
                 }
-                className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-red-500 text-white font-semibold hover:bg-red-600 transition-all disabled:opacity-50"
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-danger text-white font-semibold hover:bg-red-600 transition-all disabled:opacity-50"
               >
                 <Trash2 className="w-4 h-4" />
                 {confirmBusy ? "Deleting…" : confirmDialog.confirmLabel}
@@ -1123,7 +1123,7 @@ export default function AdminStorePage() {
               {editingId ? "Edit Book" : "New Book"}
             </h2>
             {error && (
-              <p className="text-sm text-red-400 border border-red-400/30 rounded-lg p-3 mb-4">
+              <p className="text-sm text-danger border border-danger/30 rounded-lg p-3 mb-4">
                 {error}
               </p>
             )}
@@ -1189,7 +1189,7 @@ export default function AdminStorePage() {
                   onChange={(e) => setForm({ ...form, description: e.target.value })}
                   required
                 />
-                {aiError && <p className="text-xs text-red-400 mt-1">{aiError}</p>}
+                {aiError && <p className="text-xs text-danger mt-1">{aiError}</p>}
               </div>
               <div>
                 <label className="block text-sm text-text-secondary mb-1">Description (FR)</label>
@@ -1452,7 +1452,7 @@ export default function AdminStorePage() {
               </div>
 
               {form.status === "PUBLISHED" && !form.fileId && (
-                <p className="text-sm text-amber-400">
+                <p className="text-sm text-warning">
                   Note: a published book without a file cannot be purchased. Upload the book file.
                 </p>
               )}
