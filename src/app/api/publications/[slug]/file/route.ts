@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { rateLimit } from "@/lib/rate-limit";
-import { requiresPlan, viewerHasGatedAccess, STATIC_GATED_FILES, readPrivatePublication, type FileKind } from "@/lib/publication-access";
+import { requiresPlan, viewerHasGatedAccess, STATIC_GATED_FILES, readPrivatePublication, resolvePublicPublication, type FileKind } from "@/lib/publication-access";
+import { appUrl } from "@/lib/orders";
 
 /**
  * Serves a publication's file only to viewers allowed to open it.
@@ -75,8 +76,13 @@ export async function GET(request: Request, { params }: { params: Promise<{ slug
         },
       });
     }
-    // Not a private file: it's a public one, so a plain redirect is fine.
-    return NextResponse.redirect(new URL(encodeURI(stored), request.url), 302);
+    // Not a private file: a public one under /public/publications. Redirect on
+    // the public origin — request.url is the server's internal address behind
+    // the host's proxy (https://localhost:10000/…), which no browser can open —
+    // to the file's real name on disk.
+    const publicName = await resolvePublicPublication(fileName);
+    if (!publicName) return NextResponse.json({ error: "Not found" }, { status: 404 });
+    return NextResponse.redirect(`${appUrl()}/publications/${encodeURIComponent(publicName)}`, 302);
   }
 
   if (stored.startsWith("/api/uploads/")) {
@@ -98,7 +104,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ slug
   }
 
   if (/^https:\/\//i.test(stored)) {
-    const res = NextResponse.redirect(new URL(stored, request.url), 302);
+    const res = NextResponse.redirect(stored, 302);
     res.headers.set("Cache-Control", "private, no-store");
     return res;
   }

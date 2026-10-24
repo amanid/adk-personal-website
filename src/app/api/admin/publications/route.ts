@@ -74,7 +74,7 @@ export async function POST(request: Request) {
     notifySubscribers({
       title: publication.title,
       excerpt: publication.abstract.substring(0, 200),
-      url: `/publications/${publication.slug}`,
+      url: `/en/publications/${publication.slug}`,
       type: "publication",
     }).catch((err) => console.error("Notification error:", err));
 

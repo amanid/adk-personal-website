@@ -97,12 +97,9 @@ export default function HomeClient({
 
   const featuredProjects = projects.filter((p) => p.featured).slice(0, 4);
   const featuredPublications = publications.filter((p) => p.featured).slice(0, 3);
-  // Years and the current role come from the records, never from copy.
+  // Years come from the records, never from copy. The current post itself is
+  // not shown on the home page: the site presents the work, not a job title.
   const career = careerFacts(experiences);
-  const current = career?.current ?? null;
-  const currentRole = current
-    ? { role: fr && current.roleFr ? current.roleFr : current.role, organization: current.organization, location: current.location }
-    : null;
   const iccoYears = tenureYears(experiences, /\bICCO\b|International Cocoa Organization/);
 
   const figures = [
@@ -118,7 +115,6 @@ export default function HomeClient({
         showCvDownload={vis.cvDownload === true}
         cvUrl={initialCvUrl}
         profilePhoto={profilePhoto}
-        currentRole={currentRole}
         figures={figures}
         timeline={capabilities.timeline}
         rangeStart={capabilities.rangeStart}

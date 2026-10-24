@@ -27,12 +27,14 @@
     "greeting": "Hello, I'm",
     "name": "KONAN Amani Dieudonné",
     "roles": "Senior Statistician | Data Scientist | AI Engineer | Data Architect | Econometrician",
-    "description": "I have spent {years} years turning data into decisions for development finance, UN agencies and research institutions. Today I lead data architecture and AI work at Afreximbank; before that I spent {iccoYears} years as statistician and econometrician at the International Cocoa Organization. I hold a Master's in Statistics and Econometrics from Toulouse, an engineering degree from ENSEA and MIT certificates in data engineering and applied AI. I submitted my DBA thesis on how development institutions adopt AI in June 2026.",
+    "description": "I have spent {years} years turning data into decisions for development finance, UN agencies and research institutions. Today I lead data architecture and AI work in development finance; before that I spent {iccoYears} years as statistician and econometrician at the International Cocoa Organization. I hold a Master's in Statistics and Econometrics from Toulouse, an engineering degree from ENSEA and MIT certificates in data engineering and applied AI. I submitted my DBA thesis on how development institutions adopt AI in June 2026.",
     "cta_services": "Explore Services",
     "cta_contact": "Get in Touch",
     "download_cv": "Download CV",
     "badge_text": "{years}+ Years of International Experience",
-    "cta_book": "Book a call"
+    "cta_book": "Book a call",
+    "tagline": "Statistics, data architecture and AI for development finance and research",
+    "based_in": "Cairo · Abidjan · remote"
   },
   "stats": {
     "years": "Years Experience",
@@ -66,7 +68,7 @@
     "title": "About Me",
     "subtitle": "Senior Data Scientist | Principal AI Engineer | ML & Data Architect",
     "bio_title": "Professional Biography",
-    "bio": "I am a statistician and data scientist from Côte d'Ivoire. I trained at ENSEA in Abidjan, where I qualified as a Statistics and Information Systems Engineer in 2012, and I hold a Master's in Statistics and Econometrics from Université Toulouse I Capitole (2017).\n\nSince September 2023 I have been Manager, Data Scientist / Architect at the African Export-Import Bank (Afreximbank) in Cairo. I work on the bank's Databricks lakehouse, data quality and master data, the pipelines that bring core banking and treasury data into the warehouse, and generative AI tools for internal use. From 2017 to 2023 I was Statistician and Econometrician at the International Cocoa Organization (ICCO) in Abidjan, where I built forecasting models and the statistical database behind its market reports.\n\nBefore and alongside those roles, I managed data and monitoring and evaluation work for PAC-CI, ICRAF, FHI360, Barry-Callebaut and UNHCR in Abidjan, ran a training for ICRISAT in Mali, and took remote assignments for IOM, UNIDIR and ITU.\n\nI also hold certificates from MIT, Johns Hopkins University and the Corporate Finance Institute. In June 2026 I submitted my Doctor of Business Administration thesis, Renting Intelligence, at the IIBM Institute of Business Management. It looks at how AI sourcing choices shape performance in international development.",
+    "bio": "I am a statistician and data scientist from Côte d'Ivoire. I trained at ENSEA in Abidjan, where I qualified as a Statistics and Information Systems Engineer in 2012, and I hold a Master's in Statistics and Econometrics from Université Toulouse I Capitole (2017).\n\nSince September 2023 I have led data architecture and AI work at the African Export-Import Bank (Afreximbank) in Cairo. I work on the bank's Databricks lakehouse, data quality and master data, the pipelines that bring core banking and treasury data into the warehouse, and generative AI tools for internal use. From 2017 to 2023 I was Statistician and Econometrician at the International Cocoa Organization (ICCO) in Abidjan, where I built forecasting models and the statistical database behind its market reports.\n\nBefore and alongside those roles, I managed data and monitoring and evaluation work for PAC-CI, ICRAF, FHI360, Barry-Callebaut and UNHCR in Abidjan, ran a training for ICRISAT in Mali, and took remote assignments for IOM, UNIDIR and ITU.\n\nI also hold certificates from MIT, Johns Hopkins University and the Corporate Finance Institute. In June 2026 I submitted my Doctor of Business Administration thesis, Renting Intelligence, at the IIBM Institute of Business Management. It looks at how AI sourcing choices shape performance in international development.",
     "education_title": "Education",
     "certifications_title": "Certifications",
     "skills_title": "Technical Skills",

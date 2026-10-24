@@ -53,7 +53,7 @@ export async function PUT(
       notifySubscribers({
         title: post.title,
         excerpt: post.excerpt || post.title,
-        url: `/blog/${post.slug}`,
+        url: `/en/blog/${post.slug}`,
         type: "blog",
       }).catch((err) => console.error("Notification error:", err));
     }

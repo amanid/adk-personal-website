@@ -10,8 +10,6 @@ interface HeroSectionProps {
   cvUrl?: string;
   /** Portrait URL from the site settings (server-provided, no client fetch). */
   profilePhoto?: string;
-  /** The role with no end date, taken from the experience records. */
-  currentRole?: { role: string; organization: string; location: string } | null;
   /** Every figure here is computed from the records, never typed in. */
   figures: { value: number; suffix?: string; label: string }[];
   timeline: TimelineBar[];
@@ -34,7 +32,6 @@ export default function HeroSection({
   showCvDownload = false,
   cvUrl,
   profilePhoto,
-  currentRole,
   figures,
   timeline,
   rangeStart,
@@ -55,11 +52,11 @@ export default function HeroSection({
       <div className="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-14 pb-16 md:pt-24 md:pb-20">
         <div className="grid md:grid-cols-12 gap-10 md:gap-14 items-end">
           <div className="md:col-span-7 order-2 md:order-1">
-            {currentRole && (
-              <p className="eyebrow mb-6 rise" style={{ ["--i" as string]: 0 }}>
-                {currentRole.role}
-              </p>
-            )}
+            {/* A standing line about the work, not the job title of the day:
+                the site presents the practitioner, whatever the current post. */}
+            <p className="eyebrow mb-6 rise" style={{ ["--i" as string]: 0 }}>
+              {t("tagline")}
+            </p>
 
             <h1 className="display-name mb-8 rise" style={{ ["--i" as string]: 1 }}>
               <span className="display-name__surname">{surname}</span>
@@ -125,16 +122,10 @@ export default function HeroSection({
                 unoptimized
               />
             </div>
-            {currentRole && (
-              <figcaption className="mt-3 flex gap-3 text-xs leading-relaxed">
-                <span className="text-gold shrink-0 pt-px" aria-hidden>●</span>
-                <span className="text-text-secondary">
-                  {currentRole.organization}
-                  <br />
-                  {currentRole.location}
-                </span>
-              </figcaption>
-            )}
+            <figcaption className="mt-3 flex gap-3 text-xs leading-relaxed">
+              <span className="text-gold shrink-0 pt-px" aria-hidden>●</span>
+              <span className="text-text-secondary">{t("based_in")}</span>
+            </figcaption>
           </figure>
         </div>
 

@@ -45,5 +45,10 @@ export default async function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/", "/(en|fr)/:path*", "/api/admin/:path*"],
+  // The last pattern is every path WITHOUT a locale prefix (an old bookmark,
+  // a link from an email, /blog/<slug> typed by hand) — next-intl redirects it
+  // to the default locale instead of Next answering 404. Excluded: the API,
+  // affiliate links (/r/<code>), Next internals, and files (anything with a dot:
+  // sitemap.xml, feed.xml, llms.txt, robots.txt, PDFs, images).
+  matcher: ["/", "/(en|fr)/:path*", "/api/admin/:path*", "/((?!api|r/|_next|_vercel|.*\\..*).*)"],
 };

@@ -55,7 +55,7 @@ const playfair = Playfair_Display({
 export async function generateMetadata(): Promise<Metadata> {
   const facts = await getSiteFacts();
   const y = facts.years;
-  const long = `Statistician and data scientist with ${y}+ years of work for Afreximbank, the International Cocoa Organization, UN agencies and research centres.`;
+  const long = `Statistician and data scientist with ${y}+ years of work in development finance, commodity markets, UN agencies and research centres.`;
   return {
     metadataBase: new URL("https://www.konanamanidieudonne.org"),
     title: {
@@ -146,10 +146,8 @@ export default async function LocaleLayout({
     name: "KONAN Amani Dieudonné",
     url: "https://www.konanamanidieudonne.org",
     image: "https://www.konanamanidieudonne.org/images/profile.jpg",
-    jobTitle: facts.current?.role ?? "Senior Statistician & Data Scientist",
-    ...(facts.current
-      ? { worksFor: { "@type": "Organization", name: facts.current.organization } }
-      : {}),
+    // The profession, not the current post: the site is position-agnostic.
+    jobTitle: "Senior Statistician & Data Scientist",
     alumniOf: [
       {
         "@type": "EducationalOrganization",

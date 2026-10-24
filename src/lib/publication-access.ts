@@ -1,5 +1,5 @@
 import path from "node:path";
-import { readFile } from "node:fs/promises";
+import { access, readFile } from "node:fs/promises";
 import { auth } from "./auth";
 import { prisma } from "./prisma";
 import { checkPublicationAccess } from "./subscription";
@@ -90,10 +90,35 @@ export function protectFiles<T extends WithFiles>(pub: T): T {
   return out;
 }
 
+/** Spellings a stored name may have on disk: straight or curly apostrophes, hyphen or en dash. */
+function nameVariants(fileName: string): string[] {
+  const apos = [fileName, fileName.replace(/'/g, "’"), fileName.replace(/’/g, "'")];
+  const dashes = apos.flatMap((n) => [n, n.replace(/–/g, "-"), n.replace(/-/g, "–")]);
+  return [...new Set(dashes)];
+}
+
+/**
+ * The public PDF's real file name under /public/publications, or null. The
+ * catalogue stores names with a straight apostrophe while some files were
+ * saved with a curly one; the link must still resolve.
+ */
+export async function resolvePublicPublication(fileName: string): Promise<string | null> {
+  for (const name of nameVariants(fileName)) {
+    const safe = path.basename(name);
+    if (!safe || safe !== name) continue;
+    try {
+      await access(path.join(process.cwd(), "public", "publications", safe));
+      return safe;
+    } catch {
+      /* try the next spelling */
+    }
+  }
+  return null;
+}
+
 /** Read a file from the private folder, tolerating ’ vs ' in the stored name. */
 export async function readPrivatePublication(fileName: string): Promise<Buffer | null> {
-  const candidates = [...new Set([fileName, fileName.replace(/'/g, "’"), fileName.replace(/’/g, "'")])];
-  for (const name of candidates) {
+  for (const name of nameVariants(fileName)) {
     // basename() drops any directory part, so a crafted name can't escape the folder.
     const safe = path.basename(name);
     if (!safe || safe !== name) continue;
