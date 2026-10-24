@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { priceCart } from "@/lib/store";
 import { applyCoupon } from "@/lib/coupon";
-import { rateLimit } from "@/lib/rate-limit";
+import { persistentRateLimit } from "@/lib/rate-limit-db";
 import { checkOrigin } from "@/lib/origin-check";
 
 export const runtime = "nodejs";
@@ -12,7 +12,7 @@ export async function POST(request: Request) {
   if (origin) return origin;
   // Kept deliberately low: this endpoint reveals whether a code is valid, so a
   // tight limit blunts brute-force enumeration of coupon codes.
-  const limited = rateLimit(request, { limit: 12, windowSeconds: 60 });
+  const limited = await persistentRateLimit(request, { limit: 12, windowSeconds: 60 });
   if (limited) return limited;
 
   try {

@@ -87,8 +87,8 @@ export default function AboutClient({
             <div className="md:col-span-8 order-2 md:order-1">
               <p className="eyebrow mb-5">{t("title")}</p>
               <h1 className="font-display text-4xl md:text-6xl leading-[1.02] tracking-tight mb-6">
-                {surname}{" "}
-                <em className="font-normal text-text-secondary">{given.join(" ")}</em>
+                <span className="font-medium">{surname}</span>{" "}
+                <span className="font-normal">{given.join(" ")}</span>
               </h1>
               <p className="font-mono text-xs uppercase tracking-[0.08em] text-text-muted mb-8">
                 {t("subtitle")}

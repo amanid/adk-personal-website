@@ -16,6 +16,7 @@ import PdfViewer from "@/components/publications/PdfViewer";
 import ShareButtons from "@/components/publications/ShareButtons";
 import type { PublicationType, PublicationData } from "@/types";
 import CTABanner from "@/components/CTABanner";
+import NewsletterSignup from "@/components/NewsletterSignup";
 import SubscriptionGate from "@/components/publications/SubscriptionGate";
 
 interface Comment {
@@ -37,6 +38,8 @@ interface DbPublication {
   year: number;
   category: string | null;
   pdfUrl: string | null;
+  dataUrl?: string | null;
+  supplementaryUrl?: string | null;
   tags: string[];
   featured: boolean;
   views: number;
@@ -136,6 +139,9 @@ export default function PublicationDetailClient({
   const title = locale === "fr" ? (pub.titleFr || pub.title) : pub.title;
   const abstract = locale === "fr" ? (pub.abstractFr || pub.abstract) : pub.abstract;
   const pdfUrl = pub.pdfUrl;
+  // Data files arrive already rewritten to the access-checked route (protectFiles).
+  const dataUrl = dbPub?.dataUrl || (staticPub as PublicationData | undefined)?.dataUrl || null;
+  const supplementaryUrl = dbPub?.supplementaryUrl || (staticPub as PublicationData | undefined)?.supplementaryUrl || null;
   const views = dbPub?.views;
   const downloads = dbPub?.downloadCount || 0;
   const pubType = (dbPub?.publicationType || (staticPub as PublicationData | undefined)?.publicationType || "ANALYTICAL_REPORT") as PublicationType;
@@ -312,6 +318,54 @@ export default function PublicationDetailClient({
           </div>
         )}
 
+        {/* Data & files: the paid part of every publication. The URLs are the
+            access-checked route (protectFiles), so the gate here only decides
+            what to show; the server decides what to serve. */}
+        {(dataUrl || supplementaryUrl) && (
+          <section aria-labelledby="pub-data" className="mb-12 card p-6 md:p-7">
+            <h2 id="pub-data" className="eyebrow mb-1">
+              {t("data_files")}
+            </h2>
+            <p className="text-sm text-text-secondary mb-5 max-w-xl">{t("data_files_note")}</p>
+            <SubscriptionGate
+              accessLevel="GATED"
+              requiredAccess="data"
+              fallback={
+                <div className="flex flex-wrap items-center gap-3">
+                  {dataUrl && (
+                    <ButtonLink href="/subscribe" variant="secondary">
+                      <Lock aria-hidden className="w-4 h-4" />
+                      {t("download_dataset")}
+                    </ButtonLink>
+                  )}
+                  {supplementaryUrl && (
+                    <ButtonLink href="/subscribe" variant="secondary">
+                      <Lock aria-hidden className="w-4 h-4" />
+                      {t("download_supplementary")}
+                    </ButtonLink>
+                  )}
+                  <span className="text-sm text-text-muted">{t("data_plan_hint")}</span>
+                </div>
+              }
+            >
+              <div className="flex flex-wrap items-center gap-3">
+                {dataUrl && (
+                  <a href={dataUrl} className={buttonClass("primary", "md")} onClick={trackDownload}>
+                    <Download aria-hidden className="w-4 h-4" />
+                    {t("download_dataset")}
+                  </a>
+                )}
+                {supplementaryUrl && (
+                  <a href={supplementaryUrl} className={buttonClass("secondary", "md")} onClick={trackDownload}>
+                    <Download aria-hidden className="w-4 h-4" />
+                    {t("download_supplementary")}
+                  </a>
+                )}
+              </div>
+            </SubscriptionGate>
+          </section>
+        )}
+
         {/* Abstract */}
         <section aria-labelledby="pub-abstract" className="mb-12">
           <h2 id="pub-abstract" className="eyebrow mb-4">
@@ -418,9 +472,10 @@ export default function PublicationDetailClient({
           </section>
         )}
 
-        {/* CTA */}
+        {/* CTA: the session first, then the brief */}
         {accessLevel === "GATED" && <CTABanner variant="premium" />}
         <CTABanner variant="consulting" />
+        <NewsletterSignup variant="inline" />
 
         {/* Related */}
         {related.length > 0 && (

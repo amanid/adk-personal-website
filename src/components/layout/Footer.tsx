@@ -4,6 +4,7 @@ import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/routing";
 import { Github, Linkedin, Mail, MapPin, Phone } from "lucide-react";
 import NewsletterSignup from "@/components/NewsletterSignup";
+import { useSiteFacts } from "@/lib/site-facts";
 
 const socialLinks = [
   { icon: Linkedin, href: "https://www.linkedin.com/in/amanidieudonnekonan", label: "LinkedIn" },
@@ -25,7 +26,7 @@ const quickLinks = [
 export default function Footer() {
   const t = useTranslations("footer");
   const tNav = useTranslations("nav");
-
+  const { years } = useSiteFacts();
 
   return (
     <footer className="border-t border-glass-border bg-navy/50">
@@ -37,7 +38,7 @@ export default function Footer() {
               KONAN Amani Dieudonné
             </p>
             <p className="text-text-secondary text-sm leading-relaxed mb-4">
-              {t("description")}
+              {t("description", { years })}
             </p>
             <div className="space-y-2">
               <div className="flex items-center gap-2 text-text-muted text-sm">

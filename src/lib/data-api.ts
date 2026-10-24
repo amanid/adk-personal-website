@@ -11,6 +11,7 @@ import { NextResponse } from "next/server";
 import type { ApiKey } from "@prisma/client";
 import { prisma } from "./prisma";
 import { rateLimitKey } from "./rate-limit";
+import { subscriptionGrantsAccess } from "./subscription-plans";
 
 export const API_SETTING_KEYS = {
   freeQuota: "api.freeQuota",
@@ -63,6 +64,27 @@ export function effectivePlan(k: Pick<ApiKey, "plan" | "currentPeriodEnd">, now 
   return "PRO";
 }
 
+/**
+ * One data product, one price: a Data Access or Full Access research
+ * subscription includes API Pro. The key's address is matched to the account
+ * (case-insensitively) and the subscription must still grant access.
+ */
+export async function subscriptionIncludesPro(email: string, now = new Date()): Promise<boolean> {
+  const user = await prisma.user.findFirst({
+    where: { email: { equals: email, mode: "insensitive" } },
+    select: { subscription: { select: { tier: true, status: true, cancelAtPeriodEnd: true, currentPeriodEnd: true } } },
+  });
+  const sub = user?.subscription;
+  if (!sub || !subscriptionGrantsAccess(sub, now)) return false;
+  return sub.tier === "DATA_ACCESS" || sub.tier === "FULL_ACCESS";
+}
+
+/** The plan in force for a key: its own Pro billing, or Pro through a data subscription. */
+export async function planForKey(k: Pick<ApiKey, "plan" | "currentPeriodEnd" | "email">, now = new Date()): Promise<"FREE" | "PRO"> {
+  if (effectivePlan(k, now) === "PRO") return "PRO";
+  return (await subscriptionIncludesPro(k.email, now)) ? "PRO" : "FREE";
+}
+
 const CORS = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "Authorization, X-API-Key, Content-Type",
@@ -98,7 +120,7 @@ export async function authenticateApi(request: Request): Promise<ApiContext | Ne
   if (!key || key.status !== "ACTIVE") return apiError(401, "unauthorized", "Unknown or revoked API key.");
 
   const settings = await getApiSettings();
-  const plan = effectivePlan(key);
+  const plan = await planForKey(key);
   const perMinute = plan === "PRO" ? settings.proPerMinute : settings.freePerMinute;
   if (rateLimitKey(`api:${key.id}`, { limit: perMinute, windowSeconds: 60 })) {
     return apiError(429, "rate_limited", `Too many requests: ${perMinute} per minute on the ${plan} plan.`, { "Retry-After": "60" });

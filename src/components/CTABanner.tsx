@@ -4,6 +4,8 @@ import { Link } from "@/i18n/routing";
 import { ArrowRight } from "lucide-react";
 import { useLocale } from "next-intl";
 import { buttonClass } from "@/components/ui/Button";
+import { useSiteFacts } from "@/lib/site-facts";
+import { formatPriceShort } from "@/lib/utils";
 
 interface CTABannerProps {
   variant?: "consulting" | "newsletter" | "services" | "premium";
@@ -11,16 +13,38 @@ interface CTABannerProps {
 
 export default function CTABanner({ variant = "consulting" }: CTABannerProps) {
   const fr = useLocale() === "fr";
+  const { years, advisory } = useSiteFacts();
+
+  // The paid session, priced from the booking packages; the free call as the
+  // low-friction alternative. With no packages the banner falls back to the
+  // consulting overview.
+  const paid = advisory.paid;
+  const free = advisory.free;
+  const sessionLabel = paid
+    ? fr
+      ? `Réserver une session conseil de ${paid.durationMinutes} min · ${formatPriceShort(paid.priceCents, paid.currency)}`
+      : `Book a ${paid.durationMinutes}-minute advisory session · ${formatPriceShort(paid.priceCents, paid.currency)}`
+    : fr
+      ? "Voir les formules"
+      : "View packages";
 
   const content = {
     consulting: {
       badge: fr ? "Conseil" : "Consulting",
       title: fr ? "Besoin d'aide sur un projet de données ou d'IA ?" : "Need help with a data or AI project?",
       description: fr
-        ? "Plus de 13 ans d'expérience internationale en statistique, science des données et IA, de la stratégie à la mise en œuvre."
-        : "13+ years of international experience in statistics, data science and AI, from strategy to implementation.",
-      cta: fr ? "Voir les formules" : "View packages",
-      href: "/consulting",
+        ? `Plus de ${years} ans d'expérience internationale en statistique, science des données et IA. Une session d'une heure suffit souvent à débloquer une décision, un modèle ou une architecture.`
+        : `${years}+ years of international experience in statistics, data science and AI. One session is often enough to unblock a decision, a model or an architecture.`,
+      cta: sessionLabel,
+      href: paid ? `/book?package=${encodeURIComponent(paid.slug)}` : "/consulting",
+      secondary: free
+        ? {
+            label: fr
+              ? `Ou commencez par un appel découverte gratuit de ${free.durationMinutes} min`
+              : `Or start with a free ${free.durationMinutes}-minute discovery call`,
+            href: `/book?package=${encodeURIComponent(free.slug)}`,
+          }
+        : null,
     },
     newsletter: {
       badge: fr ? "Newsletter" : "Newsletter",
@@ -51,17 +75,26 @@ export default function CTABanner({ variant = "consulting" }: CTABannerProps) {
     },
   };
 
-  const c = content[variant];
+  const c = content[variant] as (typeof content)[typeof variant] & {
+    secondary?: { label: string; href: string } | null;
+  };
 
   return (
-    <aside className="my-8 card p-6 md:p-8" aria-label={c.badge}>
+    <aside className={`my-8 card p-6 md:p-8 ${variant === "consulting" ? "card-feature" : ""}`} aria-label={c.badge}>
       <p className="eyebrow mb-3">{c.badge}</p>
       <h2 className="font-display text-2xl md:text-3xl leading-tight mb-2">{c.title}</h2>
       <p className="text-text-secondary mb-5 max-w-xl">{c.description}</p>
-      <Link href={c.href} className={buttonClass("primary", "md", "group")}>
-        {c.cta}
-        <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" aria-hidden />
-      </Link>
+      <div className="flex flex-col sm:flex-row sm:items-center gap-x-5 gap-y-3">
+        <Link href={c.href} className={buttonClass("primary", "md", "group")}>
+          {c.cta}
+          <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" aria-hidden />
+        </Link>
+        {c.secondary && (
+          <Link href={c.secondary.href} className="text-sm text-text-secondary hover:text-gold underline underline-offset-4 decoration-glass-border hover:decoration-gold transition-colors">
+            {c.secondary.label}
+          </Link>
+        )}
+      </div>
     </aside>
   );
 }

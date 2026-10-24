@@ -8,6 +8,7 @@ import { Container, Section } from "@/components/ui/Section";
 import { ButtonLink, buttonClass } from "@/components/ui/Button";
 import { Link } from "@/i18n/routing";
 import { cn } from "@/lib/utils";
+import { useSiteFacts } from "@/lib/site-facts";
 
 /*
  * The four ways to work together. Prices and session lengths match the
@@ -151,6 +152,7 @@ const steps = [
 export default function ConsultingClient() {
   const locale = useLocale();
   const fr = locale === "fr";
+  const { years } = useSiteFacts();
 
   return (
     <>
@@ -161,8 +163,8 @@ export default function ConsultingClient() {
         </h1>
         <p className="lede max-w-2xl mb-8">
           {fr
-            ? "Plus de 13 ans d'expérience en statistique, science des données et IA, au sein d'organisations internationales, d'agences des Nations Unies et d'une institution de financement du commerce. Choisissez la formule qui correspond à votre besoin."
-            : "13+ years of work in statistics, data science and AI for international organisations, UN agencies and a trade finance institution. Pick the format that fits what you need."}
+            ? `Plus de ${years} ans d'expérience en statistique, science des données et IA, au sein d'organisations internationales, d'agences des Nations Unies et d'une institution de financement du commerce. Choisissez la formule qui correspond à votre besoin.`
+            : `${years}+ years of work in statistics, data science and AI for international organisations, UN agencies and a trade finance institution. Pick the format that fits what you need.`}
         </p>
         <div className="flex flex-col sm:flex-row gap-3">
           <ButtonLink href="/book" size="lg">

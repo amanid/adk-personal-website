@@ -5,9 +5,11 @@ export const runtime = "edge";
 
 export async function GET(request: NextRequest) {
   const { searchParams } = request.nextUrl;
-  const title = searchParams.get("title") || "KONAN Amani Dieudonné";
-  const subtitle = searchParams.get("subtitle") || "Senior Statistician & Data Scientist";
-  const type = searchParams.get("type") || "page";
+  // Capped: satori renders whatever it is given, and a megabyte of title is a
+  // cheap way to burn CPU on the edge.
+  const title = (searchParams.get("title") || "KONAN Amani Dieudonné").slice(0, 140);
+  const subtitle = (searchParams.get("subtitle") || "Senior Statistician & Data Scientist").slice(0, 200);
+  const type = (searchParams.get("type") || "page").slice(0, 20);
 
   const typeColors: Record<string, string> = {
     page: "#ea5536",

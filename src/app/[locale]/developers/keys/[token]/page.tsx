@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import { prisma } from "@/lib/prisma";
 import { normalizeLocale } from "@/lib/seo";
-import { currentPeriod, effectivePlan, getApiSettings } from "@/lib/data-api";
+import { currentPeriod, getApiSettings, planForKey } from "@/lib/data-api";
 import { keyByManageToken } from "@/lib/data-api-owner";
 import KeyActions from "./KeyActions";
 
@@ -18,7 +18,7 @@ export default async function KeyPage({ params }: { params: Promise<{ locale: st
   if (!k) notFound();
   const t = await getTranslations({ locale: l, namespace: "developers" });
   const s = await getApiSettings();
-  const plan = effectivePlan(k);
+  const plan = await planForKey(k);
   const quota = plan === "PRO" ? s.proQuota : s.freeQuota;
   const used = (await prisma.apiUsage.findUnique({ where: { keyId_period: { keyId: k.id, period: currentPeriod() } } }))?.count ?? 0;
   const pct = Math.min(100, (used / quota) * 100);
@@ -55,7 +55,7 @@ export default async function KeyPage({ params }: { params: Promise<{ locale: st
             <p className="text-sm text-text-muted mt-1.5">{t("resets")}</p>
           </div>
           <KeyActions
-            token={k.manageToken}
+            token={token}
             keyId={k.id}
             isPro={plan === "PRO"}
             hasSubscription={!!k.paypalSubscriptionId}

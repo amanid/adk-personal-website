@@ -10,11 +10,16 @@ import { BASE_URL } from "./seo";
 import { effectivePrice } from "./pricing";
 import { publications as staticPublications } from "@/data/publications";
 import en from "../../messages/en.json";
+import { experiences as staticExperiences } from "@/data/experience";
+import { fillCareerPlaceholders } from "./career";
 
 export const SITE = {
   name: en.hero.name,
   roles: en.hero.roles,
-  summary: en.hero.description,
+  // A getter, so the years figure is computed when read rather than at build.
+  get summary() {
+    return fillCareerPlaceholders(en.hero.description, staticExperiences, "en");
+  },
   url: BASE_URL,
 };
 
@@ -58,7 +63,7 @@ const toPub = (p: PubSource): CatalogPublication => ({
 
 /** Same source rule as the publications page: the database, else the seed set. */
 export async function allPublications(): Promise<CatalogPublication[]> {
-  const rows = await prisma.publication.findMany({ orderBy: [{ year: "desc" }, { createdAt: "desc" }] });
+  const rows = await prisma.publication.findMany({ orderBy: [{ year: "desc" }, { createdAt: "desc" }], take: 500 });
   return rows.length ? rows.map(toPub) : staticPublications.map(toPub).sort((a, b) => b.year - a.year);
 }
 
@@ -85,8 +90,8 @@ export async function listProducts(kind?: string) {
   const k = kind?.toUpperCase();
   const where: Prisma.BookWhereInput = { status: "PUBLISHED", ...(k ? { kind: k as Prisma.BookWhereInput["kind"] } : {}) };
   const [books, bundles] = await Promise.all([
-    k === "BUNDLE" ? Promise.resolve([]) : prisma.book.findMany({ where, orderBy: [{ featured: "desc" }, { sortOrder: "asc" }] }),
-    k && k !== "BUNDLE" ? Promise.resolve([]) : prisma.bundle.findMany({ where: { status: "PUBLISHED" }, orderBy: { sortOrder: "asc" } }),
+    k === "BUNDLE" ? Promise.resolve([]) : prisma.book.findMany({ where, orderBy: [{ featured: "desc" }, { sortOrder: "asc" }], take: 500 }),
+    k && k !== "BUNDLE" ? Promise.resolve([]) : prisma.bundle.findMany({ where: { status: "PUBLISHED" }, orderBy: { sortOrder: "asc" }, take: 200 }),
   ]);
   return [
     ...books.map((b) => {
@@ -114,7 +119,7 @@ export async function listProducts(kind?: string) {
 }
 
 export async function listServices() {
-  const rows = await prisma.servicePackage.findMany({ where: { active: true }, orderBy: { sortOrder: "asc" } });
+  const rows = await prisma.servicePackage.findMany({ where: { active: true }, orderBy: { sortOrder: "asc" }, take: 100 });
   return rows.map((s) => ({
     slug: s.slug,
     title: s.title,

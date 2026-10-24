@@ -14,11 +14,13 @@ export async function POST(request: Request, { params }: { params: Promise<{ tok
   if (origin) return origin;
   const limited = rateLimit(request, { limit: 5, windowSeconds: 3600 });
   if (limited) return limited;
-  const k = await keyByManageToken((await params).token);
+  const { token } = await params;
+  const k = await keyByManageToken(token);
   if (!k || k.status !== "ACTIVE") return NextResponse.json({ error: "Not found" }, { status: 404 });
   const { key, prefix, hash } = generateApiKey();
   try {
-    await sendApiKeyEmail({ to: k.email, name: k.name, key, manageToken: k.manageToken, rotated: true });
+    // The stored token is a hash; the one in the URL is the owner's real link.
+    await sendApiKeyEmail({ to: k.email, name: k.name, key, manageToken: token, rotated: true });
   } catch {
     return NextResponse.json({ error: "We couldn't email the new key, so the current one was kept." }, { status: 502 });
   }

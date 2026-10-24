@@ -13,6 +13,9 @@ import CookieConsent from "@/components/CookieConsent";
 import GoogleAnalytics from "@/components/GoogleAnalytics";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import { safeJsonLd } from "@/lib/utils";
+import { getSiteFacts } from "@/lib/career-data";
+import { SiteFactsProvider } from "@/lib/site-facts";
+import type { Metadata } from "next";
 import "../globals.css";
 
 // Self-hosted, preloaded fonts, exposed as CSS variables that globals.css maps
@@ -43,73 +46,79 @@ const playfair = Playfair_Display({
   preload: false,
 });
 
-export const metadata = {
-  metadataBase: new URL("https://www.konanamanidieudonne.org"),
-  title: {
-    default: "KONAN Amani Dieudonné | Senior Statistician & Data Scientist",
-    template: "%s | KONAN Amani Dieudonné",
-  },
-  description:
-    "Statistician and data scientist with 13+ years of work for Afreximbank, the International Cocoa Organization, UN agencies and research centres. Statistics, econometrics, data architecture and AI systems.",
-  keywords: [
-    "Full-Stack Statistician",
-    "Senior Data Scientist",
-    "AI Engineer",
-    "Machine Learning Professional",
-    "Statistician",
-    "Econometrician",
-    "Data Architect",
-    "Full-Stack Developer",
-    "MLOps Engineer",
-    "Data Engineering",
-    "Predictive Analytics",
-    "NLP",
-    "LLM",
-    "RAG Systems",
-    "Statistical Modeling",
-    "Econometric Analysis",
-    "KONAN Amani Dieudonné",
-  ],
-  authors: [{ name: "KONAN Amani Dieudonné" }],
-  alternates: {
-    canonical: "https://www.konanamanidieudonne.org",
-    languages: {
-      en: "https://www.konanamanidieudonne.org/en",
-      fr: "https://www.konanamanidieudonne.org/fr",
+/**
+ * Site-wide metadata. The years-of-experience figure is derived from the
+ * experience records at request time, never typed in, so it cannot go stale.
+ */
+export async function generateMetadata(): Promise<Metadata> {
+  const facts = await getSiteFacts();
+  const y = facts.years;
+  const long = `Statistician and data scientist with ${y}+ years of work for Afreximbank, the International Cocoa Organization, UN agencies and research centres.`;
+  return {
+    metadataBase: new URL("https://www.konanamanidieudonne.org"),
+    title: {
+      default: "KONAN Amani Dieudonné | Senior Statistician & Data Scientist",
+      template: "%s | KONAN Amani Dieudonné",
     },
-  },
-  icons: {
-    icon: [
-      { url: "/favicon-32.png", sizes: "32x32", type: "image/png" },
-      { url: "/icon-192.png", sizes: "192x192", type: "image/png" },
+    description: `${long} Statistics, econometrics, data architecture and AI systems.`,
+    keywords: [
+      "Full-Stack Statistician",
+      "Senior Data Scientist",
+      "AI Engineer",
+      "Machine Learning Professional",
+      "Statistician",
+      "Econometrician",
+      "Data Architect",
+      "Full-Stack Developer",
+      "MLOps Engineer",
+      "Data Engineering",
+      "Predictive Analytics",
+      "NLP",
+      "LLM",
+      "RAG Systems",
+      "Statistical Modeling",
+      "Econometric Analysis",
+      "KONAN Amani Dieudonné",
     ],
-    apple: "/apple-icon.png",
-  },
-  openGraph: {
-    type: "website",
-    locale: "en_US",
-    url: "https://www.konanamanidieudonne.org",
-    siteName: "KONAN Amani Dieudonné",
-    title: "KONAN Amani Dieudonné | Senior Statistician & Data Scientist",
-    description:
-      "Statistician and data scientist with 13+ years of work for Afreximbank, the International Cocoa Organization, UN agencies and research centres.",
-    images: [
-      {
-        url: "/images/profile.jpg",
-        width: 800,
-        height: 800,
-        alt: "KONAN Amani Dieudonné, Senior Statistician & Data Scientist",
+    authors: [{ name: "KONAN Amani Dieudonné" }],
+    alternates: {
+      canonical: "https://www.konanamanidieudonne.org",
+      languages: {
+        en: "https://www.konanamanidieudonne.org/en",
+        fr: "https://www.konanamanidieudonne.org/fr",
       },
-    ],
-  },
-  twitter: {
-    card: "summary",
-    title: "KONAN Amani Dieudonné | Senior Statistician & Data Scientist",
-    description:
-      "Statistician and data scientist with 13+ years of international experience.",
-    images: ["/images/profile.jpg"],
-  },
-};
+    },
+    icons: {
+      icon: [
+        { url: "/favicon-32.png", sizes: "32x32", type: "image/png" },
+        { url: "/icon-192.png", sizes: "192x192", type: "image/png" },
+      ],
+      apple: "/apple-icon.png",
+    },
+    openGraph: {
+      type: "website",
+      locale: "en_US",
+      url: "https://www.konanamanidieudonne.org",
+      siteName: "KONAN Amani Dieudonné",
+      title: "KONAN Amani Dieudonné | Senior Statistician & Data Scientist",
+      description: long,
+      images: [
+        {
+          url: "/images/profile.jpg",
+          width: 800,
+          height: 800,
+          alt: "KONAN Amani Dieudonné, Senior Statistician & Data Scientist",
+        },
+      ],
+    },
+    twitter: {
+      card: "summary",
+      title: "KONAN Amani Dieudonné | Senior Statistician & Data Scientist",
+      description: `Statistician and data scientist with ${y}+ years of international experience.`,
+      images: ["/images/profile.jpg"],
+    },
+  };
+}
 
 export default async function LocaleLayout({
   children,
@@ -123,7 +132,10 @@ export default async function LocaleLayout({
     notFound();
   }
 
-  const messages = (await import(`../../../messages/${locale}.json`)).default;
+  const [messages, facts] = await Promise.all([
+    import(`../../../messages/${locale}.json`).then((m) => m.default),
+    getSiteFacts(),
+  ]);
 
   const jsonLd = {
     "@context": "https://schema.org",
@@ -131,11 +143,10 @@ export default async function LocaleLayout({
     name: "KONAN Amani Dieudonné",
     url: "https://www.konanamanidieudonne.org",
     image: "https://www.konanamanidieudonne.org/images/profile.jpg",
-    jobTitle: "Manager, Data Scientist / Architect",
-    worksFor: {
-      "@type": "Organization",
-      name: "African Export-Import Bank (Afreximbank)",
-    },
+    jobTitle: facts.current?.role ?? "Senior Statistician & Data Scientist",
+    ...(facts.current
+      ? { worksFor: { "@type": "Organization", name: facts.current.organization } }
+      : {}),
     alumniOf: [
       {
         "@type": "EducationalOrganization",
@@ -238,6 +249,7 @@ export default async function LocaleLayout({
             With the nesting reversed those two render without intl context and
             throw, which fails the render of every page on the site. */}
         <NextIntlClientProvider locale={locale} messages={messages}>
+          <SiteFactsProvider facts={facts}>
           <Providers>
             <ScrollProgress />
             <a
@@ -256,6 +268,7 @@ export default async function LocaleLayout({
             <PageViewTracker />
             <CookieConsent />
           </Providers>
+          </SiteFactsProvider>
         </NextIntlClientProvider>
       </body>
     </html>

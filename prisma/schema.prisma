@@ -1130,3 +1130,13 @@ model ApiUsage {
 
   @@id([keyId, period])
 }
+
+/// Rate-limit windows that must survive restarts (login, registration,
+/// coupon codes, order lookup). One row per key; pruned by the cron tick.
+model RateLimitBucket {
+  key     String   @id
+  count   Int      @default(0)
+  resetAt DateTime
+
+  @@index([resetAt])
+}

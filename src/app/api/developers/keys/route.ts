@@ -8,6 +8,7 @@ import { secureToken } from "@/lib/store";
 import { generateApiKey } from "@/lib/data-api";
 import { sendApiKeyEmail } from "@/lib/data-api-notify";
 import { emitWebhook } from "@/lib/webhooks";
+import { hashManageToken } from "@/lib/data-api-owner";
 
 export const runtime = "nodejs";
 
@@ -45,7 +46,8 @@ export async function POST(request: Request) {
       useCase: sanitizeInput(parsed.data.useCase),
       keyPrefix: prefix,
       keyHash: hash,
-      manageToken,
+      // Hashed at rest, like the key itself: the plain token only travels in the email.
+      manageToken: hashManageToken(manageToken),
     },
   });
   try {

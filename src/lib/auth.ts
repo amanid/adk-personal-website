@@ -4,24 +4,31 @@ import Google from "next-auth/providers/google";
 import { prisma } from "./prisma";
 import bcrypt from "bcryptjs";
 import { clientIp, rateLimitKey } from "./rate-limit";
+import { bumpBucket, clearBucket, readBucket } from "./rate-limit-db";
 
 // Brute-force protection for the credentials provider, at three levels:
 //  - email + IP: 5 failures lock that pair out. Keying on the pair means a
 //    stranger can no longer lock the real owner out of their own account.
 //  - email alone: a much higher ceiling, for guessing spread across many IPs.
 //  - IP alone (rateLimitKey below): caps password spraying across accounts.
+// Failure counts live in Postgres (RateLimitBucket), so a restart of the
+// instance — which happens on every deploy and after idle — no longer hands
+// an attacker a fresh budget. The in-memory map is the fallback when the
+// database is unreachable.
 const LOGIN_MAX_ATTEMPTS = 5;
 const LOGIN_MAX_ATTEMPTS_PER_EMAIL = 50;
 const LOGIN_WINDOW_MS = 15 * 60 * 1000;
 const loginAttempts = new Map<string, { count: number; resetAt: number }>();
 
-function loginAllowed(key: string, max = LOGIN_MAX_ATTEMPTS): boolean {
+async function loginAllowed(key: string, max = LOGIN_MAX_ATTEMPTS): Promise<boolean> {
+  const bucket = await readBucket(`login:${key}`);
+  if (bucket) return bucket.count < max;
   const entry = loginAttempts.get(key);
   if (!entry || Date.now() > entry.resetAt) return true;
   return entry.count < max;
 }
 
-function recordLoginFailure(key: string): void {
+async function recordLoginFailure(key: string): Promise<void> {
   const now = Date.now();
   const entry = loginAttempts.get(key);
   if (!entry || now > entry.resetAt) {
@@ -29,10 +36,12 @@ function recordLoginFailure(key: string): void {
   } else {
     entry.count++;
   }
+  await bumpBucket(`login:${key}`, LOGIN_WINDOW_MS / 1000);
 }
 
-function clearLoginFailures(key: string): void {
+async function clearLoginFailures(key: string): Promise<void> {
   loginAttempts.delete(key);
+  await clearBucket(`login:${key}`);
 }
 
 // A bcrypt hash compared against when the account doesn't exist (or has no
@@ -75,7 +84,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
 
         // Throttle repeated failures to blunt password guessing.
         if (rateLimitKey(`login-ip:${ip}`, { limit: 30, windowSeconds: 15 * 60 })) return null;
-        if (!loginAllowed(pairKey) || !loginAllowed(emailKey, LOGIN_MAX_ATTEMPTS_PER_EMAIL)) return null;
+        if (!(await loginAllowed(pairKey)) || !(await loginAllowed(emailKey, LOGIN_MAX_ATTEMPTS_PER_EMAIL))) return null;
 
         // Emails were historically stored as typed, so match case-insensitively.
         const user = await prisma.user.findFirst({
@@ -91,12 +100,11 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         );
 
         if (!user || !user.hashedPassword || !isValid) {
-          recordLoginFailure(pairKey);
-          recordLoginFailure(emailKey);
+          await Promise.all([recordLoginFailure(pairKey), recordLoginFailure(emailKey)]);
           return null;
         }
 
-        clearLoginFailures(pairKey);
+        await clearLoginFailures(pairKey);
 
         return {
           id: user.id,

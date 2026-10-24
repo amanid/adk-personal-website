@@ -1,12 +1,15 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
+import { checkOrigin } from "@/lib/origin-check";
 
 export async function POST(
   request: Request,
   { params }: { params: Promise<{ id: string; answerId: string }> }
 ) {
   try {
+    const origin = checkOrigin(request);
+    if (origin) return origin;
     const session = await auth();
     if (!session?.user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });

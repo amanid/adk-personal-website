@@ -27,11 +27,12 @@
     "greeting": "Bonjour, je suis",
     "name": "KONAN Amani Dieudonné",
     "roles": "Statisticien senior | Data Scientist | Ingénieur IA | Architecte de données | Économètre",
-    "description": "Depuis 13 ans, je transforme des données en décisions pour la finance du développement, les agences des Nations Unies et des instituts de recherche. Je dirige aujourd'hui l'architecture des données et les projets d'IA à Afreximbank ; auparavant, j'ai été pendant six ans statisticien et économètre à l'Organisation internationale du cacao. Je suis titulaire d'un Master en statistique et économétrie de Toulouse, d'un diplôme d'ingénieur de l'ENSEA et de certificats du MIT en ingénierie des données et en IA appliquée. J'ai soumis en juin 2026 ma thèse de DBA sur l'adoption de l'IA par les institutions de développement.",
+    "description": "Depuis {years} ans, je transforme des données en décisions pour la finance du développement, les agences des Nations Unies et des instituts de recherche. Je dirige aujourd'hui l'architecture des données et les projets d'IA à Afreximbank ; auparavant, j'ai été pendant {iccoYears} ans statisticien et économètre à l'Organisation internationale du cacao. Je suis titulaire d'un Master en statistique et économétrie de Toulouse, d'un diplôme d'ingénieur de l'ENSEA et de certificats du MIT en ingénierie des données et en IA appliquée. J'ai soumis en juin 2026 ma thèse de DBA sur l'adoption de l'IA par les institutions de développement.",
     "cta_services": "Découvrir les Services",
     "cta_contact": "Me Contacter",
     "download_cv": "Télécharger le CV",
-    "badge_text": "13+ Ans d'Expérience Internationale"
+    "badge_text": "{years}+ Ans d'Expérience Internationale",
+    "cta_book": "Réserver un appel"
   },
   "stats": {
     "years": "Années d'Expérience",
@@ -53,7 +54,7 @@
   },
   "organizations": {
     "title": "Où j'ai travaillé",
-    "subtitle": "Employeurs et clients sur 13 ans : finance du développement, marchés des matières premières, agences des Nations Unies et centres de recherche."
+    "subtitle": "Employeurs et clients sur {years} ans : finance du développement, marchés des matières premières, agences des Nations Unies et centres de recherche."
   },
   "certifications_showcase": {
     "title": "Formation & Certifications",
@@ -74,7 +75,15 @@
   "experience": {
     "title": "Expérience Professionnelle",
     "subtitle": "Tous mes postes, du plus récent au plus ancien, tels qu'indiqués dans mon CV.",
-    "present": "Présent"
+    "present": "Présent",
+    "current": "Poste actuel",
+    "summary_years": "Années",
+    "summary_roles": "Postes",
+    "summary_orgs": "Organisations",
+    "summary_countries": "Pays",
+    "summary_note": "Calculé à partir des postes ci-dessous",
+    "tenure_label": "Durée",
+    "concurrent": "En parallèle de {org}"
   },
   "services": {
     "title": "Services",
@@ -225,7 +234,12 @@
     "related": "Publications Connexes",
     "loading": "Chargement...",
     "eyebrow": "Rapports et analyses",
-    "members_only": "Réservé aux abonnés"
+    "members_only": "Réservé aux abonnés",
+    "data_files": "Données & fichiers",
+    "data_files_note": "Le jeu de données et les fichiers de travail de cette publication. Les rapports sont libres de lecture ; les données sont réservées aux abonnés avec un forfait données.",
+    "download_dataset": "Télécharger le jeu de données",
+    "download_supplementary": "Fichiers complémentaires",
+    "data_plan_hint": "Inclus dans l'accès Données et l'accès Complet."
   },
   "blog": {
     "title": "Blog",
@@ -309,7 +323,7 @@
     "forgot_password": "Mot de passe oublié ?"
   },
   "footer": {
-    "description": "Statisticien et data scientist. 13 ans de travail pour la finance du développement, les agences des Nations Unies et des instituts de recherche.",
+    "description": "Statisticien et data scientist. {years} ans de travail pour la finance du développement, les agences des Nations Unies et des instituts de recherche.",
     "quick_links": "Liens Rapides",
     "connect": "Se Connecter",
     "rights": "Tous droits réservés.",
@@ -326,7 +340,10 @@
     "already": "Cet email est déjà abonné.",
     "error": "Une erreur est survenue. Veuillez réessayer.",
     "confirmed": "Abonnement confirmé ! Vous recevrez des notifications pour les nouvelles publications.",
-    "unsubscribed": "Vous avez été désabonné. Vous ne recevrez plus d'emails."
+    "unsubscribed": "Vous avez été désabonné. Vous ne recevrez plus d'emails.",
+    "brief_eyebrow": "Le brief mensuel",
+    "brief_title": "Un email par mois. La recherche du mois, rien d'autre.",
+    "brief_subtitle": "Nouveaux rapports, jeux de données et articles sur le commerce africain, les matières premières, les données et l'IA, en un seul message. Désabonnement en un clic."
   },
   "research": {
     "title": "Activités de Recherche",
@@ -346,7 +363,7 @@
   "subscribe": {
     "badge": "Publications Premium",
     "title": "Rapports et données premium",
-    "subtitle": "Certains de mes rapports, et les jeux de données qui les accompagnent, sont disponibles sur abonnement. De nombreuses publications restent gratuites.",
+    "subtitle": "Les rapports sont libres de lecture sauf mention premium. Les jeux de données et fichiers de travail qui les accompagnent, ainsi que l'API Données Pro, sont inclus dans l'abonnement.",
     "monthly": "Mensuel",
     "yearly": "Annuel",
     "per_month": "/mois",
@@ -370,7 +387,7 @@
     "tier_document_access": "Accès Documents",
     "tier_document_access_desc": "Accès PDF complet à tous les rapports analytiques et publications premium.",
     "tier_data_access": "Accès Données",
-    "tier_data_access_desc": "Jeux de données et fichiers complémentaires joints aux publications premium.",
+    "tier_data_access_desc": "Tous les jeux de données et fichiers de travail des publications, plus l'API Données Pro.",
     "tier_full_access": "Accès Complet",
     "tier_full_access_desc": "Les rapports complets, avec leurs jeux de données et fichiers complémentaires.",
     "whats_included": "Ce Que Chaque Abonnement Inclut",
@@ -387,7 +404,7 @@
     "faq_q2": "Toutes les publications sont-elles payantes ?",
     "faq_a2": "Non. De nombreuses publications sont entièrement gratuites. Seules certaines publications premium nécessitent un abonnement, et les gratuites sont clairement signalées.",
     "faq_q3": "Quel format ont les jeux de données ?",
-    "faq_a3": "Lorsqu'une publication premium a un jeu de données, il est proposé en téléchargement sur la page de la publication.",
+    "faq_a3": "Lorsqu'une publication dispose d'un jeu de données, il est proposé en téléchargement sur la page de la publication, et via l'API Données avec une clé Pro.",
     "faq_q4": "Puis-je annuler à tout moment ?",
     "faq_a4": "Oui, vous pouvez annuler à tout moment sans pénalité. Vous conservez l'accès jusqu'à la fin de votre période de facturation en cours.",
     "cta_title": "Explorez la Recherche Premium",
@@ -841,7 +858,9 @@
     "ai_title": "Assistants IA et agents (MCP)",
     "ai_body": "Connectez Claude, ChatGPT ou tout client Model Context Protocol au catalogue public — publications, boutique, séances de conseil et blog. Sans clé ; lecture seule.",
     "ai_server": "URL du serveur MCP (Streamable HTTP)",
-    "ai_llms": "Plan du site pour les modèles de langage"
+    "ai_llms": "Plan du site pour les modèles de langage",
+    "pro_included": "Pro est inclus dans les abonnements recherche Accès Données et Accès Complet : la clé enregistrée avec l'email de votre compte est mise à niveau automatiquement.",
+    "pro_included_link": "Voir les abonnements"
   },
   "topics": {
     "meta_title": "Thèmes",

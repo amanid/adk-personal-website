@@ -13,6 +13,7 @@ import { experiences as staticExperiences } from "@/data/experience";
 import { publications as staticPublications } from "@/data/publications";
 import { organizations } from "@/data/organizations";
 import { countriesWorked } from "@/data/countries";
+import { careerFacts, tenureYears } from "@/lib/career";
 
 /*
  * Server-rendered home page. Seven sections, each earning its place:
@@ -91,10 +92,13 @@ export default function HomeClient({
 
   const featuredProjects = projects.filter((p) => p.featured).slice(0, 4);
   const featuredPublications = publications.filter((p) => p.featured).slice(0, 3);
-  const current = experiences.find((e) => !e.endDate);
+  // Years and the current role come from the records, never from copy.
+  const career = careerFacts(experiences);
+  const current = career?.current ?? null;
   const currentRole = current
     ? { role: fr && current.roleFr ? current.roleFr : current.role, organization: current.organization, location: current.location }
     : null;
+  const iccoYears = tenureYears(experiences, /\bICCO\b|International Cocoa Organization/);
 
   const figures = [
     ...(capabilities.facts.years ? [{ value: capabilities.facts.years, suffix: "+", label: t("stats.years") }] : []),
@@ -114,6 +118,8 @@ export default function HomeClient({
         timeline={capabilities.timeline}
         rangeStart={capabilities.rangeStart}
         rangeEnd={capabilities.rangeEnd}
+        years={career?.years ?? capabilities.facts.years}
+        iccoYears={iccoYears}
       />
 
       {vis.capabilities !== false && <CapabilitiesSection data={capabilities} />}
@@ -228,7 +234,7 @@ export default function HomeClient({
         <Section
           eyebrow={t("homeV2.worked_eyebrow")}
           title={t("homeV2.worked_title")}
-          intro={t("organizations.subtitle")}
+          intro={t("organizations.subtitle", { years: career?.years ?? capabilities.facts.years ?? "" })}
         >
           <ul className="grid grid-cols-1 md:grid-cols-2 gap-x-12">
             {organizations.map((o) => (

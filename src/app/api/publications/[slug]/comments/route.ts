@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
+import { checkOrigin } from "@/lib/origin-check";
 import { commentSchema } from "@/lib/validations";
 import { rateLimit } from "@/lib/rate-limit";
 
@@ -9,6 +10,8 @@ export async function POST(
   { params }: { params: Promise<{ slug: string }> }
 ) {
   try {
+    const origin = checkOrigin(request);
+    if (origin) return origin;
     const limited = rateLimit(request, { limit: 10, windowSeconds: 60 });
     if (limited) return limited;
 

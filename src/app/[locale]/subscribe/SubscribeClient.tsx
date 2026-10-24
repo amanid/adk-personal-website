@@ -14,8 +14,8 @@ import { cn } from "@/lib/utils";
 
 /*
  * Tier features list only what the code delivers: gated report PDFs for
- * document plans, gated dataset/supplementary files for data plans
- * (src/lib/subscription.ts, src/lib/publication-access.ts).
+ * document plans; every dataset/supplementary file plus API Pro for data plans
+ * (src/lib/subscription.ts, src/lib/publication-access.ts, src/lib/data-api.ts).
  */
 const tiers = [
   {
@@ -38,17 +38,17 @@ const tiers = [
     yearlyPrice: TIER_PRICES.DATA_ACCESS.YEAR / 100,
     features: {
       en: [
-        "Datasets attached to premium publications",
-        "Supplementary files attached to premium publications",
+        "Every dataset and supplementary file behind the publications",
+        "Data API Pro included: dataset downloads and higher limits",
       ],
       fr: [
-        "Jeux de données joints aux publications premium",
-        "Fichiers complémentaires joints aux publications premium",
+        "Tous les jeux de données et fichiers complémentaires des publications",
+        "API Données Pro incluse : téléchargement des jeux de données et limites plus élevées",
       ],
     },
     excluded: {
-      en: ["Full PDF reports"],
-      fr: ["Rapports PDF complets"],
+      en: ["Premium PDF reports"],
+      fr: ["Rapports PDF premium"],
     },
     popular: false,
   },
@@ -57,8 +57,8 @@ const tiers = [
     monthlyPrice: TIER_PRICES.FULL_ACCESS.MONTH / 100,
     yearlyPrice: TIER_PRICES.FULL_ACCESS.YEAR / 100,
     features: {
-      en: ["Everything in Document Access", "Everything in Data Access"],
-      fr: ["Tout l'accès Document", "Tout l'accès Données"],
+      en: ["Everything in Document Access", "Everything in Data Access", "Data API Pro included"],
+      fr: ["Tout l'accès Document", "Tout l'accès Données", "API Données Pro incluse"],
     },
     excluded: { en: [], fr: [] },
     popular: true,

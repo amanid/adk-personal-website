@@ -2,12 +2,12 @@ import { NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/prisma";
 import { registerSchema } from "@/lib/validations";
-import { rateLimit } from "@/lib/rate-limit";
+import { persistentRateLimit } from "@/lib/rate-limit-db";
 import { checkOrigin } from "@/lib/origin-check";
 
 export async function POST(request: Request) {
   try {
-    const rateLimited = rateLimit(request, { limit: 5, windowSeconds: 300 });
+    const rateLimited = await persistentRateLimit(request, { limit: 5, windowSeconds: 300 });
     if (rateLimited) return rateLimited;
 
     const originBlocked = checkOrigin(request);

@@ -1,6 +1,7 @@
 import { staticPageMetadata } from "@/lib/seo";
 import { prisma } from "@/lib/prisma";
 import ExperienceClient, { type ExperienceEntry } from "./ExperienceClient";
+import { monthIndex } from "@/lib/capabilities";
 
 export const generateMetadata = staticPageMetadata({ namespace: "experience", path: "/experience" });
 
@@ -27,5 +28,6 @@ export default async function ExperiencePage() {
   } catch {
     // DB unavailable — client falls back to static seed.
   }
-  return <ExperienceClient initialExperiences={experiences} />;
+  // "Now" is fixed on the server so the durations are identical on both render passes.
+  return <ExperienceClient initialExperiences={experiences} nowMonth={monthIndex(new Date())} />;
 }

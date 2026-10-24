@@ -2,10 +2,13 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { serviceRequestSchema, SERVICE_EXTRA_TYPES } from "@/lib/validations";
 import { auth } from "@/lib/auth";
+import { checkOrigin } from "@/lib/origin-check";
 import { rateLimit } from "@/lib/rate-limit";
 
 export async function POST(request: Request) {
   try {
+    const origin = checkOrigin(request);
+    if (origin) return origin;
     const limited = rateLimit(request, { limit: 3, windowSeconds: 300 });
     if (limited) return limited;
 
@@ -33,7 +36,8 @@ export async function POST(request: Request) {
       },
     });
 
-    return NextResponse.json({ serviceRequest }, { status: 201 });
+    // Only the id goes back: the row carries the requester's details and userId.
+    return NextResponse.json({ serviceRequest: { id: serviceRequest.id } }, { status: 201 });
   } catch (error) {
     console.error("Service request error:", error);
     return NextResponse.json(

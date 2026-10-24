@@ -1,6 +1,6 @@
 # KONAN Amani Dieudonné - Personal Website
 
-> Senior Data Scientist, Principal AI Engineer & Statistician-Econometrician with 13+ years of international experience.
+> Senior Data Scientist, Principal AI Engineer & Statistician-Econometrician with more than a decade of international experience.
 
 A full-featured personal portfolio and CMS built with Next.js 16, featuring a bilingual public site (EN/FR), an advanced admin dashboard with analytics and financial market data, and a multi-theme design system.
 

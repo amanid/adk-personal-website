@@ -3,6 +3,7 @@ import { ArrowRight, Download } from "lucide-react";
 import Image from "next/image";
 import { ButtonLink, buttonClass } from "@/components/ui/Button";
 import type { TimelineBar } from "@/lib/capabilities";
+import { spellSmall } from "@/lib/career";
 
 interface HeroSectionProps {
   showCvDownload?: boolean;
@@ -16,12 +17,18 @@ interface HeroSectionProps {
   timeline: TimelineBar[];
   rangeStart: number;
   rangeEnd: number;
+  /** Whole years since the first role, from the records; null if none parse. */
+  years: number | null;
+  /** Whole years at ICCO, quoted in the introduction. */
+  iccoYears: number | null;
 }
 
 /*
- * Editorial: the name carries the page, set large in the display serif with
- * the given names in italic. Beneath it, the career itself drawn as a line —
- * one stroke per role, from the experience records — is the only ornament.
+ * Editorial: the name carries the page, set large in the display serif, the
+ * surname at medium weight and the given names a step lighter — one colour,
+ * no italics, so the two lines read as a single name rather than a title and
+ * a subtitle. Beneath it, the career itself drawn as a line — one stroke per
+ * role, from the experience records — is the only ornament.
  */
 export default function HeroSection({
   showCvDownload = false,
@@ -32,9 +39,12 @@ export default function HeroSection({
   timeline,
   rangeStart,
   rangeEnd,
+  years,
+  iccoYears,
 }: HeroSectionProps) {
   const t = useTranslations("hero");
-  const fr = useLocale() === "fr";
+  const locale = useLocale();
+  const fr = locale === "fr";
   const roles = t("roles").split("|").map((r) => r.trim()).filter(Boolean);
   const [surname, ...given] = t("name").split(" ");
   const photo = profilePhoto || "/images/profile.jpg?v2";
@@ -52,9 +62,8 @@ export default function HeroSection({
             )}
 
             <h1 className="display-name mb-8 rise" style={{ ["--i" as string]: 1 }}>
-              {surname}
-              <br />
-              <em className="font-normal text-text-secondary">{given.join(" ")}</em>
+              <span className="display-name__surname">{surname}</span>
+              <span className="display-name__given">{given.join(" ")}</span>
             </h1>
 
             <ul
@@ -70,16 +79,21 @@ export default function HeroSection({
             </ul>
 
             <p className="lede max-w-xl mb-10 rise" style={{ ["--i" as string]: 3 }}>
-              {t("description")}
+              {t("description", {
+                years: years ?? "",
+                iccoYears: iccoYears !== null ? spellSmall(iccoYears, locale) : "",
+              })}
             </p>
 
             <div className="flex flex-col sm:flex-row sm:items-center gap-3 rise" style={{ ["--i" as string]: 4 }}>
-              <ButtonLink href="/services" size="lg" className="group">
-                {t("cta_services")}
+              {/* The call is the entry point to every paid engagement, so it
+                  leads; the service catalogue is one click behind it. */}
+              <ButtonLink href="/book" size="lg" className="group">
+                {t("cta_book")}
                 <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
               </ButtonLink>
-              <ButtonLink href="/contact" variant="secondary" size="lg">
-                {t("cta_contact")}
+              <ButtonLink href="/services" variant="secondary" size="lg">
+                {t("cta_services")}
               </ButtonLink>
               {showCvDownload && (
                 <a
@@ -128,12 +142,12 @@ export default function HeroSection({
         <div className="mt-16 md:mt-20 pt-8 hairline grid md:grid-cols-12 gap-10 items-end">
           <dl className="md:col-span-5 grid grid-cols-2 sm:grid-cols-4 md:grid-cols-2 lg:grid-cols-4 gap-x-6 gap-y-6">
             {figures.map((f) => (
-              <div key={f.label}>
+              <div key={f.label} className="flex flex-col-reverse">
+                <dt className="mb-1 text-xs text-text-muted">{f.label}</dt>
                 <dd className="font-mono text-3xl md:text-4xl text-text-primary tabular-nums tracking-tight">
                   {f.value}
                   {f.suffix && <span className="text-gold">{f.suffix}</span>}
                 </dd>
-                <dt className="mt-1 text-xs text-text-muted">{f.label}</dt>
               </div>
             ))}
           </dl>

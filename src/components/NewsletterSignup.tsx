@@ -11,7 +11,12 @@ const field =
   "w-full min-h-11 px-3.5 py-2 rounded-[var(--radius-md)] bg-navy border border-glass-border text-text-primary text-sm " +
   "placeholder:text-text-muted focus:border-gold focus:outline-none transition-colors";
 
-export default function NewsletterSignup() {
+/**
+ * `footer` (default): the stacked form in the site footer.
+ * `inline`: a card under an article or report, pitched as the monthly brief —
+ * the same /api/subscribe double opt-in, one field.
+ */
+export default function NewsletterSignup({ variant = "footer" }: { variant?: "footer" | "inline" }) {
   const t = useTranslations("newsletter");
   const [email, setEmail] = useState("");
   const [name, setName] = useState("");
@@ -44,10 +49,23 @@ export default function NewsletterSignup() {
     }
   };
 
+  const inline = variant === "inline";
+  const ids = inline ? { email: "brief-email", name: "brief-name" } : { email: "newsletter-email", name: "newsletter-name" };
+
   return (
-    <div className="mb-4">
-      <h3 className="text-sm font-semibold text-text-primary mb-2">{t("title")}</h3>
-      <p className="text-sm text-text-muted mb-3">{t("subtitle")}</p>
+    <div className={inline ? "my-8 card p-6 md:p-8" : "mb-4"}>
+      {inline ? (
+        <>
+          <p className="eyebrow mb-3">{t("brief_eyebrow")}</p>
+          <h2 className="font-display text-2xl md:text-3xl leading-tight mb-2">{t("brief_title")}</h2>
+          <p className="text-text-secondary mb-5 max-w-xl">{t("brief_subtitle")}</p>
+        </>
+      ) : (
+        <>
+          <h3 className="text-sm font-semibold text-text-primary mb-2">{t("title")}</h3>
+          <p className="text-sm text-text-muted mb-3">{t("subtitle")}</p>
+        </>
+      )}
 
       {status === "success" ? (
         <p
@@ -79,12 +97,12 @@ export default function NewsletterSignup() {
           </Button>
         </div>
       ) : (
-        <form onSubmit={handleSubmit} className="space-y-2">
-          <label htmlFor="newsletter-email" className="sr-only">
+        <form onSubmit={handleSubmit} className={inline ? "flex flex-col sm:flex-row gap-2 max-w-xl" : "space-y-2"}>
+          <label htmlFor={ids.email} className="sr-only">
             {t("placeholder_email")}
           </label>
           <input
-            id="newsletter-email"
+            id={ids.email}
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
@@ -93,19 +111,23 @@ export default function NewsletterSignup() {
             required
             className={field}
           />
-          <label htmlFor="newsletter-name" className="sr-only">
-            {t("placeholder_name")}
-          </label>
-          <input
-            id="newsletter-name"
-            type="text"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            placeholder={t("placeholder_name")}
-            autoComplete="name"
-            className={field}
-          />
-          <Button type="submit" loading={status === "loading"} className="w-full">
+          {!inline && (
+            <>
+              <label htmlFor={ids.name} className="sr-only">
+                {t("placeholder_name")}
+              </label>
+              <input
+                id={ids.name}
+                type="text"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder={t("placeholder_name")}
+                autoComplete="name"
+                className={field}
+              />
+            </>
+          )}
+          <Button type="submit" loading={status === "loading"} className={inline ? "shrink-0" : "w-full"}>
             {status === "loading" ? t("subscribing") : t("subscribe")}
           </Button>
         </form>

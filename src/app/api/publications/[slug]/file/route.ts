@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { rateLimit } from "@/lib/rate-limit";
-import { isGated, viewerHasGatedAccess, STATIC_GATED_FILES, readPrivatePublication, type FileKind } from "@/lib/publication-access";
+import { requiresPlan, viewerHasGatedAccess, STATIC_GATED_FILES, readPrivatePublication, type FileKind } from "@/lib/publication-access";
 
 /**
  * Serves a publication's file only to viewers allowed to open it.
@@ -49,15 +49,18 @@ export async function GET(request: Request, { params }: { params: Promise<{ slug
   const found = await lookup(slug, kind);
   if (!found) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
-  if (isGated(slug, found.level) && !(await viewerHasGatedAccess(kind))) {
-    return NextResponse.json({ error: "Subscription required" }, { status: 403 });
-  }
-
   // Resolve the stored location. A row whose URL is this route itself (the
   // static catalogue's gated entries) is resolved through the server-side map.
+  // A file that does not exist is 404 before any access check, so the paywall
+  // never confirms or denies a file that was never there.
   let stored = found.url && !found.url.startsWith("/api/publications/") ? found.url : null;
   if (!stored && kind === "pdf" && STATIC_GATED_FILES[slug]) stored = `/publications/${STATIC_GATED_FILES[slug]}`;
   if (!stored) return NextResponse.json({ error: "Not found" }, { status: 404 });
+
+  // Reports follow the publication's access level; data files always need a data plan.
+  if (requiresPlan(kind, slug, found.level) && !(await viewerHasGatedAccess(kind))) {
+    return NextResponse.json({ error: "Subscription required" }, { status: 403 });
+  }
 
   if (stored.startsWith("/publications/")) {
     const fileName = decodeURIComponent(stored.slice("/publications/".length));

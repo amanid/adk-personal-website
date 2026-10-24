@@ -11,6 +11,7 @@ import { useSession } from "next-auth/react";
 import BlogJsonLd from "@/components/blog/BlogJsonLd";
 import ShareBar from "@/components/blog/ShareBar";
 import CTABanner from "@/components/CTABanner";
+import NewsletterSignup from "@/components/NewsletterSignup";
 
 interface BlogPostFull {
   id: string;
@@ -245,6 +246,7 @@ export default function BlogDetailClient({
           <ShareBar title={title} slug={post.slug} />
 
           <CTABanner variant="consulting" />
+          <NewsletterSignup variant="inline" />
 
           {/* Comments */}
           <section aria-labelledby="blog-comments" className="hairline pt-10 mt-4">

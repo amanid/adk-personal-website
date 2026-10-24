@@ -31,7 +31,7 @@
     "framer-motion": "^12.34.3",
     "jszip": "^3.10.1",
     "lucide-react": "^0.575.0",
-    "next": "^16.3.8",
+    "next": "^16.4.3",
     "next-auth": "^5.0.0-beta.32",
     "next-intl": "^4.8.3",
     "nodemailer": "^10.0.13",
@@ -59,7 +59,7 @@
     "@types/sanitize-html": "^2.16.2",
     "docx": "^9.6.0",
     "eslint": "^9",
-    "eslint-config-next": "^16.3.8",
+    "eslint-config-next": "^16.4.3",
     "tailwindcss": "^4",
     "tsx": "^4.21.0",
     "typescript": "^5"

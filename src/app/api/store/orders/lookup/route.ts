@@ -1,7 +1,7 @@
 import { NextResponse, after } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { sendOrderLookupEmail } from "@/lib/email";
-import { rateLimit } from "@/lib/rate-limit";
+import { persistentRateLimit } from "@/lib/rate-limit-db";
 import { checkOrigin } from "@/lib/origin-check";
 
 export const runtime = "nodejs";
@@ -23,7 +23,7 @@ export async function POST(request: Request) {
   if (origin) return origin;
 
   // Tight limit — this endpoint sends email and must not be a spam vector.
-  const limited = rateLimit(request, { limit: 5, windowSeconds: 300 });
+  const limited = await persistentRateLimit(request, { limit: 5, windowSeconds: 300 });
   if (limited) return limited;
 
   try {

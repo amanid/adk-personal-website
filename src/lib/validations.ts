@@ -14,8 +14,8 @@ export const loginSchema = z.object({
 
 export const registerSchema = z
   .object({
-    name: z.string().min(2, "Name must be at least 2 characters"),
-    email: z.string().email("Invalid email address"),
+    name: z.string().trim().min(2, "Name must be at least 2 characters").max(120),
+    email: z.string().email("Invalid email address").max(254),
     password: passwordSchema,
     confirmPassword: z.string(),
   })
@@ -23,6 +23,16 @@ export const registerSchema = z
     message: "Passwords don't match",
     path: ["confirmPassword"],
   });
+
+/**
+ * A link the site will render as an href or redirect to: an https:// URL or a
+ * site-relative path. Rejects javascript:, data: and protocol-relative forms,
+ * which an admin session under someone else's control could otherwise plant.
+ */
+export const safeLink = z
+  .string()
+  .max(2000)
+  .refine((u) => u === "" || /^https:\/\//i.test(u) || (u.startsWith("/") && !u.startsWith("//")), "Must be an https:// link or a site path");
 
 export const contactSchema = z.object({
   name: z.string().min(2, "Name is required").max(100),
@@ -34,7 +44,7 @@ export const contactSchema = z.object({
 export const serviceRequestSchema = z.object({
   name: z.string().min(2, "Name is required").max(100),
   email: z.string().email("Invalid email address"),
-  company: z.string().optional(),
+  company: z.string().max(200).optional(),
   // The form also offers services the DB enum predates; the API stores those
   // as OTHER and names the choice in the description (see SERVICE_EXTRA_TYPES).
   serviceType: z.enum([
@@ -42,7 +52,7 @@ export const serviceRequestSchema = z.object({
     "STATISTICS", "DATA_ENGINEERING", "FULLSTACK",
   ]),
   description: z.string().min(20, "Please provide more details").max(5000),
-  budget: z.string().optional(),
+  budget: z.string().max(200).optional(),
 });
 
 /** Form choices with no ServiceType enum value of their own. */
@@ -89,7 +99,7 @@ export const publicationSchema = z.object({
   journal: z.string().optional(),
   year: z.number().int().min(1990).max(2040),
   category: z.string().optional(),
-  pdfUrl: z.string().optional(),
+  pdfUrl: safeLink.optional(),
   tags: z.array(z.string()).optional(),
   featured: z.boolean().optional(),
   publicationType: z.enum([
@@ -111,11 +121,11 @@ export const publicationSchema = z.object({
   institution: z.string().optional(),
   institutionFr: z.string().optional(),
   month: z.number().int().min(1).max(12).optional(),
-  url: z.string().optional(),
+  url: safeLink.optional(),
   citationCount: z.number().int().min(0).optional(),
   accessLevel: z.enum(["FREE", "GATED"]).optional(),
-  dataUrl: z.string().optional(),
-  supplementaryUrl: z.string().optional(),
+  dataUrl: safeLink.optional(),
+  supplementaryUrl: safeLink.optional(),
 });
 
 export const researchActivitySchema = z.object({
@@ -135,10 +145,10 @@ export const researchActivitySchema = z.object({
   date: z.string().min(1, "Date is required"),
   location: z.string().optional(),
   locationFr: z.string().optional(),
-  url: z.string().optional(),
+  url: safeLink.optional(),
   paperUrl: z.string().optional(),
-  dataUrl: z.string().optional(),
-  supplementaryUrl: z.string().optional(),
+  dataUrl: safeLink.optional(),
+  supplementaryUrl: safeLink.optional(),
   accessLevel: z.enum(["FREE", "GATED"]).optional(),
   published: z.boolean().optional(),
 });

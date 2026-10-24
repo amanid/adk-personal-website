@@ -11,7 +11,8 @@ export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
     const category = searchParams.get("category");
-    const limit = searchParams.get("limit");
+    // Bounded and validated: ?limit=abc or ?limit=-1 used to reach Prisma as is.
+    const limit = Math.min(Math.max(parseInt(searchParams.get("limit") || "", 10) || 20, 1), 100);
 
     const where: Record<string, unknown> = { published: true };
     if (category) where.category = category;
@@ -19,7 +20,7 @@ export async function GET(request: Request) {
     const posts = await prisma.blogPost.findMany({
       where,
       orderBy: { createdAt: "desc" },
-      ...(limit ? { take: parseInt(limit) } : {}),
+      take: limit,
       select: {
         id: true,
         title: true,

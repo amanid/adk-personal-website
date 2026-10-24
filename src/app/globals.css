@@ -684,6 +684,57 @@ html[data-cookie-banner="open"] .back-to-top {
   font-size: clamp(3rem, 7vw + 1rem, 6.5rem);
   line-height: 0.95;
   letter-spacing: -0.025em;
+  text-wrap: balance;
+}
+
+/* The surname and given names share one colour and sit on two lines; the
+   given names drop one weight step and gain a hair of tracking so the lighter
+   strokes hold the same optical width. No italics: at this size the italic
+   read as a subtitle, not as part of the name. */
+.display-name__surname,
+.display-name__given {
+  display: block;
+}
+
+.display-name__given {
+  font-weight: 400;
+  font-size: 0.84em;
+  letter-spacing: -0.015em;
+  margin-top: 0.06em;
+}
+
+/* Hairline-separated key figures (Experience page): mono digits, small caps labels. */
+.fact-strip {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  border-top: 1px solid var(--color-glass-border);
+  border-bottom: 1px solid var(--color-glass-border);
+}
+
+@media (min-width: 640px) {
+  .fact-strip {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+.fact-strip > div {
+  padding: 1.25rem 1rem 1.25rem 0;
+}
+
+.fact-strip > div + div {
+  border-left: 1px solid var(--color-glass-border);
+  padding-left: 1.25rem;
+}
+
+@media (max-width: 639px) {
+  .fact-strip > div:nth-child(3) {
+    border-left: 0;
+    padding-left: 0;
+    border-top: 1px solid var(--color-glass-border);
+  }
+  .fact-strip > div:nth-child(4) {
+    border-top: 1px solid var(--color-glass-border);
+  }
 }
 
 .h-section {

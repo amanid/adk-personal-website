@@ -51,7 +51,10 @@ export async function GET(
         "Content-Type": contentType,
         "Content-Disposition": disposition,
         "X-Content-Type-Options": "nosniff",
-        "Cache-Control": "public, max-age=31536000, immutable",
+        // A day, not a year: an upload can later become the file of a gated
+        // publication, and a year-long immutable copy in a shared cache would
+        // keep serving it past the paywall.
+        "Cache-Control": "public, max-age=86400, stale-while-revalidate=3600",
       },
     });
   } catch (error) {

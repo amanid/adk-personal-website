@@ -27,11 +27,12 @@
     "greeting": "Hello, I'm",
     "name": "KONAN Amani Dieudonné",
     "roles": "Senior Statistician | Data Scientist | AI Engineer | Data Architect | Econometrician",
-    "description": "I have spent 13 years turning data into decisions for development finance, UN agencies and research institutions. Today I lead data architecture and AI work at Afreximbank; before that I spent six years as statistician and econometrician at the International Cocoa Organization. I hold a Master's in Statistics and Econometrics from Toulouse, an engineering degree from ENSEA and MIT certificates in data engineering and applied AI. I submitted my DBA thesis on how development institutions adopt AI in June 2026.",
+    "description": "I have spent {years} years turning data into decisions for development finance, UN agencies and research institutions. Today I lead data architecture and AI work at Afreximbank; before that I spent {iccoYears} years as statistician and econometrician at the International Cocoa Organization. I hold a Master's in Statistics and Econometrics from Toulouse, an engineering degree from ENSEA and MIT certificates in data engineering and applied AI. I submitted my DBA thesis on how development institutions adopt AI in June 2026.",
     "cta_services": "Explore Services",
     "cta_contact": "Get in Touch",
     "download_cv": "Download CV",
-    "badge_text": "13+ Years of International Experience"
+    "badge_text": "{years}+ Years of International Experience",
+    "cta_book": "Book a call"
   },
   "stats": {
     "years": "Years Experience",
@@ -53,7 +54,7 @@
   },
   "organizations": {
     "title": "Where I've Worked",
-    "subtitle": "Employers and clients over 13 years: development finance, commodity markets, UN agencies and research centres."
+    "subtitle": "Employers and clients over {years} years: development finance, commodity markets, UN agencies and research centres."
   },
   "certifications_showcase": {
     "title": "Education & Certifications",
@@ -74,7 +75,15 @@
   "experience": {
     "title": "Professional Experience",
     "subtitle": "Every role, most recent first, as listed in my CV.",
-    "present": "Present"
+    "present": "Present",
+    "current": "Current role",
+    "summary_years": "Years",
+    "summary_roles": "Roles",
+    "summary_orgs": "Organisations",
+    "summary_countries": "Countries",
+    "summary_note": "Computed from the roles below",
+    "tenure_label": "Duration",
+    "concurrent": "Concurrent with {org}"
   },
   "services": {
     "title": "Services",
@@ -225,7 +234,12 @@
     "related": "Related Publications",
     "loading": "Loading...",
     "eyebrow": "Reports & analysis",
-    "members_only": "Members only"
+    "members_only": "Members only",
+    "data_files": "Data & files",
+    "data_files_note": "The dataset and working files behind this publication. Reports are free to read; the data is for subscribers with a data plan.",
+    "download_dataset": "Download dataset",
+    "download_supplementary": "Supplementary files",
+    "data_plan_hint": "Included in Data Access and Full Access."
   },
   "blog": {
     "title": "Blog",
@@ -309,7 +323,7 @@
     "forgot_password": "Forgot password?"
   },
   "footer": {
-    "description": "Statistician and data scientist. 13 years of work for development finance, UN agencies and research institutions.",
+    "description": "Statistician and data scientist. {years} years of work for development finance, UN agencies and research institutions.",
     "quick_links": "Quick Links",
     "connect": "Connect",
     "rights": "All rights reserved.",
@@ -326,7 +340,10 @@
     "already": "This email is already subscribed.",
     "error": "Something went wrong. Please try again.",
     "confirmed": "Subscription confirmed! You'll receive notifications for new publications.",
-    "unsubscribed": "You've been unsubscribed. You won't receive further emails."
+    "unsubscribed": "You've been unsubscribed. You won't receive further emails.",
+    "brief_eyebrow": "The monthly brief",
+    "brief_title": "One email a month. The month's research, nothing else.",
+    "brief_subtitle": "New reports, datasets and posts on African trade, commodities, data and AI, in one message. Unsubscribe in one click."
   },
   "research": {
     "title": "Research Activities",
@@ -346,7 +363,7 @@
   "subscribe": {
     "badge": "Premium Publications",
     "title": "Premium reports and data",
-    "subtitle": "Some of my reports, and the datasets behind them, are available by subscription. Many publications stay free.",
+    "subtitle": "Reports are free to read unless marked premium. The datasets and working files behind them, and the Data API Pro plan, come with a subscription.",
     "monthly": "Monthly",
     "yearly": "Yearly",
     "per_month": "/mo",
@@ -370,7 +387,7 @@
     "tier_document_access": "Document Access",
     "tier_document_access_desc": "Full PDF access to all premium analytical reports and publications.",
     "tier_data_access": "Data Access",
-    "tier_data_access_desc": "Datasets and supplementary files attached to premium publications.",
+    "tier_data_access_desc": "Every dataset and working file behind the publications, plus the Data API Pro plan.",
     "tier_full_access": "Full Access",
     "tier_full_access_desc": "Full reports plus their datasets and supplementary files.",
     "whats_included": "What Every Subscription Includes",
@@ -387,7 +404,7 @@
     "faq_q2": "Are all publications behind the paywall?",
     "faq_a2": "No. Many publications are completely free. Only selected premium publications require a subscription, and free ones are clearly marked.",
     "faq_q3": "What format are the datasets in?",
-    "faq_a3": "Where a premium publication has a dataset, it is offered as a file download on the publication page.",
+    "faq_a3": "Where a publication has a dataset, it is offered as a file download on the publication page, and through the Data API with a Pro key.",
     "faq_q4": "Can I cancel anytime?",
     "faq_a4": "Yes, you can cancel at any time with no penalties. You'll retain access until the end of your current billing period.",
     "cta_title": "Start Exploring Premium Research",
@@ -841,7 +858,9 @@
     "ai_title": "AI assistants & agents (MCP)",
     "ai_body": "Connect Claude, ChatGPT or any Model Context Protocol client to the public catalogue — publications, store, consulting sessions and blog. No key needed; read-only.",
     "ai_server": "MCP server URL (Streamable HTTP)",
-    "ai_llms": "Site map for language models"
+    "ai_llms": "Site map for language models",
+    "pro_included": "Pro is included with the Data Access and Full Access research subscriptions: the key registered with your account email is upgraded automatically.",
+    "pro_included_link": "See the subscriptions"
   },
   "topics": {
     "meta_title": "Topics",

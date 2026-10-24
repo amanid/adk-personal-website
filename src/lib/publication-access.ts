@@ -37,6 +37,15 @@ export function isGated(slug: string, dbLevel?: string | null): boolean {
   return staticPublications.find((p) => p.slug === slug)?.accessLevel === "GATED";
 }
 
+/**
+ * The paywall rule: the prose is open unless a publication is marked GATED,
+ * but the data behind it — datasets and supplementary files — always needs a
+ * data plan. Reports stay free to read, index and cite; the files are the product.
+ */
+export function requiresPlan(kind: FileKind, slug: string, dbLevel?: string | null): boolean {
+  return kind === "pdf" ? isGated(slug, dbLevel) : true;
+}
+
 export function gatedFileUrl(slug: string, kind: FileKind): string {
   return `/api/publications/${encodeURIComponent(slug)}/file?kind=${kind}`;
 }
@@ -71,9 +80,10 @@ type WithFiles = {
  * A URL that was empty stays empty, so the UI still knows which files exist.
  */
 export function protectFiles<T extends WithFiles>(pub: T): T {
-  if (!isGated(pub.slug, pub.accessLevel)) return pub;
-  const out = { ...pub, accessLevel: "GATED" };
-  if ("pdfUrl" in pub) out.pdfUrl = pub.pdfUrl ? gatedFileUrl(pub.slug, "pdf") : pub.pdfUrl;
+  const gated = isGated(pub.slug, pub.accessLevel);
+  const out = { ...pub, accessLevel: gated ? "GATED" : pub.accessLevel };
+  if (gated && "pdfUrl" in pub) out.pdfUrl = pub.pdfUrl ? gatedFileUrl(pub.slug, "pdf") : pub.pdfUrl;
+  // Data files go through the access-checked route on every publication.
   if ("dataUrl" in pub) out.dataUrl = pub.dataUrl ? gatedFileUrl(pub.slug, "data") : pub.dataUrl;
   if ("supplementaryUrl" in pub)
     out.supplementaryUrl = pub.supplementaryUrl ? gatedFileUrl(pub.slug, "supplementary") : pub.supplementaryUrl;
@@ -99,19 +109,19 @@ export async function readPrivatePublication(fileName: string): Promise<Buffer |
 const UPLOAD_PREFIX = "/api/uploads/";
 
 /**
- * Whether an upload is the file behind a gated publication or research
- * activity. Such uploads must never be served by the public /api/uploads
- * route, only through the access-checked file route.
+ * Whether an upload is a paid file: the report of a gated publication or
+ * research activity, or the dataset / supplementary file of any of them.
+ * Such uploads must never be served by the public /api/uploads route, only
+ * through the access-checked file route.
  */
 export async function isGatedUpload(id: string): Promise<boolean> {
   const url = `${UPLOAD_PREFIX}${id}`;
-  const fileMatch = [{ dataUrl: url }, { supplementaryUrl: url }];
   const [pubs, activities] = await Promise.all([
     prisma.publication.count({
-      where: { accessLevel: "GATED", OR: [{ pdfUrl: url }, ...fileMatch] },
+      where: { OR: [{ accessLevel: "GATED", pdfUrl: url }, { dataUrl: url }, { supplementaryUrl: url }] },
     }),
     prisma.researchActivity.count({
-      where: { accessLevel: "GATED", OR: [{ paperUrl: url }, ...fileMatch] },
+      where: { OR: [{ accessLevel: "GATED", paperUrl: url }, { dataUrl: url }, { supplementaryUrl: url }] },
     }),
   ]);
   return pubs + activities > 0;

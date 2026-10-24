@@ -31,6 +31,11 @@ export function formatPrice(minor: number, currency: string = "USD"): string {
   return formatMoney(minor, currency);
 }
 
+/** formatPrice without a ".00" tail: "$150" rather than "$150.00" in running copy. */
+export function formatPriceShort(minor: number, currency: string = "USD"): string {
+  return formatPrice(minor, currency).replace(/([.,]00)(?=\s|$)/, "");
+}
+
 export function slugify(text: string): string {
   return text
     .toLowerCase()

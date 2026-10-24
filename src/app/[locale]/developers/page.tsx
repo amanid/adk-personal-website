@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Link } from "@/i18n/routing";
 import { getTranslations } from "next-intl/server";
 import { buildPageMetadata, normalizeLocale, BASE_URL } from "@/lib/seo";
 import { getApiSettings } from "@/lib/data-api";
@@ -61,6 +62,12 @@ export default async function DevelopersPage({ params }: { params: Promise<{ loc
               ))}
             </ul>
             <p className="text-sm text-text-muted mt-4">{proOpen ? t("upgrade_hint") : t("pro_soon")}</p>
+            <p className="text-sm text-text-muted mt-2">
+              {t("pro_included")}{" "}
+              <Link href="/subscribe" className="text-gold hover:text-gold-light underline underline-offset-4">
+                {t("pro_included_link")}
+              </Link>
+            </p>
           </div>
         </div>
       </section>
