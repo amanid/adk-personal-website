@@ -637,6 +637,9 @@ model Order {
   /// The affiliate whose link brought the buyer (store orders only).
   affiliateId      String?
   affiliate        Affiliate?           @relation(fields: [affiliateId], references: [id])
+  /// Where the buyer came from: "promo:<placement>:<slug>" when a house ad was
+  /// clicked in the last 30 days (see lib/promos). Null otherwise.
+  source           String?
   commission       AffiliateCommission?
 
   @@index([email])
@@ -644,6 +647,7 @@ model Order {
   @@index([kind, status])
   @@index([quoteId])
   @@index([affiliateId])
+  @@index([source])
 }
 
 model OrderItem {
@@ -1139,4 +1143,19 @@ model RateLimitBucket {
   resetAt DateTime
 
   @@index([resetAt])
+}
+
+/// House-ad impressions and clicks (books and publications promoted across
+/// the site). Written by /api/promo/event, read by the store analytics.
+model PromoEvent {
+  id        String   @id @default(cuid())
+  placement String
+  itemKind  String
+  itemSlug  String
+  /// "impression" | "click"
+  event     String
+  createdAt DateTime @default(now())
+
+  @@index([createdAt])
+  @@index([placement, event])
 }

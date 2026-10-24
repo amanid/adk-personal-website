@@ -15,6 +15,8 @@ import Breadcrumbs from "@/components/Breadcrumbs";
 import { safeJsonLd } from "@/lib/utils";
 import { getSiteFacts } from "@/lib/career-data";
 import { SiteFactsProvider } from "@/lib/site-facts";
+import { getAnnouncement } from "@/lib/promos";
+import AnnouncementBar from "@/components/promo/AnnouncementBar";
 import type { Metadata } from "next";
 import "../globals.css";
 
@@ -132,9 +134,10 @@ export default async function LocaleLayout({
     notFound();
   }
 
-  const [messages, facts] = await Promise.all([
+  const [messages, facts, announcement] = await Promise.all([
     import(`../../../messages/${locale}.json`).then((m) => m.default),
     getSiteFacts(),
+    getAnnouncement(),
   ]);
 
   const jsonLd = {
@@ -260,6 +263,7 @@ export default async function LocaleLayout({
             </a>
             <Navbar />
             <main id="main-content" className="flex-1 pt-16">
+              <AnnouncementBar announcement={announcement} />
               <Breadcrumbs />
               <PageTransition>{children}</PageTransition>
             </main>

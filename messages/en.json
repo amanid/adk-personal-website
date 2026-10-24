@@ -896,5 +896,27 @@
     "worked_title": "Where I've worked",
     "book_call": "Book a call",
     "creds_eyebrow": "Credentials"
+  },
+  "promo": {
+    "from_store": "From the bookstore",
+    "related_reading": "Related reading",
+    "research_behind": "The research behind this title",
+    "go_deeper": "Go deeper",
+    "go_deeper_intro": "Titles from the bookstore on the same questions.",
+    "strip_title": "Reports, datasets and books",
+    "home_title": "From the bookstore",
+    "home_intro": "Full reports, datasets and toolkits, delivered as files after payment.",
+    "see_all": "All titles",
+    "get_book": "Get the book",
+    "get_title": "Get this title",
+    "read_report": "Read the report",
+    "launch_offer": "Launch offer",
+    "new_label": "New",
+    "until": "until {date}",
+    "free": "Free",
+    "from": "from",
+    "cover_alt": "Cover of {title}",
+    "bar_label": "Announcement",
+    "dismiss": "Dismiss"
   }
 }

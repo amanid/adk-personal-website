@@ -4,6 +4,9 @@ import { buildPageMetadata, normalizeLocale } from "@/lib/seo";
 import { prisma } from "@/lib/prisma";
 import { protectFiles } from "@/lib/publication-access";
 import PublicationsClient, { type DbPublicationRow } from "./PublicationsClient";
+import PromoStrip from "@/components/promo/PromoStrip";
+import { Container } from "@/components/ui/Section";
+import { getPromos } from "@/lib/promos";
 
 export async function generateMetadata({
   params,
@@ -60,5 +63,15 @@ export default async function PublicationsPage() {
   } catch {
     // DB unavailable — the client falls back to the static seed set.
   }
-  return <PublicationsClient initialDbPublications={dbPublications.map((p) => protectFiles(p))} />;
+  const promos = (await getPromos({ kind: "list" }, { books: 4 })).books;
+  return (
+    <>
+      <PublicationsClient initialDbPublications={dbPublications.map((p) => protectFiles(p))} />
+      {promos.length > 0 && (
+        <Container className="pb-20 md:pb-28">
+          <PromoStrip items={promos} placement="publications-list" />
+        </Container>
+      )}
+    </>
+  );
 }

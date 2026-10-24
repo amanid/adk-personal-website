@@ -8,6 +8,8 @@ import { Section } from "@/components/ui/Section";
 import { ButtonLink } from "@/components/ui/Button";
 import Reveal from "@/components/ui/Reveal";
 import type { CapabilityData } from "@/lib/capabilities";
+import type { PromoItem } from "@/lib/promos";
+import PromoStrip from "@/components/promo/PromoStrip";
 import { projects as staticProjects } from "@/data/projects";
 import { experiences as staticExperiences } from "@/data/experience";
 import { publications as staticPublications } from "@/data/publications";
@@ -72,6 +74,8 @@ interface HomeClientProps {
   initialCvUrl?: string;
   profilePhoto?: string;
   capabilities: CapabilityData;
+  /** Books for the bookstore strip, chosen by lib/promos. */
+  storePromos?: PromoItem[];
 }
 
 export default function HomeClient({
@@ -82,6 +86,7 @@ export default function HomeClient({
   initialCvUrl,
   profilePhoto,
   capabilities,
+  storePromos = [],
 }: HomeClientProps) {
   const t = useTranslations();
   const fr = useLocale() === "fr";
@@ -198,6 +203,20 @@ export default function HomeClient({
             </div>
           )}
         </Section>
+      )}
+
+      {vis.store !== false && storePromos.length > 0 && (
+        <section className="py-20 md:py-28 hairline">
+          <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+            <PromoStrip
+              items={storePromos}
+              placement="home-store"
+              title={t("promo.home_title")}
+              intro={t("promo.home_intro")}
+              className="border-t-0 pt-0"
+            />
+          </div>
+        </section>
       )}
 
       {vis.services !== false && (

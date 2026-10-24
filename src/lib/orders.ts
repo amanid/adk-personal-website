@@ -49,6 +49,8 @@ export interface NewOrder {
   paymentMethod?: PaymentMethod;
   paymentReference?: string | null;
   ipAddress?: string | null;
+  /** House-ad attribution, "promo:<placement>:<slug>" (see lib/promos). */
+  source?: string | null;
 }
 
 /** Persist a PENDING order with its lines; links a matching account by email. */
@@ -89,6 +91,7 @@ export async function createOrderRecord(input: NewOrder) {
       totalCents: input.totalCents,
       receiptToken: secureToken(),
       ipAddress: input.ipAddress ?? null,
+      source: input.source ?? null,
       items: {
         create: input.lines.map((l) => ({
           bookId: l.bookId,

@@ -110,7 +110,49 @@ export async function GET(request: NextRequest) {
       views: Math.round(minorToMajor(Number(r.cents), primaryCurrency)),
     }));
 
+    // House ads: impressions, clicks and the paid orders they led to, by placement.
+    const [promoEvents, promoOrders] = await Promise.all([
+      prisma.promoEvent.groupBy({
+        by: ["placement", "event"],
+        where: { createdAt: { gte: startDate } },
+        _count: { _all: true },
+      }),
+      prisma.order.findMany({
+        where: { status: "PAID", source: { startsWith: "promo:" }, paidAt: { gte: startDate } },
+        select: { source: true, totalCents: true, currency: true },
+      }),
+    ]);
+    const byPlacement = new Map<string, { placement: string; impressions: number; clicks: number; orders: number; revenueCents: number }>();
+    const slot = (placement: string) => {
+      if (!byPlacement.has(placement)) byPlacement.set(placement, { placement, impressions: 0, clicks: 0, orders: 0, revenueCents: 0 });
+      return byPlacement.get(placement)!;
+    };
+    for (const e of promoEvents) {
+      const row = slot(e.placement);
+      if (e.event === "impression") row.impressions += e._count._all;
+      else if (e.event === "click") row.clicks += e._count._all;
+    }
+    for (const o of promoOrders) {
+      const placement = o.source?.split(":")[1] || "unknown";
+      const row = slot(placement);
+      row.orders += 1;
+      if (o.currency === primaryCurrency) row.revenueCents += o.totalCents;
+    }
+    const promoRows = [...byPlacement.values()].sort((a, b) => b.clicks - a.clicks || b.impressions - a.impressions);
+    const promos = {
+      impressions: promoRows.reduce((n, r) => n + r.impressions, 0),
+      clicks: promoRows.reduce((n, r) => n + r.clicks, 0),
+      orders: promoRows.reduce((n, r) => n + r.orders, 0),
+      revenue: Math.round(minorToMajor(promoRows.reduce((n, r) => n + r.revenueCents, 0), primaryCurrency)),
+      byPlacement: promoRows.map((r) => ({
+        ...r,
+        ctr: r.impressions ? Math.round((r.clicks / r.impressions) * 1000) / 10 : 0,
+        revenue: Math.round(minorToMajor(r.revenueCents, primaryCurrency)),
+      })),
+    };
+
     return NextResponse.json({
+      promos,
       revenueByCurrency,
       primaryCurrency,
       summary: {

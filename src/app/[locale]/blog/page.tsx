@@ -3,6 +3,9 @@ import { getTranslations } from "next-intl/server";
 import { buildPageMetadata, normalizeLocale } from "@/lib/seo";
 import { prisma } from "@/lib/prisma";
 import BlogClient from "./BlogClient";
+import PromoStrip from "@/components/promo/PromoStrip";
+import { Container } from "@/components/ui/Section";
+import { getPromos } from "@/lib/promos";
 
 export async function generateMetadata({
   params,
@@ -52,5 +55,15 @@ export default async function BlogPage() {
   } catch {
     // DB unavailable at build — render an empty list.
   }
-  return <BlogClient initialPosts={posts} />;
+  const promos = (await getPromos({ kind: "list" }, { books: 4 })).books;
+  return (
+    <>
+      <BlogClient initialPosts={posts} />
+      {promos.length > 0 && (
+        <Container className="pb-20 md:pb-28">
+          <PromoStrip items={promos} placement="blog-list" />
+        </Container>
+      )}
+    </>
+  );
 }

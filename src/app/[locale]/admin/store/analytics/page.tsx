@@ -23,6 +23,13 @@ interface Analytics {
   revenueByDay: { date: string; views: number }[];
   topBooksByUnits: { name: string; value: number }[];
   topBooksByRevenue: { name: string; value: number }[];
+  promos?: {
+    impressions: number;
+    clicks: number;
+    orders: number;
+    revenue: number;
+    byPlacement: { placement: string; impressions: number; clicks: number; ctr: number; orders: number; revenue: number }[];
+  };
 }
 
 export default function AdminStoreAnalyticsPage() {
@@ -133,6 +140,57 @@ export default function AdminStoreAnalyticsPage() {
       <div className="mt-6">
         <PieChartCard title="Orders by status" data={data.ordersByStatus} />
       </div>
+
+      {/* House ads: the site's own titles promoted across its pages */}
+      {data.promos && (
+        <div className="glass rounded-xl p-6 mt-6">
+          <h2 className="text-lg font-semibold mb-1">House ads — last {days} days</h2>
+          <p className="text-sm text-text-secondary mb-4">
+            Books and publications promoted automatically on the home page, articles, reports, list pages and the announcement bar.
+            Orders are attributed to the placement clicked in the previous 30 days.
+          </p>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-5">
+            {[
+              ["Impressions", data.promos.impressions],
+              ["Clicks", data.promos.clicks],
+              ["Attributed orders", data.promos.orders],
+              [`Attributed revenue (${data.primaryCurrency})`, data.promos.revenue],
+            ].map(([label, value]) => (
+              <div key={String(label)} className="rounded-lg border border-glass-border p-4">
+                <p className="text-2xl font-bold tabular-nums">{Number(value).toLocaleString()}</p>
+                <p className="text-text-secondary text-sm">{label}</p>
+              </div>
+            ))}
+          </div>
+          {data.promos.byPlacement.length === 0 ? (
+            <p className="text-sm text-text-muted">No house-ad activity yet in this window.</p>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="text-left text-text-muted border-b border-glass-border">
+                    {["Placement", "Impressions", "Clicks", "CTR", "Orders", `Revenue (${data.primaryCurrency})`].map((h) => (
+                      <th key={h} className="py-2 pr-4 font-medium">{h}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {data.promos.byPlacement.map((r) => (
+                    <tr key={r.placement} className="border-b border-glass-border/60">
+                      <td className="py-2 pr-4 font-mono text-xs">{r.placement}</td>
+                      <td className="py-2 pr-4 tabular-nums">{r.impressions.toLocaleString()}</td>
+                      <td className="py-2 pr-4 tabular-nums">{r.clicks.toLocaleString()}</td>
+                      <td className="py-2 pr-4 tabular-nums">{r.ctr}%</td>
+                      <td className="py-2 pr-4 tabular-nums">{r.orders}</td>
+                      <td className="py-2 pr-4 tabular-nums">{r.revenue.toLocaleString()}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }

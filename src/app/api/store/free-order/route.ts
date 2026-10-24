@@ -6,6 +6,7 @@ import { fulfilPaidOrder, CouponExhaustedError } from "@/lib/order-fulfillment";
 import { rateLimit, clientIp } from "@/lib/rate-limit";
 import { resolveAffiliate } from "@/lib/affiliates";
 import { checkOrigin } from "@/lib/origin-check";
+import { promoSourceFromRequest } from "@/lib/promos";
 
 export const runtime = "nodejs";
 
@@ -53,6 +54,7 @@ export async function POST(request: Request) {
     }
 
     const order = await createOrderRecord({
+      source: promoSourceFromRequest(request),
       email,
       name,
       currency: priced.currency,

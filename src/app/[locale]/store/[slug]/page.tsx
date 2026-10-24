@@ -19,6 +19,8 @@ import ProductPurchase from "@/components/store/ProductPurchase";
 import { cardPrice, effectivePrice } from "@/lib/pricing";
 import BookViewBeacon from "@/components/store/BookViewBeacon";
 import BookCard, { type StoreBook } from "@/components/store/BookCard";
+import PromoCard from "@/components/promo/PromoCard";
+import { getPromos } from "@/lib/promos";
 import { BookOpen, Check, ChevronLeft } from "lucide-react";
 import type { Book } from "@prisma/client";
 
@@ -97,6 +99,7 @@ export default async function BookDetailPage({
   const l = normalizeLocale(locale);
   const book = await getBook(slug);
   const tStore = await getTranslations({ locale: l, namespace: "store" });
+  const tPromo = await getTranslations({ locale: l, namespace: "promo" });
   if (!book) notFound();
   // The price in force now (launch offer applied); checkout re-prices anyway.
   const price = effectivePrice(book);
@@ -134,6 +137,8 @@ export default async function BookDetailPage({
       : "Secure download after payment (Mobile Money: Wave, Djamo, Orange Money)";
 
   const related = await getRelatedBooks(book);
+  // A free report on the same questions: the invitation to read before buying.
+  const reading = (await getPromos({ kind: "store", slug: book.slug, category: book.category, tags: book.tags }, { publications: 1, requireRelevance: true })).publications[0] ?? null;
   const relatedBooks: StoreBook[] = related.map((b) => ({
     id: b.id,
     slug: b.slug,
@@ -321,6 +326,12 @@ export default async function BookDetailPage({
           )}
         </div>
       </div>
+
+      {reading && (
+        <div className="mt-16">
+          <PromoCard item={reading} placement="store-reading" eyebrow={tPromo("research_behind")} />
+        </div>
+      )}
 
       {relatedBooks.length > 0 && (
         <section className="mt-20 pt-14 hairline" aria-labelledby="related-heading">

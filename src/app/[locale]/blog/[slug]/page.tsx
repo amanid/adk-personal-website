@@ -3,6 +3,7 @@ import { buildPageMetadata, normalizeLocale } from "@/lib/seo";
 import { prisma } from "@/lib/prisma";
 import BlogDetailClient from "./BlogDetailClient";
 import { sanitizeRichText } from "@/lib/sanitize";
+import { getPromos, type PromoSet } from "@/lib/promos";
 
 function clip(text: string, max = 160): string {
   const clean = text
@@ -91,6 +92,7 @@ export default async function BlogPostPage({
 
   let initialPost: React.ComponentProps<typeof BlogDetailClient>["initialPost"] = null;
   let initialRelated: React.ComponentProps<typeof BlogDetailClient>["initialRelated"] = [];
+  let promos: PromoSet = { books: [], publications: [] };
 
   try {
     const post = await prisma.blogPost.findFirst({
@@ -133,6 +135,7 @@ export default async function BlogPostPage({
           createdAt: c.createdAt.toISOString(),
         })),
       };
+      promos = await getPromos({ kind: "blog", slug, category: post.category, tags: post.tags }, { books: 1, publications: 1 });
       if (post.category) {
         const related = await prisma.blogPost.findMany({
           where: { published: true, category: post.category, slug: { not: slug } },
@@ -148,6 +151,6 @@ export default async function BlogPostPage({
   }
 
   return (
-    <BlogDetailClient params={params} initialPost={initialPost} initialRelated={initialRelated} />
+    <BlogDetailClient params={params} initialPost={initialPost} initialRelated={initialRelated} promos={promos} />
   );
 }

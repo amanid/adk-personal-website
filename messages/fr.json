@@ -896,5 +896,27 @@
     "worked_title": "Où j'ai travaillé",
     "book_call": "Réserver un appel",
     "creds_eyebrow": "Diplômes"
+  },
+  "promo": {
+    "from_store": "Dans la librairie",
+    "related_reading": "Lecture associée",
+    "research_behind": "La recherche derrière ce titre",
+    "go_deeper": "Aller plus loin",
+    "go_deeper_intro": "Des titres de la librairie sur les mêmes questions.",
+    "strip_title": "Rapports, jeux de données et livres",
+    "home_title": "Dans la librairie",
+    "home_intro": "Rapports complets, jeux de données et boîtes à outils, livrés en fichiers après paiement.",
+    "see_all": "Tous les titres",
+    "get_book": "Obtenir le livre",
+    "get_title": "Obtenir ce titre",
+    "read_report": "Lire le rapport",
+    "launch_offer": "Offre de lancement",
+    "new_label": "Nouveau",
+    "until": "jusqu'au {date}",
+    "free": "Gratuit",
+    "from": "à partir de",
+    "cover_alt": "Couverture de {title}",
+    "bar_label": "Annonce",
+    "dismiss": "Fermer"
   }
 }

@@ -6,6 +6,7 @@ import { sanitizeInput } from "@/lib/sanitize";
 import { rateLimit, clientIp } from "@/lib/rate-limit";
 import { resolveAffiliate } from "@/lib/affiliates";
 import { checkOrigin } from "@/lib/origin-check";
+import { promoSourceFromRequest } from "@/lib/promos";
 
 export const runtime = "nodejs";
 
@@ -67,6 +68,7 @@ export async function POST(request: Request) {
       quantity: i.quantity,
     }));
     const order = await createOrderRecord({
+      source: promoSourceFromRequest(request),
       email,
       name,
       currency: priced.currency,

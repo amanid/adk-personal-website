@@ -17,6 +17,8 @@ import ShareButtons from "@/components/publications/ShareButtons";
 import type { PublicationType, PublicationData } from "@/types";
 import CTABanner from "@/components/CTABanner";
 import NewsletterSignup from "@/components/NewsletterSignup";
+import PromoStrip from "@/components/promo/PromoStrip";
+import type { PromoItem } from "@/lib/promos";
 import SubscriptionGate from "@/components/publications/SubscriptionGate";
 
 interface Comment {
@@ -77,11 +79,15 @@ export interface RelatedPub {
 
 export default function PublicationDetailClient({
   initialRelated = [],
+  promoBooks = [],
 }: {
   initialRelated?: RelatedPub[];
+  /** Bookstore titles on the same questions, chosen by lib/promos. */
+  promoBooks?: PromoItem[];
 }) {
   const params = useParams();
   const t = useTranslations("publications");
+  const tPromo = useTranslations("promo");
   const locale = useLocale();
   const { data: session } = useSession();
   const [commentText, setCommentText] = useState("");
@@ -470,6 +476,17 @@ export default function PublicationDetailClient({
               ))}
             </ul>
           </section>
+        )}
+
+        {/* Go deeper: bookstore titles related to this report */}
+        {promoBooks.length > 0 && (
+          <PromoStrip
+            items={promoBooks}
+            placement="publication-books"
+            title={tPromo("go_deeper")}
+            intro={tPromo("go_deeper_intro")}
+            className="mb-12"
+          />
         )}
 
         {/* CTA: the session first, then the brief */}

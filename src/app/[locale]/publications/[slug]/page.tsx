@@ -10,6 +10,7 @@ import {
 import { publications } from "@/data/publications";
 import { prisma } from "@/lib/prisma";
 import PublicationDetailClient, { type RelatedPub } from "./PublicationDetailClient";
+import { getPromos, type PromoItem } from "@/lib/promos";
 
 function clip(text: string, max = 160): string {
   const clean = text.replace(/\s+/g, " ").trim();
@@ -98,6 +99,7 @@ export default async function PublicationDetailPage({
 
   // Compute "related" on the server (was a whole-corpus fetch on the client).
   let initialRelated: RelatedPub[] = [];
+  let promoBooks: PromoItem[] = [];
   try {
     const staticPub = publications.find((p) => p.slug === slug);
     let category: string | null = staticPub?.category ?? null;
@@ -111,6 +113,7 @@ export default async function PublicationDetailPage({
       tags = cur?.tags ?? [];
     }
     const tagSet = new Set(tags);
+    promoBooks = (await getPromos({ kind: "publication", slug, category, tags }, { books: 2 })).books;
 
     const candidates = await prisma.publication.findMany({
       where: { slug: { not: slug } },
@@ -145,5 +148,5 @@ export default async function PublicationDetailPage({
     // DB unavailable — related simply stays empty.
   }
 
-  return <PublicationDetailClient initialRelated={initialRelated} />;
+  return <PublicationDetailClient initialRelated={initialRelated} promoBooks={promoBooks} />;
 }

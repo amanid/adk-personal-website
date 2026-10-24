@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { getSiteSettings } from "@/lib/settings";
 import HomeClient from "./HomeClient";
 import { buildCapabilityData } from "@/lib/capabilities";
+import { getPromos } from "@/lib/promos";
 import { protectFiles } from "@/lib/publication-access";
 import { projects as staticProjects } from "@/data/projects";
 import { experiences as staticExperiences } from "@/data/experience";
@@ -108,6 +109,7 @@ export default async function HomePage() {
   });
 
   const visibility = settings.sectionVisibility as Record<string, boolean>;
+  const storePromos = (await getPromos({ kind: "home" }, { books: 4 })).books;
   const cvUrl = typeof settings.cvFileUrl === "string" ? settings.cvFileUrl : "";
   const photo = typeof settings.profilePhoto === "string" && settings.profilePhoto ? settings.profilePhoto : "";
   const profilePhoto = photo ? (photo.includes("?") ? photo : `${photo}?v2`) : undefined;
@@ -121,6 +123,7 @@ export default async function HomePage() {
       initialCvUrl={cvUrl}
       profilePhoto={profilePhoto}
       capabilities={capabilities}
+      storePromos={storePromos}
     />
   );
 }

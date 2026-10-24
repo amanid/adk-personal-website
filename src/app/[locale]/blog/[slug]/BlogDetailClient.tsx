@@ -12,6 +12,8 @@ import BlogJsonLd from "@/components/blog/BlogJsonLd";
 import ShareBar from "@/components/blog/ShareBar";
 import CTABanner from "@/components/CTABanner";
 import NewsletterSignup from "@/components/NewsletterSignup";
+import PromoCard from "@/components/promo/PromoCard";
+import type { PromoSet } from "@/lib/promos";
 
 interface BlogPostFull {
   id: string;
@@ -44,10 +46,13 @@ export default function BlogDetailClient({
   params,
   initialPost = null,
   initialRelated = [],
+  promos,
 }: {
   params: Promise<{ slug: string }>;
   initialPost?: BlogPostFull | null;
   initialRelated?: RelatedPost[];
+  /** House ads chosen for this post by lib/promos: one title to buy, one report to read. */
+  promos?: PromoSet;
 }) {
   const { slug } = use(params);
   const t = useTranslations("blog");
@@ -244,6 +249,9 @@ export default function BlogDetailClient({
           )}
 
           <ShareBar title={title} slug={post.slug} />
+
+          {promos?.books[0] && <PromoCard item={promos.books[0]} placement="blog-article" />}
+          {promos?.publications[0] && <PromoCard item={promos.publications[0]} placement="blog-reading" />}
 
           <CTABanner variant="consulting" />
           <NewsletterSignup variant="inline" />
