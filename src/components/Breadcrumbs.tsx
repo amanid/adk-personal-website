@@ -55,7 +55,7 @@ export default function Breadcrumbs() {
       <nav aria-label="Breadcrumb" className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-5">
         <ol className="flex flex-wrap items-center gap-x-2 gap-y-1 font-mono text-xs text-text-muted">
           <li>
-            <Link href="/" className="hover:text-text-primary transition-colors">
+            <Link href="/" className="inline-flex items-center py-1.5 -my-1.5 hover:text-text-primary transition-colors">
               {tNav("home")}
             </Link>
           </li>
@@ -69,7 +69,7 @@ export default function Breadcrumbs() {
                     {label}
                   </span>
                 ) : (
-                  <Link href={crumb.href} className="hover:text-text-primary transition-colors truncate max-w-[200px]">
+                  <Link href={crumb.href} className="inline-flex items-center py-1.5 -my-1.5 hover:text-text-primary transition-colors truncate max-w-[200px]">
                     {label}
                   </Link>
                 )}

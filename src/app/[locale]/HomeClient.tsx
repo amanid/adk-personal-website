@@ -236,7 +236,7 @@ export default function HomeClient({
                 <s.icon className="w-5 h-5 text-gold mb-6" strokeWidth={1.5} />
                 <h3 className="text-lg font-semibold mb-2 flex items-center gap-2">
                   {t(`services.${s.key}`)}
-                  <ArrowRight className="w-4 h-4 opacity-0 -translate-x-1 group-hover:opacity-100 group-hover:translate-x-0 transition-all text-gold" />
+                  <ArrowRight className="w-4 h-4 opacity-0 -translate-x-1 group-hover:opacity-100 group-hover:translate-x-0 pointer-coarse:opacity-100 pointer-coarse:translate-x-0 transition-all text-gold" />
                 </h3>
                 <p className="text-sm text-text-secondary leading-relaxed">{t(`services.${s.key}_desc`)}</p>
               </Link>

@@ -47,9 +47,9 @@ export default function AnnouncementBar({ announcement }: { announcement: Announ
 
   return (
     <div ref={ref as React.RefObject<HTMLDivElement>} className="border-b border-glass-border bg-surface-1" role="region" aria-label={t("bar_label")}>
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 min-h-10 py-2 flex items-center gap-3 text-sm">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 min-h-11 py-1 flex items-center gap-3 text-sm">
         <span className="eyebrow text-[11px] shrink-0">{announcement.kind === "sale" ? t("launch_offer") : t("new_label")}</span>
-        <Link href={item.href} onClick={onClick} className="min-w-0 flex-1 truncate text-text-primary hover:text-gold transition-colors">
+        <Link href={item.href} onClick={onClick} className="min-w-0 flex-1 truncate py-2 text-text-primary hover:text-gold transition-colors">
           <span className="font-display">{title}</span>
           {item.priceCents !== null && (
             <span className="font-mono tabular-nums text-text-secondary ml-2">
@@ -60,7 +60,7 @@ export default function AnnouncementBar({ announcement }: { announcement: Announ
           {until && <span className="text-text-muted ml-2 hidden sm:inline">{t("until", { date: until })}</span>}
           <ArrowRight className="inline w-3.5 h-3.5 ml-1.5 align-[-2px]" aria-hidden />
         </Link>
-        <button type="button" onClick={dismiss} aria-label={t("dismiss")} className="shrink-0 p-1.5 text-text-muted hover:text-text-primary rounded-[var(--radius-sm)]">
+        <button type="button" onClick={dismiss} aria-label={t("dismiss")} className="shrink-0 -mr-2 min-w-11 min-h-11 inline-flex items-center justify-center text-text-muted hover:text-text-primary rounded-[var(--radius-sm)]">
           <X className="w-4 h-4" />
         </button>
       </div>

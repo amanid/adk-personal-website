@@ -17,7 +17,7 @@ import { getSiteFacts } from "@/lib/career-data";
 import { SiteFactsProvider } from "@/lib/site-facts";
 import { getAnnouncement } from "@/lib/promos";
 import AnnouncementBar from "@/components/promo/AnnouncementBar";
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import "../globals.css";
 
 // Self-hosted, preloaded fonts, exposed as CSS variables that globals.css maps
@@ -47,6 +47,13 @@ const playfair = Playfair_Display({
   display: "swap",
   preload: false,
 });
+
+/** Edge to edge on notched phones; the safe-area padding in globals.css keeps content clear of the notch. */
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
+};
 
 /**
  * Site-wide metadata. The years-of-experience figure is derived from the

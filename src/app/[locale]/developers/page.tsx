@@ -88,12 +88,12 @@ print(r.json()["data"][0]["title"])`}</pre>
       <section className="mb-16 pt-12 hairline" aria-labelledby="dev-endpoints">
         <h2 id="dev-endpoints" className="h-section mb-6">{t("endpoints")}</h2>
         <div className="overflow-x-auto">
-          <table className="w-full text-sm">
+          <table className="w-full min-w-[34rem] text-sm">
             <tbody>
               {ENDPOINTS.map(([m, p, note]) => (
                 <tr key={p} className="border-b border-glass-border">
                   <td className="py-3 pr-4 font-mono text-gold">{m}</td>
-                  <td className="py-3 pr-4 font-mono break-all">{p}</td>
+                  <td className="py-3 pr-4 font-mono whitespace-nowrap">{p}</td>
                   <td className="py-3 font-mono text-text-muted text-xs">{note}</td>
                 </tr>
               ))}

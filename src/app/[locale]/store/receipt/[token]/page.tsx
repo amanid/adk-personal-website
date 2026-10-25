@@ -225,7 +225,8 @@ export default async function ReceiptPage({
         </div>
 
         {/* Items */}
-        <table className="w-full text-sm mb-6">
+<div className="overflow-x-auto mb-6">
+                <table className="w-full text-sm">
           <thead>
             <tr className="text-text-secondary text-left border-b border-glass-border">
               <th className="pb-2 font-medium">{l === "fr" ? "Article" : "Item"}</th>
@@ -274,6 +275,7 @@ export default async function ReceiptPage({
             </tr>
           </tbody>
         </table>
+        </div>
 
         {/* Downloads */}
         {isPaid && (

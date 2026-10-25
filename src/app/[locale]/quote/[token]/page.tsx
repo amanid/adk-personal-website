@@ -62,6 +62,7 @@ export default async function QuotePage({ params }: { params: Promise<{ locale: 
 
         <section>
           <h2 className="font-display text-2xl mb-3">{t("items")}</h2>
+          <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <tbody>
               {items.map((i, n) => (
@@ -96,6 +97,7 @@ export default async function QuotePage({ params }: { params: Promise<{ locale: 
               )}
             </tfoot>
           </table>
+          </div>
         </section>
 
         {q.acceptedAt && q.acceptedName && (

@@ -134,7 +134,7 @@ function CareerTimeline({ data }: { data: CapabilityData }) {
             />
           ))}
         </div>
-        <ul className="relative space-y-1.5" aria-label={t("timeline_title")}>
+        <ul className="relative space-y-2 md:space-y-1.5" aria-label={t("timeline_title")}>
           {bars.map((b, i) => (
             <li key={`${b.organization}-${b.start}`} className="md:grid md:grid-cols-[11rem_1fr] md:items-center gap-0">
               <span
@@ -143,7 +143,7 @@ function CareerTimeline({ data }: { data: CapabilityData }) {
               >
                 {shortOrg(b.organization)}
               </span>
-              <div className="relative h-4">
+              <div className="relative h-6 md:h-4">
                 <motion.button
                   type="button"
                   aria-label={`${roleOf(b)}, ${b.organization}, ${formatMonth(b.start, fr)} – ${
@@ -188,7 +188,7 @@ function CareerTimeline({ data }: { data: CapabilityData }) {
                     onFocus={() => setActive(i)}
                     onBlur={() => setActive(null)}
                     onClick={() => setActive(active === i ? null : i)}
-                    className={`absolute top-1/2 w-3 h-3 -translate-x-1/2 -translate-y-1/2 rotate-45 bg-violet ring-2 ring-[var(--color-glass)] transition-opacity ${
+                    className={`absolute top-1/2 w-4 h-4 md:w-3 md:h-3 -translate-x-1/2 -translate-y-1/2 rotate-45 bg-violet ring-2 ring-[var(--color-glass)] transition-opacity ${
                       active !== null && active !== i ? "opacity-35" : "opacity-100"
                     }`}
                     style={{ left: `calc(${left}% + ${sameYearBefore * 10}px)` }}

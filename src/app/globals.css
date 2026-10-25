@@ -273,6 +273,27 @@ body {
   overflow-x: hidden;
 }
 
+/* Notched phones in landscape: keep content and the fixed navigation clear of
+   the sensor housing while the dark background still runs edge to edge. */
+@supports (padding: env(safe-area-inset-left)) {
+  body,
+  nav[aria-label="Main"] {
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
+  }
+}
+
+/* Paragraphs avoid widows and orphans; long URLs and identifiers break rather
+   than push the page sideways. */
+p {
+  text-wrap: pretty;
+}
+
+.prose,
+.lede {
+  overflow-wrap: anywhere;
+}
+
 ::selection {
   background-color: var(--color-gold);
   color: var(--color-charcoal);
@@ -479,11 +500,21 @@ body {
   border-radius: 2px;
 }
 
+/* A wide table scrolls inside the article instead of widening the page. */
 .prose table {
-  width: 100%;
+  display: block;
+  max-width: 100%;
+  overflow-x: auto;
   border-collapse: collapse;
   margin: 1.5rem 0;
   font-size: 0.875rem;
+  -webkit-overflow-scrolling: touch;
+}
+
+.prose table tbody,
+.prose table thead {
+  display: table;
+  width: 100%;
 }
 
 .prose thead th {
@@ -743,6 +774,7 @@ html[data-cookie-banner="open"] .back-to-top {
   font-size: clamp(1.875rem, 3vw + 0.5rem, 2.75rem);
   line-height: 1.08;
   letter-spacing: -0.02em;
+  text-wrap: balance;
 }
 
 .lede {
