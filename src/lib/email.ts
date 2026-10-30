@@ -178,7 +178,7 @@ function buildNotificationEmail({ title, excerpt, url, type, unsubscribeUrl }: E
           <tr>
             <td style="text-align:center;padding-bottom:30px;">
               <h1 style="margin:0;font-size:24px;color:#d4a843;font-weight:bold;">KONAN Amani Dieudonn&eacute;</h1>
-              <p style="margin:4px 0 0;font-size:13px;color:#8892a4;">Research &amp; Insights</p>
+              <p style="margin:4px 0 0;font-size:13px;color:#8892a4;">Newsletter</p>
             </td>
           </tr>
           <!-- Content Card -->
@@ -187,14 +187,14 @@ function buildNotificationEmail({ title, excerpt, url, type, unsubscribeUrl }: E
               <p style="margin:0 0 8px;font-size:12px;color:#d4a843;text-transform:uppercase;letter-spacing:1px;font-weight:600;">${type}</p>
               <h2 style="margin:0 0 16px;font-size:22px;color:#f1f5f9;line-height:1.3;">${escapeHtml(title)}</h2>
               <p style="margin:0 0 24px;font-size:15px;color:#8892a4;line-height:1.6;">${escapeHtml(excerpt)}</p>
-              <a href="${url}" style="display:inline-block;padding:12px 28px;background-color:#d4a843;color:#0a0f1e;text-decoration:none;border-radius:8px;font-weight:600;font-size:14px;">Read Now</a>
+              <a href="${url}" style="display:inline-block;padding:12px 28px;background-color:#d4a843;color:#0a0f1e;text-decoration:none;border-radius:8px;font-weight:600;font-size:14px;">Read it</a>
             </td>
           </tr>
           <!-- Footer -->
           <tr>
             <td style="text-align:center;padding-top:30px;">
               <p style="margin:0;font-size:12px;color:#4b5563;">
-                You received this because you subscribed to updates.<br>
+                You get this email because you subscribed on konanamanidieudonne.org.<br>
                 <a href="${unsubscribeUrl}" style="color:#8892a4;text-decoration:underline;">Unsubscribe</a>
               </p>
             </td>
@@ -557,16 +557,16 @@ export function buildConfirmationEmail(confirmUrl: string): string {
           <tr>
             <td style="text-align:center;padding-bottom:30px;">
               <h1 style="margin:0;font-size:24px;color:#d4a843;font-weight:bold;">KONAN Amani Dieudonn&eacute;</h1>
-              <p style="margin:4px 0 0;font-size:13px;color:#8892a4;">Research &amp; Insights</p>
+              <p style="margin:4px 0 0;font-size:13px;color:#8892a4;">Newsletter</p>
             </td>
           </tr>
           <!-- Content Card -->
           <tr>
             <td style="background-color:#111827;border:1px solid rgba(212,168,67,0.2);border-radius:12px;padding:32px;text-align:center;">
-              <h2 style="margin:0 0 16px;font-size:22px;color:#f1f5f9;">Confirm Your Subscription</h2>
-              <p style="margin:0 0 24px;font-size:15px;color:#8892a4;line-height:1.6;">Click the button below to confirm your email and start receiving notifications when new research and insights are published.</p>
-              <a href="${confirmUrl}" style="display:inline-block;padding:12px 28px;background-color:#d4a843;color:#0a0f1e;text-decoration:none;border-radius:8px;font-weight:600;font-size:14px;">Confirm Subscription</a>
-              <p style="margin:24px 0 0;font-size:12px;color:#4b5563;">If you didn&rsquo;t request this, you can safely ignore this email.</p>
+              <h2 style="margin:0 0 16px;font-size:22px;color:#f1f5f9;">Please confirm your address</h2>
+              <p style="margin:0 0 24px;font-size:15px;color:#8892a4;line-height:1.6;">Click the button to confirm your email address. You will then get an email when I publish a new report or article.</p>
+              <a href="${confirmUrl}" style="display:inline-block;padding:12px 28px;background-color:#d4a843;color:#0a0f1e;text-decoration:none;border-radius:8px;font-weight:600;font-size:14px;">Confirm</a>
+              <p style="margin:24px 0 0;font-size:12px;color:#4b5563;">If you did not ask for this, you can ignore this email.</p>
             </td>
           </tr>
         </table>

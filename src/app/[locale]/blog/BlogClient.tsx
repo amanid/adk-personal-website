@@ -66,7 +66,7 @@ export default function BlogClient({ initialPosts }: { initialPosts: BlogPost[] 
       "@context": "https://schema.org",
       "@type": "ItemList",
       name: "Blog Posts",
-      description: "Articles on data science, AI, and statistical analysis",
+      description: "Articles on data, AI and economics",
       url: "https://www.konanamanidieudonne.org/en/blog",
       numberOfItems: posts.length,
       itemListElement: posts.slice(0, 20).map((post, index) => ({

@@ -62,14 +62,14 @@ export const viewport: Viewport = {
 export async function generateMetadata(): Promise<Metadata> {
   const facts = await getSiteFacts();
   const y = facts.years;
-  const long = `Statistician and data scientist with ${y}+ years of work in development finance, commodity markets, UN agencies and research centres.`;
+  const long = `KONAN Amani Dieudonné is a statistician and data scientist from Côte d'Ivoire, with ${y} years of work in development finance, commodity markets, UN agencies and research.`;
   return {
     metadataBase: new URL("https://www.konanamanidieudonne.org"),
     title: {
-      default: "KONAN Amani Dieudonné | Senior Statistician & Data Scientist",
+      default: "KONAN Amani Dieudonné, statistician and data scientist",
       template: "%s | KONAN Amani Dieudonné",
     },
-    description: `${long} Statistics, econometrics, data architecture and AI systems.`,
+    description: `${long} Reports, datasets, consulting and books.`,
     keywords: [
       "Full-Stack Statistician",
       "Senior Data Scientist",
@@ -109,21 +109,21 @@ export async function generateMetadata(): Promise<Metadata> {
       locale: "en_US",
       url: "https://www.konanamanidieudonne.org",
       siteName: "KONAN Amani Dieudonné",
-      title: "KONAN Amani Dieudonné | Senior Statistician & Data Scientist",
+      title: "KONAN Amani Dieudonné, statistician and data scientist",
       description: long,
       images: [
         {
           url: "/images/profile.jpg",
           width: 800,
           height: 800,
-          alt: "KONAN Amani Dieudonné, Senior Statistician & Data Scientist",
+          alt: "KONAN Amani Dieudonné, statistician and data scientist",
         },
       ],
     },
     twitter: {
       card: "summary",
-      title: "KONAN Amani Dieudonné | Senior Statistician & Data Scientist",
-      description: `Statistician and data scientist with ${y}+ years of international experience.`,
+      title: "KONAN Amani Dieudonné, statistician and data scientist",
+      description: `Statistician and data scientist from Côte d'Ivoire. ${y} years of work in development finance, commodities and research.`,
       images: ["/images/profile.jpg"],
     },
   };
@@ -154,7 +154,7 @@ export default async function LocaleLayout({
     url: "https://www.konanamanidieudonne.org",
     image: "https://www.konanamanidieudonne.org/images/profile.jpg",
     // The profession, not the current post: the site is position-agnostic.
-    jobTitle: "Senior Statistician & Data Scientist",
+    jobTitle: "Statistician and data scientist",
     alumniOf: [
       {
         "@type": "EducationalOrganization",

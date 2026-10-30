@@ -122,10 +122,10 @@ ${i.excerpt ? `<p style="margin:4px 0 0;color:#c4bfb4;font-size:13px;line-height
 export function renderDigest(d: DigestContent, unsubscribeUrl: string, name?: string | null): string {
   const offer = d.offer
     ? `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-top:28px;border-top:1px solid #2e2d2a;"><tr><td style="padding-top:22px;">
-<p style="margin:0 0 6px;color:#edeae3;font-size:16px;font-weight:bold;">Working on a data or AI decision?</p>
+<p style="margin:0 0 6px;color:#edeae3;font-size:16px;font-weight:bold;">Working on a data or AI problem?</p>
 <p style="margin:0 0 14px;color:#c4bfb4;font-size:13px;line-height:1.55;">One ${escapeHtml(d.offer.label)} (${escapeHtml(
         d.offer.price
-      )}) is often enough to unblock a model, an architecture or a procurement choice.${
+      )}) is often enough to unblock a model, a pipeline or a decision.${
         d.offer.freeLabel ? ` Or start with <a href="${escapeHtml(d.offer.freeUrl!)}" style="color:#edeae3;">${escapeHtml(d.offer.freeLabel)}</a>.` : ""
       }</p>
 ${emailButton(escapeHtml(d.offer.url), "Book the session")}
@@ -133,7 +133,7 @@ ${emailButton(escapeHtml(d.offer.url), "Book the session")}
     : "";
   const body = `
 <p style="margin:0 0 6px;color:#edeae3;font-size:20px;font-weight:bold;">The brief · ${escapeHtml(d.periodLabel)}</p>
-<p style="margin:0 0 8px;color:#c4bfb4;">Hello${name ? ` ${escapeHtml(name)}` : ""}, here is what I published this month.</p>
+<p style="margin:0 0 8px;color:#c4bfb4;">Hello${name ? ` ${escapeHtml(name)}` : ""}. Here is what I published this month.</p>
 ${section("New research", d.publications)}
 ${section("From the blog", d.posts)}
 ${section("New in the store", d.products)}

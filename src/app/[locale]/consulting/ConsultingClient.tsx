@@ -163,8 +163,8 @@ export default function ConsultingClient() {
         </h1>
         <p className="lede max-w-2xl mb-8">
           {fr
-            ? `Plus de ${years} ans d'expérience en statistique, science des données et IA, au sein d'organisations internationales, d'agences des Nations Unies et d'une institution de financement du commerce. Choisissez la formule qui correspond à votre besoin.`
-            : `${years}+ years of work in statistics, data science and AI for international organisations, UN agencies and a trade finance institution. Pick the format that fits what you need.`}
+            ? `J'ai travaillé ${years} ans en statistique, science des données et IA, pour des organisations internationales, des agences des Nations Unies et une banque de financement du commerce. Voici comment nous pouvons travailler ensemble.`
+            : `I have worked ${years} years in statistics, data science and AI, for international organisations, UN agencies and a trade finance bank. Here is how we can work together.`}
         </p>
         <div className="flex flex-col sm:flex-row gap-3">
           <ButtonLink href="/book" size="lg">

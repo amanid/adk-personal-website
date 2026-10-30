@@ -31,10 +31,10 @@ export default function CTABanner({ variant = "consulting" }: CTABannerProps) {
   const content = {
     consulting: {
       badge: fr ? "Conseil" : "Consulting",
-      title: fr ? "Besoin d'aide sur un projet de données ou d'IA ?" : "Need help with a data or AI project?",
+      title: fr ? "Un problème de données ou d'IA à régler ?" : "Working on a data or AI problem?",
       description: fr
-        ? `Plus de ${years} ans d'expérience internationale en statistique, science des données et IA. Une session d'une heure suffit souvent à débloquer une décision, un modèle ou une architecture.`
-        : `${years}+ years of international experience in statistics, data science and AI. One session is often enough to unblock a decision, a model or an architecture.`,
+        ? `J'ai ${years} ans de pratique en statistique, science des données et IA dans des organisations internationales. Une heure suffit souvent pour débloquer un modèle, un pipeline ou une décision.`
+        : `I have ${years} years of practice in statistics, data science and AI at international organisations. An hour is often enough to unblock a model, a pipeline or a decision.`,
       cta: sessionLabel,
       href: paid ? `/book?package=${encodeURIComponent(paid.slug)}` : "/consulting",
       secondary: free
@@ -57,7 +57,7 @@ export default function CTABanner({ variant = "consulting" }: CTABannerProps) {
     },
     services: {
       badge: fr ? "Services" : "Services",
-      title: fr ? "Un projet en statistique, IA ou données ?" : "A statistics, AI or data project?",
+      title: fr ? "Un projet de statistique, d'IA ou de données ?" : "A statistics, AI or data project?",
       description: fr
         ? "Statistique, IA, ingénierie de données et développement full-stack."
         : "Statistics, AI, data engineering and full-stack development.",

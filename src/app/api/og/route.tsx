@@ -8,7 +8,7 @@ export async function GET(request: NextRequest) {
   // Capped: satori renders whatever it is given, and a megabyte of title is a
   // cheap way to burn CPU on the edge.
   const title = (searchParams.get("title") || "KONAN Amani Dieudonné").slice(0, 140);
-  const subtitle = (searchParams.get("subtitle") || "Senior Statistician & Data Scientist").slice(0, 200);
+  const subtitle = (searchParams.get("subtitle") || "Statistician and data scientist").slice(0, 200);
   const type = (searchParams.get("type") || "page").slice(0, 20);
 
   const typeColors: Record<string, string> = {
