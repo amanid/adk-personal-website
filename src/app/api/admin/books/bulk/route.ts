@@ -81,7 +81,7 @@ export async function POST(request: Request) {
       if (Date.now() - startedAt > TIME_BUDGET_MS) {
         failed.push({
           name: file.name,
-          error: "Not processed — import time limit reached. Re-run the import for this file.",
+          error: "Not processed, import time limit reached. Re-run the import for this file.",
         });
         continue;
       }
@@ -89,7 +89,7 @@ export async function POST(request: Request) {
       try {
         const asset = await findAsset(file.fileId);
         if (!asset) {
-          failed.push({ name: file.name, error: "The uploaded file was not found — upload it again." });
+          failed.push({ name: file.name, error: "The uploaded file was not found, upload it again." });
           continue;
         }
         if (docKind(asset.filename, asset.mimeType) === "other") {
@@ -116,7 +116,7 @@ export async function POST(request: Request) {
             subtitle: facts.subtitle ? sanitizeInput(facts.subtitle.value) : null,
             description: facts.description
               ? sanitizeInput(facts.description.value)
-              : `${title} — description pending.`,
+              : `${title}, description pending.`,
             keyInsights: [],
             keyInsightsFr: [],
             author: facts.author ? sanitizeInput(facts.author.value) : undefined,
@@ -137,9 +137,9 @@ export async function POST(request: Request) {
 
         // Say plainly which values are stand-ins rather than read from the file.
         const notes: string[] = [];
-        if (!facts.title) notes.push("no title found in the file — its file name was used");
-        if (!facts.publicationYear) notes.push(`no publication year found — set to ${book.publicationYear} as a placeholder`);
-        if (!coverImageId) notes.push("no usable cover found — upload one");
+        if (!facts.title) notes.push("no title found in the file, its file name was used");
+        if (!facts.publicationYear) notes.push(`no publication year found, set to ${book.publicationYear} as a placeholder`);
+        if (!coverImageId) notes.push("no usable cover found, upload one");
         created.push({ id: book.id, title: book.title, slug: book.slug, notes });
       } catch (err) {
         console.error(`Bulk import failed for ${file.name}:`, err);

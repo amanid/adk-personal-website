@@ -227,7 +227,7 @@ async function analysePdf(buffer: Uint8Array, filename: string, renderCover: (pa
 
       const metaTitle = typeof info.Title === "string" ? info.Title.trim() : "";
       const metaTitleOk = metaTitle && !isJunkTitle(metaTitle, filename);
-      if (metaTitle && !metaTitleOk) facts.notes.push(`Ignored the file's embedded title "${metaTitle}" — it is a software default, not the book's title.`);
+      if (metaTitle && !metaTitleOk) facts.notes.push(`Ignored the file's embedded title "${metaTitle}". It is a software default, not the book's title.`);
 
       if (titleBlock) {
         let title = titleBlock.title;
@@ -256,7 +256,7 @@ async function analysePdf(buffer: Uint8Array, filename: string, renderCover: (pa
       if (metaAuthor) {
         const a = cleanAuthor(metaAuthor);
         if ("ok" in a) facts.author = { value: a.ok, source: "Author stored in the PDF's properties", evidence: a.ok !== metaAuthor ? metaAuthor : undefined };
-        else facts.notes.push(`Ignored the file's embedded author "${a.rejected}" — it is not a person's name.`);
+        else facts.notes.push(`Ignored the file's embedded author "${a.rejected}". It is not a person's name.`);
       }
 
       const subject = typeof info.Subject === "string" ? info.Subject.trim() : "";
@@ -302,7 +302,7 @@ async function analysePdf(buffer: Uint8Array, filename: string, renderCover: (pa
       if (!cover) {
         facts.notes.push(
           (pages.get(1)?.length ?? 0) > 0
-            ? "The first page has text but draws blank here — its fonts aren't embedded in the PDF. Upload a cover image (or export the PDF with fonts embedded)."
+            ? "The first page has text but draws blank here. Its fonts aren't embedded in the PDF. Upload a cover image (or export the PDF with fonts embedded)."
             : "The first pages could not be turned into a cover image. Upload a cover."
         );
       }
@@ -388,7 +388,7 @@ async function analyseEpub(buffer: Uint8Array): Promise<AnalysedDocument> {
   if (creator) {
     const a = cleanAuthor(creator);
     if ("ok" in a) facts.author = { value: a.ok, source: src };
-    else facts.notes.push(`Ignored the EPUB's author "${a.rejected}" — it is not a person's name.`);
+    else facts.notes.push(`Ignored the EPUB's author "${a.rejected}". It is not a person's name.`);
   }
   const lang = languageFromCode(pick("dc\\:language, language"));
   const description = pick("dc\\:description, description");
@@ -519,14 +519,14 @@ async function analyseOoxml(buffer: Uint8Array, kind: "docx" | "pptx" | "xlsx", 
   const coreTitle = coreField("dc:title");
   if (visibleTitle) facts.title = { value: visibleTitle, source: kind === "pptx" ? "Title of the first slide" : "Paragraph styled as the document title" };
   else if (coreTitle && !isJunkTitle(coreTitle, filename)) facts.title = { value: coreTitle, source: `Title stored in the ${label} file's properties` };
-  else if (coreTitle) facts.notes.push(`Ignored the file's embedded title "${coreTitle}" — it is a software default.`);
+  else if (coreTitle) facts.notes.push(`Ignored the file's embedded title "${coreTitle}". It is a software default.`);
   if (visibleSubtitle) facts.subtitle = { value: visibleSubtitle, source: kind === "pptx" ? "Subtitle of the first slide" : "Paragraph styled as the subtitle" };
 
   const creator = coreField("dc:creator");
   if (creator) {
     const a = cleanAuthor(creator);
     if ("ok" in a) facts.author = { value: a.ok, source: `Author stored in the ${label} file's properties` };
-    else facts.notes.push(`Ignored the file's embedded author "${a.rejected}" — it is not a person's name.`);
+    else facts.notes.push(`Ignored the file's embedded author "${a.rejected}". It is not a person's name.`);
   }
   const subject = coreField("dc:subject") || coreField("dc:description");
   if (subject.length >= 80) facts.description = { value: subject, source: `Description stored in the ${label} file's properties` };

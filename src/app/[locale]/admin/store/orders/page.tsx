@@ -252,7 +252,7 @@ export default function AdminOrdersPage() {
         <div className="glass rounded-xl p-5">
           <DollarSign className="w-5 h-5 text-success mb-2" />
           {summary.revenueByCurrency.length === 0 ? (
-            <p className="text-2xl font-bold">—</p>
+            <p className="text-2xl font-bold">, </p>
           ) : (
             <div className="space-y-0.5">
               {summary.revenueByCurrency.slice(0, 3).map((r) => (
@@ -288,7 +288,7 @@ export default function AdminOrdersPage() {
           <MailWarning className="w-4 h-4 shrink-0 mt-0.5" />
           <span>
             {emailFailedCount} order{emailFailedCount === 1 ? "" : "s"} had an email delivery
-            failure. Buyers may not have received their invoice or download links — check your
+            failure. Buyers may not have received their invoice or download links, check your
             SMTP settings, then use the buyer email to follow up.
           </span>
         </div>
@@ -466,13 +466,13 @@ export default function AdminOrdersPage() {
                         label="Email"
                       >
                         {o.lastEmailError ? (
-                          <span className="text-danger">Failed — {o.lastEmailError}</span>
+                          <span className="text-danger">Failed: {o.lastEmailError}</span>
                         ) : o.receiptEmailedAt ? (
                           `Confirmation sent ${fmtDate(o.receiptEmailedAt)}`
                         ) : o.invoiceEmailedAt ? (
                           `Invoice sent ${fmtDate(o.invoiceEmailedAt)}`
                         ) : (
-                          "—"
+                          "–"
                         )}
                         {o.status === "PAID" && (
                           <button

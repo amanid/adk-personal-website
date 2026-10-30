@@ -228,23 +228,23 @@ export default function AdminVisitorsPage() {
                       <td className="p-3 whitespace-nowrap">
                         <span className="inline-flex items-center gap-1">
                           <Globe className="w-3.5 h-3.5 text-text-muted" />
-                          {[v.city, v.country].filter(Boolean).join(", ") || "—"}
+                          {[v.city, v.country].filter(Boolean).join(", ") || "–"}
                         </span>
                       </td>
                       <td className="p-3 whitespace-nowrap">
                         <span className="inline-flex items-center gap-1.5 capitalize">
                           <DIcon className="w-3.5 h-3.5 text-text-muted" />
-                          {v.device || "—"}
+                          {v.device || "–"}
                         </span>
                       </td>
                       <td className="p-3 whitespace-nowrap text-text-secondary">
-                        {[v.browser, v.os].filter(Boolean).join(" · ") || "—"}
+                        {[v.browser, v.os].filter(Boolean).join(" · ") || "–"}
                       </td>
                       <td className="p-3 max-w-[160px] truncate" title={v.referrer || "Direct"}>
                         {ref}
                       </td>
                       <td className="p-3 whitespace-nowrap font-mono text-xs text-text-muted">
-                        {v.sessionId ? v.sessionId.slice(0, 8) : "—"}
+                        {v.sessionId ? v.sessionId.slice(0, 8) : "–"}
                       </td>
                     </tr>
                   );

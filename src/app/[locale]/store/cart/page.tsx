@@ -285,7 +285,7 @@ export default function CartPage() {
             <p id="email-hint" className="text-sm text-text-secondary mt-3">{t("emailHint")}</p>
           </section>
 
-          {/* Free order — no payment needed */}
+          {/* Free order: no payment needed */}
           {isFree ? (
             <section className="card p-6" aria-labelledby="free-heading">
               <div className="flex items-center gap-2 mb-2">
@@ -359,7 +359,7 @@ export default function CartPage() {
                 </div>
               ))}
             </div>
-            {/* Coupon — only meaningful for a paid cart */}
+            {/* Coupon: only meaningful for a paid cart */}
             {subtotalCents > 0 && (
               <div className="mt-4 pt-4 border-t border-glass-border">
                 {appliedCode ? (

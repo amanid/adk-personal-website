@@ -51,7 +51,7 @@ export async function PATCH(
         const quote = await fetchChartQuote(existing.symbol, 10000);
         if (!quote || quote.price === null) {
           return NextResponse.json(
-            { error: "No live price available — enter the closing price manually." },
+            { error: "No live price available, enter the closing price manually." },
             { status: 404 }
           );
         }

@@ -30,7 +30,7 @@ export async function POST(request: Request) {
     let cover: Awaited<ReturnType<typeof storeDocumentCover>> | null = null;
     if (body?.wantCover === true && result.cover) {
       cover = await storeDocumentCover(result.cover);
-      if ("refused" in cover) result.facts.notes.push(`No cover taken from the file — ${cover.refused}.`);
+      if ("refused" in cover) result.facts.notes.push(`No cover taken from the file: ${cover.refused}.`);
       else if (cover.note) result.facts.notes.push(cover.note);
     }
 

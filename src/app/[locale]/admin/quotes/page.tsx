@@ -343,7 +343,7 @@ export default function AdminQuotesPage() {
                   {q.orders.length > 0 && (
                     <p className="text-xs text-text-muted mt-1">
                       {q.orders.map((o) => `${o.quoteStage?.toLowerCase()} ${o.orderNumber} ${o.status.toLowerCase()}`).join(" · ")}
-                      {q.orders.some((o) => o.status === "PENDING") && " — confirm manual payments in Orders"}
+                      {q.orders.some((o) => o.status === "PENDING") && ", confirm manual payments in Orders"}
                     </p>
                   )}
                 </div>

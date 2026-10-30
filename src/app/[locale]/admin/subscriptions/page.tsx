@@ -114,11 +114,11 @@ export default function AdminSubscriptionsPage() {
             <tbody>
               {data.subscriptions.map((s) => (
                 <tr key={s.id} className="border-b border-glass-border/60">
-                  <td className="p-3">{s.user.name || "—"} <span className="text-text-muted">{s.user.email}</span></td>
+                  <td className="p-3">{s.user.name || "–"} <span className="text-text-muted">{s.user.email}</span></td>
                   <td className="p-3">{s.tier.replace("_", " ").toLowerCase()}</td>
                   <td className="p-3">{s.status.toLowerCase()}{s.cancelAtPeriodEnd ? " (ends)" : ""}</td>
                   <td className="p-3 text-text-secondary">{s.paypalSubscriptionId ? `PayPal · ${s.billingInterval?.toLowerCase()}` : "manual"}</td>
-                  <td className="p-3 text-text-secondary">{s.currentPeriodEnd ? new Date(s.currentPeriodEnd).toLocaleDateString() : "—"}</td>
+                  <td className="p-3 text-text-secondary">{s.currentPeriodEnd ? new Date(s.currentPeriodEnd).toLocaleDateString() : "–"}</td>
                 </tr>
               ))}
             </tbody>

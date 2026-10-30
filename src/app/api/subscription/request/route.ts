@@ -101,7 +101,7 @@ export async function POST(request: NextRequest) {
             <td style="background-color:#111827;border:1px solid rgba(212,168,67,0.2);border-radius:12px;padding:32px;text-align:center;">
               <h2 style="margin:0 0 16px;font-size:22px;color:#f1f5f9;">Subscription Request Received</h2>
               <p style="margin:0 0 24px;font-size:15px;color:#8892a4;line-height:1.6;">Thank you, ${escapeHtml(name)}! Your request for <strong style="color:#d4a843;">${tierLabel}</strong> (${billing}) has been received. I will review it and get back to you within 24 hours with access details and payment instructions.</p>
-              <p style="margin:0;font-size:13px;color:#4b5563;">— KONAN Amani Dieudonn&eacute;</p>
+              <p style="margin:0;font-size:13px;color:#4b5563;">KONAN Amani Dieudonn&eacute;</p>
             </td>
           </tr>
         </table>
@@ -111,7 +111,7 @@ export async function POST(request: NextRequest) {
 </body>
 </html>`;
 
-    await sendEmail(email, "Your Subscription Request — KONAN Amani Dieudonné", confirmHtml).catch(() => {});
+    await sendEmail(email, "Your subscription request, KONAN Amani Dieudonné", confirmHtml).catch(() => {});
 
     return NextResponse.json({ success: true });
   } catch (error) {

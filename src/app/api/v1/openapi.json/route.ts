@@ -8,7 +8,7 @@ export function GET() {
   const spec = {
     openapi: "3.1.0",
     info: {
-      title: "KONAN Amani Dieudonné — Data & Research API",
+      title: "KONAN Amani Dieudonné: Data & Research API",
       version: "1.0.0",
       description:
         "Publication metadata and datasets on African economics, trade, commodities, AI and data governance. Free and Pro plans; quotas reset monthly (UTC). Get a key at " +

@@ -26,10 +26,10 @@ function messageForStatus(status: number, fallback: string): string {
       return "Too many requests. Wait a moment and try again.";
     case 502:
     case 503:
-      return "The server restarted while handling this request — it usually means the file was too heavy to process. Try a smaller file, or retry in a minute.";
+      return "The server restarted while handling this request. It usually means the file was too heavy to process. Try a smaller file, or retry in a minute.";
     case 504:
     case 524:
-      return "The server took too long to respond. Large files can exceed the time limit — try a smaller file, or retry.";
+      return "The server took too long to respond. Large files can exceed the time limit. Try a smaller file, or retry.";
     default:
       return status >= 500
         ? `${fallback} (server error ${status}).`

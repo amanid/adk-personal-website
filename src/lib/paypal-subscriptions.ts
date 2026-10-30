@@ -68,7 +68,7 @@ export async function setupPayPalPlans(homeUrl: string): Promise<PlanMap> {
     for (const interval of ["MONTH", "YEAR"] as BillingInterval[]) {
       const plan = await createBillingPlan({
         productId,
-        name: `${TIER_LABELS[tier]} — ${interval === "MONTH" ? "monthly" : "yearly"}`,
+        name: `${TIER_LABELS[tier]}, ${interval === "MONTH" ? "monthly" : "yearly"}`,
         intervalUnit: interval,
         amountCents: TIER_PRICES[tier][interval],
         currency: SUBSCRIPTION_CURRENCY,

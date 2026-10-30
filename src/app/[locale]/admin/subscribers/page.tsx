@@ -261,7 +261,7 @@ export default function AdminSubscribersPage() {
                       {subscriber.email}
                     </td>
                     <td className="px-4 py-3 text-sm text-text-secondary">
-                      {subscriber.name || "—"}
+                      {subscriber.name || "–"}
                     </td>
                     <td className="px-4 py-3">
                       {subscriber.confirmed ? (

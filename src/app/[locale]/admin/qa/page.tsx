@@ -197,7 +197,7 @@ export default function AdminQAPage() {
                         <p className="text-text-secondary text-sm">{a.content}</p>
                         <div className="flex items-center gap-3 mt-1.5">
                           <p className="text-text-muted text-xs">
-                            — {a.author.name}, {formatDate(a.createdAt)}
+, {a.author.name}, {formatDate(a.createdAt)}
                           </p>
                           <span className="flex items-center gap-1 text-xs text-text-muted">
                             <ThumbsUp className="w-3 h-3" />

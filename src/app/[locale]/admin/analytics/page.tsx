@@ -205,9 +205,9 @@ export default function AnalyticsPage() {
                         className="border-b border-glass-border/50 hover:bg-gold/5 transition-colors"
                       >
                         <td className="p-3 font-medium truncate max-w-[200px]">{view.path}</td>
-                        <td className="p-3 text-text-secondary">{view.country || "—"}</td>
-                        <td className="p-3 text-text-secondary">{view.device || "—"}</td>
-                        <td className="p-3 text-text-secondary">{view.browser || "—"}</td>
+                        <td className="p-3 text-text-secondary">{view.country || "–"}</td>
+                        <td className="p-3 text-text-secondary">{view.device || "–"}</td>
+                        <td className="p-3 text-text-secondary">{view.browser || "–"}</td>
                         <td className="p-3 text-right text-text-secondary">
                           {new Date(view.createdAt).toLocaleTimeString([], {
                             hour: "2-digit",

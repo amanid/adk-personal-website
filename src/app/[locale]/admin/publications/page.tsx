@@ -310,7 +310,7 @@ export default function AdminPublicationsPage() {
               <textarea value={form.abstractFr} onChange={(e) => setForm({ ...form, abstractFr: e.target.value })} rows={4} className={INPUT_CLASS} />
             </div>
 
-            {/* File Uploads — PDF, Data & Supplementary */}
+            {/* File Uploads: PDF, Data & Supplementary */}
             <div className="p-4 border border-gold/20 rounded-lg bg-gold/[0.02] space-y-4">
               <h3 className="text-sm font-medium text-gold">File Attachments</h3>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -356,8 +356,8 @@ export default function AdminPublicationsPage() {
                   onChange={(e) => setForm({ ...form, accessLevel: e.target.value })}
                   className={INPUT_CLASS}
                 >
-                  <option value="FREE">Free — Open access</option>
-                  <option value="GATED">Premium — Subscription required</option>
+                  <option value="FREE">Free: Open access</option>
+                  <option value="GATED">Premium: Subscription required</option>
                 </select>
               </div>
               <div className="flex items-end pb-1">

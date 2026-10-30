@@ -420,7 +420,7 @@ export default function AdminBookingsPage() {
               <input className={INPUT} value={settings.timeZone} onChange={(e) => setSettings({ ...settings, timeZone: e.target.value })} />
             </label>
             <label className="text-xs text-text-secondary">
-              Default meeting link (https, private — sent only to confirmed clients)
+              Default meeting link (https, private, sent only to confirmed clients)
               <input className={INPUT} value={settings.meetingUrl || ""} placeholder="https://meet.google.com/…" onChange={(e) => setSettings({ ...settings, meetingUrl: e.target.value })} />
             </label>
             {(
@@ -525,7 +525,7 @@ function BookingRow({
               <span className={b.order.status === "PAID" ? "text-success" : "text-warning"}>{b.order.status}</span>
               {b.order.status === "PENDING" && (
                 <>
-                  {" "}— <Link href="/admin/store/orders" className="text-gold">confirm payment in Orders</Link>
+                  {" "}<Link href="/admin/store/orders" className="text-gold">confirm payment in Orders</Link>
                 </>
               )}
             </p>
@@ -552,7 +552,7 @@ function BookingRow({
           </div>
           <div className="flex gap-2 items-end">
             <label className="flex-1 text-xs text-text-secondary">
-              Move to (your browser&apos;s time) — re-sends the invite
+              Move to (your browser&apos;s time), re-sends the invite
               <input type="datetime-local" className={INPUT} value={moveTo || isoToLocalInput(b.startsAt)} onChange={(e) => setMoveTo(e.target.value)} />
             </label>
             <button disabled={!moveTo || !paid} onClick={() => act(() => send(`/api/admin/bookings/${b.id}`, "PATCH", { startsAt: localInputToIso(moveTo) }), "Booking moved and client notified.")} className="px-3 py-2 rounded-md border border-glass-border text-sm disabled:opacity-40">

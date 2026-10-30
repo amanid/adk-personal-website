@@ -104,7 +104,7 @@ export default function AdminDataApiPage() {
           <p className="text-sm text-text-secondary">
             {d.settings.proPriceCents && d.settings.proPlanId
               ? `Live at ${formatPrice(d.settings.proPriceCents, "USD")} / month.`
-              : "Not offered yet — set a price to create the PayPal plan."}
+              : "Not offered yet, set a price to create the PayPal plan."}
           </p>
           {d.paypalConfigured ? (
             <div className="flex gap-2 items-end">

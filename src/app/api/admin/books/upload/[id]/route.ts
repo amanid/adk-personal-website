@@ -22,7 +22,7 @@ export async function PUT(request: Request, { params }: Params) {
     const { id } = await params;
     const index = Number(new URL(request.url).searchParams.get("part"));
     const asset = await pendingAsset(id);
-    if (!asset) return NextResponse.json({ error: "Upload not found — start it again." }, { status: 404 });
+    if (!asset) return NextResponse.json({ error: "Upload not found, start it again." }, { status: 404 });
     if (asset.complete) return NextResponse.json({ error: "This upload is already finished." }, { status: 409 });
     const expected = Number.isInteger(index) ? partLength(asset.size, index) : -1;
     if (expected < 0) return NextResponse.json({ error: "Invalid piece number" }, { status: 400 });
@@ -57,7 +57,7 @@ export async function POST(request: Request, { params }: Params) {
     const sha256 = typeof body?.sha256 === "string" ? body.sha256.toLowerCase() : "";
     const fileName = typeof body?.fileName === "string" ? body.fileName.slice(0, 255) : "";
     const asset = await pendingAsset(id);
-    if (!asset) return NextResponse.json({ error: "Upload not found — start it again." }, { status: 404 });
+    if (!asset) return NextResponse.json({ error: "Upload not found, start it again." }, { status: 404 });
 
     if (!asset.complete) {
       const parts = await prisma.bookAssetPart.findMany({ where: { assetId: id }, select: { index: true } });

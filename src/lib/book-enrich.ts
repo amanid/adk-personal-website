@@ -53,7 +53,7 @@ export async function enrichBookById(
   const book = await prisma.book.findUnique({ where: { id: bookId } });
   if (!book) return { status: "failed", reason: "Book not found." };
   if (!book.fileId) {
-    return { status: "skipped", reason: "No book file to read — upload a PDF or EPUB first." };
+    return { status: "skipped", reason: "No book file to read. Upload a PDF or EPUB first." };
   }
 
   const asset = await findAsset(book.fileId);

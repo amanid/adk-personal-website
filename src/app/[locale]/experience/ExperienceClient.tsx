@@ -103,7 +103,7 @@ export default function ExperienceClient({
           <p className="lede mt-5 max-w-2xl">{t("subtitle")}</p>
 
           {facts && (
-            <dl className="fact-strip mt-10 md:mt-12" aria-label={t("summary_note")}>
+            <dl className="fact-strip mt-10 md:mt-12">
               {[
                 { value: facts.years, suffix: "+", label: t("summary_years") },
                 { value: facts.roles, label: t("summary_roles") },
@@ -120,7 +120,6 @@ export default function ExperienceClient({
               ))}
             </dl>
           )}
-          {facts && <p className="mt-3 text-xs text-text-muted">{t("summary_note")}</p>}
         </Container>
       </header>
 

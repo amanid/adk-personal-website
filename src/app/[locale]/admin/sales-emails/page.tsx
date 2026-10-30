@@ -106,7 +106,7 @@ export default function SalesEmailsPage() {
           </button>
         </div>
         <p className="text-xs text-text-muted">
-          Last run: {lastRun ? `${new Date(lastRun.at).toLocaleString()} — ${lastRun.reminders} reminder(s), ${lastRun.followUps} follow-up(s)` : "never"}
+          Last run: {lastRun ? `${new Date(lastRun.at).toLocaleString()}: ${lastRun.reminders} reminder(s), ${lastRun.followUps} follow-up(s)` : "never"}
         </p>
       </div>
 

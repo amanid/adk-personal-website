@@ -47,7 +47,7 @@ ${valid ? emailRow(f ? "Valable jusqu'au" : "Valid until", escapeHtml(valid)) : 
 ${emailButton(escapeHtml(quoteUrl(q)), f ? "Consulter la proposition" : "Review the proposal")}`;
   await sendEmail(
     q.clientEmail,
-    f ? `Proposition ${q.number} — ${q.title}` : `Proposal ${q.number} — ${q.title}`,
+    f ? `Proposition ${q.number} : ${q.title}` : `Proposal ${q.number}: ${q.title}`,
     emailShell(f ? "Conseil &middot; Proposition" : "Consulting &middot; Proposal", body)
   );
 }
@@ -67,7 +67,7 @@ ${emailRow(f ? "Solde dû" : "Balance due", escapeHtml(formatPrice(balanceCents,
 ${emailButton(escapeHtml(quoteUrl(q)), f ? "Régler le solde" : "Pay the balance")}`;
   await sendEmail(
     q.clientEmail,
-    f ? `Solde dû — ${q.number}` : `Balance due — ${q.number}`,
+    f ? `Solde dû, proposition ${q.number}` : `Balance due, proposal ${q.number}`,
     emailShell(f ? "Conseil &middot; Facture" : "Consulting &middot; Invoice", body)
   );
 }
@@ -79,7 +79,7 @@ export async function sendQuotePaymentReceived(q: Quote, stage: QuoteStage, amou
     stage === "DEPOSIT" ? (f ? "votre acompte" : "your deposit") : f ? "le solde" : "the balance";
   const body = `
 <p style="margin:0 0 16px;color:#edeae3;font-size:18px;font-weight:bold;">${f ? "Paiement reçu" : "Payment received"}</p>
-<p style="margin:0 0 16px;">${f ? "Merci" : "Thank you"}, ${escapeHtml(q.clientName)} — ${
+<p style="margin:0 0 16px;">${f ? "Merci" : "Thank you"}, ${escapeHtml(q.clientName)}. ${
     f ? `nous avons bien reçu ${what} pour` : `we've received ${what} for`
   } <strong style="color:#edeae3;">${escapeHtml(q.title)}</strong>.</p>
 <table role="presentation" cellpadding="0" cellspacing="0" style="margin:0 0 16px;">
@@ -89,11 +89,11 @@ ${emailRow(f ? "Montant" : "Amount", escapeHtml(formatPrice(amountCents, q.curre
 ${emailButton(escapeHtml(quoteUrl(q)), f ? "Voir le projet" : "View the project")}`;
   await sendEmail(
     q.clientEmail,
-    f ? `Paiement reçu — ${q.number}` : `Payment received — ${q.number}`,
+    f ? `Paiement reçu, proposition ${q.number}` : `Payment received, proposal ${q.number}`,
     emailShell(f ? "Conseil &middot; Reçu" : "Consulting &middot; Receipt", body)
   );
   await notifyAdmin(
-    `${stage === "DEPOSIT" ? "Deposit" : "Balance"} paid: ${q.number} — ${q.clientName}`,
+    `${stage === "DEPOSIT" ? "Deposit" : "Balance"} paid: ${q.number}, ${q.clientName}`,
     `${stage === "DEPOSIT" ? "Deposit" : "Balance"} of ${formatPrice(amountCents, q.currency)} received for “${q.title}”.`,
     q
   );
@@ -108,7 +108,7 @@ export async function notifyAdmin(subject: string, text: string, q: Quote): Prom
 <table role="presentation" cellpadding="0" cellspacing="0" style="margin:0 0 16px;">
 ${emailRow("Client", `${escapeHtml(q.clientName)} &lt;${escapeHtml(q.clientEmail)}&gt;`)}
 ${q.company ? emailRow("Company", escapeHtml(q.company)) : ""}
-${emailRow("Quote", escapeHtml(`${q.number} — ${q.title}`))}
+${emailRow("Quote", escapeHtml(`${q.number}: ${q.title}`))}
 ${amounts(q)}
 </table>
 ${emailButton(escapeHtml(adminUrl()), "Open quotes")}`;

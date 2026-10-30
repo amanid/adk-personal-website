@@ -13,10 +13,10 @@ const PRODUCT_KEY = "private.api.paypalProductId";
 export async function setupApiProPlan(priceCents: number, homeUrl: string): Promise<string> {
   let productId = (await prisma.siteSetting.findUnique({ where: { key: PRODUCT_KEY } }))?.value;
   if (!productId) {
-    productId = (await createCatalogProduct("Data & Research API — Pro", "API access to publications and datasets", homeUrl)).id;
+    productId = (await createCatalogProduct("Data & Research API, Pro plan", "API access to publications and datasets", homeUrl)).id;
     await prisma.siteSetting.upsert({ where: { key: PRODUCT_KEY }, update: { value: productId }, create: { key: PRODUCT_KEY, value: productId } });
   }
-  const plan = await createBillingPlan({ productId, name: "Data API Pro — monthly", intervalUnit: "MONTH", amountCents: priceCents, currency: "USD" });
+  const plan = await createBillingPlan({ productId, name: "Data API Pro, monthly", intervalUnit: "MONTH", amountCents: priceCents, currency: "USD" });
   const writes = {
     [API_SETTING_KEYS.proPlanId]: plan.id,
     [API_SETTING_KEYS.proPriceCents]: String(priceCents),

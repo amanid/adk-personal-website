@@ -5,7 +5,7 @@ import { BASE_URL } from "@/lib/seo";
 export function GET() {
   return NextResponse.json(
     {
-      name: "KONAN Amani Dieudonné — Data & Research API",
+      name: "KONAN Amani Dieudonné: Data & Research API",
       version: "v1",
       docs: `${BASE_URL}/en/developers`,
       openapi: `${BASE_URL}/api/v1/openapi.json`,

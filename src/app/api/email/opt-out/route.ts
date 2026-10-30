@@ -15,5 +15,5 @@ export async function GET(request: Request) {
     );
   if (!email) return page("This link isn't valid.");
   await prisma.emailOptOut.upsert({ where: { email }, update: {}, create: { email } });
-  return page(`Done — <strong>${escapeHtml(email)}</strong> won't receive order reminders or recommendations any more. Receipts and download links are still sent.`);
+  return page(`Done. <strong>${escapeHtml(email)}</strong> won't receive order reminders or recommendations any more. Receipts and download links are still sent.`);
 }

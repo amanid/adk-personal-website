@@ -371,7 +371,7 @@ export default function AdminEmailPage() {
           Test
         </h2>
         <p className="text-sm text-text-secondary">
-          Check the connection first — that isolates wrong credentials from delivery problems.
+          Check the connection first, that isolates wrong credentials from delivery problems.
           Then send yourself a real message.
         </p>
 

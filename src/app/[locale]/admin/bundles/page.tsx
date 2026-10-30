@@ -219,7 +219,7 @@ export default function AdminBundlesPage() {
 
           <div className="grid sm:grid-cols-[1fr_auto] gap-4 items-start">
             <div>
-              <p className="text-xs text-text-secondary mb-1">Cover (optional — otherwise the products&apos; covers are fanned out)</p>
+              <p className="text-xs text-text-secondary mb-1">Cover (optional, otherwise the products&apos; covers are fanned out)</p>
               <FileUpload
                 accept="image/*"
                 label="Bundle cover"

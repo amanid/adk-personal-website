@@ -55,7 +55,7 @@ export async function POST(request: Request) {
 
     if (priced.totalCents <= 0) {
       return NextResponse.json(
-        { error: "This order is free — use the free checkout." },
+        { error: "This order is free. Use the free checkout." },
         { status: 400 }
       );
     }

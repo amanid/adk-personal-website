@@ -56,7 +56,7 @@ export function Section({
             <div className="max-w-2xl">
               {eyebrow && (
                 <p className="eyebrow mb-4">
-                  {index !== undefined && <span className="text-text-muted">{String(index).padStart(2, "0")} — </span>}
+                  {index !== undefined && <span className="text-text-muted">{String(index).padStart(2, "0")} · </span>}
                   {eyebrow}
                 </p>
               )}

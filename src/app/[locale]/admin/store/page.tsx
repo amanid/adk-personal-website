@@ -392,7 +392,7 @@ export default function AdminStorePage() {
       applied.filled.forEach((k) => fromFile.add(k));
       state.notes = data.facts.notes;
     } catch (err) {
-      state.error = `${err instanceof Error ? err.message : "Reading the file failed"} — the file itself uploaded fine; fill the fields by hand.`;
+      state.error = `${err instanceof Error ? err.message : "Reading the file failed"}, the file itself uploaded fine; fill the fields by hand.`;
     }
 
     // 2. The prose, drafted from the text and checked against it.
@@ -518,14 +518,14 @@ export default function AdminStorePage() {
 
         if (data.status === "updated") {
           updated++;
-          log.push(`✓ ${book.title} — ${(data.fields || []).join(", ")}`);
+          log.push(`✓ ${book.title}: ${(data.fields || []).join(", ")}`);
         } else {
           skipped++;
-          log.push(`– ${book.title} — ${data.reason || "skipped"}`);
+          log.push(`– ${book.title}: ${data.reason || "skipped"}`);
         }
       } catch (err) {
         failed++;
-        log.push(`✗ ${book.title} — ${err instanceof Error ? err.message : "failed"}`);
+        log.push(`✗ ${book.title}: ${err instanceof Error ? err.message : "failed"}`);
       }
     }
 
@@ -551,11 +551,11 @@ export default function AdminStorePage() {
       for (const [i, f] of files.entries()) {
         try {
           const u = await uploadInPieces(f, (fraction, step) =>
-            setBulkResult(`Uploading ${i + 1} of ${files.length}: ${f.name} — ${step} (${Math.round(fraction * 100)}%)`)
+            setBulkResult(`Uploading ${i + 1} of ${files.length}: ${f.name}: ${step} (${Math.round(fraction * 100)}%)`)
           );
           uploaded.push({ fileId: u.fileId, fileName: u.fileName });
         } catch (err) {
-          uploadFailures.push(`✗ ${f.name} — ${err instanceof Error ? err.message : "upload failed"}`);
+          uploadFailures.push(`✗ ${f.name}: ${err instanceof Error ? err.message : "upload failed"}`);
         }
       }
       if (!uploaded.length) throw new Error(`Nothing was uploaded.\n${uploadFailures.join("\n")}`);
@@ -571,7 +571,7 @@ export default function AdminStorePage() {
         aiAvailable?: boolean;
       }>(res, "Import failed");
       const okCount = data.created?.length || 0;
-      const allFailed = [...uploadFailures, ...(data.failed ?? []).map((f) => `✗ ${f.name} — ${f.error}`)];
+      const allFailed = [...uploadFailures, ...(data.failed ?? []).map((f) => `✗ ${f.name}: ${f.error}`)];
       const failCount = allFailed.length;
       setBulkResult(
         `Imported ${okCount} book${okCount === 1 ? "" : "s"} as drafts, with title, author, year, pages, ISBN, ` +
@@ -793,7 +793,7 @@ export default function AdminStorePage() {
                   `the actual text. Key insights, category and tags are only filled in where they ` +
                   `are currently empty, so nothing you have written by hand is replaced. Any DOI ` +
                   `in an existing description is carried across.\n\n` +
-                  `It runs one book at a time — roughly ${Math.max(1, Math.round(books.length * 10 / 60))}–` +
+                  `It runs one book at a time, roughly ${Math.max(1, Math.round(books.length * 10 / 60))}–` +
                   `${Math.max(2, Math.round(books.length * 25 / 60))} minutes for ${books.length}. You can stop it ` +
                   `part-way; books already done stay saved.`,
                 confirmLabel: "Draft all listings",
@@ -821,7 +821,7 @@ export default function AdminStorePage() {
           <div className="flex items-center gap-2 mb-2">
             <Sparkles className="w-4 h-4 text-gold shrink-0 animate-pulse" />
             <span className="flex-1">
-              Drafting {enrichRun.done + 1} of {enrichRun.total} —{" "}
+              Drafting {enrichRun.done + 1} of {enrichRun.total} :{" "}
               <span className="text-text-secondary">{enrichRun.current}</span>
             </span>
             <button
@@ -1336,7 +1336,7 @@ export default function AdminStorePage() {
                       />
                     </label>
                     <label className="block text-xs text-text-secondary">
-                      Ends (optional — shows a countdown)
+                      Ends (optional, shows a countdown)
                       <input
                         type="datetime-local"
                         className={INPUT_CLASS}
@@ -1352,7 +1352,7 @@ export default function AdminStorePage() {
                       onChange={(e) => setForm({ ...form, payWhatYouWant: e.target.checked })}
                       className="accent-gold"
                     />
-                    Pay what you want — the (launch) price above becomes the minimum
+                    Pay what you want, the (launch) price above becomes the minimum
                   </label>
                 </div>
                 <div>

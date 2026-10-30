@@ -28,7 +28,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ tok
 
   after(() =>
     notifyAdmin(
-      `Quote declined: ${q.number} — ${q.clientName}`,
+      `Quote declined: ${q.number}, ${q.clientName}`,
       `${q.clientName} declined “${q.title}”.${reason ? ` Reason: ${reason}` : ""}`,
       q
     ).catch((e) => console.error("Quote declined alert failed:", e))

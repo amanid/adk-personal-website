@@ -112,7 +112,7 @@ export async function sendTestEmail(to: string): Promise<void> {
   </table>
 </body>
 </html>`;
-  await sendEmail(to, "Test email — your SMTP settings work", html);
+  await sendEmail(to, "Test email: your SMTP settings work", html);
 }
 
 interface NotifyParams {
@@ -294,7 +294,7 @@ const BOOKSTORE_INVOICE_COPY: InvoiceCopy = {
 /** Send an invoice requesting payment (mobile money) with settlement instructions. */
 export async function sendOrderInvoiceEmail(params: OrderInvoiceParams): Promise<void> {
   const html = buildOrderInvoiceEmail(params);
-  await sendEmail(params.to, `Invoice — please complete payment · Order ${params.orderNumber}`, html);
+  await sendEmail(params.to, `Invoice for order ${params.orderNumber}: payment needed`, html);
 }
 
 /**
@@ -439,7 +439,7 @@ function buildOrderInvoiceEmail({
 /** Send an order receipt with secure download links to the buyer. */
 export async function sendOrderReceiptEmail(params: OrderReceiptParams): Promise<void> {
   const html = buildOrderReceiptEmail(params);
-  await sendEmail(params.to, `Your receipt & downloads — Order ${params.orderNumber}`, html);
+  await sendEmail(params.to, `Your receipt and downloads for order ${params.orderNumber}`, html);
 }
 
 function buildOrderReceiptEmail({
@@ -620,7 +620,7 @@ export async function sendOrderLookupEmail(
           <h2 style="margin:0 0 8px;font-size:20px;color:#f1f5f9;">Your orders</h2>
           <p style="margin:0 0 16px;font-size:14px;color:#8892a4;line-height:1.6;">Here are the orders linked to this email address. Use the links below to view each receipt and re-download your books.</p>
           <table role="presentation" width="100%" cellpadding="0" cellspacing="0">${rows}</table>
-          <p style="margin:20px 0 0;font-size:12px;color:#4b5563;">If you didn&rsquo;t request this, you can safely ignore this email — these links only work for your own orders.</p>
+          <p style="margin:20px 0 0;font-size:12px;color:#4b5563;">If you didn&rsquo;t request this, you can ignore this email. These links only work for your own orders.</p>
         </td></tr>
       </table>
     </td></tr>
@@ -669,7 +669,7 @@ export async function notifyAdminOfManualOrder(
   params: AdminOrderAlertParams
 ): Promise<void> {
   const to = await adminNotifyAddress();
-  if (!to) return; // Nowhere to send — not an error worth failing an order over.
+  if (!to) return; // Nowhere to send, not an error worth failing an order over.
 
   const {
     orderNumber, buyerEmail, buyerName, provider, currency,
@@ -727,5 +727,5 @@ export async function notifyAdminOfManualOrder(
 </body>
 </html>`;
 
-  await sendEmail(to, `Payment to confirm — Order ${orderNumber} (${total} via ${label})`, html);
+  await sendEmail(to, `Payment to confirm: order ${orderNumber} (${total} via ${label})`, html);
 }

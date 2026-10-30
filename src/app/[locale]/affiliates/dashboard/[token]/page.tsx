@@ -118,7 +118,7 @@ export default async function AffiliateDashboard({ params }: { params: Promise<{
                       <td className="py-2 pr-3">{date(c.createdAt)}</td>
                       <td className="py-2 pr-3 font-mono text-text-secondary">{c.order.orderNumber}</td>
                       <td className="py-2 pr-3 font-mono tabular-nums text-right">{formatPrice(c.amountCents, c.currency)}</td>
-                      <td className="py-2 text-text-secondary">{c.status === "VOID" ? "—" : t(c.status.toLowerCase())}</td>
+                      <td className="py-2 text-text-secondary">{c.status === "VOID" ? "–" : t(c.status.toLowerCase())}</td>
                     </tr>
                   ))}
                 </tbody>

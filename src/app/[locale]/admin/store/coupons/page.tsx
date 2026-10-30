@@ -146,7 +146,7 @@ export default function AdminCouponsPage() {
     if (c.type === "PERCENT") return `${c.percentOff}% off`;
     if (c.amountOffCents != null && c.currency)
       return `${formatPrice(c.amountOffCents, c.currency)} off`;
-    return "—";
+    return "–";
   };
 
   const isExpired = (c: Coupon) => !!c.expiresAt && new Date(c.expiresAt) < new Date();

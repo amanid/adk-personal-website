@@ -59,7 +59,7 @@ export default async function AdminUsersPage() {
                     </div>
                     <div>
                       <p className="text-sm font-medium">
-                        {user.name || "—"}
+                        {user.name || "–"}
                       </p>
                       <p className="text-text-muted text-xs">{user.email}</p>
                     </div>

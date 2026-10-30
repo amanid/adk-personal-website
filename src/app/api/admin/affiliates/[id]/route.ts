@@ -28,7 +28,7 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
     } catch (err) {
       return NextResponse.json({ affiliate, warning: `Approved, but the welcome email failed: ${String((err as Error)?.message || err).slice(0, 160)}` });
     }
-    return NextResponse.json({ affiliate, message: `Approved — welcome email sent to ${affiliate.email}.` });
+    return NextResponse.json({ affiliate, message: `Approved, welcome email sent to ${affiliate.email}.` });
   }
   return NextResponse.json({ affiliate });
 }

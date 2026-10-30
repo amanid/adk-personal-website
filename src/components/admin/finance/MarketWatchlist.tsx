@@ -37,13 +37,13 @@ interface WatchRow {
 }
 
 const num = (v: number | null | undefined, digits = 2): string =>
-  v === null || v === undefined || !Number.isFinite(v) ? "—" : v.toLocaleString(undefined, {
+  v === null || v === undefined || !Number.isFinite(v) ? "–" : v.toLocaleString(undefined, {
     minimumFractionDigits: digits,
     maximumFractionDigits: digits,
   });
 
 const pct = (v: number | null | undefined, digits = 1): string =>
-  v === null || v === undefined || !Number.isFinite(v) ? "—" : `${v >= 0 ? "+" : ""}${v.toFixed(digits)}%`;
+  v === null || v === undefined || !Number.isFinite(v) ? "–" : `${v >= 0 ? "+" : ""}${v.toFixed(digits)}%`;
 
 export default function MarketWatchlist() {
   const [rows, setRows] = useState<WatchRow[]>([]);
@@ -227,7 +227,7 @@ export default function MarketWatchlist() {
         <p className="text-sm text-text-secondary py-6 text-center">Loading quotes…</p>
       ) : rows.length === 0 ? (
         <p className="text-sm text-text-secondary py-6 text-center">
-          Nothing followed yet — use Add to start a watchlist.
+          Nothing followed yet, use Add to start a watchlist.
         </p>
       ) : (
         Object.entries(grouped).map(([category, items]) => (
@@ -302,17 +302,17 @@ export default function MarketWatchlist() {
                         </Stat>
                         <Stat label="Position in range">
                           {row.stats.rangePosition === null
-                            ? "—"
+                            ? "–"
                             : `${row.stats.rangePosition.toFixed(0)}%`}
                         </Stat>
                         <Stat label="Volatility (annualised)">
                           {row.stats.volatility === null
-                            ? "—"
+                            ? "–"
                             : `${row.stats.volatility.toFixed(1)}%`}
                         </Stat>
                         <Stat label="Max drawdown">
                           {row.stats.maxDrawdown === null
-                            ? "—"
+                            ? "–"
                             : `−${row.stats.maxDrawdown.toFixed(1)}%`}
                         </Stat>
                         <Stat label="20-day average">{num(row.stats.sma20)}</Stat>

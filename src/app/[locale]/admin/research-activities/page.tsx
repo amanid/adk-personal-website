@@ -341,7 +341,7 @@ export default function AdminResearchActivitiesPage() {
             </div>
           </div>
 
-          {/* File Uploads — Paper, Data, Supplementary */}
+          {/* File Uploads: Paper, Data, Supplementary */}
           <div className="p-4 border border-gold/20 rounded-lg bg-gold/[0.02] space-y-4">
             <h3 className="text-sm font-medium text-gold flex items-center gap-2">
               <Paperclip className="w-4 h-4" />
@@ -384,8 +384,8 @@ export default function AdminResearchActivitiesPage() {
                 onChange={(e) => setForm({ ...form, accessLevel: e.target.value })}
                 className={INPUT_CLASS}
               >
-                <option value="FREE">Free — Open access</option>
-                <option value="GATED">Premium — Subscription required</option>
+                <option value="FREE">Free: Open access</option>
+                <option value="GATED">Premium: Subscription required</option>
               </select>
             </div>
             <div className="flex items-end pb-2">

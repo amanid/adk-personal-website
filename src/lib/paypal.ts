@@ -96,7 +96,7 @@ export async function createPayPalOrder({
         },
       ],
       application_context: {
-        brand_name: "KONAN Amani Dieudonné — Bookstore",
+        brand_name: "KONAN Amani Dieudonné, Bookstore",
         shipping_preference: "NO_SHIPPING",
         user_action: "PAY_NOW",
       },

@@ -148,7 +148,7 @@ export async function POST(request: Request) {
       return reply(id, {
         protocolVersion: SUPPORTED_VERSIONS.includes(asked) ? asked : SUPPORTED_VERSIONS[0],
         capabilities: { tools: { listChanged: false } },
-        serverInfo: { name: "konanamanidieudonne-catalogue", title: `${SITE.name} — catalogue`, version: "1.0.0" },
+        serverInfo: { name: "konanamanidieudonne-catalogue", title: `${SITE.name}: catalogue`, version: "1.0.0" },
         instructions:
           `Public catalogue of ${SITE.name}: research publications, store products, consulting sessions and blog posts. ` +
           "Read-only. Quote prices and links exactly as returned; publications with access \"subscription\" need a research subscription to read in full.",

@@ -40,7 +40,7 @@ interface Totals {
 }
 
 const money = (v: number | null | undefined, ccy = "USD"): string => {
-  if (v === null || v === undefined || !Number.isFinite(v)) return "—";
+  if (v === null || v === undefined || !Number.isFinite(v)) return "–";
   try {
     return v.toLocaleString(undefined, { style: "currency", currency: ccy });
   } catch {
@@ -50,7 +50,7 @@ const money = (v: number | null | undefined, ccy = "USD"): string => {
 
 const signed = (v: number | null | undefined, ccy = "USD"): string =>
   v === null || v === undefined || !Number.isFinite(v)
-    ? "—"
+    ? "–"
     : `${v >= 0 ? "+" : "−"}${money(Math.abs(v), ccy)}`;
 
 /** Default stake — the symbolic amount this section was built around. */
@@ -250,7 +250,7 @@ export default function PositionTracker() {
           <input
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
-            placeholder="Note (optional) — why you took this position"
+            placeholder="Note (optional), why you took this position"
             className="w-full px-3 py-2 rounded-lg bg-navy/50 border border-glass-border focus:border-gold/50 outline-none text-sm"
           />
           <div className="flex items-center gap-2">
@@ -317,7 +317,7 @@ export default function PositionTracker() {
                     <td className="py-2.5 text-right tabular-nums">{r.quantity.toFixed(4)}</td>
                     <td className="py-2.5 text-right tabular-nums">{r.entryPrice.toFixed(2)}</td>
                     <td className="py-2.5 text-right tabular-nums">
-                      {r.currentPrice === null ? "—" : r.currentPrice.toFixed(2)}
+                      {r.currentPrice === null ? "–" : r.currentPrice.toFixed(2)}
                     </td>
                     <td className="py-2.5 text-right tabular-nums">
                       {money(r.valuation?.marketValue, r.currency)}

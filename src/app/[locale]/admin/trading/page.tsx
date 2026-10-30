@@ -161,7 +161,7 @@ function MarketsDesk() {
         if (stop) return;
         const next: Record<string, { bid: string; ask: string }> = {};
         for (const p of d.prices as { instrument: string; bids: { price: string }[]; asks: { price: string }[] }[]) {
-          next[p.instrument] = { bid: p.bids?.[0]?.price ?? "—", ask: p.asks?.[0]?.price ?? "—" };
+          next[p.instrument] = { bid: p.bids?.[0]?.price ?? "–", ask: p.asks?.[0]?.price ?? "–" };
         }
         setPrices(next);
       } catch {
@@ -238,7 +238,7 @@ OANDA_MAX_UNITS=100000    # largest order the desk will accept`}</pre>
     <div className="space-y-5">
       <div className="flex flex-wrap items-center gap-3">
         <span className={`px-3 py-1 rounded-md text-sm font-bold ${live ? "bg-danger/20 text-danger border border-danger/40" : "bg-success/15 text-success border border-success/30"}`}>
-          {live ? "LIVE ACCOUNT — real money" : "PRACTICE ACCOUNT"}
+          {live ? "LIVE ACCOUNT, real money" : "PRACTICE ACCOUNT"}
         </span>
         <button onClick={load} className="text-sm text-text-secondary inline-flex items-center gap-1 hover:text-text-primary">
           <RefreshCw className="w-4 h-4" /> Refresh
@@ -407,7 +407,7 @@ OANDA_MAX_UNITS=100000    # largest order the desk will accept`}</pre>
                   <td className="py-2 text-right">
                     <button
                       onClick={async () => {
-                        if (!confirm(`Close trade ${t.id} (${t.currentUnits} ${t.instrument}) at market${live ? " — LIVE account" : ""}?`)) return;
+                        if (!confirm(`Close trade ${t.id} (${t.currentUnits} ${t.instrument}) at market${live ? ": LIVE account" : ""}?`)) return;
                         try {
                           const r = await send(`/api/admin/trading/trades/${t.id}/close`, "POST");
                           setFlash({ ok: true, text: `Closed at ${r.fill?.price ?? "market"}.` });
@@ -454,7 +454,7 @@ function History() {
               <tr key={t.id} className="border-b border-glass-border/60">
                 <td className="py-1.5">{t.instrument}</td>
                 <td className="py-1.5 figure text-right">{t.initialUnits}</td>
-                <td className="py-1.5 figure text-right">{t.price} → {t.averageClosePrice ?? "—"}</td>
+                <td className="py-1.5 figure text-right">{t.price} → {t.averageClosePrice ?? "–"}</td>
                 <td className={`py-1.5 figure text-right ${Number(t.realizedPL) >= 0 ? "text-success" : "text-danger"}`}>{t.realizedPL}</td>
                 <td className="py-1.5 text-text-muted text-right">{t.closeTime ? new Date(t.closeTime).toLocaleString() : ""}</td>
               </tr>
@@ -565,8 +565,8 @@ function BetJournal() {
             <div key={s.currency} className="glass p-4 grid grid-cols-3 gap-3 text-sm">
               <div><p className="text-xs text-text-muted">Staked (settled)</p><p className="figure">{money(s.staked, s.currency)}</p></div>
               <div><p className="text-xs text-text-muted">Profit</p><p className={`figure ${s.profit >= 0 ? "text-success" : "text-danger"}`}>{money(s.profit, s.currency)}</p></div>
-              <div><p className="text-xs text-text-muted">ROI</p><p className="figure">{s.roi === null ? "—" : `${s.roi.toFixed(1)}%`}</p></div>
-              <div><p className="text-xs text-text-muted">Strike rate</p><p className="figure">{s.strikeRate === null ? "—" : `${s.strikeRate.toFixed(0)}%`}</p></div>
+              <div><p className="text-xs text-text-muted">ROI</p><p className="figure">{s.roi === null ? "–" : `${s.roi.toFixed(1)}%`}</p></div>
+              <div><p className="text-xs text-text-muted">Strike rate</p><p className="figure">{s.strikeRate === null ? "–" : `${s.strikeRate.toFixed(0)}%`}</p></div>
               <div><p className="text-xs text-text-muted">Settled</p><p className="figure">{s.settled}</p></div>
               <div><p className="text-xs text-text-muted">Open (at stake)</p><p className="figure">{s.open} · {money(s.openStake, s.currency)}</p></div>
             </div>
@@ -614,7 +614,7 @@ function BetJournal() {
                 <td className="p-2">{b.event}<span className="text-text-secondary"> · {b.market ? `${b.market}: ` : ""}{b.selection}</span></td>
                 <td className="p-2 figure text-right">{(b.oddsMilli / 1000).toFixed(2)}</td>
                 <td className="p-2 figure text-right">{money(b.stakeCents, b.currency)}</td>
-                <td className="p-2 figure text-right">{b.returnCents !== null ? money(b.returnCents, b.currency) : "—"}</td>
+                <td className="p-2 figure text-right">{b.returnCents !== null ? money(b.returnCents, b.currency) : "–"}</td>
                 <td className="p-2">
                   {b.status === "OPEN" ? (
                     <span className="flex flex-wrap gap-1">

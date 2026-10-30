@@ -80,7 +80,7 @@ export async function GET(request: Request) {
   const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0" xmlns:g="http://base.google.com/ns/1.0">
   <channel>
-    <title>${esc("KONAN Amani Dieudonné — Store")}</title>
+    <title>${esc("KONAN Amani Dieudonné, Bookstore")}</title>
     <link>${BASE_URL}/${l}/store</link>
     <description>${fr ? "Ouvrages et rapports numériques" : "Digital books and reports"}</description>
 ${items.join("\n")}

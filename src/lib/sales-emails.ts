@@ -121,7 +121,7 @@ async function sendReminders(s: SalesSettings, now: Date): Promise<number> {
     )}</strong> (${titles}, ${escapeHtml(formatPrice(o.totalCents, o.currency))}) hasn't been completed yet.</p>
 <p style="margin:0 0 16px;">${
       manual
-        ? "If you've already sent the payment, there's nothing to do — it will be confirmed shortly. Otherwise, the payment details are on your order page."
+        ? "If you've already sent the payment, there's nothing to do. It will be confirmed shortly. Otherwise, the payment details are on your order page."
         : "Your selection is still available whenever you're ready."
     }</p>
 ${emailButton(escapeHtml(link), manual ? "View payment details" : "Complete your purchase")}

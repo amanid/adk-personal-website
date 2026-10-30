@@ -50,7 +50,7 @@ const sectionLabels: Record<keyof SectionVisibility, { name: string; desc: strin
   marketTicker: { name: "Market Ticker", desc: "Live commodity & stock ticker bar" },
   whoIAm: { name: "Who I Am", desc: "Personal story section" },
   stats: { name: "Statistics", desc: "Key metrics counter" },
-  capabilities: { name: "Capabilities Infographics", desc: "Career timeline, publication themes, tools — computed from your records" },
+  capabilities: { name: "Capabilities Infographics", desc: "Career timeline, publication themes and tools, drawn from your experience, publications and projects" },
   trustedBy: { name: "Trusted By", desc: "Organizations logos" },
   marketIntelligence: { name: "Market Intelligence", desc: "Live market data charts" },
   expertise: { name: "Expertise Areas", desc: "Core competency cards" },

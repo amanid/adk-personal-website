@@ -268,7 +268,7 @@ export default function AdminAffiliatesPage() {
                         {c.payoutNote && <span className="text-xs text-text-muted ml-2">{c.payoutNote}</span>}
                       </td>
                       <td className="p-3 text-xs text-text-muted">
-                        {c.status === "PENDING" ? (new Date(c.holdUntil).getTime() <= now ? "now" : new Date(c.holdUntil).toLocaleDateString()) : "—"}
+                        {c.status === "PENDING" ? (new Date(c.holdUntil).getTime() <= now ? "now" : new Date(c.holdUntil).toLocaleDateString()) : "–"}
                       </td>
                     </tr>
                   ))}

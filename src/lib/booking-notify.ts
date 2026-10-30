@@ -44,7 +44,7 @@ export function bookingIcs(b: BookingWithPackage, organizerEmail: string | null)
     `DTSTAMP:${icsDate(new Date())}`,
     `DTSTART:${icsDate(b.startsAt)}`,
     `DTEND:${icsDate(b.endsAt)}`,
-    `SUMMARY:${icsText(`${b.package.title} — KONAN Amani Dieudonné`)}`,
+    `SUMMARY:${icsText(`${b.package.title} with KONAN Amani Dieudonné`)}`,
     `DESCRIPTION:${icsText(
       [b.meetingUrl ? `Join: ${b.meetingUrl}` : "The meeting link will follow by email.", b.notes ? `Notes: ${b.notes}` : ""]
         .filter(Boolean)
@@ -83,7 +83,7 @@ export async function sendBookingConfirmation(b: BookingWithPackage): Promise<vo
   const reschedule = b.status === "RESCHEDULE_NEEDED";
   const clientBody = `
 <p style="margin:0 0 16px;color:#edeae3;font-size:18px;font-weight:bold;">${
-    reschedule ? "Payment received — let's find a new time" : "Your session is confirmed"
+    reschedule ? "Payment received, a new time is needed" : "Your session is confirmed"
   }</p>
 <p style="margin:0 0 16px;">Hello ${escapeHtml(b.name)}, ${
     reschedule
@@ -101,7 +101,7 @@ ${emailButton(escapeHtml(manageUrl), "View your booking")}`;
 
   await sendEmail(
     b.email,
-    reschedule ? `Payment received — ${b.package.title}` : `Confirmed: ${b.package.title} on ${when}`,
+    reschedule ? `Payment received: ${b.package.title}` : `Confirmed: ${b.package.title} on ${when}`,
     shell("Consulting &middot; Booking", clientBody),
     reschedule ? undefined : [{ filename: "session.ics", content: bookingIcs(b, organizer), contentType: "text/calendar; charset=utf-8; method=PUBLISH" }]
   );
@@ -121,7 +121,7 @@ ${b.notes ? row("Notes", escapeHtml(b.notes).replace(/\n/g, "<br>")) : ""}
 <a href="${escapeHtml(`${appUrl()}/en/admin/bookings`)}" style="color:#ea5536;">Open bookings</a>`;
     await sendEmail(
       organizer,
-      `${reschedule ? "Reschedule needed" : "New booking"}: ${b.name} — ${b.package.title}`,
+      `${reschedule ? "Reschedule needed" : "New booking"}: ${b.name}, ${b.package.title}`,
       shell("Consulting &middot; Admin", adminBody),
       reschedule ? undefined : [{ filename: "session.ics", content: bookingIcs(b, organizer), contentType: "text/calendar; charset=utf-8; method=PUBLISH" }]
     );

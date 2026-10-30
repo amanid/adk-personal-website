@@ -40,7 +40,7 @@ export default function BookFileUpload({
     setError(null);
     if (file.size > MAX_BYTES) {
       setError(
-        `"${file.name}" is ${(file.size / 1024 / 1024).toFixed(1)}MB. The limit is 50MB — ` +
+        `"${file.name}" is ${(file.size / 1024 / 1024).toFixed(1)}MB. The limit is 50MB: ` +
           `compress the PDF (or upload the EPUB) and try again.`
       );
       return;
@@ -70,7 +70,7 @@ export default function BookFileUpload({
   return (
     <div className="space-y-2">
       <label className="block text-sm text-text-secondary">
-        Product file — the secured download
+        Product file, the secured download
       </label>
       <div
         onClick={() => inputRef.current?.click()}

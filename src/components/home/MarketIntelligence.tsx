@@ -122,9 +122,7 @@ export default function MarketIntelligence() {
                       {commodity.changePercent.toFixed(2)}%
                     </span>
                   ) : (
-                    <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-yellow-500/10 text-yellow-400">
-                      —
-                    </span>
+                    <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-yellow-500/10 text-yellow-400">–</span>
                   )}
                 </div>
                 <p className="text-2xl font-bold gradient-text font-[family-name:var(--font-display)]">

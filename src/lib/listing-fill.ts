@@ -204,7 +204,7 @@ export function applyDraft(
   put("titleFr", "Title (FR)", draft.titleFr, true, false);
   put("subtitleFr", "Subtitle (FR)", draft.subtitleFr, true, false);
   if (draft.category) {
-    const source = draft.categoryIsNew ? "AI suggestion — a new category for the catalogue" : "AI choice among the catalogue's existing categories";
+    const source = draft.categoryIsNew ? "AI suggestion: a new category for the catalogue" : "AI choice among the catalogue's existing categories";
     if (!form.category.trim() || replace) {
       next.category = draft.category;
       rows.push({ field: "Category", value: draft.category, source, status: "drafted" });

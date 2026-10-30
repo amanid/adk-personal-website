@@ -50,7 +50,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ tok
     const fr = q.locale === "fr";
     const label =
       due.stage === "DEPOSIT" ? (fr ? `Acompte (${q.depositPercent} %)` : `Deposit (${q.depositPercent}%)`) : fr ? "Solde" : "Balance";
-    const lines = [{ bookId: null, title: `${q.number} — ${q.title} · ${label}`, unitPriceCents: due.amountCents, quantity: 1 }];
+    const lines = [{ bookId: null, title: `${q.number}: ${q.title} · ${label}`, unitPriceCents: due.amountCents, quantity: 1 }];
     const order = await createOrderRecord({
       kind: "QUOTE",
       quoteId: q.id,

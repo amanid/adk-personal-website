@@ -83,7 +83,7 @@
     "summary_roles": "Roles",
     "summary_orgs": "Organisations",
     "summary_countries": "Countries",
-    "summary_note": "Counted from the roles below",
+    "summary_note": "",
     "tenure_label": "Duration",
     "concurrent": "Concurrent with {org}"
   },
@@ -627,7 +627,7 @@
   "capabilities": {
     "eyebrow": "In figures",
     "title": "{years} years of work, in charts",
-    "subtitle": "Roles, publications, tools and skills, drawn from the same lists as the rest of the site.",
+    "subtitle": "Where I have worked, what I have published and the tools I use.",
     "timeline_title": "Career timeline",
     "timeline_note": "Overlapping bars are jobs held at the same time",
     "timeline_hint": "Tap or hover a bar to see the role and its dates.",
@@ -641,7 +641,7 @@
     "tools_title": "Tools used across projects",
     "tools_note": "Out of {total} projects",
     "domains_title": "Skills by area",
-    "domains_note": "As on the skills page",
+    "domains_note": "Grouped by area",
     "uncategorised": "Uncategorised",
     "view_table": "View as table",
     "col_role": "Role",

@@ -121,7 +121,7 @@ async function startPayment(
     timeZoneName: "short",
   }).format(booking.startsAt);
   const lines = [
-    { bookId: null, title: `${pkg.title} — ${when}`, unitPriceCents: pkg.priceCents, quantity: 1 },
+    { bookId: null, title: `${pkg.title}, ${when}`, unitPriceCents: pkg.priceCents, quantity: 1 },
   ];
   const order = await createOrderRecord({
     kind: "BOOKING",

@@ -123,7 +123,7 @@ export default function AdminStoreAnalyticsPage() {
 
       <div className="mb-6">
         <AreaChartCard
-          title={`Revenue (${data.primaryCurrency}) — last ${days} days`}
+          title={`Revenue (${data.primaryCurrency}), last ${days} days`}
           data={data.revenueByDay}
         />
       </div>
@@ -144,7 +144,7 @@ export default function AdminStoreAnalyticsPage() {
       {/* House ads: the site's own titles promoted across its pages */}
       {data.promos && (
         <div className="glass rounded-xl p-6 mt-6">
-          <h2 className="text-lg font-semibold mb-1">House ads — last {days} days</h2>
+          <h2 className="text-lg font-semibold mb-1">House ads, last {days} days</h2>
           <p className="text-sm text-text-secondary mb-4">
             Books and publications promoted automatically on the home page, articles, reports, list pages and the announcement bar.
             Orders are attributed to the placement clicked in the previous 30 days.

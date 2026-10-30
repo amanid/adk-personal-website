@@ -54,7 +54,7 @@ export default async function DevelopersPage({ params }: { params: Promise<{ loc
           <div className={cn("card p-6", proOpen && "card-feature")}>
             <h3 className="font-display text-2xl">{t("pro")}</h3>
             <p className="font-mono tabular-nums text-3xl my-3">
-              {proOpen ? <>{formatPrice(s!.proPriceCents!, "USD")}<span className="text-base text-text-muted"> {t("per_month")}</span></> : "—"}
+              {proOpen ? <>{formatPrice(s!.proPriceCents!, "USD")}<span className="text-base text-text-muted"> {t("per_month")}</span></> : "–"}
             </p>
             <ul className="space-y-2 text-sm text-text-secondary pt-4 hairline">
               {[t("pro_f1"), t("requests", { n: fmt(s?.proQuota ?? 50000) }), t("per_minute", { n: s?.proPerMinute ?? 300 }), t("pro_f2")].map((x) => (

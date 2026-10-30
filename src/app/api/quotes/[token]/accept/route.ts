@@ -49,7 +49,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ tok
     deposit_cents: q.depositCents,
   });
   after(() =>
-    notifyAdmin(`Quote accepted: ${q.number} — ${q.clientName}`, `${q.clientName} accepted “${q.title}”.`, q).catch(
+    notifyAdmin(`Quote accepted: ${q.number}, ${q.clientName}`, `${q.clientName} accepted “${q.title}”.`, q).catch(
       (e) => console.error("Quote accepted alert failed:", e)
     )
   );

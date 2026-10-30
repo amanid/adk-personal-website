@@ -355,7 +355,7 @@ export default function AdminBlogPage() {
                 </td>
                 <td className="px-4 py-3 hidden md:table-cell">
                   <span className="text-xs px-2 py-0.5 rounded bg-navy-light text-text-secondary">
-                    {post.category || "—"}
+                    {post.category || "–"}
                   </span>
                 </td>
                 <td className="px-4 py-3 hidden md:table-cell">

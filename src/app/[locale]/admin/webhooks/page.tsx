@@ -100,7 +100,7 @@ export default function WebhooksPage() {
 
       {secret && (
         <div className="glass-strong p-4 space-y-2">
-          <p className="text-sm font-medium">Signing secret — store it in the receiving system:</p>
+          <p className="text-sm font-medium">Signing secret, store it in the receiving system:</p>
           <input readOnly value={secret.value} onFocus={(e) => e.target.select()} className={`${INPUT} figure`} />
           <button onClick={() => setSecret(null)} className="text-xs text-text-secondary">Hide</button>
         </div>
@@ -128,7 +128,7 @@ export default function WebhooksPage() {
                     onChange={(e) => setForm({ ...form, events: e.target.checked ? [...form.events, ev] : form.events.filter((x) => x !== ev) })}
                   />
                   <span>
-                    <span className="figure">{ev}</span> <span className="text-text-muted text-xs">— {desc}</span>
+                    <span className="figure">{ev}</span> <span className="text-text-muted text-xs">, {desc}</span>
                   </span>
                 </label>
               ))}

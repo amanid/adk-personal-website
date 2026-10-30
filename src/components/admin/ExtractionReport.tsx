@@ -41,7 +41,7 @@ export default function ExtractionReport({ state }: { state: ExtractionState }) 
         <span className="font-medium flex-1">
           {state.phase === "reading" && "Reading the file…"}
           {state.phase === "drafting" && `Read the file (${filled} field${filled === 1 ? "" : "s"} filled). Drafting the listing from its text…`}
-          {state.phase === "done" && `From the file: ${filled} field${filled === 1 ? "" : "s"} filled — review them below, nothing is saved until you press Save.`}
+          {state.phase === "done" && `From the file: ${filled} field${filled === 1 ? "" : "s"} filled, review them below, nothing is saved until you press Save.`}
         </span>
         <ChevronDown className={`w-4 h-4 transition-transform ${open ? "rotate-180" : ""}`} />
       </button>
@@ -105,7 +105,7 @@ export default function ExtractionReport({ state }: { state: ExtractionState }) 
                 <p key={i} className="flex gap-1.5 pl-5 text-text-muted">
                   <Scissors className="w-3 h-3 mt-0.5 shrink-0" />
                   <span>
-                    <span className="line-through">{r.text.length > 160 ? `${r.text.slice(0, 160)}…` : r.text}</span> — {r.reason}
+                    <span className="line-through">{r.text.length > 160 ? `${r.text.slice(0, 160)}…` : r.text}</span>, {r.reason}
                   </span>
                 </p>
               ))}

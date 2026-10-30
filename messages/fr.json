@@ -83,7 +83,7 @@
     "summary_roles": "Postes",
     "summary_orgs": "Organisations",
     "summary_countries": "Pays",
-    "summary_note": "Comptés à partir des postes ci-dessous",
+    "summary_note": "",
     "tenure_label": "Durée",
     "concurrent": "En parallèle de {org}"
   },
@@ -627,7 +627,7 @@
   "capabilities": {
     "eyebrow": "En chiffres",
     "title": "{years} ans de travail, en graphiques",
-    "subtitle": "Postes, publications, outils et compétences, tirés des mêmes listes que le reste du site.",
+    "subtitle": "Où j'ai travaillé, ce que j'ai publié et les outils que j'utilise.",
     "timeline_title": "Parcours professionnel",
     "timeline_note": "Les barres qui se chevauchent sont des postes tenus en même temps",
     "timeline_hint": "Touchez ou survolez une barre pour voir le poste et ses dates.",
@@ -641,7 +641,7 @@
     "tools_title": "Outils utilisés dans les projets",
     "tools_note": "Sur {total} projets",
     "domains_title": "Compétences par domaine",
-    "domains_note": "Comme sur la page compétences",
+    "domains_note": "Par domaine",
     "uncategorised": "Non classé",
     "view_table": "Voir en tableau",
     "col_role": "Poste",
